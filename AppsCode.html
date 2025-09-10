@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family First - Professional Aftercare Document Builder</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cdefs/%3E%3Ccircle cx='32' cy='32' r='30' fill='%230099cc'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='Calibri, Arial, sans-serif' font-size='34' font-weight='700' fill='white'%3EF%3C/text%3E%3C/svg%3E">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Calibri', Arial, sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(to right, #0066cc, #0099cc);
+            padding: 24px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,102,204,0.1);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-circle {
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-size: 28px;
+            color: white;
+            font-weight: 700;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header-text h1 {
+            color: white;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 2px;
+            letter-spacing: -0.5px;
+        }
+        
+        .header-text p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        
+        .main-content {
+            display: flex;
+            min-height: 600px;
+        }
+        
+        .programs-panel {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #f8fafb;
+            max-height: 70vh;
+        }
+        
+        .selection-panel {
+            width: 450px;
+            background: white;
+            border-left: 1px solid #e5e7eb;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 12px rgba(0,0,0,0.03);
+        }
+        
+        .document-type-selector {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #bae6fd;
+            box-shadow: 0 2px 8px rgba(0,153,204,0.08);
+        }
+        
+        .doc-type-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+        
+        .doc-type-btn {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #0099cc;
+            background: white;
+            color: #0099cc;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .doc-type-btn.active {
+            background: #0099cc;
+            color: white;
+        }
+        
+        .client-info {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #bae6fd;
+            box-shadow: 0 2px 8px rgba(0,153,204,0.08);
+        }
+        
+        .client-info h3 {
+            color: #0c4a6e;
+            margin-bottom: 14px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .client-info input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e0e7ff;
+            border-radius: 8px;
+            margin-bottom: 0;
+            font-family: -apple-system, 'Calibri', Arial, sans-serif;
+            font-size: 15px;
+            background: white;
+            transition: all 0.2s ease;
+        }
+        
+        .client-info input:focus {
+            outline: none;
+            border-color: #0099cc;
+            box-shadow: 0 0 0 3px rgba(0,153,204,0.1);
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 14px 18px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            font-size: 15px;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            transition: all 0.2s ease;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #0099cc;
+            box-shadow: 0 0 0 3px rgba(0,153,204,0.1);
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            color: #374151;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .filter-btn:hover {
+            border-color: #0099cc;
+            color: #0099cc;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .filter-btn.active {
+            background: #0099cc;
+            color: white;
+            border-color: #0099cc;
+            box-shadow: 0 2px 8px rgba(0,153,204,0.2);
+        }
+        
+        .program-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        
+        .program-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .program-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            border-color: #cbd5e1;
+        }
+        
+        .program-card.primary {
+            border-color: #0099cc;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            box-shadow: 0 4px 12px rgba(0,153,204,0.15);
+        }
+        
+        .program-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            background: #0099cc;
+        }
+        
+        .program-name {
+            font-weight: bold;
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .program-location {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 5px;
+        }
+        
+        .program-type {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #555;
+            margin-top: 5px;
+        }
+        
+        .program-info-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #0099cc;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 2;
+            transition: all 0.3s;
+        }
+        
+        .program-info-btn:hover {
+            background: #0077aa;
+            transform: scale(1.1);
+        }
+        
+        .selected-section {
+            flex: 1;
+            overflow-y: auto;
+        }
+        
+        .section-title {
+            font-weight: 600;
+            margin: 20px 0 16px 0;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 15px;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            color: #1e40af;
+            border-left: 4px solid #0099cc;
+        }
+        
+        .selected-program {
+            background: white;
+            padding: 8px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e0e0e0;
+            font-size: 13px;
+            cursor: move;
+            transition: all 0.3s;
+        }
+        
+        .selected-program.dragging {
+            opacity: 0.5;
+            background: #f0f8ff;
+        }
+        
+        .selected-program.drag-over {
+            border-top: 3px solid #0099cc;
+        }
+        
+        .drag-handle {
+            cursor: move;
+            color: #999;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .program-order-controls {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        
+        .order-btn {
+            background: #0099cc;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .order-btn:hover {
+            background: #0077aa;
+        }
+        
+        .order-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 5px;
+        }
+        
+        .generate-btn {
+            background: linear-gradient(135deg, #0099cc, #0077aa);
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 24px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,153,204,0.3);
+            width: 100%;
+            letter-spacing: 0.5px;
+        }
+        
+        .generate-btn:hover {
+            background: linear-gradient(135deg, #0077aa, #005588);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,153,204,0.4);
+        }
+        
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+        
+        .generate-btn:disabled {
+            background: #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .instructions {
+            background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+            border: 1px solid #fbbf24;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(251,191,36,0.1);
+        }
+        
+        .instructions h3 {
+            color: #92400e;
+            margin-bottom: 12px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .instructions ul {
+            margin-left: 20px;
+            color: #78350f;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .instructions ul li {
+            margin-bottom: 6px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: #999;
+            padding: 15px;
+            font-style: italic;
+            font-size: 13px;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            background: #0099cc;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+        
+        .modal-close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        
+        .modal-close:hover {
+            color: #f0f0f0;
+        }
+        
+        .modal-body {
+            padding: 20px;
+            max-height: calc(80vh - 60px);
+            overflow-y: auto;
+        }
+        
+        .preview-section {
+            margin-bottom: 20px;
+        }
+        
+        .preview-section h3 {
+            color: #0099cc;
+            margin-bottom: 10px;
+            font-size: 16px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+        
+        .preview-features {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .preview-features li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        
+        .preview-features li strong {
+            color: #333;
+        }
+        
+        .preview-contact {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .preview-contact div {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .modal-actions {
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .add-from-preview {
+            background: #0099cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .add-from-preview:hover {
+            background: #0077aa;
+        }
+        
+        .add-from-preview.selected {
+            background: #dc3545;
+        }
+        
+        /* Print Styles - Professional Clean Document */
+        @media print {
+            @page {
+                size: letter;
+                margin: 1in 0.75in 1in 0.75in; /* Top, Right, Bottom, Left - content width ~6.5" */
+            }
+            
+            body {
+                margin: 0;
+                padding: 0;
+                background: white;
+            }
+            
+            .container {
+                display: none !important;
+            }
+            
+            .document-output {
+                display: block !important;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                background: white;
+                color: black;
+                font-family: Helvetica, Arial, "Segoe UI", sans-serif;
+                font-size: 11pt;
+                line-height: 1.6;
+            }
+            
+            .doc-page {
+                position: relative;
+                width: 100%;
+                padding: 0;
+                page-break-inside: avoid;
+            }
+            
+            /* Hide web elements completely */
+            .modal, .program-info-btn, .program-badge {
+                display: none !important;
+            }
+        }
+        
+        /* Document output styles */
+        .document-output {
+            display: none;
+            font-family: Helvetica, Arial, "Segoe UI", sans-serif;
+            font-size: 11pt; /* Body size 11-12pt as specified */
+            line-height: 1.6;
+            color: #000;
+        }
+        
+        .doc-page {
+            background: white;
+            position: relative;
+            min-height: 100%;
+        }
+        
+        .doc-content {
+            padding-bottom: 60px; /* Space for footer */
+        }
+        
+        /* Letterhead Header */
+        .doc-letterhead {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 0;
+        }
+        
+        .doc-logo {
+            width: 200px;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+        }
+        
+        .doc-letterhead-lockup {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .doc-letterhead-icon {
+            width: 40px;
+            height: 40px;
+            background: #0099cc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        
+        .doc-letterhead-text {
+            text-align: left;
+        }
+        
+        .doc-letterhead-text h1 {
+            font-size: 18pt;
+            color: #0099cc;
+            margin: 0;
+            font-weight: bold;
+            line-height: 1;
+        }
+        
+        .doc-letterhead-text p {
+            font-size: 10pt;
+            color: #0099cc;
+            margin: 2px 0 0 0;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        
+        /* Document Body */
+        .doc-greeting {
+            font-size: 11pt;
+            font-weight: normal;
+            margin-bottom: 8px;
+        }
+        
+        .doc-intro {
+            font-size: 11pt;
+            margin-bottom: 18pt;
+            font-style: italic;
+            text-decoration: underline;
+        }
+        
+        /* Section headers - H1-style */
+        .doc-section-header {
+            font-size: 12pt;
+            font-weight: bold;
+            margin: 18pt 0 14pt 0;
+            text-align: left;
+        }
+        
+        /* Category headers - H2-style */
+        .doc-category-header {
+            font-size: 11pt;
+            font-weight: normal;
+            margin: 14pt 0 10pt 0;
+        }
+        
+        /* Program Cards */
+        .doc-program {
+            margin-bottom: 18pt;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        
+        /* Program title line with en dash */
+        .doc-program-title {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 6pt;
+        }
+        
+        /* Descriptor line with pipes */
+        .doc-program-descriptor {
+            font-size: 11pt;
+            margin-bottom: 10pt;
+        }
+        
+        .doc-program-descriptor strong {
+            font-weight: bold;
+        }
+        
+        /* Program Details heading */
+        .doc-program-details-heading {
+            font-weight: bold;
+            font-size: 11pt;
+            margin-bottom: 8pt;
+            margin-top: 10pt;
+        }
+        
+        /* Bullet lists */
+        .doc-program-bullets {
+            margin: 0 0 10pt 20px;
+            padding-left: 0;
+            list-style: none;
+        }
+        
+        .doc-program-bullets li {
+            font-size: 11pt;
+            margin-bottom: 6pt;
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        .doc-program-bullets li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+        }
+        
+        /* Sub-bullets with dashes */
+        .doc-sub-bullets {
+            margin: 4pt 0 0 20px;
+            padding-left: 0;
+            list-style: none;
+        }
+        
+        .doc-sub-bullets li {
+            font-size: 11pt;
+            margin-bottom: 2pt;
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        .doc-sub-bullets li:before {
+            content: "–";
+            position: absolute;
+            left: 0;
+        }
+        
+        /* Contact Information block */
+        .doc-contact-section {
+            font-size: 11pt;
+            line-height: 1.4;
+            margin-top: 10pt;
+        }
+        
+        .doc-contact-section a {
+            color: #0099cc;
+            text-decoration: underline;
+        }
+        
+        /* Footer - single line with dot separators */
+        .doc-footer {
+            position: fixed;
+            bottom: 20px;
+            left: 50px;
+            right: 50px;
+            text-align: center;
+            font-size: 10pt;
+            color: #333;
+            background: white;
+            padding: 10px 0 0 0;
+            border-top: 1px solid #ccc;
+        }
+        
+        /* Mini card styles for AT HOME sections */
+        .doc-mini-card {
+            margin-bottom: 12pt;
+        }
+        
+        .doc-mini-title {
+            font-size: 11pt;
+            font-weight: bold;
+            margin-bottom: 2pt;
+        }
+        
+        .doc-mini-blurb {
+            font-size: 11pt;
+            margin-bottom: 4pt;
+        }
+        
+        .doc-mini-contact {
+            font-size: 11pt;
+        }
+        
+        /* Special emphasis for AT HOME Recommendation */
+        .doc-emphasis-section {
+            font-style: italic;
+            text-decoration: underline;
+        }
+        
+        /* Print-specific styles for blank lines */
+        @media print {
+            .doc-mini-title, .doc-mini-blurb, .doc-mini-contact {
+                min-height: 1.2em;
+            }
+            
+            .doc-footer {
+                position: fixed;
+                bottom: 0.5in;
+                left: 0;
+                right: 0;
+                text-align: center;
+                font-size: 10pt;
+                color: #333;
+                background: white;
+                padding: 10px 0;
+                z-index: 100;
+            }
+            
+            .doc-content {
+                padding-bottom: 80px; /* More space for fixed footer */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <div class="logo-circle">F</div>
+                <div class="header-text">
+                    <h1>Family First</h1>
+                    <p>ADOLESCENT SERVICES</p>
+                </div>
+            </div>
+            <div style="font-size: 14px; color: rgba(255,255,255,0.9); text-align: right;">
+                Professional Aftercare Document Builder<br>
+                <small style="color: rgba(255,255,255,0.7); font-size: 12px;">💾 Generate → Print → Save as PDF</small>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="programs-panel">
+                <div class="instructions">
+                    <h3>📋 How to Create Professional Documents:</h3>
+                    <ul>
+                        <li>Select <strong>"Options"</strong> for multiple program recommendations</li>
+                        <li>Select <strong>"Plans"</strong> for single program (discharge facesheet)</li>
+                        <li>Click the <strong>"i"</strong> button to preview program details</li>
+                        <li><strong>Click programs</strong> to add to your selection</li>
+                        <li><strong>Drag & drop</strong> selected programs to reorder them</li>
+                        <li>Click "Generate Document" → Use Print dialog → Save as PDF</li>
+                    </ul>
+                </div>
+                
+                <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search programs by name, location, or type...">
+                
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterPrograms('all', this)">All</button>
+                    <button class="filter-btn" onclick="filterPrograms('rtc', this)">RTC</button>
+                    <button class="filter-btn" onclick="filterPrograms('tbs', this)">TBS</button>
+                    <button class="filter-btn" onclick="filterPrograms('wilderness', this)">Wilderness</button>
+                    <button class="filter-btn" onclick="filterPrograms('php-iop', this)">PHP/IOP</button>
+                    <button class="filter-btn" onclick="filterPrograms('transitional', this)">Transitional</button>
+                    <button class="filter-btn" onclick="filterPrograms('virtual', this)">Virtual</button>
+                    <button class="filter-btn" onclick="filterPrograms('asd', this)">ASD</button>
+                    <button class="filter-btn" onclick="filterPrograms('evaluation', this)">Evaluation</button>
+                    <button class="filter-btn" onclick="filterPrograms('athome', this)">AT HOME</button>
+                </div>
+                
+                <div class="program-grid" id="programGrid">
+                    <!-- Programs will be loaded here -->
+                </div>
+            </div>
+            
+            <div class="selection-panel">
+                <div class="document-type-selector">
+                    <h3 style="font-size: 14px; color: #0099cc; margin-bottom: 8px;">Document Type:</h3>
+                    <div class="doc-type-buttons">
+                        <button class="doc-type-btn active" onclick="setDocumentType('options', this)">OPTIONS (Multiple)</button>
+                        <button class="doc-type-btn" onclick="setDocumentType('plans', this)">PLANS (Single)</button>
+                    </div>
+                </div>
+                
+                <div class="client-info">
+                    <h3>Client Information</h3>
+                    <input type="text" id="clientName" placeholder="Client Name (Required)">
+                    <label style="display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 14px;">
+                        <input type="checkbox" id="includeAtHome" style="width: 18px; height: 18px;">
+                        <span>Include AT HOME Recommendations</span>
+                    </label>
+                </div>
+                
+                <div class="selected-section">
+                    <div class="section-title" id="selectedTitle">Selected Programs (Drag to reorder)</div>
+                    <div id="selectedList">
+                        <div class="empty-state">Click programs to add to document</div>
+                    </div>
+                </div>
+                
+                <button class="generate-btn" id="generateBtn" onclick="generateDocument()">
+                    📄 GENERATE DOCUMENT
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Program Details</h2>
+                <button class="modal-close" onclick="closePreview()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-actions">
+                <button id="modalAddBtn" class="add-from-preview" onclick="toggleFromPreview()">Add to Selection</button>
+                <button onclick="closePreview()" style="padding: 10px 20px; background: #e0e0e0; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hidden document output for printing -->
+    <div class="document-output" id="documentOutput"></div>
+    
+    <script>
+        // Complete program database
+        const programs = [
+            // VIRTUAL PROGRAMS
+            {
+                id: 'charlie-health',
+                name: 'Charlie Health',
+                location: 'Virtual Nationwide',
+                type: 'Virtual IOP',
+                category: 'virtual',
+                programCategory: 'Virtual / Outpatient Programs',
+                levelOfCare: 'Virtual Intensive Outpatient Program for teens and young adults (12-30) providing comprehensive mental health treatment from home.',
+                features: [
+                    'Program Structure: 3-5 days per week, 3 hours per day',
+                    'Treatment Duration: 90 days typical',
+                    'Group Therapy: Peer support and skill-building groups',
+                    'Individual Therapy: Weekly one-on-one sessions',
+                    'Family Involvement: Family therapy and parent support groups'
+                ],
+                contact: {
+                    phone: '(866) 939-2427',
+                    website: 'www.charliehealth.com',
+                    email: 'admissions@charliehealth.com'
+                }
+            },
+            
+            // SOBER LIVING
+            {
+                id: 'last-house',
+                name: 'The Last House',
+                location: 'Los Angeles, CA',
+                type: 'Sober Living',
+                category: 'transitional',
+                programCategory: 'Transitional Living / Sober Living',
+                levelOfCare: 'Sober living program for young adult men (18+) located in West Los Angeles. Offers a structured, fun, and community-driven environment for individuals transitioning out of treatment and into long-term recovery.',
+                features: [
+                    'Community-Oriented Housing: Residents live in structured homes with support from peers and staff',
+                    'Certified Staff: Team includes professionals with backgrounds in counseling, employment services, and wellness',
+                    'Life in LA Recovery Community: Access to over 3,000 recovery meetings weekly',
+                    'Fun in Sobriety Philosophy: Weekly and quarterly sober activities including group outings, surfing, golf, snowboarding',
+                    'Accountability: House meetings, curfews, and community support help residents stay on track with recovery'
+                ],
+                contact: {
+                    phone: '866.677.0090',
+                    website: 'https://thelasthouse.net',
+                    address: '3101 Ocean Park Blvd #302, Santa Monica, CA 90405'
+                }
+            },
+            {
+                id: 'patton-sober',
+                name: 'Patton Sober Living Homes',
+                location: 'Dallas, TX',
+                type: 'Sober Living',
+                category: 'transitional',
+                programCategory: 'Transitional Living / Sober Living',
+                levelOfCare: 'Structured sober living program for young adult men in Dallas, Texas, offering accountability, life skills development, and peer support during the early stages of recovery.',
+                features: [
+                    'Random Drug Testing: Residents are drug tested randomly at least once weekly and breathalyzed daily',
+                    'Community & House Meetings: Three structured group meetings per week, led by licensed clinicians',
+                    'Employment Coaching: Residents receive assistance with job placement, resume building, and interview preparation',
+                    'Educational Support: Located near Richland College with personal support for academic success',
+                    'Independent Living Skills: Daily chores, cooking, laundry, and personal care responsibilities',
+                    '12-Step Integration: Active participation in a 12-Step program, including step work and sponsor communication',
+                    'Family Communication: Biweekly calls from the Program Director and ongoing access to staff'
+                ],
+                contact: {
+                    phone: '(469) 974-4639',
+                    website: 'https://pattonsoberliving.com',
+                    address: '13028 Fall Manor Dr, Dallas, TX 75243'
+                }
+            },
+            
+            // RESIDENTIAL TREATMENT CENTERS (RTC)
+            {
+                id: 'stonewater',
+                name: 'Stonewater Adolescent Recovery Center',
+                location: 'Oxford, MS',
+                type: 'Adolescent Residential',
+                category: 'rtc',
+                programCategory: 'Residential Treatment Centers (RTC)',
+                levelOfCare: 'Residential treatment center for adolescent males with substance use and co-occurring mental health disorders. Offers fully supervised detox, dual-diagnosis programming, and individualized care grounded in faith, family restoration, and evidence-based interventions.',
+                features: [
+                    'Dual-Diagnosis Expertise: Clinical program designed specifically for the evolving needs of adolescents',
+                    'Detox to Residential Continuum: Safe, medically supervised detox followed by structured residential treatment',
+                    'Family Restoration Focus: Programming emphasizes rebuilding relationships and empowering the family system',
+                    'Faith-Informed Recovery: For families who desire it, Christian values and faith-based elements are integrated',
+                    'Individualized Treatment Plans: Residents receive customized care designed to uncover strengths and passions',
+                    'Founders with Lived Experience: The Fikes family brings personal understanding of adolescent substance use'
+                ],
+                contact: {
+                    phone: '662-667-1832',
+                    website: 'https://www.stonewaterrecovery.com',
+                    address: '8 Co Rd 362, Oxford, MS 38655'
+                }
+            },
+            {
+                id: 'turnbridge',
+                name: 'Turnbridge',
+                location: 'New Haven, CT',
+                type: 'Young Adult Residential',
+                category: 'rtc',
+                programCategory: 'Residential Treatment Centers (RTC)',
+                levelOfCare: 'Phased residential program for adolescents and young adults (17-25) struggling with substance use, mental health, and co-occurring disorders.',
+                features: [
+                    'Phased Treatment Model: Gradual increase in autonomy and responsibility',
+                    'Duration: 12+ months recommended for lasting change',
+                    'Vocational Support: Career development and educational planning',
+                    'Community Integration: Real-world skill application',
+                    'Co-Occurring Focus: Integrated treatment for dual diagnosis'
+                ],
+                contact: {
+                    phone: '(877) 581-1793',
+                    website: 'www.turnbridge.com',
+                    email: 'admissions@turnbridge.com'
+                }
+            },
+            {
+                id: 'newport',
+                name: 'Newport Academy',
+                location: 'Multiple Locations',
+                type: 'Adolescent Residential',
+                category: 'rtc',
+                programCategory: 'Residential Treatment Centers (RTC)',
+                levelOfCare: 'Gender-specific residential treatment for teens (12-18) with mental health and substance use disorders in home-like therapeutic settings.',
+                features: [
+                    'Gender-Specific Programming: Separate programs for boys and girls',
+                    'Attachment-Based Model: Focus on healing family relationships',
+                    'Experiential Therapies: Art, music, equine, and adventure therapy',
+                    'Academic Support: Accredited on-site school',
+                    'Length of Stay: 30-90 days typical'
+                ],
+                contact: {
+                    phone: '(877) 929-5105',
+                    website: 'www.newportacademy.com',
+                    email: 'info@newportacademy.com'
+                }
+            },
+            
+            // Add more programs here (I'll include a few more for variety)
+            {
+                id: 'bluefire',
+                name: 'BlueFire Wilderness',
+                location: 'Idaho',
+                type: 'Wilderness Therapy',
+                category: 'wilderness',
+                programCategory: 'Wilderness Therapy / Hybrid Programs',
+                levelOfCare: 'Outdoor therapeutic program for adolescents (11-17) and young adults (18-28) combining clinical expertise with wilderness and adventure therapy.',
+                features: [
+                    'Clinical Integration: Licensed therapists and psychiatric support',
+                    'Adventure-Based: Rock climbing, hiking, and primitive skills',
+                    'Family Program: Multi-day family workshops and therapy',
+                    'Program Length: 8-12 weeks average',
+                    'Transition Support: Aftercare planning and step-down options'
+                ],
+                contact: {
+                    phone: '(844) 413-1999',
+                    website: 'www.bluefirewilderness.com',
+                    email: 'admissions@bluefirewilderness.com'
+                }
+            },
+            
+            // Comprehensive Assessment Centers
+            {
+                id: 'menninger',
+                name: 'Menninger Clinic',
+                location: 'Houston, TX',
+                type: 'Comprehensive Assessment',
+                category: 'evaluation',
+                programCategory: 'Concierge / Placement / Evaluation Services',
+                levelOfCare: 'Customized, intensive diagnostic evaluation service (CPAS) for adolescents to clarify underlying issues and determine the most effective treatment path.',
+                features: [
+                    'Assessment Duration: 3-4 weeks typical',
+                    'Comprehensive Testing: Psychological, neuropsychological, medical',
+                    'Multidisciplinary Team: Psychiatrists, psychologists, social workers',
+                    'Treatment Planning: Detailed recommendations and referrals',
+                    'Family Involvement: Family assessment and education'
+                ],
+                contact: {
+                    phone: '(713) 275-5400',
+                    website: 'www.menningerclinic.org',
+                    email: 'admissions@menninger.edu',
+                    address: '12301 S Main St, Houston, TX 77035'
+                }
+            }
+        ];
+        
+        // State management
+        let selectedPrograms = [];
+        let documentType = 'options';
+        let currentFilter = 'all';
+        let currentPreviewProgram = null;
+        let draggedItem = null;
+        
+        // Helpers
+        function normalizeUrl(url) {
+            if (!url) return '';
+            const trimmed = String(url).trim();
+            if (!trimmed) return '';
+            if (/^https?:\/\//i.test(trimmed)) return trimmed;
+            if (/^www\./i.test(trimmed)) return `https://${trimmed}`;
+            try {
+                // If it's a bare domain like example.com
+                const hasDot = trimmed.includes('.') && !trimmed.includes(' ');
+                return hasDot ? `https://${trimmed}` : trimmed;
+            } catch { return trimmed; }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderPrograms();
+            
+            // Search functionality (combined with active filter)
+            document.getElementById('searchBox').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const cards = document.querySelectorAll('.program-card');
+                cards.forEach(card => {
+                    const program = programs.find(p => p.id === card.dataset.id);
+                    const matchesSearch = `${program.name} ${program.location} ${program.type}`.toLowerCase().includes(searchTerm);
+                    const matchesFilter = (currentFilter === 'all' || program.category === currentFilter);
+                    card.style.display = (matchesSearch && matchesFilter) ? 'block' : 'none';
+                });
+            });
+            
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                const modal = document.getElementById('previewModal');
+                if (event.target == modal) {
+                    closePreview();
+                }
+            }
+        });
+        
+        // Set document type
+        function setDocumentType(type, el) {
+            documentType = type;
+            
+            // Update button states
+            document.querySelectorAll('.doc-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (el) el.classList.add('active');
+            
+            // Update UI based on type
+            const selectedTitle = document.getElementById('selectedTitle');
+            
+            if (type === 'plans') {
+                selectedTitle.textContent = 'Selected Program (Choose 1)';
+                
+                // If more than one selected, keep only the first
+                if (selectedPrograms.length > 1) {
+                    selectedPrograms = [selectedPrograms[0]];
+                    updateSelectionPanel();
+                    renderPrograms();
+                }
+            } else {
+                selectedTitle.textContent = 'Selected Programs (Drag to reorder)';
+            }
+        }
+        
+        // Filter programs
+    function filterPrograms(category, el) {
+            currentFilter = category;
+            
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (el) el.classList.add('active');
+            
+            // Filter cards
+            const cards = document.querySelectorAll('.program-card');
+            cards.forEach(card => {
+                const program = programs.find(p => p.id === card.dataset.id);
+        const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+        const matchesFilter = (category === 'all' || program.category === category);
+        const matchesSearch = `${program.name} ${program.location} ${program.type}`.toLowerCase().includes(searchTerm);
+        card.style.display = (matchesFilter && matchesSearch) ? 'block' : 'none';
+            });
+        }
+        
+        // Render programs
+        function renderPrograms() {
+            const grid = document.getElementById('programGrid');
+            grid.innerHTML = '';
+            
+            programs.forEach(program => {
+                const card = document.createElement('div');
+                card.className = 'program-card';
+                card.dataset.id = program.id;
+                
+                const isSelected = selectedPrograms.some(p => p.id === program.id);
+                if (isSelected) {
+                    card.classList.add('primary');
+                }
+                
+                card.innerHTML = `
+                    <button class="program-info-btn" onclick="openPreview('${program.id}', event)" title="View Details">i</button>
+                    <div class="program-name">${program.name}</div>
+                    <div class="program-location">${program.location}</div>
+                    <div class="program-type">${program.type}</div>
+                    ${isSelected ? '<div class="program-badge">SELECTED</div>' : ''}
+                `;
+                
+                card.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('program-info-btn')) {
+                        handleProgramClick(program, card);
+                    }
+                });
+                grid.appendChild(card);
+            });
+        }
+        
+        // Handle program clicks
+        function handleProgramClick(program, card) {
+            const isSelected = selectedPrograms.some(p => p.id === program.id);
+            
+            if (isSelected) {
+                // Remove from selection
+                selectedPrograms = selectedPrograms.filter(p => p.id !== program.id);
+                card.classList.remove('primary');
+                const badge = card.querySelector('.program-badge');
+                if (badge) badge.remove();
+            } else {
+                // Add to selection
+                if (documentType === 'plans' && selectedPrograms.length >= 1) {
+                    // For plans, replace the existing selection
+                    selectedPrograms = [program];
+                    // Update all cards
+                    renderPrograms();
+                } else {
+                    selectedPrograms.push(program);
+                    card.classList.add('primary');
+                    
+                    const badge = document.createElement('div');
+                    badge.className = 'program-badge';
+                    badge.textContent = 'SELECTED';
+                    card.appendChild(badge);
+                }
+            }
+            
+            updateSelectionPanel();
+        }
+        
+        // Open preview modal
+        function openPreview(programId, event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            
+            const program = programs.find(p => p.id === programId);
+            if (!program) return;
+            
+            currentPreviewProgram = program;
+            const modal = document.getElementById('previewModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+            const modalAddBtn = document.getElementById('modalAddBtn');
+            
+            // Update modal title
+            modalTitle.textContent = `${program.name} - ${program.location}`;
+            
+            // Generate modal content
+            let content = `
+                <div class="preview-section">
+                    <h3>Program Type</h3>
+                    <p>${program.type}</p>
+                    <p><strong>Category:</strong> ${program.programCategory}</p>
+                </div>
+                
+                <div class="preview-section">
+                    <h3>Level of Care & Services</h3>
+                    <p>${program.levelOfCare}</p>
+                </div>
+                
+                <div class="preview-section">
+                    <h3>Program Features</h3>
+                    <ul class="preview-features">
+            `;
+            
+            program.features.forEach(feature => {
+                const parts = feature.split(':');
+                if (parts.length > 1) {
+                    content += `<li><strong>${parts[0]}:</strong>${parts[1]}</li>`;
+                } else {
+                    content += `<li>${feature}</li>`;
+                }
+            });
+            
+            content += `
+                    </ul>
+                </div>
+                
+                <div class="preview-section">
+                    <h3>Contact Information</h3>
+                    <div class="preview-contact">
+            `;
+            
+            if (program.contact.phone) {
+                content += `<div><strong>Phone:</strong> ${program.contact.phone}</div>`;
+            }
+            if (program.contact.website) {
+                const w = normalizeUrl(program.contact.website);
+                const label = program.contact.website;
+                content += `<div><strong>Website:</strong> <a href="${w}" target="_blank" rel="noopener">${label}</a></div>`;
+            }
+            if (program.contact.email) {
+                content += `<div><strong>Email:</strong> ${program.contact.email}</div>`;
+            }
+            if (program.contact.address) {
+                content += `<div><strong>Address:</strong> ${program.contact.address}</div>`;
+            }
+            
+            content += `
+                    </div>
+                </div>
+            `;
+            
+            modalBody.innerHTML = content;
+            
+            // Update add button state
+            const isSelected = selectedPrograms.some(p => p.id === programId);
+            if (isSelected) {
+                modalAddBtn.textContent = 'Remove from Selection';
+                modalAddBtn.classList.add('selected');
+            } else {
+                modalAddBtn.textContent = 'Add to Selection';
+                modalAddBtn.classList.remove('selected');
+            }
+            
+            // Show modal
+            modal.style.display = 'block';
+        }
+        
+        // Close preview modal
+        function closePreview() {
+            const modal = document.getElementById('previewModal');
+            modal.style.display = 'none';
+            currentPreviewProgram = null;
+        }
+        
+        // Toggle program from preview
+        function toggleFromPreview() {
+            if (!currentPreviewProgram) return;
+            
+            const isSelected = selectedPrograms.some(p => p.id === currentPreviewProgram.id);
+            
+            if (isSelected) {
+                // Remove from selection
+                selectedPrograms = selectedPrograms.filter(p => p.id !== currentPreviewProgram.id);
+            } else {
+                // Add to selection
+                if (documentType === 'plans' && selectedPrograms.length >= 1) {
+                    selectedPrograms = [currentPreviewProgram];
+                } else {
+                    selectedPrograms.push(currentPreviewProgram);
+                }
+            }
+            
+            // Update UI
+            updateSelectionPanel();
+            renderPrograms();
+            
+            // Update modal button
+            const modalAddBtn = document.getElementById('modalAddBtn');
+            if (!isSelected) {
+                modalAddBtn.textContent = 'Remove from Selection';
+                modalAddBtn.classList.add('selected');
+            } else {
+                modalAddBtn.textContent = 'Add to Selection';
+                modalAddBtn.classList.remove('selected');
+            }
+        }
+        
+        // Update selection panel with drag and drop
+        function updateSelectionPanel() {
+            const selectedList = document.getElementById('selectedList');
+            
+            if (selectedPrograms.length > 0) {
+                selectedList.innerHTML = selectedPrograms.map((p, index) => `
+                    <div class="selected-program" draggable="true" data-id="${p.id}" data-index="${index}">
+                        <span class="drag-handle">⋮⋮</span>
+                        <span style="flex: 1;">${p.name} - ${p.location}</span>
+                        <div class="program-order-controls">
+                            <button class="order-btn" onclick="moveProgram(${index}, 'up')" ${index === 0 ? 'disabled' : ''}>↑</button>
+                            <button class="order-btn" onclick="moveProgram(${index}, 'down')" ${index === selectedPrograms.length - 1 ? 'disabled' : ''}>↓</button>
+                            <button class="remove-btn" onclick="removeProgram('${p.id}')">×</button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Add drag and drop event listeners
+                const items = selectedList.querySelectorAll('.selected-program');
+                items.forEach(item => {
+                    item.addEventListener('dragstart', handleDragStart);
+                    item.addEventListener('dragend', handleDragEnd);
+                    item.addEventListener('dragover', handleDragOver);
+                    item.addEventListener('drop', handleDrop);
+                    item.addEventListener('dragenter', handleDragEnter);
+                    item.addEventListener('dragleave', handleDragLeave);
+                });
+            } else {
+                selectedList.innerHTML = '<div class="empty-state">Click programs to add to document</div>';
+            }
+            
+            // Enable/disable generate button
+            const generateBtn = document.getElementById('generateBtn');
+            generateBtn.disabled = selectedPrograms.length === 0;
+        }
+        
+        // Drag and drop handlers
+        function handleDragStart(e) {
+            draggedItem = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+        }
+        
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            
+            // Remove all drag-over classes
+            const items = document.querySelectorAll('.selected-program');
+            items.forEach(item => {
+                item.classList.remove('drag-over');
+            });
+        }
+        
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            e.dataTransfer.dropEffect = 'move';
+            return false;
+        }
+        
+        function handleDragEnter(e) {
+            this.classList.add('drag-over');
+        }
+        
+        function handleDragLeave(e) {
+            this.classList.remove('drag-over');
+        }
+        
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+            
+            if (draggedItem !== this) {
+                const draggedIndex = parseInt(draggedItem.dataset.index);
+                const targetIndex = parseInt(this.dataset.index);
+                
+                // Reorder the array
+                const [removed] = selectedPrograms.splice(draggedIndex, 1);
+                selectedPrograms.splice(targetIndex, 0, removed);
+                
+                // Update the UI
+                updateSelectionPanel();
+            }
+            
+            return false;
+        }
+        
+        // Move program up or down
+        function moveProgram(index, direction) {
+            if (direction === 'up' && index > 0) {
+                [selectedPrograms[index], selectedPrograms[index - 1]] = 
+                [selectedPrograms[index - 1], selectedPrograms[index]];
+            } else if (direction === 'down' && index < selectedPrograms.length - 1) {
+                [selectedPrograms[index], selectedPrograms[index + 1]] = 
+                [selectedPrograms[index + 1], selectedPrograms[index]];
+            }
+            updateSelectionPanel();
+        }
+        
+        // Remove program
+        function removeProgram(programId) {
+            selectedPrograms = selectedPrograms.filter(p => p.id !== programId);
+            updateSelectionPanel();
+            renderPrograms();
+        }
+        
+        // Generate document - Professional letterhead format
+        function generateDocument() {
+            const clientName = document.getElementById('clientName').value;
+            
+            if (!clientName) {
+                alert('Please enter client name!');
+                return;
+            }
+            
+            // Use the order as arranged by the user
+            const orderedPrograms = [...selectedPrograms];
+            
+            // Generate document with professional letterhead styling
+            let html = `
+                <div class="doc-page">
+                    <div class="doc-content">
+                        <!-- Letterhead Header -->
+                        <div class="doc-letterhead">
+                            <div class="doc-letterhead-text" style="text-align: center;">
+                                <h1>Family First</h1>
+                                <p>Adolescent Services</p>
+                            </div>
+                        </div>
+                        
+
+            `;
+            
+            if (documentType === 'options') {
+                // OPTIONS Document Format
+                html += `
+                    <div class="doc-greeting">Hello,</div>
+                    <div class="doc-intro">
+                        The FFAS clinical team has formulated a list of recommendations and options to support ${clientName} in continuing care. 
+                        Included in the list is: contact information, location, website, and a breakdown of specialties and services provided by each program.
+                    </div>
+                    <div class="doc-section-header">Aftercare Options:</div>
+                `;
+            } else {
+                // PLANS Document Format
+                html += `
+                    <div class="doc-greeting">Hello,</div>
+                    <div class="doc-intro">
+                        Below is ${clientName}'s aftercare plan. Included in this list is: contact information, location, website, 
+                        and a breakdown of specialties and services provided by the program.
+                    </div>
+                    <div class="doc-section-header">Aftercare Plan:</div>
+                `;
+            }
+            
+            // Group programs by type if using categories
+            let currentCategory = '';
+            
+            // Add programs in user-arranged order
+            orderedPrograms.forEach(program => {
+                // Extract demographic info from features or use defaults
+                let demographics = '';
+                let ageRange = '';
+                
+                // Look for age and gender info in features
+                program.features.forEach(feature => {
+                    if (feature.toLowerCase().includes('gender')) {
+                        demographics = feature.includes('All') ? 'All-Gender' : feature;
+                    }
+                    if (feature.toLowerCase().includes('age')) {
+                        const ageMatch = feature.match(/(\d+)[\s-–]+(\d+)/);
+                        if (ageMatch) {
+                            ageRange = `Ages ${ageMatch[1]}–${ageMatch[2]}`;
+                        }
+                    }
+                });
+                
+                // Build the title line with en dash
+                const titleParts = [program.name];
+                if (program.type) titleParts.push(program.type);
+                const titleBase = titleParts.join(' – ');
+                const titleDemo = (demographics || ageRange) ? ` (${[demographics, ageRange].filter(Boolean).join(', ')})` : '';
+                
+                // Extract services from levelOfCare
+                const services = program.levelOfCare.includes('Services:') 
+                    ? program.levelOfCare.split('Services:')[1]?.trim() 
+                    : 'Clinical Therapy, Psychiatric Support, Dual Diagnosis, Academics, Family Work';
+                
+                html += `
+                    <div class="doc-program">
+                        <div class="doc-program-title">${titleBase}${titleDemo}</div>
+                        
+                        <div class="doc-program-descriptor">
+                            <strong>Level of Care:</strong> ${program.type || 'RTC'} | <strong>Services:</strong> ${services}
+                        </div>
+                        
+                        <div class="doc-program-details-heading">Program Details / Differentiating Features:</div>
+                        <ul class="doc-program-bullets">
+                            ${program.features.map(feature => {
+                                // Check if this feature has sub-points (look for specific patterns)
+                                if (feature.toLowerCase().includes('family') && feature.toLowerCase().includes('care')) {
+                                    return `<li>${feature}
+                                        <ul class="doc-sub-bullets">
+                                            <li>Weekly family therapy via telehealth</li>
+                                            <li>Monthly family weekends on campus</li>
+                                            <li>Parent support groups</li>
+                                            <li>Structured home visits for reintegration practice</li>
+                                        </ul>
+                                    </li>`;
+                                }
+                                return `<li>${feature}</li>`;
+                            }).join('')}
+                        </ul>
+                        
+                        <div class="doc-program-details-heading">Contact Information:</div>
+                        <div class="doc-contact-section">
+                            ${program.contact.phone ? `<strong>Phone:</strong> ${program.contact.phone}<br>` : ''}
+                            ${program.contact.website ? (() => { 
+                                const w = normalizeUrl(program.contact.website); 
+                                return `<strong>Website:</strong> <a href="${w}" target="_blank" rel="noopener">${w}</a>`;
+                            })() : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Add AT HOME Recommendations if checkbox is checked
+            const includeAtHome = document.getElementById('includeAtHome').checked;
+            if (includeAtHome && documentType === 'options') {
+                html += `
+                    <div class="doc-section-header doc-emphasis-section" style="margin-top: 24pt;">
+                        AT HOME Recommendation: If extended residential care is not a viable option, below are the clinical recommendations should your son return home.
+                    </div>
+                    
+                    <div class="doc-category-header">PHP Options</div>
+                    
+                    <!-- Blank mini-cards for manual entry -->
+                    <div class="doc-mini-card">
+                        <div class="doc-mini-title">___________________________ – PHP, ___________ Location</div>
+                        <div class="doc-mini-blurb">________________________________________________________________</div>
+                        <div class="doc-mini-contact">
+                            <strong>Phone:</strong> ___________________________________<br>
+                            <strong>Website:</strong> _________________________________
+                        </div>
+                    </div>
+                    
+                    <div class="doc-mini-card">
+                        <div class="doc-mini-title">___________________________ – PHP, ___________ Location</div>
+                        <div class="doc-mini-blurb">________________________________________________________________</div>
+                        <div class="doc-mini-contact">
+                            <strong>Phone:</strong> ___________________________________<br>
+                            <strong>Website:</strong> _________________________________
+                        </div>
+                    </div>
+                    
+                    <div class="doc-category-header">IOP Options</div>
+                    
+                    <div class="doc-mini-card">
+                        <div class="doc-mini-title">___________________________ – IOP, ___________ Location</div>
+                        <div class="doc-mini-blurb">________________________________________________________________</div>
+                        <div class="doc-mini-contact">
+                            <strong>Phone:</strong> ___________________________________<br>
+                            <strong>Website:</strong> _________________________________
+                        </div>
+                    </div>
+                    
+                    <div class="doc-category-header">Therapeutic Support</div>
+                    
+                    <div class="doc-mini-card">
+                        <div class="doc-mini-title">___________________________ – Individual Therapy</div>
+                        <div class="doc-mini-blurb">________________________________________________________________</div>
+                        <div class="doc-mini-contact">
+                            <strong>Phone:</strong> ___________________________________<br>
+                            <strong>Website:</strong> _________________________________
+                        </div>
+                    </div>
+                    
+                    <div class="doc-mini-card">
+                        <div class="doc-mini-title">___________________________ – Psychiatry</div>
+                        <div class="doc-mini-blurb">________________________________________________________________</div>
+                        <div class="doc-mini-contact">
+                            <strong>Phone:</strong> ___________________________________<br>
+                            <strong>Website:</strong> _________________________________
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Close content div
+            html += `
+                    </div>
+                    
+                    <!-- Footer - single line with dot separators -->
+                    <div class="doc-footer">
+                        700 Village Square Crossing, Unit 101, Palm Beach Gardens, FL 33410 • (561) 328-7370 • familyfirstas.com
+                    </div>
+                </div>
+            `;
+            
+            // Set the document content
+            document.getElementById('documentOutput').innerHTML = html;
+            
+            // Print the document
+            window.print();
+        }
+    </script>
+</body>
+</html>
