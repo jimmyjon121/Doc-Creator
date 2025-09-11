@@ -449,6 +449,242 @@
             font-size: 13px;
         }
         
+        /* Dark Mode Styles */
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .header {
+            background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
+            border-bottom: 1px solid #2a2a3e;
+        }
+
+        body.dark-mode .panel {
+            background: #1a1a2e;
+            border: 1px solid #2a2a3e;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-mode .program-card {
+            background: #252538;
+            border: 1px solid #3a3a4e;
+        }
+
+        body.dark-mode .program-card:hover {
+            background: #2a2a3e;
+            border-color: #4a4a5e;
+        }
+
+        body.dark-mode .program-card.selected {
+            background: #2a3f5f;
+            border-color: #3498db;
+        }
+
+        body.dark-mode input[type="text"],
+        body.dark-mode select {
+            background: #252538;
+            color: #e0e0e0;
+            border: 1px solid #3a3a4e;
+        }
+
+        body.dark-mode .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+
+        body.dark-mode .modal-content {
+            background: #1a1a2e;
+            color: #e0e0e0;
+            border: 1px solid #3a3a4e;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        body.dark-mode .theme-toggle {
+            background: #252538;
+            border-color: #3a3a4e;
+            color: #e0e0e0;
+        }
+
+        /* Comparison View Styles */
+        .comparison-view {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 1200px;
+            height: 80vh;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 2000;
+            overflow: hidden;
+        }
+
+        .comparison-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .comparison-content {
+            display: flex;
+            height: calc(100% - 60px);
+            overflow-y: auto;
+        }
+
+        .comparison-column {
+            flex: 1;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+
+        .comparison-column:last-child {
+            border-right: none;
+        }
+
+        /* Quick Action Buttons */
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .quick-action-btn {
+            padding: 8px 15px;
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .quick-action-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        body.dark-mode .quick-action-btn {
+            background: #252538;
+            border-color: #3a3a4e;
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .quick-action-btn:hover {
+            background: #2a2a3e;
+        }
+
+        /* Document History Panel */
+        .history-panel {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transition: right 0.3s ease;
+            z-index: 999;
+            overflow-y: auto;
+            display: none; /* Hidden by default */
+        }
+        
+        .history-panel.active {
+            display: block;
+        }
+
+        .history-panel.open {
+            right: 0;
+        }
+
+        .history-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .history-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: #f5f5f5;
+        }
+
+        body.dark-mode .history-panel {
+            background: #1a1a2e;
+        }
+
+        body.dark-mode .history-item {
+            border-bottom-color: #2a2a3e;
+        }
+
+        body.dark-mode .history-item:hover {
+            background: #252538;
+        }
+
+        /* Analytics Dashboard */
+        .analytics-dashboard {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            margin: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .analytics-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .analytics-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
         /* Modal Styles */
         .modal {
             display: none;
@@ -578,10 +814,37 @@
         }
         
         /* Print Styles - Professional Clean Document */
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            .main-content { flex-direction: column; }
+            .programs-panel, .selection-panel { width: 100%; max-width: 100%; }
+            .program-grid { grid-template-columns: 1fr; }
+            .filter-buttons, .quick-actions { flex-wrap: wrap; }
+            .theme-toggle { top: 10px; right: 10px; }
+            .history-panel { width: 100%; }
+            .comparison-view { width: 95%; }
+            .comparison-content { flex-direction: column; }
+        }
+        
         @media print {
             @page {
                 size: letter;
                 margin: 1in 0.75in 1in 0.75in; /* Top, Right, Bottom, Left - content width ~6.5" */
+            }
+            
+            /* Hide ALL UI elements during print */
+            .theme-toggle,
+            .history-panel,
+            .comparison-view,
+            .analytics-dashboard,
+            .container,
+            .modal,
+            .quick-actions,
+            #historyPanel,
+            #comparisonView,
+            #analyticsDashboard {
+                display: none !important;
             }
             
             body {
@@ -611,6 +874,7 @@
                 width: 100%;
                 padding: 0;
                 page-break-inside: avoid;
+                overflow: visible; /* ensure header image not clipped */
             }
             
             /* Hide web elements completely */
@@ -632,6 +896,7 @@
             background: white;
             position: relative;
             min-height: 100%;
+            overflow: visible; /* allow header graphics to render fully */
         }
         
         .doc-content {
@@ -643,6 +908,21 @@
             text-align: center;
             margin-bottom: 30px;
             padding-bottom: 0;
+            margin-top: 8px; /* ensure image isn't clipped at page top */
+        }
+        
+        .doc-letterhead-logo {
+            height: 80px !important; /* fixed visual height to avoid partial decode/cropping */
+            width: auto !important;
+            max-width: 160px !important;
+            margin: 0 auto 15px !important;
+            display: block !important;
+            object-fit: contain !important;
+            object-position: center center !important;
+            /* Ensure image loads properly in print */
+            -webkit-print-color-adjust: exact !important;
+            color-adjust: exact !important;
+            print-color-adjust: exact !important;
         }
         
         .doc-logo {
@@ -871,6 +1151,30 @@
     </style>
 </head>
 <body>
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <span id="themeIcon">🌙</span>
+        <span id="themeText">Dark Mode</span>
+    </button>
+    
+    <!-- History Panel -->
+    <div class="history-panel" id="historyPanel">
+        <div class="history-header">
+            <h3>Document History</h3>
+            <button onclick="toggleHistory()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">✕</button>
+        </div>
+        <div id="historyContent"></div>
+    </div>
+    
+    <!-- Comparison View -->
+    <div class="comparison-view" id="comparisonView">
+        <div class="comparison-header">
+            <h3>Program Comparison</h3>
+            <button onclick="closeComparison()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">✕</button>
+        </div>
+        <div class="comparison-content" id="comparisonContent"></div>
+    </div>
+    
     <div class="container">
         <div class="header">
             <div class="header-left">
@@ -900,7 +1204,17 @@
                     </ul>
                 </div>
                 
-                <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search programs by name, location, or type...">
+                <div class="quick-actions">
+                    <button class="quick-action-btn" onclick="selectAllPrograms()">Select All</button>
+                    <button class="quick-action-btn" onclick="clearAllPrograms()">Clear All</button>
+                    <button class="quick-action-btn" onclick="selectByCategory()">Select Category</button>
+                    <button class="quick-action-btn" onclick="comparePrograms()">Compare (<span id="compareCount">0</span>)</button>
+                    <button class="quick-action-btn" onclick="toggleHistory()">History</button>
+                    <button class="quick-action-btn" onclick="exportDatabase()">Export DB</button>
+                    <button class="quick-action-btn" onclick="importDatabase()">Import DB</button>
+                </div>
+                
+                <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search programs by name, location, features, or contacts..." style="margin-top: 10px;">
                 
                 <div class="filter-buttons">
                     <button class="filter-btn active" onclick="filterPrograms('all', this)">All</button>
@@ -973,32 +1287,111 @@
     <div class="document-output" id="documentOutput"></div>
     
     <script>
-        // Complete program database
+        // Logo - Family First WebP image
+        const LOGO_WEBP = 'data:image/webp;base64,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';
+
+        // App Configuration
+        const appConfig = {
+            version: "2.1.0",
+            lastUpdated: "2025-09-11",
+            companyName: "Aftercare Planning Services",
+            features: {
+                enableDarkMode: true,
+                enableAnalytics: false,
+                enableAutoSave: true,
+                sessionTimeout: 1800000, // 30 minutes
+                maxDocumentHistory: 10
+            }
+        };
+
+        // Program database metadata
+        const programDatabase = {
+            version: "2.0.0",
+            lastUpdated: "2025-09-11",
+            totalPrograms: 40
+        };
+
+        // Complete program database - Comprehensive list of treatment programs
         const programs = [
-            // VIRTUAL PROGRAMS
+            // ==================== VIRTUAL PROGRAMS ====================
             {
                 id: 'charlie-health',
-                name: 'Charlie Health',
-                location: 'Virtual Nationwide',
+                name: 'Charlie Health Virtual IOP Program',
+                location: 'Virtual',
                 type: 'Virtual IOP',
                 category: 'virtual',
                 programCategory: 'Virtual / Outpatient Programs',
-                levelOfCare: 'Virtual Intensive Outpatient Program for teens and young adults (12-30) providing comprehensive mental health treatment from home.',
+                levelOfCare: 'Virtual Intensive Outpatient Program (IOP) for adolescents and young adults ages 13–25 in need of structured, higher-acuity mental health care from home. The program typically runs for 6–10 weeks and includes 9–11 hours of treatment per week via secure video conferencing.',
                 features: [
-                    'Program Structure: 3-5 days per week, 3 hours per day',
-                    'Treatment Duration: 90 days typical',
-                    'Group Therapy: Peer support and skill-building groups',
-                    'Individual Therapy: Weekly one-on-one sessions',
-                    'Family Involvement: Family therapy and parent support groups'
+                    'Group Therapy: 3 hours of therapy 3 times per week focused on connection, skill-building, and peer support',
+                    'Individual Therapy: Weekly 1-hour individual session tailored to personal goals and challenges',
+                    'Family Therapy: 1–2 hours per week involving family members to improve communication and support healing',
+                    'Psychiatry Services: Psychiatric assessment and medication management as needed',
+                    'Flexible Scheduling: Evening sessions available to accommodate school or extracurricular commitments',
+                    'Accessible Virtual Format: Services can be accessed via computer, tablet, or phone'
                 ],
                 contact: {
-                    phone: '(866) 939-2427',
-                    website: 'www.charliehealth.com',
-                    email: 'admissions@charliehealth.com'
+                    contactPerson: 'Gabriella H.',
+                    phone: '561.203.5396',
+                    website: 'https://www.charliehealth.com'
+                }
+            },
+            {
+                id: 'discovery-virtual-php-iop',
+                name: 'Discovery Mood & Anxiety Virtual PHP/IOP',
+                location: 'Florida (Virtual)',
+                type: 'Virtual PHP/IOP',
+                category: 'virtual',
+                programCategory: 'Virtual / Outpatient Programs',
+                levelOfCare: 'Secure, HIPAA-compliant virtual programming for adolescents ages 11–17 needing continued therapeutic care while living at home.',
+                features: [
+                    'PHP & IOP: Multiple weekly sessions tailored to teen availability',
+                    'Virtual Individual, Group, and Family Therapy: Real-time treatment with licensed clinicians',
+                    'Psychiatric Oversight: Medication management and remote evaluations',
+                    'Parent Involvement: Integrated family sessions and check-ins',
+                    'School Coordination: Adjusted schedules to accommodate academic needs'
+                ],
+                contact: {
+                    phone: '(954) 825-9887',
+                    website: 'www.discoverymood.com'
+                }
+            },
+            {
+                id: 'aane-virtual',
+                name: 'AANE (Association for Autism and Neurodiversity)',
+                location: 'Virtual',
+                type: 'Virtual Support Services',
+                category: 'virtual',
+                programCategory: 'Virtual / Outpatient Programs',
+                levelOfCare: 'Virtual services for adolescents and families with autism spectrum disorders.',
+                features: [
+                    'Parent & Family Consultation: Calls with resource specialists',
+                    'Peer Connections: Virtual social groups and events',
+                    'Advocacy & Resources: Tools to navigate school and clinical systems'
+                ],
+                contact: {
+                    website: 'https://aane.org/'
+                }
+            },
+            {
+                id: 'bend-health',
+                name: 'Bend Health',
+                location: 'Virtual',
+                type: 'Virtual ASD Services',
+                category: 'virtual',
+                programCategory: 'Virtual / Outpatient Programs',
+                levelOfCare: 'Fully virtual platform offering behavioral health coaching and therapy for children and adolescents.',
+                features: [
+                    'Individual Coaching: Ongoing virtual sessions for ASD youth',
+                    'Parent Coaching: Training and education for caregivers',
+                    'Online Accessibility: Secure, convenient platform for remote engagement'
+                ],
+                contact: {
+                    website: 'https://www.bendhealth.com/'
                 }
             },
             
-            // SOBER LIVING
+            // SOBER LIVING / TRANSITIONAL
             {
                 id: 'last-house',
                 name: 'The Last House',
@@ -1006,7 +1399,7 @@
                 type: 'Sober Living',
                 category: 'transitional',
                 programCategory: 'Transitional Living / Sober Living',
-                levelOfCare: 'Sober living program for young adult men (18+) located in West Los Angeles. Offers a structured, fun, and community-driven environment for individuals transitioning out of treatment and into long-term recovery.',
+                levelOfCare: 'Sober living program for young adult men (18+) located in West Los Angeles.',
                 features: [
                     'Community-Oriented Housing: Residents live in structured homes with support from peers and staff',
                     'Certified Staff: Team includes professionals with backgrounds in counseling, employment services, and wellness',
@@ -1016,31 +1409,105 @@
                 ],
                 contact: {
                     phone: '866.677.0090',
-                    website: 'https://thelasthouse.net',
-                    address: '3101 Ocean Park Blvd #302, Santa Monica, CA 90405'
+                    address: '3101 Ocean Park Blvd #302, Santa Monica, CA 90405',
+                    website: 'https://thelasthouse.net'
                 }
             },
             {
-                id: 'patton-sober',
+                id: 'patton-sober-living',
                 name: 'Patton Sober Living Homes',
                 location: 'Dallas, TX',
                 type: 'Sober Living',
                 category: 'transitional',
                 programCategory: 'Transitional Living / Sober Living',
-                levelOfCare: 'Structured sober living program for young adult men in Dallas, Texas, offering accountability, life skills development, and peer support during the early stages of recovery.',
+                levelOfCare: 'Structured sober living program for young adult men in Dallas, Texas.',
                 features: [
                     'Random Drug Testing: Residents are drug tested randomly at least once weekly and breathalyzed daily',
                     'Community & House Meetings: Three structured group meetings per week, led by licensed clinicians',
                     'Employment Coaching: Residents receive assistance with job placement, resume building, and interview preparation',
                     'Educational Support: Located near Richland College with personal support for academic success',
                     'Independent Living Skills: Daily chores, cooking, laundry, and personal care responsibilities',
-                    '12-Step Integration: Active participation in a 12-Step program, including step work and sponsor communication',
-                    'Family Communication: Biweekly calls from the Program Director and ongoing access to staff'
+                    '12-Step Integration: Active participation in a 12-Step program',
+                    'Family Communication: Biweekly calls from the Program Director'
                 ],
                 contact: {
+                    contactPerson: 'Austin Shook, Program Director',
                     phone: '(469) 974-4639',
-                    website: 'https://pattonsoberliving.com',
-                    address: '13028 Fall Manor Dr, Dallas, TX 75243'
+                    address: '13028 Fall Manor Dr, Dallas, TX 75243',
+                    website: 'https://pattonsoberliving.com'
+                }
+            },
+            {
+                id: 'resilience-recovery',
+                name: 'Resilience Recovery Residences',
+                location: 'West Palm Beach, FL',
+                type: 'Transitional Living',
+                category: 'transitional',
+                programCategory: 'Transitional Living / Sober Living',
+                levelOfCare: 'Structured transitional living program for young adult men ages 16+ who have completed primary treatment.',
+                features: [
+                    'Orientation Phase (2–4 Weeks): Daily chores, wake-up routines, seven 12-step meetings per week',
+                    'Level 1 (14–90 Days): Six 12-step meetings/week, one meeting commitment, 9+ hours of IOP or therapy',
+                    'Level 2 (60–120 Days): Completion of Step 5, increased leadership in community',
+                    'Level 3 (120+ Days): Step 9 completion, leadership role, full tech privileges and car access'
+                ],
+                contact: {
+                    contactPerson: 'Christopher Martinez, Owner',
+                    phone: '424-254-4304',
+                    address: '3011 Poinsettia Ave, West Palm Beach, FL 33407',
+                    website: 'www.resiliencerecoveryresources.com'
+                }
+            },
+            {
+                id: 'live-strong-house',
+                name: 'Live Strong House',
+                location: 'Layton, UT',
+                type: 'Transitional Living',
+                category: 'transitional',
+                programCategory: 'Transitional Living / Sober Living',
+                levelOfCare: 'Residential treatment program for adolescent and young adult males.',
+                features: [
+                    '3:1 Household Model: Three students per home with dedicated life coaches',
+                    'Daily Life Structure: Flexible weekday and weekend schedules',
+                    'Individual Therapy: Multiple sessions per week',
+                    'Group Therapy: Topics include trauma, social skills, communication',
+                    'Adventure Therapy: Two recreation days per week',
+                    'Community Leadership: Weekly student-led group meetings',
+                    'Monthly Excursions: Wilderness and off-campus trips',
+                    'Weekly Service: Built-in humanitarian service opportunities'
+                ],
+                contact: {
+                    contactPerson: 'Paul Taylor',
+                    phone: '928.300.5699',
+                    email: 'ptaylor@livestronghouse.com',
+                    address: '377 N. Marshall Way, Layton, UT 84041',
+                    website: 'www.livestronghouse.com'
+                }
+            },
+            {
+                id: 'serenity-lodge',
+                name: 'Serenity Lodge',
+                location: 'Nicholson, PA',
+                type: 'Residential',
+                category: 'rtc',
+                programCategory: 'Residential Treatment Centers (RTC)',
+                levelOfCare: 'Comprehensive treatment for young men with addiction.',
+                features: [
+                    'Partial Hospitalization Program',
+                    'Intensive Outpatient',
+                    'Certified School Program with Licensed Teacher',
+                    'Structured Sober Living',
+                    'Outdoor Adventure Trek Program',
+                    'Individual & Group Counseling',
+                    'Family Counseling',
+                    'Life Skills Program',
+                    '15-Acre Facility with Indoor Gym, Basketball Court',
+                    'Recovery Yoga & Meditation'
+                ],
+                contact: {
+                    phone: '(570) 222-3449',
+                    address: '21 Weida Ct Nicholson, PA 18446',
+                    email: 'info@serenitylodgerecovery.com'
                 }
             },
             
@@ -1052,108 +1519,580 @@
                 type: 'Adolescent Residential',
                 category: 'rtc',
                 programCategory: 'Residential Treatment Centers (RTC)',
-                levelOfCare: 'Residential treatment center for adolescent males with substance use and co-occurring mental health disorders. Offers fully supervised detox, dual-diagnosis programming, and individualized care grounded in faith, family restoration, and evidence-based interventions.',
+                levelOfCare: 'Residential treatment center for adolescent males with substance use and co-occurring mental health disorders.',
                 features: [
-                    'Dual-Diagnosis Expertise: Clinical program designed specifically for the evolving needs of adolescents',
-                    'Detox to Residential Continuum: Safe, medically supervised detox followed by structured residential treatment',
-                    'Family Restoration Focus: Programming emphasizes rebuilding relationships and empowering the family system',
-                    'Faith-Informed Recovery: For families who desire it, Christian values and faith-based elements are integrated',
-                    'Individualized Treatment Plans: Residents receive customized care designed to uncover strengths and passions',
-                    'Founders with Lived Experience: The Fikes family brings personal understanding of adolescent substance use'
+                    'Dual-Diagnosis Expertise: Clinical program designed specifically for adolescents',
+                    'Detox to Residential Continuum: Safe, medically supervised detox followed by structured treatment',
+                    'Family Restoration Focus: Programming emphasizes rebuilding relationships',
+                    'Faith-Informed Recovery: Christian values and faith-based elements available',
+                    'Individualized Treatment Plans: Customized care designed to uncover strengths',
+                    'Founders with Lived Experience: The Fikes family brings personal understanding'
                 ],
                 contact: {
+                    contactPerson: 'Bridget Norris',
                     phone: '662-667-1832',
-                    website: 'https://www.stonewaterrecovery.com',
-                    address: '8 Co Rd 362, Oxford, MS 38655'
+                    address: '8 Co Rd 362, Oxford, MS 38655',
+                    website: 'https://www.stonewaterrecovery.com'
+                }
+            },
+            {
+                id: 'catalyst-rtc',
+                name: 'Catalyst Residential Treatment Center',
+                location: 'Utah',
+                type: 'Adolescent Residential',
+                category: 'rtc',
+                programCategory: 'Residential Treatment Centers (RTC)',
+                levelOfCare: 'Holistic residential treatment for boys focusing on balance in six core elements.',
+                features: [
+                    'Minimum 15 hours of therapeutic treatment weekly',
+                    '3 hours of individual or family sessions',
+                    '5 hours of group therapy',
+                    '7-8 hours of experiential recreation',
+                    'The Seven Challenges Program for drug use and addictive behaviors',
+                    '10-12 hours of experiential activities weekly',
+                    'Relationship-based program fostering positive relationships',
+                    'Leadership skills development',
+                    'Core academic subjects plus electives'
+                ],
+                contact: {
+                    contactPerson: 'Jo Mitchell – Admissions Coordinator',
+                    phone: '951.252.5103',
+                    email: 'jo@catalystrtc.com',
+                    website: 'www.catalystrtc.com'
                 }
             },
             {
                 id: 'turnbridge',
-                name: 'Turnbridge',
+                name: 'Turnbridge Residential',
                 location: 'New Haven, CT',
                 type: 'Young Adult Residential',
                 category: 'rtc',
                 programCategory: 'Residential Treatment Centers (RTC)',
-                levelOfCare: 'Phased residential program for adolescents and young adults (17-25) struggling with substance use, mental health, and co-occurring disorders.',
+                levelOfCare: 'Long-term residential program for young adults with substance use and co-occurring disorders.',
                 features: [
-                    'Phased Treatment Model: Gradual increase in autonomy and responsibility',
+                    'Phase I: Mental Health & Addiction Treatment – Structured therapy, recreation, wellness',
+                    'Phase II: Life Skills & Planning – Residents pursue education, employment readiness',
+                    'Phase III: Sober Living – Clients begin college, work, or volunteer activities',
                     'Duration: 12+ months recommended for lasting change',
                     'Vocational Support: Career development and educational planning',
-                    'Community Integration: Real-world skill application',
-                    'Co-Occurring Focus: Integrated treatment for dual diagnosis'
+                    'Community Integration: Real-world skill application'
                 ],
                 contact: {
-                    phone: '(877) 581-1793',
-                    website: 'www.turnbridge.com',
-                    email: 'admissions@turnbridge.com'
+                    contactPerson: 'Beth Legacki',
+                    phone: '512.921.3533',
+                    address: '189 Orange Street, New Haven, CT 06510',
+                    email: 'blegacki@turnbridge.com',
+                    website: 'www.turnbridge.com'
                 }
             },
             {
-                id: 'newport',
-                name: 'Newport Academy',
-                location: 'Multiple Locations',
-                type: 'Adolescent Residential',
-                category: 'rtc',
-                programCategory: 'Residential Treatment Centers (RTC)',
-                levelOfCare: 'Gender-specific residential treatment for teens (12-18) with mental health and substance use disorders in home-like therapeutic settings.',
+                id: 'insight-program',
+                name: 'The Insight Program',
+                location: 'Tampa, FL',
+                type: 'IOP',
+                category: 'php-iop',
+                programCategory: 'PHP / IOP Programs',
+                levelOfCare: 'Intensive outpatient substance use treatment program for adolescents and young adults.',
                 features: [
-                    'Gender-Specific Programming: Separate programs for boys and girls',
-                    'Attachment-Based Model: Focus on healing family relationships',
-                    'Experiential Therapies: Art, music, equine, and adventure therapy',
-                    'Academic Support: Accredited on-site school',
-                    'Length of Stay: 30-90 days typical'
+                    'Free Evaluations: No-cost substance use evaluations for clients and families',
+                    'Weekly IOP Sessions: Five treatment sessions per week',
+                    '12-Step Meetings: Weekly youth-focused 12-step support',
+                    'Family Integration: Weekly family counseling and support',
+                    'Two-Year Aftercare: Includes follow-up counseling and group access',
+                    'School & Community Engagements: Education on youth substance use'
                 ],
                 contact: {
-                    phone: '(877) 929-5105',
-                    website: 'www.newportacademy.com',
-                    email: 'info@newportacademy.com'
+                    contactPerson: 'Adam Schwartz',
+                    phone: '470-505-9786',
+                    address: '13944 Lynmar Blvd, Tampa, FL 33626',
+                    website: 'https://theinsightprogram.com/'
                 }
             },
-            
-            // Add more programs here (I'll include a few more for variety)
             {
-                id: 'bluefire',
-                name: 'BlueFire Wilderness',
-                location: 'Idaho',
-                type: 'Wilderness Therapy',
+                id: 'greater-nashua',
+                name: 'Greater Nashua Mental Health',
+                location: 'Nashua, NH',
+                type: 'IOP',
+                category: 'php-iop',
+                programCategory: 'PHP / IOP Programs',
+                levelOfCare: 'Adolescent Intensive Outpatient Program for teens with substance use and co-occurring disorders.',
+                features: [
+                    'IOP Structure: Group therapy, individual therapy, family involvement',
+                    'Psychiatric Services: Access to in-house or referred psychiatric practitioners',
+                    'Whole-Person Coordination: Collaboration with schools, doctors, and service providers',
+                    'Recovery Coaching: Helps adolescents connect with long-term recovery resources'
+                ],
+                contact: {
+                    address: '15 Prospect Street, Nashua, NH 03060',
+                    phone: '603.401.1597',
+                    website: 'https://gnmhc.org/'
+                }
+            },
+            {
+                id: 'directions-behavioral',
+                name: 'Directions Behavioral Health',
+                location: 'Nashua, NH',
+                type: 'PHP/IOP',
+                category: 'php-iop',
+                programCategory: 'PHP / IOP Programs',
+                levelOfCare: 'Outpatient and partial hospitalization program serving teens and young adults.',
+                features: [
+                    'IOP: 3 hours per day of group therapy and psychiatric services',
+                    'PHP: 5 hours per day of clinical programming',
+                    'Family Work: Ongoing parent engagement and clinical involvement',
+                    'Insurance Accepted: Covered by most commercial health plans'
+                ],
+                contact: {
+                    address: '25 Technology Way, Nashua, NH 03060',
+                    phone: '603.880.8188',
+                    website: 'https://www.directionbehavioralhealth.com/'
+                }
+            },
+            // WILDERNESS THERAPY
+            {
+                id: 'turning-winds',
+                name: 'Turning Winds',
+                location: 'Troy, MT',
+                type: 'Wilderness/Residential',
                 category: 'wilderness',
                 programCategory: 'Wilderness Therapy / Hybrid Programs',
-                levelOfCare: 'Outdoor therapeutic program for adolescents (11-17) and young adults (18-28) combining clinical expertise with wilderness and adventure therapy.',
+                levelOfCare: 'Residential treatment center and therapeutic boarding school for adolescents ages 13–18.',
                 features: [
-                    'Clinical Integration: Licensed therapists and psychiatric support',
-                    'Adventure-Based: Rock climbing, hiking, and primitive skills',
-                    'Family Program: Multi-day family workshops and therapy',
-                    'Program Length: 8-12 weeks average',
-                    'Transition Support: Aftercare planning and step-down options'
+                    'Small Community: Maximum of 45 students with average stay of 12 months',
+                    'Comprehensive Diagnosis: Addresses ADHD, depression, anxiety, substance use, eating disorders',
+                    '5 Pillars of Change: Character, health, outdoor education, therapeutic success, academics',
+                    'Outdoor Adventure Therapy: Wilderness-based experiential education',
+                    'Clinical Services: Individual, group, and family therapy',
+                    'Accredited Academics: IEP support and personalized education'
                 ],
                 contact: {
-                    phone: '(844) 413-1999',
-                    website: 'www.bluefirewilderness.com',
-                    email: 'admissions@bluefirewilderness.com'
+                    contactPerson: 'Eric Losche – Admission Director',
+                    phone: '973.650.8636',
+                    address: '31733 S Fork Yaak Rd, Troy, MT 59935',
+                    website: 'https://www.turningwinds.com/'
                 }
             },
             
-            // Comprehensive Assessment Centers
+            // THERAPEUTIC BOARDING SCHOOLS
             {
-                id: 'menninger',
-                name: 'Menninger Clinic',
-                location: 'Houston, TX',
-                type: 'Comprehensive Assessment',
-                category: 'evaluation',
-                programCategory: 'Concierge / Placement / Evaluation Services',
-                levelOfCare: 'Customized, intensive diagnostic evaluation service (CPAS) for adolescents to clarify underlying issues and determine the most effective treatment path.',
+                id: 'in-balance-academy',
+                name: 'In Balance Academy',
+                location: 'Tucson, AZ',
+                type: 'Therapeutic Boarding School',
+                category: 'tbs',
+                programCategory: 'Therapeutic Boarding Schools',
+                levelOfCare: 'Therapeutic boarding school for adolescent males combining recovery, academics, and character development.',
                 features: [
-                    'Assessment Duration: 3-4 weeks typical',
-                    'Comprehensive Testing: Psychological, neuropsychological, medical',
-                    'Multidisciplinary Team: Psychiatrists, psychologists, social workers',
-                    'Treatment Planning: Detailed recommendations and referrals',
-                    'Family Involvement: Family assessment and education'
+                    'Individualized Academics: Accredited education aligned with student strengths',
+                    'Family Systems Focus: Therapy and education to rebuild relationships',
+                    'Service-Oriented Culture: Students engage in acts of service',
+                    'Staff Mentorship: Clinicians and mentors help students identify purpose',
+                    'Emphasis on Community: Shared goals and daily rituals'
                 ],
                 contact: {
-                    phone: '(713) 275-5400',
-                    website: 'www.menningerclinic.org',
-                    email: 'admissions@menninger.edu',
-                    address: '12301 S Main St, Houston, TX 77035'
+                    contactPerson: 'Tiffany – Director of Admissions',
+                    phone: '520.653.8716',
+                    address: '6107 E Grant Rd, Tucson, AZ 85712'
+                }
+            },
+            {
+                id: 'crossroads-academy',
+                name: 'Crossroads Academy',
+                location: 'Ogden, UT',
+                type: 'Therapeutic Boarding School',
+                category: 'tbs',
+                programCategory: 'Therapeutic Boarding Schools',
+                levelOfCare: 'Therapeutic program and recovery residence for adolescent boys ages 14–18.',
+                features: [
+                    'Individual Therapy: Weekly 1:1 sessions in informal environments',
+                    'Group Therapy: Peer process groups offering support and accountability',
+                    'Family Therapy: Weekly sessions and coordination with home therapists',
+                    'Recovery Work: 3 hours per week of substance use counseling',
+                    'Academic Planning: Credit recovery and individualized learning plans',
+                    'Holistic Focus: Incorporates outdoor recreation and mentorship'
+                ],
+                contact: {
+                    contactPerson: 'Sam Dahlin – Co-Owner',
+                    phone: '801.369.0238',
+                    address: '195 25th Street, Suite 300, Ogden, UT 84401',
+                    website: 'www.crossroadsrtc.com'
+                }
+            },
+            {
+                id: 'mountain-springs',
+                name: 'Mountain Springs Preparatory Academy',
+                location: 'Cedar City, UT',
+                type: 'Therapeutic Boarding School',
+                category: 'tbs',
+                programCategory: 'Therapeutic Boarding Schools',
+                levelOfCare: 'Step-down boarding school for teens transitioning from higher levels of care.',
+                features: [
+                    'Real-Life Practice: Co-ed milieu, community jobs, and unsupervised outings',
+                    'Solution-Focused Mentoring: Emphasizes learning from natural consequences',
+                    'Individualized MAPP Plans: Custom goals across academic, personal, family domains',
+                    'Parental Reengagement: Empowers families to re-take the parenting role',
+                    'College & Career Prep: Forward planning with clinical wraparound care'
+                ],
+                contact: {
+                    contactPerson: 'Shawnale Wilson – Admissions Director',
+                    phone: '435.592.3220',
+                    email: 'swilson@mountainspringsprep.com',
+                    address: '1454 S Campus Dr, Cedar City, UT 84720'
+                }
+            },
+            {
+                id: 'grove-school',
+                name: 'The Grove School',
+                location: 'Madison, CT',
+                type: 'Therapeutic Boarding School',
+                category: 'tbs',
+                programCategory: 'Therapeutic Boarding Schools',
+                levelOfCare: 'Therapeutic boarding and day school for adolescents ages 11–18.',
+                features: [
+                    'Individualized Treatment: Support for behavioral, academic, emotional challenges',
+                    'Year-Round Education: 12-month academic schedule with four 2-week breaks',
+                    'Holistic Model: Clinical therapy, residential life, and extracurriculars',
+                    'Academic Supports: Small classes and individualized learning',
+                    'Long-Term Planning: Prepares students for healthy transition into adulthood'
+                ],
+                contact: {
+                    phone: '203.245.2778',
+                    address: '175 Copse Rd, Madison, CT 06443',
+                    website: 'http://www.groveschool.org/'
+                }
+            },
+            {
+                id: 'maple-hall-academy',
+                name: 'Maple Hall Academy',
+                location: 'Lexington, VA',
+                type: 'Therapeutic Boarding School',
+                category: 'tbs',
+                programCategory: 'Therapeutic Boarding Schools',
+                levelOfCare: 'Therapeutic boarding school for students in grades 5–9.',
+                features: [
+                    'Therapeutic Curriculum: Integrates clinical, academic, and social-emotional learning',
+                    'Expressive Arts Therapy: Ceramics, equine, and creative expression',
+                    'Individualized Academics: Personalized college-prep instruction',
+                    'Community Involvement: Encourages family and school reintegration',
+                    'Beautiful Campus: Swimming pool, soccer field, animal pastures, ceramics studio'
+                ],
+                contact: {
+                    contactPerson: 'Chass Armstrong – Executive Director',
+                    phone: '828.747.9294',
+                    address: '3111 N Lee Hwy, Lexington, VA 24450',
+                    website: 'https://maplehallacademy.com/'
+                }
+            },
+            {
+                id: 'black-mountain-academy',
+                name: 'Black Mountain Academy',
+                location: 'Black Mountain, NC',
+                type: 'Therapeutic Boarding School',
+                category: 'tbs',
+                programCategory: 'Therapeutic Boarding Schools',
+                levelOfCare: 'Therapeutic boarding school for adolescent males with Level 1 autism.',
+                features: [
+                    'Inquiry-Based Academics: Rigorous curriculum adapted for learning differences',
+                    'Six Core Competencies: Social skills, wellness, executive functioning, independence',
+                    'Real-World Preparation: Financial literacy, hygiene routines, community skills',
+                    'Autism-Specific Supports: Integrated emotional regulation strategies',
+                    'Health & Wellness: Exercise, sleep hygiene, nutrition, stress management',
+                    'Independent Living Skills: Daily living skills and self-regulation'
+                ],
+                contact: {
+                    phone: '828.243.6165',
+                    address: 'PO Box 1236, Black Mountain, NC 28711',
+                    website: 'www.theblackmountainacademy.com'
+                }
+            },
+            
+            // DISCOVERY MOOD & ANXIETY PROGRAMS
+            {
+                id: 'discovery-dade-city',
+                name: 'Discovery Mood & Anxiety',
+                location: 'Dade City, FL',
+                type: 'Residential/PHP',
+                category: 'php-iop',
+                programCategory: 'PHP / IOP Programs',
+                levelOfCare: 'Residential and PHP programs for adolescents ages 11–17 with depression, anxiety, trauma.',
+                features: [
+                    'Residential Treatment: 24/7 therapeutic support in home-like setting',
+                    'PHP: Day program with therapy, group, and academic support',
+                    'CBT, DBT & Experiential Therapy: Weekly evidence-based sessions',
+                    'Psychiatric Oversight: Medication management and evaluation',
+                    'Family Integration: Weekly therapy and support groups'
+                ],
+                contact: {
+                    phone: '(954) 825-9887',
+                    website: 'www.discoverymood.com'
+                }
+            },
+            {
+                id: 'discovery-maitland',
+                name: 'Discovery Mood & Anxiety',
+                location: 'Maitland, FL',
+                type: 'PHP/IOP',
+                category: 'php-iop',
+                programCategory: 'PHP / IOP Programs',
+                levelOfCare: 'PHP and IOP services for adolescents ages 11–17 near Orlando.',
+                features: [
+                    'PHP: Structured day program with therapy and academics',
+                    'IOP: Afternoon programming for step-down or less acute needs',
+                    'Virtual Services: Optional for teens transitioning home',
+                    'Psychiatric Services: Medication and evaluation included',
+                    'Family Therapy: In-person and virtual family participation'
+                ],
+                contact: {
+                    phone: '(954) 825-9887',
+                    website: 'www.discoverymood.com'
+                }
+            },
+            {
+                id: 'discovery-tampa-orlando',
+                name: 'Discovery Mood & Anxiety',
+                location: 'Tampa-Orlando Region, FL',
+                type: 'Residential/PHP',
+                category: 'php-iop',
+                programCategory: 'PHP / IOP Programs',
+                levelOfCare: 'Boarded PHP and Residential Treatment for teens with mood and anxiety disorders.',
+                features: [
+                    'Residential: On-site housing and 24/7 support',
+                    'PHP: Intensive therapeutic programming with educational components',
+                    'IOP services offered as well',
+                    'Specialized Tracks: Trauma, anxiety, and co-occurring presentations',
+                    'Family Involvement: Required family therapy and parent support groups',
+                    'Psychiatric & Medical Care: On-site assessments and medication management'
+                ],
+                contact: {
+                    phone: '(954) 825-9887',
+                    website: 'www.discoverymood.com'
+                }
+            },
+            
+            // HIGH FOCUS TREATMENT CENTERS
+            {
+                id: 'high-focus-cherry-hill',
+                name: 'High Focus Treatment Centers',
+                location: 'Cherry Hill, NJ',
+                type: 'PHP/IOP',
+                category: 'php-iop',
+                programCategory: 'PHP / IOP Programs',
+                levelOfCare: 'Adolescent PHP and IOP programs for ages 10–18.',
+                features: [
+                    'PHP: Full-day structured care with integrated academic support',
+                    'IOP: After-school mental health support',
+                    'Weekly Psychiatry: Clients receive weekly psychiatric oversight',
+                    'DBT-Focused: Skills for emotional regulation and distress tolerance'
+                ],
+                contact: {
+                    email: 'aszuminski@highfocuscenters.com',
+                    website: 'https://www.highfocuscenters.com/'
+                }
+            },
+            {
+                id: 'high-focus-branchburg',
+                name: 'High Focus Treatment Centers',
+                location: 'Branchburg, NJ',
+                type: 'PHP/IOP',
+                category: 'php-iop',
+                programCategory: 'PHP / IOP Programs',
+                levelOfCare: 'Adolescent PHP and IOP programs for ages 10–18.',
+                features: [
+                    'PHP: Full-day structured care with integrated academic support',
+                    'IOP: After-school mental health support',
+                    'Weekly Psychiatry: Clients receive weekly psychiatric oversight',
+                    'DBT-Focused: Skills for emotional regulation'
+                ],
+                contact: {
+                    website: 'https://www.highfocuscenters.com/'
+                }
+            },
+            {
+                id: 'high-focus-lawrenceville',
+                name: 'High Focus Treatment Centers',
+                location: 'Lawrenceville, NJ',
+                type: 'PHP/IOP',
+                category: 'php-iop',
+                programCategory: 'PHP / IOP Programs',
+                levelOfCare: 'Adolescent PHP and IOP programs for ages 10–18.',
+                features: [
+                    'PHP: Full-day structured care with integrated academic support',
+                    'IOP: After-school mental health support',
+                    'Weekly Psychiatry: Clients receive weekly psychiatric oversight',
+                    'DBT-Focused: Skills for emotional regulation'
+                ],
+                contact: {
+                    website: 'https://www.highfocuscenters.com/'
+                }
+            },
+            {
+                id: 'high-focus-parsippany',
+                name: 'High Focus Treatment Centers',
+                location: 'Parsippany, NJ',
+                type: 'PHP/IOP',
+                category: 'php-iop',
+                programCategory: 'PHP / IOP Programs',
+                levelOfCare: 'Adolescent PHP and IOP programs for ages 10–18.',
+                features: [
+                    'PHP: Full-day structured care with integrated academic support',
+                    'IOP: After-school mental health support',
+                    'Weekly Psychiatry: Clients receive weekly psychiatric oversight',
+                    'DBT-Focused: Skills for emotional regulation'
+                ],
+                contact: {
+                    website: 'https://www.highfocuscenters.com/'
+                }
+            },
+            
+            // ROSECRANCE LOCATIONS
+            {
+                id: 'rosecrance-frankfort',
+                name: 'Rosecrance',
+                location: 'Frankfort, IL',
+                type: 'Outpatient/Residential',
+                category: 'php-iop',
+                programCategory: 'PHP / IOP Programs',
+                levelOfCare: 'Outpatient and/or residential substance use and mental health treatment for adolescents.',
+                features: [
+                    'IOP Services: Structured programming while teens reside at home',
+                    'PHP or Residential: Full-day or on-site therapeutic living',
+                    'Family-Focused Treatment: Group, individual, and family therapy',
+                    'Recovery Education: Skills training and relapse prevention'
+                ],
+                contact: {
+                    phone: '815.391.1000',
+                    website: 'https://rosecrance.org/'
+                }
+            },
+            {
+                id: 'rosecrance-chicago',
+                name: 'Rosecrance',
+                location: 'Chicago, IL',
+                type: 'Outpatient/Residential',
+                category: 'php-iop',
+                programCategory: 'PHP / IOP Programs',
+                levelOfCare: 'Outpatient and/or residential substance use and mental health treatment.',
+                features: [
+                    'IOP Services: Structured programming while teens reside at home',
+                    'PHP or Residential: Full-day or on-site therapeutic living',
+                    'Family-Focused Treatment: Group, individual, and family therapy',
+                    'Recovery Education: Skills training and relapse prevention'
+                ],
+                contact: {
+                    phone: '815.391.1000',
+                    website: 'https://rosecrance.org/'
+                }
+            },
+            {
+                id: 'rosecrance-mchenry',
+                name: 'Rosecrance',
+                location: 'McHenry County, IL',
+                type: 'Outpatient/Residential',
+                category: 'php-iop',
+                programCategory: 'PHP / IOP Programs',
+                levelOfCare: 'Outpatient and/or residential substance use and mental health treatment.',
+                features: [
+                    'IOP Services: Structured programming while teens reside at home',
+                    'PHP or Residential: Full-day or on-site therapeutic living',
+                    'Family-Focused Treatment: Group, individual, and family therapy',
+                    'Recovery Education: Skills training and relapse prevention'
+                ],
+                contact: {
+                    phone: '815.391.1000',
+                    website: 'https://rosecrance.org/'
+                }
+            },
+            {
+                id: 'rosecrance-rockford',
+                name: 'Rosecrance Griffin-Williamson Campus',
+                location: 'Rockford, IL',
+                type: 'Outpatient/Residential',
+                category: 'php-iop',
+                programCategory: 'PHP / IOP Programs',
+                levelOfCare: 'Outpatient and/or residential substance use and mental health treatment.',
+                features: [
+                    'IOP Services: Structured programming while teens reside at home',
+                    'PHP or Residential: Full-day or on-site therapeutic living',
+                    'Family-Focused Treatment: Group, individual, and family therapy',
+                    'Recovery Education: Skills training and relapse prevention'
+                ],
+                contact: {
+                    phone: '815.391.1000',
+                    website: 'https://rosecrance.org/'
+                }
+            },
+            
+            // FRIENDSHIP CIRCLE PROGRAMS
+            {
+                id: 'friendship-circle-fort-lauderdale',
+                name: 'Friendship Circle – Teen Scene',
+                location: 'Fort Lauderdale, FL',
+                type: 'Social Program',
+                category: 'athome',
+                programCategory: 'Community Support Programs',
+                levelOfCare: 'Social engagement group for teens with special needs.',
+                features: [
+                    'Teen Scene: Bi-monthly Sunday meetups (3:00pm – 4:30pm)',
+                    'Mentor Pairings: Teen volunteers partner with participants',
+                    'Social Skill Building: Structured, supportive interactions',
+                    'Parent Engagement: Mom\'s Night Out community events',
+                    'Ages 10-18: Designed for special teens needing social connection'
+                ],
+                contact: {
+                    phone: '754.800.1770',
+                    website: 'https://friendshipfl.org/',
+                    programInfo: 'https://friendshipfl.org/our-programs#teen-scene'
+                }
+            },
+            {
+                id: 'friendship-circle-hallandale',
+                name: 'Friendship Circle',
+                location: 'Hallandale, FL',
+                type: 'Social Program',
+                category: 'athome',
+                programCategory: 'Community Support Programs',
+                levelOfCare: 'Community-based social and recreational program for children and teens with developmental disabilities.',
+                features: [
+                    'Inclusive Activities: Monthly meetups, crafts, sports, and games',
+                    'One-on-One Friendships: Peer matching for personal growth',
+                    'Parent Support: Occasional gatherings and resources'
+                ],
+                contact: {
+                    website: 'https://www.friendshipcirclehallandale.org/'
+                }
+            },
+            {
+                id: 'friendship-circle-parkland',
+                name: 'Friendship Circle',
+                location: 'Parkland/North Broward, FL',
+                type: 'Social Program',
+                category: 'athome',
+                programCategory: 'Community Support Programs',
+                levelOfCare: 'Friendship-based programming for teens with special needs.',
+                features: [
+                    'Volunteer-Led Hangouts: Supervised by program directors',
+                    'Jewish Holiday Events: Faith-aligned community building',
+                    'Community Integration: Inclusive Shabbat dinners and more'
+                ],
+                contact: {
+                    website: 'https://www.fcpb.org/'
+                }
+            },
+            {
+                id: 'friendship-circle-miami',
+                name: 'Friendship Circle',
+                location: 'Miami, FL',
+                type: 'Social Program',
+                category: 'athome',
+                programCategory: 'Community Support Programs',
+                levelOfCare: 'Teen social group and family community programming rooted in Jewish values.',
+                features: [
+                    'Weekly Gatherings: Social groups and mentorship pairings',
+                    'Sensory Events: Music, art, games designed for accessibility',
+                    'Family Support: Educational and holiday family programming'
+                ],
+                contact: {
+                    website: 'https://friendshipcirclemiami.org/'
                 }
             }
         ];
@@ -1572,6 +2511,10 @@
                     <div class="doc-content">
                         <!-- Letterhead Header -->
                         <div class="doc-letterhead">
+                            <img src="${LOGO_WEBP}" 
+                                 alt="Family First Logo" 
+                                 class="doc-letterhead-logo"
+                                 style="height: 80px; width: auto; max-width: 160px; margin: 0 auto 15px; display: block; object-fit: contain;">
                             <div class="doc-letterhead-text" style="text-align: center;">
                                 <h1>Family First</h1>
                                 <p>Adolescent Services</p>
@@ -1752,7 +2695,264 @@
             
             // Print the document
             window.print();
+            
+            // Save to history
+            saveToHistory({
+                clientName: clientName,
+                documentType: documentType,
+                programs: selectedPrograms
+            });
         }
+        
+        // ================ ENHANCED FUNCTIONS ================
+        
+        // Storage Keys
+        const STORAGE_KEYS = {
+            selectedPrograms: 'aftercare_selected_programs',
+            documentHistory: 'aftercare_document_history',
+            theme: 'aftercare_theme'
+        };
+        
+        // Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            const isDark = body.classList.toggle('dark-mode');
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
+            
+            if (isDark) {
+                icon.textContent = '☀️';
+                text.textContent = 'Light Mode';
+                localStorage.setItem(STORAGE_KEYS.theme, 'dark');
+            } else {
+                icon.textContent = '🌙';
+                text.textContent = 'Dark Mode';
+                localStorage.setItem(STORAGE_KEYS.theme, 'light');
+            }
+        }
+        
+        // Select All Programs
+        function selectAllPrograms() {
+            const searchTerm = document.getElementById('searchBox').value.toLowerCase();
+            let toSelect = programs;
+            
+            if (currentFilter !== 'all') {
+                toSelect = toSelect.filter(p => p.category === currentFilter);
+            }
+            
+            toSelect.forEach(program => {
+                if (!selectedPrograms.find(p => p.id === program.id)) {
+                    selectedPrograms.push(program);
+                }
+            });
+            
+            updateSelectedPrograms();
+            displayPrograms();
+        }
+        
+        // Clear All Programs
+        function clearAllPrograms() {
+            selectedPrograms = [];
+            updateSelectedPrograms();
+            displayPrograms();
+        }
+        
+        // Select by Category
+        function selectByCategory() {
+            const category = prompt('Enter category (virtual, rtc, tbs, wilderness, php-iop, transitional):');
+            if (category) {
+                const categoryPrograms = programs.filter(p => p.category === category.toLowerCase());
+                categoryPrograms.forEach(program => {
+                    if (!selectedPrograms.find(p => p.id === program.id)) {
+                        selectedPrograms.push(program);
+                    }
+                });
+                updateSelectedPrograms();
+                displayPrograms();
+            }
+        }
+        
+        // Compare Programs
+        function comparePrograms() {
+            if (selectedPrograms.length < 2) {
+                alert('Please select at least 2 programs to compare');
+                return;
+            }
+            
+            const comparisonView = document.getElementById('comparisonView');
+            const content = document.getElementById('comparisonContent');
+            
+            const comparePrograms = selectedPrograms.slice(0, 3);
+            
+            content.innerHTML = comparePrograms.map(program => `
+                <div class="comparison-column">
+                    <h3>${program.name}</h3>
+                    <p><strong>Location:</strong> ${program.location}</p>
+                    <p><strong>Type:</strong> ${program.type}</p>
+                    <p><strong>Level of Care:</strong> ${program.levelOfCare}</p>
+                    <h4>Features:</h4>
+                    <ul style="font-size: 12px;">
+                        ${program.features.slice(0, 5).map(f => `<li>${f}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+            
+            comparisonView.style.display = 'block';
+        }
+        
+        function closeComparison() {
+            document.getElementById('comparisonView').style.display = 'none';
+        }
+        
+        // Document History
+        function saveToHistory(documentData) {
+            let history = JSON.parse(localStorage.getItem(STORAGE_KEYS.documentHistory) || '[]');
+            
+            const historyItem = {
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                clientName: documentData.clientName,
+                documentType: documentData.documentType,
+                programCount: documentData.programs.length,
+                programs: documentData.programs
+            };
+            
+            history.unshift(historyItem);
+            
+            if (history.length > 10) {
+                history = history.slice(0, 10);
+            }
+            
+            localStorage.setItem(STORAGE_KEYS.documentHistory, JSON.stringify(history));
+            updateHistoryPanel();
+        }
+        
+        function updateHistoryPanel() {
+            const historyContent = document.getElementById('historyContent');
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEYS.documentHistory) || '[]');
+            
+            if (history.length === 0) {
+                historyContent.innerHTML = '<p style="padding: 20px; text-align: center; color: #999;">No documents generated yet</p>';
+                return;
+            }
+            
+            historyContent.innerHTML = history.map(item => `
+                <div class="history-item" onclick="loadFromHistory('${item.id}')">
+                    <strong>${item.clientName}</strong><br>
+                    <small>${new Date(item.timestamp).toLocaleString()}</small><br>
+                    <small>${item.documentType.toUpperCase()} - ${item.programCount} programs</small>
+                </div>
+            `).join('');
+        }
+        
+        function loadFromHistory(historyId) {
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEYS.documentHistory) || '[]');
+            const item = history.find(h => h.id == historyId);
+            
+            if (item) {
+                document.getElementById('clientName').value = item.clientName;
+                selectedPrograms = item.programs;
+                updateSelectedPrograms();
+                displayPrograms();
+                toggleHistory();
+            }
+        }
+        
+        function toggleHistory() {
+            const panel = document.getElementById('historyPanel');
+            panel.classList.toggle('active');
+            panel.classList.toggle('open');
+            if (panel.classList.contains('open')) {
+                updateHistoryPanel();
+            }
+        }
+        
+        // Export Database
+        function exportDatabase() {
+            const exportData = {
+                version: programDatabase.version,
+                exportDate: new Date().toISOString(),
+                programs: programs,
+                totalPrograms: programs.length
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `aftercare_programs_${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+        
+        // Import Database
+        function importDatabase() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importData = JSON.parse(e.target.result);
+                        if (importData.programs && Array.isArray(importData.programs)) {
+                            if (confirm(`Import ${importData.programs.length} programs?`)) {
+                                programs.length = 0;
+                                programs.push(...importData.programs);
+                                displayPrograms();
+                                alert('Database imported successfully!');
+                            }
+                        }
+                    } catch(error) {
+                        alert('Error importing database: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+        
+        // Keyboard Shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'f') {
+                e.preventDefault();
+                document.getElementById('searchBox').focus();
+            }
+            
+            if (e.ctrlKey && e.key === 'g') {
+                e.preventDefault();
+                generateDocument();
+            }
+            
+            if (e.ctrlKey && e.key === 'd') {
+                e.preventDefault();
+                toggleTheme();
+            }
+        });
+        
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', function() {
+            // Load theme
+            const savedTheme = localStorage.getItem(STORAGE_KEYS.theme);
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeIcon').textContent = '☀️';
+                document.getElementById('themeText').textContent = 'Light Mode';
+            }
+            
+            // Update history
+            updateHistoryPanel();
+            
+            // Update compare count
+            document.getElementById('compareCount').textContent = '0';
+        });
     </script>
 </body>
 </html>
