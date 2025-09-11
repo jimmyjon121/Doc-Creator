@@ -1354,6 +1354,7 @@
             lastUpdated: "2025-09-11",
             companyName: "Aftercare Planning Services",
             openaiApiKey: "YOUR_OPENAI_API_KEY", // IMPORTANT: Replace with your OpenAI API key
+            // To get an API key: https://platform.openai.com/api-keys
             features: {
                 enableDarkMode: true,
                 enableAnalytics: false,
@@ -2604,6 +2605,25 @@
                 return;
             }
             
+            // Check if API key is configured
+            if (appConfig.openaiApiKey === 'YOUR_OPENAI_API_KEY') {
+                statusDiv.style.display = 'block';
+                statusDiv.style.background = '#fff3cd';
+                statusDiv.style.color = '#856404';
+                statusDiv.innerHTML = `
+                    <strong>⚠️ API Key Not Configured</strong><br>
+                    <p>To use AI analysis, you need to add your OpenAI API key:</p>
+                    <ol style="margin: 10px 0;">
+                        <li>Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a></li>
+                        <li>Edit line 1353 in AppsCode.html</li>
+                        <li>Replace YOUR_OPENAI_API_KEY with your actual key</li>
+                    </ol>
+                    <p><strong>Alternative:</strong> You can manually format the pasted content into a document.</p>
+                    <button onclick="generateManualDocument('${clientName.replace(/'/g, "\\'")}')" style="background: #0066cc; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Generate Manual Document</button>
+                `;
+                return;
+            }
+            
             statusDiv.style.display = 'block';
             statusDiv.style.background = '#f0f8ff';
             statusDiv.style.color = '#0066cc';
@@ -2750,6 +2770,77 @@
                 document.getElementById('quickModeStatus').innerHTML = '✅ Content extracted from website! Enter client name and generate document.';
             }
         });
+        
+        // Generate manual document without AI
+        function generateManualDocument(clientName) {
+            const programInfo = document.getElementById('quickProgramInfo').value;
+            if (!clientName) clientName = document.getElementById('quickClientName').value;
+            
+            const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Treatment Information - ${clientName}</title>
+                    <style>
+                        @page { size: letter; margin: 0.5in; }
+                        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; line-height: 1.6; }
+                        .letterhead { border-bottom: 3px solid #0066cc; padding-bottom: 10px; margin-bottom: 20px; }
+                        .logo-container { display: flex; justify-content: space-between; align-items: center; }
+                        .logo-left { display: flex; align-items: center; }
+                        .logo-circle { width: 50px; height: 50px; background: #0066cc; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin-right: 15px; }
+                        h1 { margin: 0; color: #0066cc; font-size: 24px; }
+                        h2 { color: #0066cc; margin-top: 20px; }
+                        .content-box { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; background: #f9f9f9; }
+                        .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #0066cc; text-align: center; color: #666; font-size: 14px; }
+                        .program-info { white-space: pre-wrap; font-family: Arial, sans-serif; }
+                    </style>
+                </head>
+                <body>
+                    <div class="letterhead">
+                        <div class="logo-container">
+                            <div class="logo-left">
+                                <div class="logo-circle">F</div>
+                                <div>
+                                    <h1>Family First</h1>
+                                    <p style="margin: 0; font-size: 14px; color: #666;">ADOLESCENT SERVICES</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right; font-size: 14px; color: #666;">
+                                ${date}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h2>PROGRAM INFORMATION</h2>
+                    <p><strong>Client:</strong> ${clientName}</p>
+                    
+                    <div class="content-box">
+                        <h3 style="color: #0066cc; margin-top: 0;">Program Details</h3>
+                        <div class="program-info">${programInfo.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                    </div>
+                    
+                    <div class="footer">
+                        <p style="margin: 0;">8737 Dunwoody Place | Suite 100 | Atlanta, Georgia 30350</p>
+                        <p style="margin: 5px 0;">Office: 770.407.0768 ext 2 | Fax: 770.407.0516</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            
+            setTimeout(() => {
+                printWindow.print();
+            }, 250);
+            
+            // Update status
+            const statusDiv = document.getElementById('quickModeStatus');
+            statusDiv.style.background = '#d4f4dd';
+            statusDiv.style.color = '#28a745';
+            statusDiv.innerHTML = '✅ Manual document generated! The print dialog should appear.';
+        }
         
         // Generate document - Professional letterhead format
         function generateDocument() {
