@@ -1190,7 +1190,65 @@
             </div>
         </div>
         
-        <div class="main-content">
+        <!-- Mode Selection -->
+        <div class="mode-selector" style="background: linear-gradient(135deg, #0066cc 0%, #003d7a 100%); padding: 20px; border-radius: 12px; margin: 20px 0; box-shadow: 0 4px 12px rgba(0, 51, 102, 0.2);">
+            <h2 style="color: white; margin-bottom: 15px; font-size: 18px;">Choose Your Input Method</h2>
+            <div class="mode-buttons" style="display: flex; gap: 15px;">
+                <button id="quickModeBtn" class="mode-btn" style="flex: 1; padding: 15px 20px; background: white; color: #0066cc; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;" onclick="selectMode('quick')">
+                    <div style="font-size: 20px; margin-bottom: 5px;">🚀</div>
+                    <div>Quick Mode</div>
+                    <small style="display: block; font-weight: normal; color: #666; margin-top: 5px;">Use Chrome Extension or Paste Info</small>
+                </button>
+                <button id="guidedModeBtn" class="mode-btn active" style="flex: 1; padding: 15px 20px; background: rgba(255,255,255,0.2); color: white; border: 2px solid white; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;" onclick="selectMode('guided')">
+                    <div style="font-size: 20px; margin-bottom: 5px;">📋</div>
+                    <div>Guided Mode</div>
+                    <small style="display: block; font-weight: normal; color: rgba(255,255,255,0.9); margin-top: 5px;">Select from Program Database</small>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Quick Mode Panel -->
+        <div id="quickModePanel" class="mode-panel" style="display: none;">
+            <div class="quick-mode-content" style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <h3 style="color: #0066cc; margin-bottom: 20px;">Quick Program Information Entry</h3>
+                
+                <div class="extension-info" style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0066cc;">
+                    <h4 style="margin-top: 0; color: #0066cc;">Chrome Extension Available!</h4>
+                    <p style="margin: 10px 0;">Install our Chrome Extension to automatically extract program information from any website.</p>
+                    <button onclick="window.open('chrome://extensions/', '_blank')" style="background: #0066cc; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 10px;">Open Extensions Page</button>
+                    <small style="color: #666;">Load the extension from the 'chrome-extension' folder</small>
+                </div>
+                
+                <div class="paste-section">
+                    <label for="quickProgramInfo" style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">
+                        Or paste program information here:
+                    </label>
+                    <textarea 
+                        id="quickProgramInfo" 
+                        placeholder="Paste website content, brochure text, or any program information here. Our AI will analyze and format it into a professional document."
+                        style="width: 100%; height: 300px; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical;"
+                    ></textarea>
+                    
+                    <div class="api-key-notice" style="margin-top: 10px; padding: 12px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px; font-size: 13px; color: #856404;">
+                        <strong>⚠️ API Key Required:</strong> To use AI analysis, add your OpenAI API key in line 1352 of this file. 
+                        Replace <code>YOUR_OPENAI_API_KEY</code> with your actual key.
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <input type="text" id="quickClientName" placeholder="Client Name (Required)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 15px;">
+                    
+                    <button onclick="generateFromWebsite()" style="width: 100%; padding: 15px; background: #0066cc; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                        🤖 Generate Document with AI
+                    </button>
+                </div>
+                
+                <div id="quickModeStatus" style="margin-top: 20px; padding: 15px; border-radius: 8px; display: none;"></div>
+            </div>
+        </div>
+        
+        <!-- Guided Mode Panel (existing content) -->
+        <div id="guidedModePanel" class="mode-panel main-content">
             <div class="programs-panel">
                 <div class="instructions">
                     <h3>📋 How to Create Professional Documents:</h3>
@@ -1295,6 +1353,7 @@
             version: "2.1.0",
             lastUpdated: "2025-09-11",
             companyName: "Aftercare Planning Services",
+            openaiApiKey: "YOUR_OPENAI_API_KEY", // IMPORTANT: Replace with your OpenAI API key
             features: {
                 enableDarkMode: true,
                 enableAnalytics: false,
@@ -2492,6 +2551,205 @@
             updateSelectionPanel();
             renderPrograms();
         }
+        
+        // Mode selection functions
+        function selectMode(mode) {
+            const quickModeBtn = document.getElementById('quickModeBtn');
+            const guidedModeBtn = document.getElementById('guidedModeBtn');
+            const quickModePanel = document.getElementById('quickModePanel');
+            const guidedModePanel = document.getElementById('guidedModePanel');
+            
+            if (mode === 'quick') {
+                quickModeBtn.style.background = 'rgba(255,255,255,0.2)';
+                quickModeBtn.style.color = 'white';
+                quickModeBtn.style.border = '2px solid white';
+                quickModeBtn.classList.add('active');
+                
+                guidedModeBtn.style.background = 'white';
+                guidedModeBtn.style.color = '#0066cc';
+                guidedModeBtn.style.border = 'none';
+                guidedModeBtn.classList.remove('active');
+                
+                quickModePanel.style.display = 'block';
+                guidedModePanel.style.display = 'none';
+            } else {
+                guidedModeBtn.style.background = 'rgba(255,255,255,0.2)';
+                guidedModeBtn.style.color = 'white';
+                guidedModeBtn.style.border = '2px solid white';
+                guidedModeBtn.classList.add('active');
+                
+                quickModeBtn.style.background = 'white';
+                quickModeBtn.style.color = '#0066cc';
+                quickModeBtn.style.border = 'none';
+                quickModeBtn.classList.remove('active');
+                
+                quickModePanel.style.display = 'none';
+                guidedModePanel.style.display = 'block';
+            }
+        }
+        
+        // AI-powered document generation from pasted content
+        async function generateFromWebsite() {
+            const programInfo = document.getElementById('quickProgramInfo').value;
+            const clientName = document.getElementById('quickClientName').value;
+            const statusDiv = document.getElementById('quickModeStatus');
+            
+            if (!programInfo) {
+                alert('Please paste program information or use the Chrome extension!');
+                return;
+            }
+            
+            if (!clientName) {
+                alert('Please enter client name!');
+                return;
+            }
+            
+            statusDiv.style.display = 'block';
+            statusDiv.style.background = '#f0f8ff';
+            statusDiv.style.color = '#0066cc';
+            statusDiv.innerHTML = '🔄 Analyzing program information with AI...';
+            
+            try {
+                // Call OpenAI API to analyze the pasted content
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${appConfig.openaiApiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4o-mini',
+                        messages: [
+                            {
+                                role: 'system',
+                                content: `You are an expert at analyzing treatment program information and creating professional referral documents. Extract and format the following information from the provided text:
+                                - Program Name
+                                - Location (City, State)
+                                - Phone Number
+                                - Website
+                                - Level of Care (RTC, PHP, IOP, etc.)
+                                - Age Range
+                                - Gender Served
+                                - Insurance Accepted
+                                - Specialties and Treatment Approaches
+                                - Duration/Length of Stay
+                                - Accreditations
+                                - Additional Features
+                                
+                                Format the response as a JSON object with these fields. If information is not available, use "Not specified" as the value.`
+                            },
+                            {
+                                role: 'user',
+                                content: programInfo
+                            }
+                        ],
+                        temperature: 0.3
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+                
+                const data = await response.json();
+                const programData = JSON.parse(data.choices[0].message.content);
+                
+                // Generate document with extracted information
+                generateQuickModeDocument(clientName, programData);
+                
+                statusDiv.style.background = '#d4f4dd';
+                statusDiv.style.color = '#28a745';
+                statusDiv.innerHTML = '✅ Document generated successfully!';
+                
+            } catch (error) {
+                statusDiv.style.background = '#ffe6e6';
+                statusDiv.style.color = '#dc3545';
+                statusDiv.innerHTML = `❌ Error: ${error.message}. Please check your API key or try manual entry.`;
+            }
+        }
+        
+        // Generate document from AI-extracted data
+        function generateQuickModeDocument(clientName, programData) {
+            const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Treatment Options - ${clientName}</title>
+                    <style>
+                        /* Same styles as regular generateDocument function */
+                        @page { size: letter; margin: 0.5in; }
+                        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+                        .letterhead { border-bottom: 3px solid #0066cc; padding-bottom: 10px; margin-bottom: 20px; }
+                        /* ... rest of styles ... */
+                    </style>
+                </head>
+                <body>
+                    <div class="letterhead">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div style="display: flex; align-items: center;">
+                                <div style="width: 50px; height: 50px; background: #0066cc; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; margin-right: 15px;">F</div>
+                                <div>
+                                    <h1 style="margin: 0; color: #0066cc; font-size: 24px;">Family First</h1>
+                                    <p style="margin: 0; font-size: 14px; color: #666;">ADOLESCENT SERVICES</p>
+                                </div>
+                            </div>
+                            <div style="text-align: right; font-size: 14px; color: #666;">
+                                ${date}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h2 style="color: #0066cc;">TREATMENT RECOMMENDATION</h2>
+                    <p><strong>Client:</strong> ${clientName}</p>
+                    
+                    <div style="margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+                        <h3 style="color: #0066cc; margin-top: 0;">${programData['Program Name'] || 'Program Name Not Specified'}</h3>
+                        <p><strong>Location:</strong> ${programData['Location'] || 'Not specified'}</p>
+                        <p><strong>Phone:</strong> ${programData['Phone Number'] || 'Not specified'}</p>
+                        <p><strong>Website:</strong> ${programData['Website'] || 'Not specified'}</p>
+                        <p><strong>Level of Care:</strong> ${programData['Level of Care'] || 'Not specified'}</p>
+                        <p><strong>Age Range:</strong> ${programData['Age Range'] || 'Not specified'}</p>
+                        <p><strong>Gender Served:</strong> ${programData['Gender Served'] || 'Not specified'}</p>
+                        <p><strong>Insurance:</strong> ${programData['Insurance Accepted'] || 'Not specified'}</p>
+                        <p><strong>Treatment Duration:</strong> ${programData['Duration/Length of Stay'] || 'Not specified'}</p>
+                        <p><strong>Accreditations:</strong> ${programData['Accreditations'] || 'Not specified'}</p>
+                        
+                        <h4 style="color: #0066cc;">Specialties & Treatment Approaches:</h4>
+                        <p>${programData['Specialties and Treatment Approaches'] || 'Not specified'}</p>
+                        
+                        <h4 style="color: #0066cc;">Additional Features:</h4>
+                        <p>${programData['Additional Features'] || 'Not specified'}</p>
+                    </div>
+                    
+                    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #0066cc; text-align: center; color: #666;">
+                        <p style="margin: 0;">8737 Dunwoody Place | Suite 100 | Atlanta, Georgia 30350</p>
+                        <p style="margin: 5px 0;">Office: 770.407.0768 ext 2 | Fax: 770.407.0516</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            
+            setTimeout(() => {
+                printWindow.print();
+            }, 250);
+        }
+        
+        // Listen for messages from Chrome extension
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'PROGRAM_INFO_EXTRACTED') {
+                // Auto-fill the Quick Mode textarea with extracted content
+                document.getElementById('quickProgramInfo').value = event.data.content;
+                selectMode('quick'); // Switch to Quick Mode
+                document.getElementById('quickModeStatus').style.display = 'block';
+                document.getElementById('quickModeStatus').style.background = '#d4f4dd';
+                document.getElementById('quickModeStatus').style.color = '#28a745';
+                document.getElementById('quickModeStatus').innerHTML = '✅ Content extracted from website! Enter client name and generate document.';
+            }
+        });
         
         // Generate document - Professional letterhead format
         function generateDocument() {
