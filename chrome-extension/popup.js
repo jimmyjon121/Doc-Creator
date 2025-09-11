@@ -23,31 +23,58 @@ document.addEventListener('DOMContentLoaded', function() {
             // Get current active tab
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
             
-            // Inject content script to extract information
-            const results = await chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                func: extractPageInfo,
-            });
-            
-            if (results && results[0] && results[0].result) {
-                const extractedInfo = results[0].result;
-                
-                // Format the extracted information
-                const formattedInfo = formatExtractedInfo(extractedInfo, tab.url);
-                
-                // Show preview
-                previewDiv.textContent = formattedInfo;
-                copySection.style.display = 'block';
-                
-                // Store in extension storage for easy access
-                chrome.storage.local.set({ 
-                    lastExtracted: formattedInfo,
-                    url: tab.url
+            // Check if chrome.scripting is available
+            if (chrome.scripting && chrome.scripting.executeScript) {
+                // Use the new scripting API
+                const results = await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: extractPageInfo,
                 });
                 
-                showStatus('✓ Information extracted successfully!', 'success');
+                if (results && results[0] && results[0].result) {
+                    const extractedInfo = results[0].result;
+                    
+                    // Format the extracted information
+                    const formattedInfo = formatExtractedInfo(extractedInfo, tab.url);
+                    
+                    // Show preview
+                    previewDiv.textContent = formattedInfo;
+                    copySection.style.display = 'block';
+                    
+                    // Store in extension storage for easy access
+                    chrome.storage.local.set({ 
+                        lastExtracted: formattedInfo,
+                        url: tab.url
+                    });
+                    
+                    showStatus('✓ Information extracted successfully!', 'success');
+                } else {
+                    showStatus('Failed to extract information from this page', 'error');
+                }
             } else {
-                showStatus('Failed to extract information from this page', 'error');
+                // Fallback: Use message passing to content script
+                chrome.tabs.sendMessage(tab.id, { action: 'extractInfo' }, function(response) {
+                    if (chrome.runtime.lastError) {
+                        showStatus('Error: Please reload the page and try again', 'error');
+                        console.error(chrome.runtime.lastError);
+                    } else if (response && response.data) {
+                        const formattedInfo = formatExtractedInfo(response.data, tab.url);
+                        
+                        // Show preview
+                        previewDiv.textContent = formattedInfo;
+                        copySection.style.display = 'block';
+                        
+                        // Store in extension storage
+                        chrome.storage.local.set({ 
+                            lastExtracted: formattedInfo,
+                            url: tab.url
+                        });
+                        
+                        showStatus('✓ Information extracted successfully!', 'success');
+                    } else {
+                        showStatus('Failed to extract information', 'error');
+                    }
+                });
             }
         } catch (error) {
             console.error('Error:', error);

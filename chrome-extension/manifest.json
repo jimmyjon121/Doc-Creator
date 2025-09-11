@@ -5,7 +5,8 @@
   "description": "Extract treatment program information from websites for Family First document creation",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "scripting"
   ],
   "host_permissions": [
     "<all_urls>"

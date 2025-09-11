@@ -69,7 +69,10 @@ If your Doc Creator tool is hosted somewhere other than `localhost:8000`:
 - Check that all files are in the folder
 
 **Not extracting information?**
+- After installing, reload the extension by clicking the refresh icon
+- Reload the webpage you're trying to extract from
 - Some websites block content extraction
+- If you see "Cannot read properties of undefined", reload both the extension and the webpage
 - Try selecting specific text and right-clicking
 - Manually copy/paste if needed
 
