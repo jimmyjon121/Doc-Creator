@@ -1190,60 +1190,7 @@
             </div>
         </div>
         
-        <!-- Mode Selection -->
-        <div class="mode-selector" style="background: linear-gradient(135deg, #0066cc 0%, #003d7a 100%); padding: 20px; border-radius: 12px; margin: 20px 0; box-shadow: 0 4px 12px rgba(0, 51, 102, 0.2);">
-            <h2 style="color: white; margin-bottom: 15px; font-size: 18px;">Choose Your Input Method</h2>
-            <div class="mode-buttons" style="display: flex; gap: 15px;">
-                <button id="quickModeBtn" class="mode-btn" style="flex: 1; padding: 15px 20px; background: white; color: #0066cc; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;" onclick="selectMode('quick')">
-                    <div style="font-size: 20px; margin-bottom: 5px;">🚀</div>
-                    <div>Quick Mode</div>
-                    <small style="display: block; font-weight: normal; color: #666; margin-top: 5px;">Use Chrome Extension or Paste Info</small>
-                </button>
-                <button id="guidedModeBtn" class="mode-btn active" style="flex: 1; padding: 15px 20px; background: rgba(255,255,255,0.2); color: white; border: 2px solid white; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;" onclick="selectMode('guided')">
-                    <div style="font-size: 20px; margin-bottom: 5px;">📋</div>
-                    <div>Guided Mode</div>
-                    <small style="display: block; font-weight: normal; color: rgba(255,255,255,0.9); margin-top: 5px;">Select from Program Database</small>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Quick Mode Panel -->
-        <div id="quickModePanel" class="mode-panel" style="display: none;">
-            <div class="quick-mode-content" style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                <h3 style="color: #0066cc; margin-bottom: 20px;">Quick Program Information Entry</h3>
-                
-                <div class="extension-info" style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #0066cc;">
-                    <h4 style="margin-top: 0; color: #0066cc;">Chrome Extension Available!</h4>
-                    <p style="margin: 10px 0;">Install our Chrome Extension to automatically extract program information from any website.</p>
-                    <button onclick="window.open('chrome://extensions/', '_blank')" style="background: #0066cc; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-right: 10px;">Open Extensions Page</button>
-                    <small style="color: #666;">Load the extension from the 'chrome-extension' folder</small>
-                </div>
-                
-                <div class="paste-section">
-                    <label for="quickProgramInfo" style="display: block; margin-bottom: 10px; font-weight: 600; color: #333;">
-                        Or paste program information here:
-                    </label>
-                    <textarea 
-                        id="quickProgramInfo" 
-                        placeholder="Paste website content, brochure text, or any program information here. The tool will automatically extract and format it into a professional document."
-                        style="width: 100%; height: 300px; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical;"
-                    ></textarea>
-                </div>
-                
-                <div style="margin-top: 20px;">
-                    <input type="text" id="quickClientName" placeholder="Client Name (Required)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 15px;">
-                    
-                    <button onclick="generateFromWebsite()" style="width: 100%; padding: 15px; background: #0066cc; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
-                        🤖 Generate Document
-                    </button>
-                </div>
-                
-                <div id="quickModeStatus" style="margin-top: 20px; padding: 15px; border-radius: 8px; display: none;"></div>
-            </div>
-        </div>
-        
-        <!-- Guided Mode Panel (existing content) -->
-        <div id="guidedModePanel" class="mode-panel main-content">
+        <div class="main-content">
             <div class="programs-panel">
                 <div class="instructions">
                     <h3>📋 How to Create Professional Documents:</h3>
@@ -1284,6 +1231,15 @@
                 
                 <div class="program-grid" id="programGrid">
                     <!-- Programs will be loaded here -->
+                </div>
+                
+                <!-- Add Custom Program Button -->
+                <div style="margin-top: 20px; padding: 20px; background: #f0f8ff; border-radius: 12px; border: 2px dashed #0066cc;">
+                    <h4 style="margin: 0 0 10px 0; color: #0066cc;">Add a New Program</h4>
+                    <p style="margin: 0 0 15px 0; font-size: 14px; color: #666;">Not finding the program you need? Add a custom program to your recommendations.</p>
+                    <button onclick="showAddProgramDialog()" style="background: #0066cc; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                        ➕ Add Custom Program
+                    </button>
                 </div>
             </div>
             
@@ -1332,6 +1288,45 @@
             <div class="modal-actions">
                 <button id="modalAddBtn" class="add-from-preview" onclick="toggleFromPreview()">Add to Selection</button>
                 <button onclick="closePreview()" style="padding: 10px 20px; background: #e0e0e0; border: none; border-radius: 5px; cursor: pointer;">Close</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Custom Program Modal -->
+    <div id="addProgramModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>Add Custom Program</h2>
+                <button class="modal-close" onclick="closeAddProgramModal()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <div style="margin-bottom: 20px; padding: 15px; background: #f0f8ff; border-radius: 8px; border-left: 4px solid #0066cc;">
+                    <p style="margin: 0; color: #0066cc; font-weight: 600;">💡 Tip: Copy and paste program information from their website or brochure</p>
+                </div>
+                
+                <label for="customProgramInfo" style="display: block; margin-bottom: 10px; font-weight: 600;">
+                    Paste Program Information:
+                </label>
+                <textarea 
+                    id="customProgramInfo" 
+                    placeholder="Paste program details here (from website, brochure, email, etc). Include:&#10;• Program name&#10;• Location&#10;• Phone number&#10;• Level of care (RTC, PHP, IOP, etc)&#10;• Age range&#10;• Treatment specialties&#10;• Any other relevant information"
+                    style="width: 100%; height: 300px; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical;"
+                ></textarea>
+                
+                <div style="margin-top: 15px; display: flex; align-items: center; gap: 10px;">
+                    <span style="color: #666; font-size: 14px;">Chrome Extension:</span>
+                    <button onclick="window.open('chrome://extensions/', '_blank')" style="background: #f0f0f0; color: #333; border: 1px solid #ddd; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">
+                        Install Extension for Auto-Extract
+                    </button>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button onclick="addCustomProgram()" style="padding: 12px 24px; background: #0066cc; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
+                    Add to Selection
+                </button>
+                <button onclick="closeAddProgramModal()" style="padding: 12px 24px; background: #e0e0e0; border: none; border-radius: 5px; cursor: pointer;">
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
@@ -2438,6 +2433,100 @@
             }
         }
         
+        // Show add custom program modal
+        function showAddProgramDialog() {
+            document.getElementById('addProgramModal').classList.add('show');
+        }
+        
+        // Close add program modal
+        function closeAddProgramModal() {
+            document.getElementById('addProgramModal').classList.remove('show');
+            document.getElementById('customProgramInfo').value = '';
+        }
+        
+        // Add custom program to selection
+        function addCustomProgram() {
+            const programInfo = document.getElementById('customProgramInfo').value;
+            const clientName = document.getElementById('clientName').value;
+            
+            if (!programInfo) {
+                alert('Please paste program information!');
+                return;
+            }
+            
+            try {
+                // Extract information from pasted content
+                const extractedData = extractProgramInfo(programInfo);
+                
+                // Create a custom program object
+                const customProgram = {
+                    id: 'custom_' + Date.now(),
+                    name: extractedData['Program Name'] || 'Custom Program',
+                    location: extractedData['Location'] || 'Location TBD',
+                    type: extractedData['Level of Care'] || 'Treatment Program', 
+                    category: 'custom',
+                    programCategory: 'Custom Program',
+                    levelOfCare: extractedData['Level of Care'] || 'See program details',
+                    features: [],
+                    isCustom: true,
+                    rawInfo: programInfo,
+                    extractedData: extractedData
+                };
+                
+                // Add description items based on extracted data
+                if (extractedData['Phone Number'] !== 'Not specified') {
+                    customProgram.features.push(`Phone: ${extractedData['Phone Number']}`);
+                }
+                if (extractedData['Website'] !== 'Not specified') {
+                    customProgram.features.push(`Website: ${extractedData['Website']}`);
+                }
+                if (extractedData['Age Range'] !== 'Not specified') {
+                    customProgram.features.push(`Age Range: ${extractedData['Age Range']}`);
+                }
+                if (extractedData['Gender Served'] !== 'Not specified') {
+                    customProgram.features.push(`Gender: ${extractedData['Gender Served']}`);
+                }
+                if (extractedData['Specialties and Treatment Approaches'] !== 'Not specified') {
+                    customProgram.features.push(`Specialties: ${extractedData['Specialties and Treatment Approaches']}`);
+                }
+                
+                // Add to selected programs
+                if (documentType === 'plans') {
+                    selectedPrograms = [customProgram];
+                } else {
+                    selectedPrograms.push(customProgram);
+                }
+                
+                // Update UI
+                updateSelectionPanel();
+                closeAddProgramModal();
+                
+                // Show success message
+                const statusDiv = document.createElement('div');
+                statusDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #d4f4dd; color: #28a745; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 10000;';
+                statusDiv.innerHTML = '✅ Custom program added to selection!';
+                document.body.appendChild(statusDiv);
+                
+                setTimeout(() => {
+                    statusDiv.remove();
+                }, 3000);
+                
+            } catch (error) {
+                alert('Program added to selection. You can generate the document now.');
+                selectedPrograms.push({
+                    id: 'custom_' + Date.now(),
+                    name: 'Custom Program',
+                    location: 'See details below',
+                    type: 'Treatment Program',
+                    category: 'custom',
+                    isCustom: true,
+                    rawInfo: programInfo
+                });
+                updateSelectionPanel();
+                closeAddProgramModal();
+            }
+        }
+        
         // Update selection panel with drag and drop
         function updateSelectionPanel() {
             const selectedList = document.getElementById('selectedList');
@@ -2547,42 +2636,7 @@
             renderPrograms();
         }
         
-        // Mode selection functions
-        function selectMode(mode) {
-            const quickModeBtn = document.getElementById('quickModeBtn');
-            const guidedModeBtn = document.getElementById('guidedModeBtn');
-            const quickModePanel = document.getElementById('quickModePanel');
-            const guidedModePanel = document.getElementById('guidedModePanel');
-            
-            if (mode === 'quick') {
-                quickModeBtn.style.background = 'rgba(255,255,255,0.2)';
-                quickModeBtn.style.color = 'white';
-                quickModeBtn.style.border = '2px solid white';
-                quickModeBtn.classList.add('active');
-                
-                guidedModeBtn.style.background = 'white';
-                guidedModeBtn.style.color = '#0066cc';
-                guidedModeBtn.style.border = 'none';
-                guidedModeBtn.classList.remove('active');
-                
-                quickModePanel.style.display = 'block';
-                guidedModePanel.style.display = 'none';
-            } else {
-                guidedModeBtn.style.background = 'rgba(255,255,255,0.2)';
-                guidedModeBtn.style.color = 'white';
-                guidedModeBtn.style.border = '2px solid white';
-                guidedModeBtn.classList.add('active');
-                
-                quickModeBtn.style.background = 'white';
-                quickModeBtn.style.color = '#0066cc';
-                quickModeBtn.style.border = 'none';
-                quickModeBtn.classList.remove('active');
-                
-                quickModePanel.style.display = 'none';
-                guidedModePanel.style.display = 'block';
-            }
-        }
-        
+
         // Smart information extraction without API
         function extractProgramInfo(text) {
             const info = {
@@ -2663,6 +2717,8 @@
         }
         
         // Simplified document generation from pasted content
+        // DEPRECATED - Kept for reference, functionality moved to addCustomProgram()
+        /*
         async function generateFromWebsite() {
             const programInfo = document.getElementById('quickProgramInfo').value;
             const clientName = document.getElementById('quickClientName').value;
@@ -2776,13 +2832,19 @@
         // Listen for messages from Chrome extension
         window.addEventListener('message', function(event) {
             if (event.data && event.data.type === 'PROGRAM_INFO_EXTRACTED') {
-                // Auto-fill the Quick Mode textarea with extracted content
-                document.getElementById('quickProgramInfo').value = event.data.content;
-                selectMode('quick'); // Switch to Quick Mode
-                document.getElementById('quickModeStatus').style.display = 'block';
-                document.getElementById('quickModeStatus').style.background = '#d4f4dd';
-                document.getElementById('quickModeStatus').style.color = '#28a745';
-                document.getElementById('quickModeStatus').innerHTML = '✅ Content extracted from website! Enter client name and generate document.';
+                // Show the add program dialog with extracted content
+                document.getElementById('addProgramModal').classList.add('show');
+                document.getElementById('customProgramInfo').value = event.data.content;
+                
+                // Show success message
+                const statusDiv = document.createElement('div');
+                statusDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #d4f4dd; color: #28a745; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 10000;';
+                statusDiv.innerHTML = '✅ Content extracted from website! Click "Add to Selection" to include this program.';
+                document.body.appendChild(statusDiv);
+                
+                setTimeout(() => {
+                    statusDiv.remove();
+                }, 4000);
             }
         });
         
@@ -2938,22 +3000,54 @@
                 const titleBase = titleParts.join(' – ');
                 const titleDemo = (demographics || ageRange) ? ` (${[demographics, ageRange].filter(Boolean).join(', ')})` : '';
                 
-                // Extract services from levelOfCare
-                const services = program.levelOfCare.includes('Services:') 
-                    ? program.levelOfCare.split('Services:')[1]?.trim() 
-                    : 'Clinical Therapy, Psychiatric Support, Dual Diagnosis, Academics, Family Work';
-                
-                html += `
-                    <div class="doc-program">
-                        <div class="doc-program-title">${titleBase}${titleDemo}</div>
-                        
-                        <div class="doc-program-descriptor">
-                            <strong>Level of Care:</strong> ${program.type || 'RTC'} | <strong>Services:</strong> ${services}
+                // Handle custom programs differently
+                if (program.isCustom) {
+                    const data = program.extractedData || {};
+                    html += `
+                        <div class="doc-program">
+                            <div class="doc-program-title">${program.name}</div>
+                            ${data['Location'] && data['Location'] !== 'Not specified' ? `<div class="doc-program-location">${data['Location']}</div>` : ''}
+                            
+                            <div class="doc-program-descriptor">
+                                <strong>Level of Care:</strong> ${data['Level of Care'] || program.type || 'Treatment Program'}
+                            </div>
+                            
+                            <div class="doc-program-details-heading">Program Information:</div>
+                            <ul class="doc-program-bullets">
+                                ${program.features.map(feature => `<li>${feature}</li>`).join('')}
+                                ${data['Insurance Accepted'] && data['Insurance Accepted'] !== 'Not specified' ? `<li>Insurance: ${data['Insurance Accepted']}</li>` : ''}
+                                ${data['Accreditations'] && data['Accreditations'] !== 'Not specified' ? `<li>Accreditations: ${data['Accreditations']}</li>` : ''}
+                            </ul>
+                            
+                            ${data['Additional Features'] && data['Additional Features'] !== 'Not specified' ? `
+                                <div class="doc-program-details-heading">Additional Information:</div>
+                                <p style="margin: 10px 0;">${data['Additional Features']}</p>
+                            ` : ''}
+                            
+                            <div class="doc-program-details-heading">Contact Information:</div>
+                            <div class="doc-contact-section">
+                                ${data['Phone Number'] && data['Phone Number'] !== 'Not specified' ? `<strong>Phone:</strong> ${data['Phone Number']}<br>` : ''}
+                                ${data['Website'] && data['Website'] !== 'Not specified' ? `<strong>Website:</strong> ${data['Website']}` : ''}
+                            </div>
                         </div>
-                        
-                        <div class="doc-program-details-heading">Program Details / Differentiating Features:</div>
-                        <ul class="doc-program-bullets">
-                            ${program.features.map(feature => {
+                    `;
+                } else {
+                    // Extract services from levelOfCare
+                    const services = program.levelOfCare.includes('Services:') 
+                        ? program.levelOfCare.split('Services:')[1]?.trim() 
+                        : 'Clinical Therapy, Psychiatric Support, Dual Diagnosis, Academics, Family Work';
+                    
+                    html += `
+                        <div class="doc-program">
+                            <div class="doc-program-title">${titleBase}${titleDemo}</div>
+                            
+                            <div class="doc-program-descriptor">
+                                <strong>Level of Care:</strong> ${program.type || 'RTC'} | <strong>Services:</strong> ${services}
+                            </div>
+                            
+                            <div class="doc-program-details-heading">Program Details / Differentiating Features:</div>
+                            <ul class="doc-program-bullets">
+                                ${program.features.map(feature => {
                                 // Check if this feature has sub-points (look for specific patterns)
                                 if (feature.toLowerCase().includes('family') && feature.toLowerCase().includes('care')) {
                                     return `<li>${feature}
@@ -2979,6 +3073,7 @@
                         </div>
                     </div>
                 `;
+                }
             });
             
             // Add AT HOME Recommendations if checkbox is checked
