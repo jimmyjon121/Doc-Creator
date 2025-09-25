@@ -843,10 +843,16 @@
             cursor: pointer;
             background: none;
             border: none;
+            position: relative;
+            z-index: 1001;
+            padding: 5px;
+            line-height: 1;
+            transition: all 0.2s;
         }
         
         .modal-close:hover {
             color: #f0f0f0;
+            transform: scale(1.1);
         }
         
         .modal-body {
@@ -3894,9 +3900,13 @@
         
         // Show add custom program modal
         function showAddProgramDialog() {
-            document.getElementById('addProgramModal').classList.add('show');
-            // Default to AI mode
-            setAddProgramMode('ai');
+            const modal = document.getElementById('addProgramModal');
+            if (modal) {
+                modal.style.display = ''; // Reset display property
+                modal.classList.add('show');
+                // Default to AI mode
+                setAddProgramMode('ai');
+            }
         }
         
         // Set the mode for adding programs
@@ -3992,8 +4002,19 @@
         
         // Close add program modal
         function closeAddProgramModal() {
-            document.getElementById('addProgramModal').classList.remove('show');
-            document.getElementById('customProgramInfo').value = '';
+            const modal = document.getElementById('addProgramModal');
+            if (modal) {
+                modal.classList.remove('show');
+                // Also try setting display none as fallback
+                modal.style.display = 'none';
+                // Clear the form
+                document.getElementById('customProgramInfo').value = '';
+                // Reset any status messages
+                const statusDiv = document.getElementById('customProgramStatus');
+                if (statusDiv) {
+                    statusDiv.innerHTML = '';
+                }
+            }
         }
         
         // Add custom program to selection
