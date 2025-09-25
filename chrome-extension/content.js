@@ -662,7 +662,12 @@ function collectRelevantLinks(baseUrl) {
 
 function requestAdditionalPages(links) {
     return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+            reject(new Error('Background fetch timed out.'));
+        }, 20000);
+
         chrome.runtime.sendMessage({ action: 'fetchRelatedPages', links }, response => {
+            clearTimeout(timeout);
             if (chrome.runtime.lastError) {
                 reject(new Error(chrome.runtime.lastError.message));
                 return;

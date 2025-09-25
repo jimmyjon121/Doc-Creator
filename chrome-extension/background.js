@@ -61,11 +61,16 @@ async function handleMultiPageFetch(links) {
         });
         
         try {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 12000);
             const response = await fetch(url, {
                 method: 'GET',
                 cache: 'no-store',
-                credentials: 'omit'
+                credentials: 'omit',
+                redirect: 'follow',
+                signal: controller.signal
             });
+            clearTimeout(timeout);
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
@@ -88,6 +93,13 @@ async function handleMultiPageFetch(links) {
             });
         }
     }
+    
+    chrome.runtime.sendMessage({
+        action: 'extractionProgress',
+        message: `✅ Background fetch complete (${pages.length}/${total})`,
+        progress: 70,
+        details: { current: total, total }
+    });
     
     return { pages };
 }
