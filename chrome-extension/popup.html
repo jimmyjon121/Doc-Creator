@@ -199,6 +199,14 @@
             </button>
         </div>
         
+        <div id="extractionProgress" style="display: none; margin: 15px 0; padding: 10px; background: #f0f9ff; border: 1px solid #0284c7; border-radius: 5px;">
+            <div style="font-weight: bold; color: #0369a1; margin-bottom: 5px;">🔍 Multi-Page Extraction in Progress...</div>
+            <div id="progressDetails" style="font-size: 12px; color: #075985;"></div>
+            <div style="background: #e0e7ff; height: 8px; border-radius: 4px; margin-top: 8px; overflow: hidden;">
+                <div id="progressBar" style="background: #4f46e5; height: 100%; width: 0%; transition: width 0.3s;"></div>
+            </div>
+        </div>
+        
         <div id="copySection" class="copy-section">
             <div class="preview" id="preview"></div>
             <button id="copyBtn" class="copy-btn">Copy to Clipboard</button>

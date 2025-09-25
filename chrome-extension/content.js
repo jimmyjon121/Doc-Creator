@@ -45,12 +45,36 @@ const TREATMENT_PATTERNS = {
 // Listen for messages from the popup or background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'extractInfo') {
-        // Extract information from the page
-        const extractedData = extractPageInfo();
-        sendResponse({ data: extractedData });
+        // Extract information from the page with multi-page support
+        extractComprehensiveInfo().then(extractedData => {
+            sendResponse({ data: extractedData });
+        });
         return true; // Keep message channel open for async response
     }
 });
+
+// Helper function to check if text contains code/script
+function isValidContent(text) {
+    if (!text || text.length < 10) return false;
+    
+    // Skip if contains common code patterns
+    const codePatterns = [
+        /function\s*\(/,
+        /\{[\s\S]*\}/,
+        /window\./,
+        /document\./,
+        /setREVStartSize/,
+        /undefined/,
+        /console\./,
+        /var\s+\w+\s*=/,
+        /if\s*\(/,
+        /for\s*\(/,
+        /\(\s*\)\s*=>/,
+        /module\.exports/
+    ];
+    
+    return !codePatterns.some(pattern => pattern.test(text));
+}
 
 // Function to extract page information
 function extractPageInfo() {
@@ -70,29 +94,6 @@ function extractPageInfo() {
         emails: [],
         addresses: []
     };
-    
-    // Helper function to check if text contains code/script
-    function isValidContent(text) {
-        if (!text || text.length < 10) return false;
-        
-        // Skip if contains common code patterns
-        const codePatterns = [
-            /function\s*\(/,
-            /\{[\s\S]*\}/,
-            /window\./,
-            /document\./,
-            /setREVStartSize/,
-            /undefined/,
-            /console\./,
-            /var\s+\w+\s*=/,
-            /if\s*\(/,
-            /for\s*\(/,
-            /\(\s*\)\s*=>/,
-            /module\.exports/
-        ];
-        
-        return !codePatterns.some(pattern => pattern.test(text));
-    }
     
     // Get all headings (excluding scripts and hidden elements)
     document.querySelectorAll('h1, h2, h3, h4').forEach(h => {
@@ -349,6 +350,320 @@ function analyzeContentEnhanced(text) {
     analysis.insurances = [...new Set(analysis.insurances)];
     
     return analysis;
+}
+
+// Comprehensive multi-page extraction
+async function extractComprehensiveInfo() {
+    console.log('Starting comprehensive multi-page extraction...');
+    
+    // First, extract from current page
+    const currentPageData = extractPageInfo();
+    const baseUrl = window.location.origin;
+    const currentPath = window.location.pathname;
+    
+    // Initialize comprehensive data structure
+    const comprehensiveData = {
+        ...currentPageData,
+        pages: {
+            current: {
+                url: window.location.href,
+                title: document.title,
+                data: currentPageData
+            }
+        },
+        compiledInfo: {
+            programName: '',
+            location: '',
+            phones: new Set(),
+            emails: new Set(),
+            addresses: new Set(),
+            agesServed: new Set(),
+            levelOfCare: new Set(),
+            specializations: new Set(),
+            therapies: new Set(),
+            staff: new Set(),
+            accreditations: new Set(),
+            insurance: new Set(),
+            programHighlights: []
+        }
+    };
+    
+    // Find navigation links to related pages
+    const navSelectors = [
+        'nav a', 'header a', '.menu a', '.nav a', '[class*="menu"] a',
+        'a[href*="about"]', 'a[href*="program"]', 'a[href*="contact"]',
+        'a[href*="admission"]', 'a[href*="staff"]', 'a[href*="therapy"]',
+        'a[href*="treatment"]', 'a[href*="approach"]', 'a[href*="services"]'
+    ];
+    
+    const links = new Set();
+    navSelectors.forEach(selector => {
+        document.querySelectorAll(selector).forEach(link => {
+            const href = link.href;
+            if (href && href.startsWith(baseUrl) && href !== window.location.href) {
+                links.add(href);
+            }
+        });
+    });
+    
+    // Keywords to identify relevant pages
+    const relevantKeywords = [
+        'about', 'program', 'contact', 'admission', 'staff', 'team',
+        'therapy', 'treatment', 'approach', 'services', 'philosophy',
+        'clinical', 'academic', 'residential', 'facility', 'campus'
+    ];
+    
+    // Filter links to only relevant pages
+    const relevantLinks = Array.from(links).filter(link => {
+        const url = link.toLowerCase();
+        return relevantKeywords.some(keyword => url.includes(keyword));
+    }).slice(0, 10); // Limit to 10 pages to avoid overloading
+    
+    console.log(`Found ${relevantLinks.length} relevant pages to extract from`);
+    
+    // Function to extract data from a page via fetch
+    async function extractFromUrl(url) {
+        try {
+            const response = await fetch(url);
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            // Extract key information from the parsed document
+            const pageData = {
+                url: url,
+                title: doc.title,
+                headings: [],
+                paragraphs: [],
+                listItems: []
+            };
+            
+            // Extract headings
+            doc.querySelectorAll('h1, h2, h3, h4').forEach(h => {
+                const text = h.textContent.trim();
+                if (text && text.length > 2 && isValidContent(text)) {
+                    pageData.headings.push({
+                        level: h.tagName,
+                        text: text
+                    });
+                }
+            });
+            
+            // Extract paragraphs
+            doc.querySelectorAll('p').forEach(p => {
+                const text = p.textContent.trim();
+                if (text && text.length > 20 && text.length < 1000 && isValidContent(text)) {
+                    pageData.paragraphs.push(text);
+                }
+            });
+            
+            // Extract list items
+            doc.querySelectorAll('li').forEach(li => {
+                const text = li.textContent.trim();
+                if (text && text.length > 10 && text.length < 500 && isValidContent(text)) {
+                    pageData.listItems.push(text);
+                }
+            });
+            
+            return pageData;
+        } catch (error) {
+            console.error(`Error extracting from ${url}:`, error);
+            return null;
+        }
+    }
+    
+    // Extract from each relevant page
+    for (const url of relevantLinks) {
+        const pageData = await extractFromUrl(url);
+        if (pageData) {
+            const pageName = url.split('/').pop() || 'page';
+            comprehensiveData.pages[pageName] = pageData;
+            
+            // Process and compile information
+            processPageData(pageData, comprehensiveData.compiledInfo);
+        }
+    }
+    
+    // Process current page data as well
+    processPageData(currentPageData, comprehensiveData.compiledInfo);
+    
+    // Compile final structured data
+    comprehensiveData.structured = compileStructuredData(comprehensiveData.compiledInfo);
+    
+    return comprehensiveData;
+}
+
+// Process page data and extract key information
+function processPageData(pageData, compiledInfo) {
+    const allText = [
+        ...pageData.headings.map(h => h.text),
+        ...pageData.paragraphs,
+        ...pageData.listItems
+    ].join(' ');
+    
+    // Extract program name (usually in h1 or title)
+    if (!compiledInfo.programName && pageData.headings.length > 0) {
+        const potentialNames = pageData.headings
+            .filter(h => h.level === 'H1')
+            .map(h => h.text);
+        if (potentialNames.length > 0) {
+            compiledInfo.programName = potentialNames[0];
+        }
+    }
+    
+    // Extract ages served
+    const agePatterns = [
+        /(\d+)\s*[-–]\s*(\d+)\s*(?:years?|yrs?)(?:\s*old)?/gi,
+        /ages?\s*(\d+)\s*(?:to|through|[-–])\s*(\d+)/gi,
+        /(?:adolescents?|teens?|youth)\s*(?:ages?\s*)?(\d+)\s*[-–]\s*(\d+)/gi
+    ];
+    
+    agePatterns.forEach(pattern => {
+        let match;
+        while ((match = pattern.exec(allText)) !== null) {
+            compiledInfo.agesServed.add(`${match[1]}-${match[2]}`);
+        }
+    });
+    
+    // Extract level of care
+    const careTypes = {
+        'residential': /\b(?:residential|24\/7|24-hour)\b/gi,
+        'PHP': /\b(?:PHP|partial hospitalization)\b/gi,
+        'IOP': /\b(?:IOP|intensive outpatient)\b/gi,
+        'therapeutic boarding school': /\b(?:therapeutic boarding school|boarding)\b/gi,
+        'wilderness': /\b(?:wilderness therapy|outdoor)\b/gi
+    };
+    
+    Object.entries(careTypes).forEach(([type, pattern]) => {
+        if (pattern.test(allText)) {
+            compiledInfo.levelOfCare.add(type);
+        }
+    });
+    
+    // Extract therapies and modalities
+    const therapyTypes = [
+        'CBT', 'DBT', 'EMDR', 'ACT', 'NARM', 'IFS', 'Somatic Therapy',
+        'Trauma-Focused', 'Equine Therapy', 'Art Therapy', 'Music Therapy',
+        'Adventure Therapy', 'Wilderness Therapy', 'Family Therapy',
+        'Group Therapy', 'Individual Therapy', 'Neurofeedback', 'QEEG'
+    ];
+    
+    therapyTypes.forEach(therapy => {
+        const regex = new RegExp(`\\b${therapy}\\b`, 'gi');
+        if (regex.test(allText)) {
+            compiledInfo.therapies.add(therapy);
+        }
+    });
+    
+    // Extract specializations
+    const specializations = {
+        'trauma': /\b(?:trauma|PTSD|traumatic)\b/gi,
+        'anxiety': /\b(?:anxiety|anxious)\b/gi,
+        'depression': /\b(?:depression|depressive)\b/gi,
+        'ADHD': /\b(?:ADHD|ADD|attention)\b/gi,
+        'autism/ASD': /\b(?:autism|ASD|spectrum)\b/gi,
+        'substance abuse': /\b(?:substance|addiction|drug|alcohol)\b/gi,
+        'eating disorders': /\b(?:eating disorder|anorexia|bulimia)\b/gi,
+        'adoption/attachment': /\b(?:adoption|attachment|RAD)\b/gi,
+        'LGBTQ+': /\b(?:LGBTQ|gender|transgender)\b/gi
+    };
+    
+    Object.entries(specializations).forEach(([spec, pattern]) => {
+        if (pattern.test(allText)) {
+            compiledInfo.specializations.add(spec);
+        }
+    });
+    
+    // Extract contact information
+    const phoneRegex = /(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g;
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+    
+    let phoneMatch;
+    while ((phoneMatch = phoneRegex.exec(allText)) !== null) {
+        compiledInfo.phones.add(phoneMatch[0]);
+    }
+    
+    let emailMatch;
+    while ((emailMatch = emailRegex.exec(allText)) !== null) {
+        if (!emailMatch[0].includes('.png') && !emailMatch[0].includes('.jpg')) {
+            compiledInfo.emails.add(emailMatch[0]);
+        }
+    }
+    
+    // Extract location/address
+    const statePattern = /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*),?\s*([A-Z]{2})\s*\d{5}/g;
+    let locationMatch;
+    while ((locationMatch = statePattern.exec(allText)) !== null) {
+        compiledInfo.addresses.add(`${locationMatch[1]}, ${locationMatch[2]}`);
+    }
+    
+    // Extract accreditations
+    const accreditations = ['JCAHO', 'Joint Commission', 'CARF', 'NATSAP', 'CEC'];
+    accreditations.forEach(accred => {
+        const regex = new RegExp(`\\b${accred}\\b`, 'gi');
+        if (regex.test(allText)) {
+            compiledInfo.accreditations.add(accred);
+        }
+    });
+}
+
+// Compile structured data from compiled info
+function compileStructuredData(compiledInfo) {
+    return {
+        programName: compiledInfo.programName || 'Treatment Program',
+        location: Array.from(compiledInfo.addresses)[0] || '',
+        phones: Array.from(compiledInfo.phones),
+        emails: Array.from(compiledInfo.emails),
+        agesServed: Array.from(compiledInfo.agesServed).join(', '),
+        levelOfCare: Array.from(compiledInfo.levelOfCare).join(', '),
+        therapies: Array.from(compiledInfo.therapies).sort(),
+        specializations: Array.from(compiledInfo.specializations),
+        accreditations: Array.from(compiledInfo.accreditations),
+        uniqueFeatures: identifyUniqueFeatures(compiledInfo)
+    };
+}
+
+// Identify unique features that differentiate this program
+function identifyUniqueFeatures(compiledInfo) {
+    const features = [];
+    
+    // Check for unique therapy combinations
+    const therapies = Array.from(compiledInfo.therapies);
+    if (therapies.includes('Equine Therapy')) {
+        features.push('Equine-assisted therapy program');
+    }
+    if (therapies.includes('Wilderness Therapy') || therapies.includes('Adventure Therapy')) {
+        features.push('Wilderness/adventure-based treatment');
+    }
+    if (therapies.includes('NARM')) {
+        features.push('NARM-certified for developmental trauma');
+    }
+    if (therapies.includes('Neurofeedback') || therapies.includes('QEEG')) {
+        features.push('Brain-based neurofeedback therapy');
+    }
+    
+    // Check for specialized populations
+    const specializations = Array.from(compiledInfo.specializations);
+    if (specializations.includes('autism/ASD')) {
+        features.push('Specialized autism spectrum program');
+    }
+    if (specializations.includes('LGBTQ+')) {
+        features.push('LGBTQ+ affirming environment');
+    }
+    if (specializations.includes('adoption/attachment')) {
+        features.push('Adoption/attachment trauma specialty');
+    }
+    
+    // Check for unique level of care combinations
+    const levelOfCare = Array.from(compiledInfo.levelOfCare);
+    if (levelOfCare.includes('wilderness')) {
+        features.push('Wilderness therapy setting');
+    }
+    if (levelOfCare.includes('therapeutic boarding school')) {
+        features.push('Therapeutic boarding school with academic program');
+    }
+    
+    return features;
 }
 
 // Optional: Add a floating button to pages for quick extraction

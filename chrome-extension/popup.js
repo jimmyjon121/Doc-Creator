@@ -16,27 +16,49 @@ document.addEventListener('DOMContentLoaded', function() {
     // Open Doc Creator tool
     openToolBtn.addEventListener('click', function() {
         chrome.tabs.create({ url: DOC_CREATOR_URL });
-    });    // Extract information from current page
+    });
+    
+    // Extract information from current page
     extractBtn.addEventListener('click', async function() {
         extractBtn.disabled = true;
         extractBtn.innerHTML = '<span class="spinner"></span> Extracting...';
         statusDiv.style.display = 'none';
         copySection.style.display = 'none';
         
+        // Show progress indicator
+        const progressDiv = document.getElementById('extractionProgress');
+        const progressDetails = document.getElementById('progressDetails');
+        const progressBar = document.getElementById('progressBar');
+        progressDiv.style.display = 'block';
+        progressDetails.textContent = 'Analyzing current page...';
+        progressBar.style.width = '10%';
+        
         try {
             // Get current active tab
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
             
-            // Check if chrome.scripting is available
-            if (chrome.scripting && chrome.scripting.executeScript) {
-                // Use the new scripting API
-                const results = await chrome.scripting.executeScript({
-                    target: { tabId: tab.id },
-                    func: extractPageInfo,
-                });
-                
-                if (results && results[0] && results[0].result) {
-                    const extractedInfo = results[0].result;
+            // Send message to content script to perform comprehensive extraction
+            chrome.tabs.sendMessage(tab.id, { action: 'extractInfo' }, (response) => {
+                if (chrome.runtime.lastError) {
+                    showStatus('Error: Please reload the page and try again', 'error');
+                    console.error(chrome.runtime.lastError);
+                    progressDiv.style.display = 'none';
+                    extractBtn.disabled = false;
+                    extractBtn.textContent = 'Extract Page Info';
+                } else if (response && response.data) {
+                    const extractedInfo = response.data;
+                    
+                    // Update progress based on extraction type
+                    if (extractedInfo.pages && Object.keys(extractedInfo.pages).length > 1) {
+                        progressDetails.textContent = `Analyzed ${Object.keys(extractedInfo.pages).length} pages successfully!`;
+                        progressBar.style.width = '100%';
+                        
+                        setTimeout(() => {
+                            progressDiv.style.display = 'none';
+                        }, 1500);
+                    } else {
+                        progressDiv.style.display = 'none';
+                    }
                     
                     // Format the extracted information
                     const formattedInfo = formatExtractedInfo(extractedInfo, tab.url);
@@ -52,38 +74,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                     
                     showStatus('✓ Information extracted successfully!', 'success');
+                    extractBtn.disabled = false;
+                    extractBtn.textContent = 'Extract Page Info';
                 } else {
                     showStatus('Failed to extract information from this page', 'error');
+                    progressDiv.style.display = 'none';
+                    extractBtn.disabled = false;
+                    extractBtn.textContent = 'Extract Page Info';
                 }
-            } else {
-                // Fallback: Use message passing to content script
-                chrome.tabs.sendMessage(tab.id, { action: 'extractInfo' }, function(response) {
-                    if (chrome.runtime.lastError) {
-                        showStatus('Error: Please reload the page and try again', 'error');
-                        console.error(chrome.runtime.lastError);
-                    } else if (response && response.data) {
-                        const formattedInfo = formatExtractedInfo(response.data, tab.url);
-                        
-                        // Show preview
-                        previewDiv.textContent = formattedInfo;
-                        copySection.style.display = 'block';
-                        
-                        // Store in extension storage
-                        chrome.storage.local.set({ 
-                            lastExtracted: formattedInfo,
-                            url: tab.url
-                        });
-                        
-                        showStatus('✓ Information extracted successfully!', 'success');
-                    } else {
-                        showStatus('Failed to extract information', 'error');
-                    }
-                });
-            }
+            });
         } catch (error) {
             console.error('Error:', error);
             showStatus('Error: ' + error.message, 'error');
-        } finally {
+            progressDiv.style.display = 'none';
             extractBtn.disabled = false;
             extractBtn.textContent = 'Extract Page Info';
         }
@@ -260,6 +263,12 @@ function extractPageInfo() {
 
 // Format the extracted information for pasting
 function formatExtractedInfo(info, url) {
+    // Check if this is comprehensive data
+    if (info.structured) {
+        return formatComprehensiveInfo(info, url);
+    }
+    
+    // Original formatting for single page
     let formatted = `PROGRAM INFORMATION EXTRACTED FROM: ${url}\n\n`;
     
     formatted += `Website: ${info.domain}\n`;
@@ -340,6 +349,96 @@ function formatExtractedInfo(info, url) {
             formatted += `• ${f}\n`;
         });
     }
+    
+    return formatted;
+}
+
+// Format comprehensive multi-page extraction data
+function formatComprehensiveInfo(info, url) {
+    const s = info.structured;
+    const pageCount = Object.keys(info.pages).length;
+    
+    let formatted = `**COMPREHENSIVE PROGRAM PROFILE**\n`;
+    formatted += `Extracted from ${pageCount} pages at ${info.domain}\n\n`;
+    
+    formatted += `**${s.programName.toUpperCase()}**\n\n`;
+    
+    formatted += `**PROGRAM OVERVIEW:**\n`;
+    formatted += `Program Name: ${s.programName}\n`;
+    formatted += `Location: ${s.location || 'Not specified'}\n`;
+    
+    if (s.phones.length > 0) {
+        formatted += `Phone: ${s.phones[0]}\n`;
+    }
+    if (s.emails.length > 0) {
+        formatted += `Email: ${s.emails[0]}\n`;
+    }
+    formatted += `Website: ${url}\n`;
+    
+    if (s.levelOfCare) {
+        formatted += `Level of Care: ${s.levelOfCare}\n`;
+    }
+    
+    formatted += `\n**TARGET POPULATION:**\n`;
+    if (s.agesServed) {
+        formatted += `Ages Served: ${s.agesServed}\n`;
+    }
+    
+    if (s.specializations.length > 0) {
+        formatted += `Specializations: ${s.specializations.join(', ')}\n`;
+    }
+    
+    formatted += `\n**CLINICAL SERVICES:**\n`;
+    if (s.therapies.length > 0) {
+        formatted += `Therapeutic Modalities:\n`;
+        s.therapies.forEach(therapy => {
+            formatted += `• ${therapy}\n`;
+        });
+    }
+    
+    if (s.uniqueFeatures.length > 0) {
+        formatted += `\n**WHAT MAKES THIS PROGRAM UNIQUE:**\n`;
+        s.uniqueFeatures.forEach(feature => {
+            formatted += `• ${feature}\n`;
+        });
+    }
+    
+    if (s.accreditations.length > 0) {
+        formatted += `\n**ACCREDITATIONS:**\n`;
+        formatted += s.accreditations.join(', ') + '\n';
+    }
+    
+    // Add key content from specific pages
+    formatted += `\n**ADDITIONAL DETAILS FROM WEBSITE:**\n`;
+    
+    // Look for about page content
+    Object.entries(info.pages).forEach(([pageName, pageData]) => {
+        if (pageName.includes('about') && pageData.paragraphs.length > 0) {
+            formatted += `\nFrom About Page:\n`;
+            const aboutContent = pageData.paragraphs
+                .filter(p => p.length > 50)
+                .slice(0, 2)
+                .join('\n');
+            formatted += aboutContent + '\n';
+        }
+    });
+    
+    // Look for clinical/treatment content
+    Object.entries(info.pages).forEach(([pageName, pageData]) => {
+        if ((pageName.includes('treatment') || pageName.includes('clinical') || pageName.includes('program')) 
+            && pageData.paragraphs.length > 0) {
+            formatted += `\nFrom ${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page:\n`;
+            const clinicalContent = pageData.paragraphs
+                .filter(p => p.length > 50)
+                .slice(0, 2)
+                .join('\n');
+            formatted += clinicalContent + '\n';
+        }
+    });
+    
+    formatted += `\n---\n`;
+    formatted += `*Comprehensive extraction completed from ${pageCount} pages. `;
+    formatted += `This profile includes information from: ${Object.keys(info.pages).join(', ')}*\n`;
     
     return formatted;
 }
