@@ -71,6 +71,11 @@ function sendProgressUpdate(message, progress, details = {}) {
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('Content script received message:', request.action);
     
+    if (request.action === 'ping') {
+        sendResponse({ status: 'ok' });
+        return true;
+    }
+    
     if (request.action === 'extractInfo') {
         // Extract information from the page with multi-page support
         extractComprehensiveInfo()

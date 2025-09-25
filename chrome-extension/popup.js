@@ -84,8 +84,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Extract information from current page
     extractBtn.addEventListener('click', async function() {
+        console.log('Extract button clicked!');
         extractBtn.disabled = true;
-            extractBtn.innerHTML = 'Extracting... <span id="progress"></span>';
+        extractBtn.innerHTML = 'Extracting... <span id="progress"></span>';
         statusDiv.style.display = 'none';
         copySection.style.display = 'none';
         
@@ -96,23 +97,45 @@ document.addEventListener('DOMContentLoaded', function() {
         const liveStatus = document.getElementById('liveStatus');
         const statusMessages = document.getElementById('statusMessages');
         
+        // Force show progress div with debugging
         if (progressDiv) {
+            console.log('Showing progress div');
             progressDiv.style.display = 'block';
-            progressBar.style.width = '0%';
-            progressDetails.textContent = 'Starting extraction...';
+            progressDiv.style.backgroundColor = '#f0f9ff';
+            progressDiv.style.border = '2px solid #0284c7';
+            progressDiv.style.padding = '15px';
             
-            // Clear previous status messages
-            if (statusMessages) {
-                statusMessages.innerHTML = '';
+            if (progressBar) {
+                progressBar.style.width = '5%';
+                progressBar.style.backgroundColor = '#4f46e5';
             }
+            
+            if (progressDetails) {
+                progressDetails.textContent = 'Initializing extraction process...';
+                progressDetails.style.color = '#075985';
+            }
+            
+            // Clear and show status messages area
+            if (liveStatus && statusMessages) {
+                statusMessages.innerHTML = '<div style="color: #065f46;">🚀 Starting extraction...</div>';
+                liveStatus.style.display = 'block';
+            }
+        } else {
+            console.error('Progress div not found!');
+            showStatus('Progress indicator not found. Please report this issue.', 'error');
         }
         
         try {
             // Get current active tab
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            console.log('Current tab:', tab.url);
+            
+            // Just log tab info for debugging
+            console.log('Sending extraction request to tab:', tab.id);
             
             // Send message to content script to perform comprehensive extraction
             chrome.tabs.sendMessage(tab.id, { action: 'extractInfo' }, (response) => {
+                console.log('Got response from content script:', response);
                 if (chrome.runtime.lastError) {
                     const errorMsg = chrome.runtime.lastError.message;
                     if (errorMsg.includes('Could not establish connection')) {
