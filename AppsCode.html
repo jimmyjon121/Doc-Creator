@@ -4428,46 +4428,67 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
         function extractProgramInfoSmart(text) {
             const data = {};
             
-            // Extract Program Name (usually in title, first line, or after "program")
-            const namePatterns = [
-                /^([A-Z][A-Za-z\s&'-]+?)(?:\s*[-–—]\s*|\s+(?:is|provides|offers))/m,
-                /(?:program|school|academy|center|institute):\s*([A-Za-z\s&'-]+)/i,
-                /^([A-Z][A-Za-z\s&'-]+?)\s*$/m
-            ];
-            for (const pattern of namePatterns) {
-                const match = text.match(pattern);
-                if (match) {
-                    data['Program Name'] = match[1].trim();
-                    break;
+            // Extract Program Name - First check if it's already in the standard format
+            const standardFormatName = text.match(/Program Name:\s*([^\n]+)/i);
+            if (standardFormatName) {
+                data['Program Name'] = standardFormatName[1].trim();
+            } else {
+                // If not in standard format, try to extract it
+                const namePatterns = [
+                    /^([A-Z][A-Za-z\s&'-]+?)(?:\s*[-–—]\s*|\s+(?:is|provides|offers))/m,
+                    /(?:program|school|academy|center|institute):\s*([A-Za-z\s&'-]+)/i,
+                    /^([A-Z][A-Za-z\s&'-]+?)\s*$/m
+                ];
+                for (const pattern of namePatterns) {
+                    const match = text.match(pattern);
+                    if (match) {
+                        data['Program Name'] = match[1].trim();
+                        break;
+                    }
                 }
             }
             
-            // Extract Location
-            const locationPatterns = [
-                /(?:located in|location:|address:)\s*([A-Za-z\s,]+(?:,\s*[A-Z]{2})?)/i,
-                /([A-Za-z\s]+,\s*[A-Z]{2})\s*\d{5}/,
-                /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z]{2})\b/
-            ];
-            for (const pattern of locationPatterns) {
-                const match = text.match(pattern);
-                if (match) {
-                    data['Location'] = match[1].trim();
-                    break;
+            // Extract Location - Check standard format first
+            const standardLocation = text.match(/Location:\s*([^\n]+)/i);
+            if (standardLocation) {
+                data['Location'] = standardLocation[1].trim();
+            } else {
+                const locationPatterns = [
+                    /(?:located in|location:|address:)\s*([A-Za-z\s,]+(?:,\s*[A-Z]{2})?)/i,
+                    /([A-Za-z\s]+,\s*[A-Z]{2})\s*\d{5}/,
+                    /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z]{2})\b/
+                ];
+                for (const pattern of locationPatterns) {
+                    const match = text.match(pattern);
+                    if (match) {
+                        data['Location'] = match[1].trim();
+                        break;
+                    }
                 }
             }
             
-            // Extract Phone Number
-            const phonePattern = /(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g;
-            const phones = text.match(phonePattern);
-            if (phones && phones.length > 0) {
-                data['Phone Number'] = phones[0].trim();
+            // Extract Phone Number - Check standard format first
+            const standardPhone = text.match(/Phone:\s*([\d\s().-]+)/i);
+            if (standardPhone) {
+                data['Phone Number'] = standardPhone[1].trim();
+            } else {
+                const phonePattern = /(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g;
+                const phones = text.match(phonePattern);
+                if (phones && phones.length > 0) {
+                    data['Phone Number'] = phones[0].trim();
+                }
             }
             
-            // Extract Website
-            const websitePattern = /(?:website:|visit us at:?\s*|www\.|https?:\/\/)([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/i;
-            const websiteMatch = text.match(websitePattern);
-            if (websiteMatch) {
-                data['Website'] = websiteMatch[1].replace(/^(www\.|https?:\/\/)/, '');
+            // Extract Website - Check standard format first
+            const standardWebsite = text.match(/Website:\s*([^\n]+)/i);
+            if (standardWebsite) {
+                data['Website'] = standardWebsite[1].trim().replace(/^(www\.|https?:\/\/)/, '');
+            } else {
+                const websitePattern = /(?:website:|visit us at:?\s*|www\.|https?:\/\/)([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/i;
+                const websiteMatch = text.match(websitePattern);
+                if (websiteMatch) {
+                    data['Website'] = websiteMatch[1].replace(/^(www\.|https?:\/\/)/, '');
+                }
             }
             
             // Extract Level of Care
