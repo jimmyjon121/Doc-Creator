@@ -3,6 +3,16 @@
 
 console.log('Family First Program Extractor content script loaded');
 
+// Add error boundary for the entire content script
+try {
+    // Test if we can access the page
+    if (!document || !document.body) {
+        throw new Error('Page not fully loaded');
+    }
+} catch (error) {
+    console.error('Content script initialization error:', error);
+}
+
 // Load enhanced extraction patterns
 const TREATMENT_PATTERNS = {
     // Age patterns
@@ -44,11 +54,22 @@ const TREATMENT_PATTERNS = {
 
 // Listen for messages from the popup or background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    console.log('Content script received message:', request.action);
+    
     if (request.action === 'extractInfo') {
         // Extract information from the page with multi-page support
-        extractComprehensiveInfo().then(extractedData => {
-            sendResponse({ data: extractedData });
-        });
+        extractComprehensiveInfo()
+            .then(extractedData => {
+                console.log('Extraction completed successfully');
+                sendResponse({ data: extractedData });
+            })
+            .catch(error => {
+                console.error('Extraction error:', error);
+                sendResponse({ 
+                    error: 'Extraction failed. Please reload the page and try again.',
+                    details: error.message 
+                });
+            });
         return true; // Keep message channel open for async response
     }
 });
@@ -424,12 +445,24 @@ function analyzeContentEnhanced(text) {
 
 // Comprehensive multi-page extraction
 async function extractComprehensiveInfo() {
-    console.log('Starting comprehensive multi-page extraction...');
-    
-    // First, extract from current page
-    const currentPageData = extractPageInfo();
-    const baseUrl = window.location.origin;
-    const currentPath = window.location.pathname;
+    try {
+        console.log('Starting comprehensive multi-page extraction...');
+        
+        // Check if page is ready
+        if (!document.body || document.readyState === 'loading') {
+            await new Promise(resolve => {
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', resolve);
+                } else {
+                    resolve();
+                }
+            });
+        }
+        
+        // First, extract from current page
+        const currentPageData = extractPageInfo();
+        const baseUrl = window.location.origin;
+        const currentPath = window.location.pathname;
     
     // Initialize comprehensive data structure
     const comprehensiveData = {
@@ -641,6 +674,16 @@ async function extractComprehensiveInfo() {
     comprehensiveData.structured = compileStructuredData(comprehensiveData.compiledInfo);
     
     return comprehensiveData;
+    
+    } catch (error) {
+        console.error('Extraction error:', error);
+        // Return basic data even if extraction fails
+        return {
+            error: true,
+            message: error.message,
+            basicInfo: extractPageInfo() // Try to at least get current page info
+        };
+    }
 }
 
 // Process page data and extract key information

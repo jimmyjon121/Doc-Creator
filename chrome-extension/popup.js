@@ -50,8 +50,20 @@ document.addEventListener('DOMContentLoaded', function() {
             // Send message to content script to perform comprehensive extraction
             chrome.tabs.sendMessage(tab.id, { action: 'extractInfo' }, (response) => {
                 if (chrome.runtime.lastError) {
-                    showStatus('Error: Please reload the page and try again', 'error');
-                    console.error(chrome.runtime.lastError);
+                    const errorMsg = chrome.runtime.lastError.message;
+                    if (errorMsg.includes('Could not establish connection')) {
+                        showStatus('Error: Please reload the page and try again. The extension may need to be refreshed.', 'error');
+                    } else {
+                        showStatus('Error: ' + errorMsg, 'error');
+                    }
+                    console.error('Chrome runtime error:', chrome.runtime.lastError);
+                    progressDiv.style.display = 'none';
+                    extractBtn.disabled = false;
+                    extractBtn.textContent = 'Extract Page Info';
+                } else if (response && response.error) {
+                    // Handle errors from content script
+                    showStatus(response.error, 'error');
+                    console.error('Content script error:', response.details);
                     progressDiv.style.display = 'none';
                     extractBtn.disabled = false;
                     extractBtn.textContent = 'Extract Page Info';
