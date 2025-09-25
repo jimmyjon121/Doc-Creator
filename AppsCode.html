@@ -1465,6 +1465,9 @@
                     <button id="manualModeBtn" onclick="setAddProgramMode('manual')" style="flex: 1; padding: 12px; background: #e5e7eb; color: #6b7280; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s;">
                         ✍️ Manual Text Entry
                     </button>
+                    <button id="templateModeBtn" onclick="setAddProgramMode('template')" style="flex: 1; padding: 12px; background: #e5e7eb; color: #6b7280; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s;">
+                        📋 Template Format
+                    </button>
                 </div>
                 
                 <!-- AI Mode Content -->
@@ -1529,6 +1532,87 @@
                     placeholder="Paste program details here (from website, brochure, email, etc). Include:&#10;• Program name&#10;• Location&#10;• Phone number&#10;• Level of care (RTC, PHP, IOP, etc)&#10;• Age range&#10;• Treatment specialties&#10;• Any other relevant information"
                         style="width: 100%; height: 250px; padding: 15px; border: 2px solid #f59e0b; border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical;"
                 ></textarea>
+                </div>
+                
+                <!-- Template Mode Content -->
+                <div id="templateModeContent" style="display: none;">
+                    <div style="margin-bottom: 20px; padding: 15px; background: #e0f2fe; border-radius: 8px; border-left: 4px solid #0284c7;">
+                        <p style="margin: 0; color: #075985; font-weight: 600;">📋 Use our structured template to format program information (Chrome Extension compatible)</p>
+                    </div>
+                    
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px;">
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #334155;">Program Name <span style="color: #ef4444;">*</span></label>
+                            <input type="text" id="templateName" placeholder="e.g., Healing Springs Treatment Center" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #334155;">Location</label>
+                            <input type="text" id="templateLocation" placeholder="e.g., Denver, Colorado" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #334155;">Phone Number</label>
+                                <input type="tel" id="templatePhone" placeholder="e.g., (555) 123-4567" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #334155;">Email</label>
+                                <input type="email" id="templateEmail" placeholder="e.g., admissions@program.com" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #334155;">Level of Care</label>
+                                <select id="templateLevel" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                                    <option value="">Select level...</option>
+                                    <option value="RTC">RTC - Residential Treatment Center</option>
+                                    <option value="PHP">PHP - Partial Hospitalization</option>
+                                    <option value="IOP">IOP - Intensive Outpatient</option>
+                                    <option value="Outpatient">Outpatient</option>
+                                    <option value="Sober Living">Sober Living</option>
+                                    <option value="Wilderness">Wilderness Therapy</option>
+                                    <option value="Therapeutic Boarding School">Therapeutic Boarding School</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #334155;">Age Range</label>
+                                <input type="text" id="templateAges" placeholder="e.g., 12-17 years" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #334155;">Treatment Specialties</label>
+                            <textarea id="templateSpecialties" placeholder="e.g., Depression, Anxiety, Trauma, ADHD, Substance Use, etc." style="width: 100%; height: 80px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #334155;">Therapeutic Modalities</label>
+                            <textarea id="templateModalities" placeholder="e.g., CBT, DBT, EMDR, Family Therapy, Group Therapy, Art Therapy, etc." style="width: 100%; height: 80px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #334155;">Insurance/Payment</label>
+                            <textarea id="templateInsurance" placeholder="e.g., Accepts most major insurance, Private pay, Financial assistance available" style="width: 100%; height: 60px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #334155;">Program Description</label>
+                            <textarea id="templateDescription" placeholder="Brief description of the program, philosophy, and unique features..." style="width: 100%; height: 120px; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical;"></textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #334155;">Website URL</label>
+                            <input type="url" id="templateWebsite" placeholder="https://www.example-program.com" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 15px; padding: 15px; background: #fef3c7; border-radius: 8px; border: 1px solid #fde68a;">
+                        <p style="margin: 0; font-size: 14px; color: #92400e;">
+                            <strong>💡 Tip:</strong> Use the Chrome Extension to extract data from any treatment program website, then paste it here in the template fields for consistent formatting.
+                        </p>
+                    </div>
                 </div>
                 
                 <div id="customProgramStatus" style="margin: 15px 0;"></div>
@@ -3814,34 +3898,46 @@
         function setAddProgramMode(mode) {
             const aiBtn = document.getElementById('aiModeBtn');
             const manualBtn = document.getElementById('manualModeBtn');
+            const templateBtn = document.getElementById('templateModeBtn');
             const aiContent = document.getElementById('aiModeContent');
             const manualContent = document.getElementById('manualModeContent');
+            const templateContent = document.getElementById('templateModeContent');
             const extractBtn = document.getElementById('extractProgramBtn');
+            
+            // Reset all buttons
+            aiBtn.style.background = '#e5e7eb';
+            aiBtn.style.color = '#6b7280';
+            manualBtn.style.background = '#e5e7eb';
+            manualBtn.style.color = '#6b7280';
+            templateBtn.style.background = '#e5e7eb';
+            templateBtn.style.color = '#6b7280';
+            
+            // Hide all content
+            aiContent.style.display = 'none';
+            manualContent.style.display = 'none';
+            templateContent.style.display = 'none';
             
             if (mode === 'ai') {
                 // AI Mode
                 aiBtn.style.background = '#4f46e5';
                 aiBtn.style.color = 'white';
-                manualBtn.style.background = '#e5e7eb';
-                manualBtn.style.color = '#6b7280';
-                
                 aiContent.style.display = 'block';
-                manualContent.style.display = 'none';
-                
                 extractBtn.innerHTML = '🚀 Extract from Website';
                 document.getElementById('programUrl').focus();
-            } else {
+            } else if (mode === 'manual') {
                 // Manual Mode
                 manualBtn.style.background = '#f59e0b';
                 manualBtn.style.color = 'white';
-                aiBtn.style.background = '#e5e7eb';
-                aiBtn.style.color = '#6b7280';
-                
                 manualContent.style.display = 'block';
-                aiContent.style.display = 'none';
-                
                 extractBtn.innerHTML = '✨ Format with AI';
                 document.getElementById('customProgramInfo').focus();
+            } else if (mode === 'template') {
+                // Template Mode
+                templateBtn.style.background = '#10b981';
+                templateBtn.style.color = 'white';
+                templateContent.style.display = 'block';
+                extractBtn.innerHTML = '📝 Add Program';
+                document.getElementById('templateProgramName').focus();
             }
         }
         
@@ -4046,8 +4142,17 @@
                     addProgressLog(`✗ Error: ${error.message}`);
                 }
             } else {
-                // Manual Mode - use existing addCustomProgram logic
-                await addCustomProgram();
+                // Check which mode we're in
+                const manualContent = document.getElementById('manualModeContent');
+                const templateContent = document.getElementById('templateModeContent');
+                
+                if (manualContent.style.display !== 'none') {
+                    // Manual Mode - use existing addCustomProgram logic
+                    await addCustomProgram();
+                } else if (templateContent.style.display !== 'none') {
+                    // Template Mode - collect form data
+                    await addTemplateProgram();
+                }
             }
         }
         
@@ -4158,6 +4263,96 @@
                 statusDiv.style.color = '#ef4444';
                 showHybridTool(programInfo, false);
             }
+        }
+        
+        // Add template-based program
+        async function addTemplateProgram() {
+            // Collect all form data
+            const programData = {
+                'Program Name': document.getElementById('templateProgramName').value.trim(),
+                'Location': document.getElementById('templateLocation').value.trim(),
+                'Phone Number': document.getElementById('templatePhone').value.trim(),
+                'Email': document.getElementById('templateEmail').value.trim(),
+                'Level of Care': document.getElementById('templateLevelOfCare').value.trim(),
+                'Age Range': document.getElementById('templateAgeRange').value.trim(),
+                'Primary Issues Treated': document.getElementById('templateTreatmentSpecialties').value.trim(),
+                'Specialized Therapies': document.getElementById('templateTherapeuticModalities').value.trim(),
+                'Insurance Accepted': document.getElementById('templateInsurance').value.trim(),
+                'Program Philosophy': document.getElementById('templateDescription').value.trim(),
+                'Website': document.getElementById('templateWebsite').value.trim()
+            };
+            
+            // Validate required fields
+            if (!programData['Program Name']) {
+                alert('Please enter the program name');
+                return;
+            }
+            
+            // Format the extracted data in the same format as AI extraction
+            const formattedData = `
+**THERAPEUTIC SCHOOL PROFILE**
+**${programData['Program Name'].toUpperCase()}**
+
+**PROGRAM OVERVIEW:**
+Program Name: ${programData['Program Name']}
+Location: ${programData['Location'] || 'Not specified'}
+Phone Number: ${programData['Phone Number'] || 'Not specified'}
+Email: ${programData['Email'] || 'Not specified'}
+Website: ${programData['Website'] || 'Not specified'}
+Level of Care: ${programData['Level of Care'] || 'Not specified'}
+
+**TARGET POPULATION:**
+Age Range: ${programData['Age Range'] || 'Not specified'}
+
+**CLINICAL SERVICES:**
+Primary Issues Treated: ${programData['Primary Issues Treated'] || 'Not specified'}
+Specialized Therapies: ${programData['Specialized Therapies'] || 'Not specified'}
+
+**PROGRAM DETAILS:**
+${programData['Program Philosophy'] || 'No description provided'}
+
+**INSURANCE & PAYMENT:**
+${programData['Insurance Accepted'] || 'Not specified'}
+
+---
+
+*Profile compiled for educational consultant review. All information should be verified directly with the program.*
+`;
+            
+            // Show the formatted result
+            const statusDiv = document.getElementById('customProgramStatus');
+            statusDiv.innerHTML = `
+                <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 15px; margin: 10px 0;">
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 16px;">✅</span>
+                        <strong style="margin-left: 8px; color: #16a34a;">Program Formatted Successfully!</strong>
+                    </div>
+                    
+                    <div style="background: white; border: 1px solid #e5e7eb; border-radius: 6px; padding: 15px; margin: 10px 0; font-family: monospace; font-size: 12px; white-space: pre-wrap; max-height: 400px; overflow-y: auto;">
+${formattedData.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button onclick="
+                            navigator.clipboard.writeText(\`${formattedData.replace(/`/g, '\\`')}\`).then(() => {
+                                alert('Program profile copied to clipboard!');
+                            });
+                        " style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                            📋 Copy to Clipboard
+                        </button>
+                        <button onclick="
+                            // Set the extracted data in the correct format
+                            window.currentAIExtraction = ${JSON.stringify(programData)};
+                            acceptAIExtraction();
+                        " style="background: #4f46e5; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                            ➕ Add to Document
+                        </button>
+                        <button onclick="document.getElementById('addProgramModal').style.display='none';" style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
         }
         
         // Update selection panel with drag and drop
