@@ -89,20 +89,62 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Copy to clipboard
+    // Copy to Tool - Smart integration
     copyBtn.addEventListener('click', async function() {
         const textToCopy = previewDiv.textContent;
         
         try {
-            await navigator.clipboard.writeText(textToCopy);
-            showStatus('✓ Copied to clipboard! Now paste into Doc Creator.', 'success');
+            // First, try to find an open Doc Creator tab
+            const tabs = await chrome.tabs.query({});
+            const docCreatorTab = tabs.find(tab => 
+                tab.url && (
+                    tab.url.includes('AppsCode.html') || 
+                    tab.url.includes('localhost') && tab.url.includes('AppsCode') ||
+                    tab.url.includes('127.0.0.1') && tab.url.includes('AppsCode')
+                )
+            );
             
-            // Optionally open the tool
-            setTimeout(() => {
-                if (confirm('Open Doc Creator to paste the information?')) {
+            if (docCreatorTab) {
+                // Doc Creator is open - inject script to send data
+                chrome.scripting.executeScript({
+                    target: { tabId: docCreatorTab.id },
+                    func: (programData) => {
+                        // This runs in the context of the Doc Creator page
+                        if (window.postMessage) {
+                            window.postMessage({
+                                type: 'PROGRAM_INFO_EXTRACTED',
+                                content: programData
+                            }, '*');
+                            
+                            // Also trigger the modal to open and switch to manual mode
+                            if (document.getElementById('addProgramModal')) {
+                                document.getElementById('addProgramModal').style.display = 'block';
+                                if (typeof setAddProgramMode === 'function') {
+                                    setAddProgramMode('manual');
+                                }
+                            }
+                        }
+                    },
+                    args: [textToCopy]
+                }, () => {
+                    if (chrome.runtime.lastError) {
+                        // Fallback to clipboard
+                        navigator.clipboard.writeText(textToCopy);
+                        showStatus('✓ Copied to clipboard! Switching to Doc Creator...', 'success');
+                    } else {
+                        showStatus('✓ Sent to Doc Creator! Check the Manual Entry tab.', 'success');
+                    }
+                    chrome.tabs.update(docCreatorTab.id, { active: true });
+                });
+            } else {
+                // No Doc Creator tab open - copy to clipboard and offer to open
+                await navigator.clipboard.writeText(textToCopy);
+                showStatus('✓ Copied to clipboard! Opening Doc Creator...', 'success');
+                
+                setTimeout(() => {
                     chrome.tabs.create({ url: DOC_CREATOR_URL });
-                }
-            }, 1000);
+                }, 1000);
+            }
         } catch (error) {
             showStatus('Failed to copy to clipboard', 'error');
         }
