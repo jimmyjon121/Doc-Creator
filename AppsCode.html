@@ -4994,13 +4994,19 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
         window.addEventListener('message', function(event) {
             if (event.data && event.data.type === 'PROGRAM_INFO_EXTRACTED') {
                 // Show the add program dialog with extracted content
-                document.getElementById('addProgramModal').classList.add('show');
+                document.getElementById('addProgramModal').style.display = 'block';
+                
+                // Set to manual mode and populate the textarea
+                setAddProgramMode('manual');
                 document.getElementById('customProgramInfo').value = event.data.content;
+                
+                // Clear any existing status messages
+                document.getElementById('customProgramStatus').innerHTML = '';
                 
                 // Show success message
                 const statusDiv = document.createElement('div');
                 statusDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #d4f4dd; color: #28a745; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 10000;';
-                statusDiv.innerHTML = '✅ Content extracted from website! Click "Add to Selection" to include this program.';
+                statusDiv.innerHTML = '✅ Content received from Chrome extension! Use "Smart Format" or "Format with AI" to process it.';
                 document.body.appendChild(statusDiv);
                 
                 setTimeout(() => {

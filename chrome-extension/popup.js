@@ -110,19 +110,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     target: { tabId: docCreatorTab.id },
                     func: (programData) => {
                         // This runs in the context of the Doc Creator page
+                        // Just send the message - let the message handler do all the work
                         if (window.postMessage) {
                             window.postMessage({
                                 type: 'PROGRAM_INFO_EXTRACTED',
                                 content: programData
                             }, '*');
-                            
-                            // Also trigger the modal to open and switch to manual mode
-                            if (document.getElementById('addProgramModal')) {
-                                document.getElementById('addProgramModal').style.display = 'block';
-                                if (typeof setAddProgramMode === 'function') {
-                                    setAddProgramMode('manual');
-                                }
-                            }
                         }
                     },
                     args: [textToCopy]
