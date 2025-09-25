@@ -211,6 +211,28 @@
         </div>
         
         <div id="copySection" class="copy-section">
+            <div class="edit-section" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                <h4 style="margin: 0 0 5px 0; color: #333;">✏️ Edit Information:</h4>
+                <p style="margin: 0 0 10px 0; font-size: 12px; color: #666;">Tip: Update the program name and contact info before copying</p>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; font-size: 12px; color: #666; margin-bottom: 3px;">Program Name:</label>
+                    <input type="text" id="programNameInput" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="Enter program name">
+                </div>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; font-size: 12px; color: #666; margin-bottom: 3px;">Phone:</label>
+                    <input type="text" id="phoneInput" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="(xxx) xxx-xxxx">
+                </div>
+                
+                <div style="margin-bottom: 10px;">
+                    <label style="display: block; font-size: 12px; color: #666; margin-bottom: 3px;">Location:</label>
+                    <input type="text" id="locationInput" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;" placeholder="City, State">
+                </div>
+                
+                <button id="updatePreviewBtn" style="background: #28a745; color: white; padding: 8px 16px; border: none; border-radius: 4px; font-size: 14px; cursor: pointer;">Update Preview</button>
+            </div>
+            
             <div class="preview" id="preview"></div>
             <button id="copyBtn" class="copy-btn">Copy to Clipboard</button>
         </div>

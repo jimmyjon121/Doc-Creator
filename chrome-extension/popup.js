@@ -5,6 +5,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const statusDiv = document.getElementById('status');
     const previewDiv = document.getElementById('preview');
     const copySection = document.getElementById('copySection');
+    const programNameInput = document.getElementById('programNameInput');
+    const phoneInput = document.getElementById('phoneInput');
+    const locationInput = document.getElementById('locationInput');
+    const updatePreviewBtn = document.getElementById('updatePreviewBtn');
+    
+    // Store the extracted data globally for editing
+    let currentExtractedData = null;
+    let currentTabUrl = null;
     
     // Listen for progress updates
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -68,6 +76,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
+    });
+    
+    // Handle update preview button
+    updatePreviewBtn.addEventListener('click', function() {
+        if (!currentExtractedData) return;
+        
+        // Update the structured data with user inputs
+        if (currentExtractedData.structured) {
+            currentExtractedData.structured.programName = programNameInput.value || currentExtractedData.structured.programName;
+            currentExtractedData.structured.phones = phoneInput.value ? [phoneInput.value] : currentExtractedData.structured.phones;
+            currentExtractedData.structured.location = locationInput.value || currentExtractedData.structured.location;
+        }
+        
+        // Re-format and display the updated information
+        const formattedInfo = formatExtractedInfo(currentExtractedData, currentTabUrl);
+        previewDiv.textContent = formattedInfo;
+        
+        // Update storage
+        chrome.storage.local.set({ 
+            lastExtracted: formattedInfo,
+            url: currentTabUrl
+        });
+        
+        showStatus('✓ Preview updated!', 'success');
     });
     
     // Configuration - UPDATE THIS PATH TO YOUR DOC CREATOR HTML FILE
@@ -179,6 +211,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         setTimeout(() => {
                             progressDiv.style.display = 'none';
                         }, 2000);
+                    }
+                    
+                    // Store the extracted data for editing
+                    currentExtractedData = extractedInfo;
+                    currentTabUrl = tab.url;
+                    
+                    // Populate editable fields with extracted data
+                    if (extractedInfo.structured) {
+                        programNameInput.value = extractedInfo.structured.programName || '';
+                        phoneInput.value = extractedInfo.structured.phones?.[0] || '';
+                        locationInput.value = extractedInfo.structured.location || '';
                     }
                     
                     // Format the extracted information
