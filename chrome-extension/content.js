@@ -146,15 +146,37 @@ function extractPageInfo() {
         if (text) info.addresses.push(text);
     });
     
-    // Look for specific sections
+    // Look for specific sections with comprehensive variations
     info.sections = {};
     const sectionKeywords = {
-        about: ['about', 'who we are', 'mission', 'overview'],
-        services: ['services', 'programs', 'treatment', 'therapy'],
-        approach: ['approach', 'philosophy', 'methodology', 'model'],
-        admissions: ['admissions', 'contact', 'intake', 'enrollment'],
-        ages: ['ages', 'age range', 'serve', 'population'],
-        specialties: ['specialize', 'specialty', 'focus', 'expertise']
+        about: ['about', 'who we are', 'mission', 'overview', 'our story', 'history', 
+                'founded', 'established', 'vision', 'values', 'purpose'],
+        services: ['services', 'programs', 'treatment', 'therapy', 'therapies', 
+                  'what we offer', 'offerings', 'clinical services', 'therapeutic services',
+                  'intervention', 'modalities', 'approaches we use'],
+        approach: ['approach', 'philosophy', 'methodology', 'model', 'framework',
+                  'treatment philosophy', 'clinical approach', 'therapeutic model',
+                  'our method', 'how we help', 'treatment model'],
+        admissions: ['admissions', 'contact', 'intake', 'enrollment', 'getting started',
+                    'admission process', 'how to apply', 'referral', 'next steps',
+                    'ready to begin', 'start your journey', 'enroll now'],
+        ages: ['ages', 'age range', 'serve', 'population', 'who we serve', 
+               'age groups', 'demographics', 'eligible', 'years old', 'adolescent',
+               'teen', 'young adult', 'adult'],
+        specialties: ['specialize', 'specialty', 'focus', 'expertise', 'areas of focus',
+                     'clinical specialties', 'we treat', 'conditions', 'issues',
+                     'specialization', 'expert in', 'experienced in'],
+        insurance: ['insurance', 'payment', 'cost', 'tuition', 'financial', 'covered',
+                   'accepted insurance', 'billing', 'fee', 'scholarship', 'financing',
+                   'payment options', 'afford'],
+        staff: ['staff', 'team', 'clinicians', 'therapists', 'counselors', 'leadership',
+               'our people', 'meet the team', 'professionals', 'credentials', 'licensed',
+               'faculty', 'clinical team'],
+        outcomes: ['outcomes', 'results', 'success', 'testimonial', 'review', 'alumni',
+                  'graduation', 'completion', 'effectiveness', 'evidence', 'research',
+                  'satisfaction', 'feedback'],
+        location: ['location', 'where', 'address', 'directions', 'campus', 'facility',
+                  'find us', 'visit', 'situated', 'located', 'based in', 'headquarters']
     };
     
     for (const [section, keywords] of Object.entries(sectionKeywords)) {
@@ -193,11 +215,59 @@ function extractPageInfo() {
         }
     }
     
-    // Detect therapies mentioned
-    const therapyKeywords = ['DBT', 'CBT', 'EMDR', 'trauma', 'experiential', 'equine', 'art therapy', 'music therapy', 'family therapy', 'group therapy', 'individual therapy'];
-    info.therapies = therapyKeywords.filter(therapy => 
-        new RegExp(`\\b${therapy}\\b`, 'i').test(allText)
-    );
+    // Comprehensive therapy detection with variations
+    const therapyPatterns = [
+        // Evidence-based therapies with variations
+        { pattern: /\b(DBT|Dialectical[\s-]?Behavior(al)?[\s-]?Therap(y|ies))\b/gi, name: 'DBT' },
+        { pattern: /\b(CBT|Cognitive[\s-]?Behavior(al)?[\s-]?Therap(y|ies))\b/gi, name: 'CBT' },
+        { pattern: /\b(EMDR|Eye[\s-]?Movement[\s-]?Desensitization)\b/gi, name: 'EMDR' },
+        { pattern: /\b(ACT|Acceptance[\s-]?and[\s-]?Commitment[\s-]?Therap(y|ies))\b/gi, name: 'ACT' },
+        { pattern: /\b(IFS|Internal[\s-]?Family[\s-]?Systems?)\b/gi, name: 'IFS' },
+        { pattern: /\bSomatic[\s-]?(Experiencing|Therap(y|ies))\b/gi, name: 'Somatic Therapy' },
+        { pattern: /\bBrainspotting\b/gi, name: 'Brainspotting' },
+        { pattern: /\b(NARM|NeuroAffective[\s-]?Relational[\s-]?Model)\b/gi, name: 'NARM' },
+        { pattern: /\bNeurofeedback\b/gi, name: 'Neurofeedback' },
+        { pattern: /\b(TF[\s-]?CBT|Trauma[\s-]?Focused[\s-]?CBT)\b/gi, name: 'TF-CBT' },
+        
+        // Creative and experiential therapies
+        { pattern: /\b(Art[\s-]?Therap(y|ies)|Expressive[\s-]?Arts?)\b/gi, name: 'Art Therapy' },
+        { pattern: /\b(Music[\s-]?Therap(y|ies))\b/gi, name: 'Music Therapy' },
+        { pattern: /\b(Dance[\s-]?Movement[\s-]?Therap(y|ies))\b/gi, name: 'Dance/Movement Therapy' },
+        { pattern: /\b(Drama[\s-]?Therap(y|ies)|Psychodrama)\b/gi, name: 'Drama Therapy' },
+        { pattern: /\b(Equine[\s-]?(Assisted|Therap(y|ies))|Horse[\s-]?Therap(y|ies))\b/gi, name: 'Equine Therapy' },
+        { pattern: /\b(Animal[\s-]?Assisted[\s-]?Therap(y|ies))\b/gi, name: 'Animal-Assisted Therapy' },
+        { pattern: /\b(Adventure[\s-]?Therap(y|ies)|Wilderness[\s-]?Therap(y|ies))\b/gi, name: 'Adventure/Wilderness Therapy' },
+        { pattern: /\b(Recreation(al)?[\s-]?Therap(y|ies))\b/gi, name: 'Recreational Therapy' },
+        { pattern: /\b(Experiential[\s-]?Therap(y|ies))\b/gi, name: 'Experiential Therapy' },
+        
+        // Trauma-specific
+        { pattern: /\b(Trauma[\s-]?(Informed|Based|Focused)[\s-]?(Care|Treatment|Therap(y|ies)))\b/gi, name: 'Trauma-Informed Care' },
+        { pattern: /\b(CPT|Cognitive[\s-]?Processing[\s-]?Therap(y|ies))\b/gi, name: 'CPT' },
+        { pattern: /\b(PE|Prolonged[\s-]?Exposure)\b/gi, name: 'Prolonged Exposure' },
+        
+        // Group and family
+        { pattern: /\b(Group[\s-]?(Therap(y|ies)|Counseling))\b/gi, name: 'Group Therapy' },
+        { pattern: /\b(Family[\s-]?(Therap(y|ies)|Counseling|Systems?))\b/gi, name: 'Family Therapy' },
+        { pattern: /\b(Multi[\s-]?family[\s-]?Therap(y|ies))\b/gi, name: 'Multi-Family Therapy' },
+        { pattern: /\b(Individual[\s-]?(Therap(y|ies)|Counseling))\b/gi, name: 'Individual Therapy' },
+        
+        // Mindfulness and meditation
+        { pattern: /\b(Mindfulness[\s-]?(Based|Therap(y|ies)))\b/gi, name: 'Mindfulness-Based Therapy' },
+        { pattern: /\b(MBSR|Mindfulness[\s-]?Based[\s-]?Stress[\s-]?Reduction)\b/gi, name: 'MBSR' },
+        { pattern: /\b(Meditation|Yoga[\s-]?Therap(y|ies))\b/gi, name: 'Meditation/Yoga' },
+        
+        // Behavioral
+        { pattern: /\b(ABA|Applied[\s-]?Behavior(al)?[\s-]?Analysis)\b/gi, name: 'ABA' },
+        { pattern: /\b(Behavior(al)?[\s-]?Modification)\b/gi, name: 'Behavioral Modification' }
+    ];
+    
+    const detectedTherapies = new Set();
+    therapyPatterns.forEach(({ pattern, name }) => {
+        if (pattern.test(allText)) {
+            detectedTherapies.add(name);
+        }
+    });
+    info.therapies = Array.from(detectedTherapies);
     
     // Enhanced extraction using smart patterns
     info.analysis = analyzeContentEnhanced(allText);
@@ -388,12 +458,34 @@ async function extractComprehensiveInfo() {
         }
     };
     
-    // Find navigation links to related pages
+    // Find navigation links to related pages - comprehensive selectors
     const navSelectors = [
+        // Standard navigation selectors
         'nav a', 'header a', '.menu a', '.nav a', '[class*="menu"] a',
-        'a[href*="about"]', 'a[href*="program"]', 'a[href*="contact"]',
-        'a[href*="admission"]', 'a[href*="staff"]', 'a[href*="therapy"]',
-        'a[href*="treatment"]', 'a[href*="approach"]', 'a[href*="services"]'
+        '.navigation a', '.navbar a', '.header-nav a', '.main-nav a',
+        '.site-nav a', '.primary-nav a', '.secondary-nav a',
+        
+        // Specific page selectors with variations
+        'a[href*="about"]', 'a[href*="who-we-are"]', 'a[href*="mission"]',
+        'a[href*="program"]', 'a[href*="treatment"]', 'a[href*="service"]',
+        'a[href*="therapy"]', 'a[href*="therapies"]', 'a[href*="approach"]',
+        'a[href*="contact"]', 'a[href*="location"]', 'a[href*="visit"]',
+        'a[href*="admission"]', 'a[href*="enroll"]', 'a[href*="apply"]',
+        'a[href*="staff"]', 'a[href*="team"]', 'a[href*="leadership"]',
+        'a[href*="clinical"]', 'a[href*="therapeutic"]', 'a[href*="counselor"]',
+        'a[href*="facility"]', 'a[href*="campus"]', 'a[href*="residential"]',
+        'a[href*="parent"]', 'a[href*="family"]', 'a[href*="faq"]',
+        'a[href*="insurance"]', 'a[href*="cost"]', 'a[href*="tuition"]',
+        'a[href*="testimonial"]', 'a[href*="review"]', 'a[href*="outcome"]',
+        'a[href*="daily"]', 'a[href*="typical-day"]', 'a[href*="activities"]',
+        
+        // Footer and sidebar links often contain important pages
+        'footer a', '.footer a', '[class*="footer"] a',
+        '.sidebar a', '[class*="sidebar"] a', 'aside a',
+        
+        // Sometimes links are in lists or specific sections
+        '.links a', '.quick-links a', '.site-links a',
+        'ul a', 'li a', '.list a'
     ];
     
     const links = new Set();
@@ -406,18 +498,58 @@ async function extractComprehensiveInfo() {
         });
     });
     
-    // Keywords to identify relevant pages
+    // Comprehensive keywords to identify relevant pages - with variations
     const relevantKeywords = [
-        'about', 'program', 'contact', 'admission', 'staff', 'team',
-        'therapy', 'treatment', 'approach', 'services', 'philosophy',
-        'clinical', 'academic', 'residential', 'facility', 'campus'
+        // About variations
+        'about', 'about-us', 'who-we-are', 'mission', 'story', 'history', 'overview',
+        // Program variations
+        'program', 'programmes', 'treatment', 'services', 'therapy', 'therapies', 
+        'approach', 'methodology', 'model', 'curriculum', 'academics',
+        // Contact variations
+        'contact', 'contact-us', 'reach', 'location', 'directions', 'visit',
+        // Admission variations
+        'admission', 'admissions', 'enroll', 'enrollment', 'apply', 'application', 
+        'intake', 'getting-started', 'start', 'begin',
+        // Staff variations
+        'staff', 'team', 'our-team', 'leadership', 'therapists', 'counselors', 
+        'professionals', 'faculty', 'clinicians',
+        // Clinical variations
+        'clinical', 'therapeutic', 'mental-health', 'behavioral', 'wellness',
+        // Facility variations
+        'facility', 'facilities', 'campus', 'residential', 'housing', 'dorms',
+        'environment', 'setting', 'amenities',
+        // Additional important pages
+        'philosophy', 'values', 'faq', 'parent', 'family', 'outcomes', 'success',
+        'testimonial', 'review', 'accreditation', 'insurance', 'cost', 'tuition',
+        'daily-life', 'typical-day', 'activities', 'recreation', 'discharge',
+        'aftercare', 'transition', 'alumni'
     ];
     
-    // Filter links to only relevant pages
-    const relevantLinks = Array.from(links).filter(link => {
+    // Score links based on relevance
+    const scoredLinks = Array.from(links).map(link => {
         const url = link.toLowerCase();
-        return relevantKeywords.some(keyword => url.includes(keyword));
-    }).slice(0, 10); // Limit to 10 pages to avoid overloading
+        let score = 0;
+        
+        // Higher score for more relevant keywords
+        relevantKeywords.forEach(keyword => {
+            if (url.includes(keyword)) {
+                score += keyword.length; // Longer keywords = more specific = higher score
+            }
+        });
+        
+        // Extra points for certain critical pages
+        if (url.includes('program') || url.includes('treatment')) score += 10;
+        if (url.includes('about')) score += 8;
+        if (url.includes('contact')) score += 5;
+        if (url.includes('admission')) score += 7;
+        if (url.includes('staff') || url.includes('team')) score += 6;
+        
+        return { url: link, score };
+    })
+    .filter(item => item.score > 0) // Only keep relevant links
+    .sort((a, b) => b.score - a.score) // Sort by relevance
+    .map(item => item.url)
+    .slice(0, 25); // Increased limit to 25 pages for comprehensive extraction
     
     console.log(`Found ${relevantLinks.length} relevant pages to extract from`);
     
@@ -472,8 +604,26 @@ async function extractComprehensiveInfo() {
         }
     }
     
-    // Extract from each relevant page
+    // Extract from each relevant page with progress tracking
+    let processedCount = 0;
     for (const url of relevantLinks) {
+        processedCount++;
+        console.log(`Extracting from page ${processedCount}/${relevantLinks.length}: ${url}`);
+        
+        // Send progress update to popup if it's listening
+        try {
+            chrome.runtime.sendMessage({ 
+                action: 'extractionProgress', 
+                progress: {
+                    current: processedCount,
+                    total: relevantLinks.length,
+                    url: url
+                }
+            });
+        } catch (e) {
+            // Popup might not be listening
+        }
+        
         const pageData = await extractFromUrl(url);
         if (pageData) {
             const pageName = url.split('/').pop() || 'page';
@@ -540,32 +690,70 @@ function processPageData(pageData, compiledInfo) {
         }
     });
     
-    // Extract therapies and modalities
-    const therapyTypes = [
-        'CBT', 'DBT', 'EMDR', 'ACT', 'NARM', 'IFS', 'Somatic Therapy',
-        'Trauma-Focused', 'Equine Therapy', 'Art Therapy', 'Music Therapy',
-        'Adventure Therapy', 'Wilderness Therapy', 'Family Therapy',
-        'Group Therapy', 'Individual Therapy', 'Neurofeedback', 'QEEG'
+    // Extract therapies and modalities with comprehensive patterns
+    const therapyPatterns = [
+        // Core evidence-based therapies
+        { pattern: /\b(?:CBT|Cognitive[\s-]?Behavioral?[\s-]?Therap(?:y|ies))\b/gi, name: 'CBT' },
+        { pattern: /\b(?:DBT|Dialectical[\s-]?Behavior(?:al)?[\s-]?Therap(?:y|ies))\b/gi, name: 'DBT' },
+        { pattern: /\b(?:EMDR|Eye[\s-]?Movement[\s-]?Desensitization(?:[\s-]?and[\s-]?Reprocessing)?)\b/gi, name: 'EMDR' },
+        { pattern: /\b(?:ACT|Acceptance[\s-]?and[\s-]?Commitment[\s-]?Therap(?:y|ies))\b/gi, name: 'ACT' },
+        { pattern: /\b(?:IFS|Internal[\s-]?Family[\s-]?Systems?)\b/gi, name: 'IFS' },
+        { pattern: /\b(?:NARM|NeuroAffective[\s-]?Relational[\s-]?Model)\b/gi, name: 'NARM' },
+        { pattern: /\bSomatic[\s-]?(?:Experiencing|Therap(?:y|ies)|Approach)\b/gi, name: 'Somatic Therapy' },
+        
+        // Trauma therapies
+        { pattern: /\b(?:TF[\s-]?CBT|Trauma[\s-]?Focused[\s-]?CBT|Trauma[\s-]?Focused[\s-]?Cognitive[\s-]?Behavioral)\b/gi, name: 'TF-CBT' },
+        { pattern: /\b(?:CPT|Cognitive[\s-]?Processing[\s-]?Therap(?:y|ies))\b/gi, name: 'CPT' },
+        { pattern: /\bTrauma[\s-]?(?:Informed|Based|Focused|Sensitive)[\s-]?(?:Care|Treatment|Approach|Therap(?:y|ies))\b/gi, name: 'Trauma-Informed Care' },
+        
+        // Experiential therapies
+        { pattern: /\b(?:Equine|Horse)[\s-]?(?:Assisted|Facilitated)?[\s-]?(?:Therap(?:y|ies)|Psychotherapy|Learning)\b/gi, name: 'Equine Therapy' },
+        { pattern: /\b(?:Art|Creative[\s-]?Arts?|Expressive[\s-]?Arts?)[\s-]?Therap(?:y|ies)\b/gi, name: 'Art Therapy' },
+        { pattern: /\bMusic[\s-]?Therap(?:y|ies)\b/gi, name: 'Music Therapy' },
+        { pattern: /\b(?:Adventure|Wilderness|Outdoor)[\s-]?(?:Based)?[\s-]?Therap(?:y|ies)\b/gi, name: 'Adventure/Wilderness Therapy' },
+        { pattern: /\b(?:Recreation(?:al)?|Therapeutic[\s-]?Recreation)[\s-]?Therap(?:y|ies)\b/gi, name: 'Recreational Therapy' },
+        { pattern: /\b(?:Drama|Theater|Psychodrama)[\s-]?Therap(?:y|ies)\b/gi, name: 'Drama Therapy' },
+        { pattern: /\b(?:Dance|Movement)[\s-]?Therap(?:y|ies)\b/gi, name: 'Dance/Movement Therapy' },
+        
+        // Neurofeedback and brain-based
+        { pattern: /\b(?:Neurofeedback|Neurotherapy|EEG[\s-]?Biofeedback)\b/gi, name: 'Neurofeedback' },
+        { pattern: /\b(?:QEEG|Quantitative[\s-]?EEG|Brain[\s-]?Mapping)\b/gi, name: 'QEEG/Brain Mapping' },
+        { pattern: /\bBrainspotting\b/gi, name: 'Brainspotting' },
+        
+        // Group and family
+        { pattern: /\b(?:Group|Peer[\s-]?Group)[\s-]?(?:Therap(?:y|ies)|Counseling|Sessions?)\b/gi, name: 'Group Therapy' },
+        { pattern: /\b(?:Family|Systemic[\s-]?Family|Structural[\s-]?Family)[\s-]?(?:Therap(?:y|ies)|Counseling)\b/gi, name: 'Family Therapy' },
+        { pattern: /\b(?:Individual|One[\s-]?on[\s-]?One|1[\s-]?on[\s-]?1)[\s-]?(?:Therap(?:y|ies)|Counseling|Sessions?)\b/gi, name: 'Individual Therapy' },
+        
+        // Other modalities
+        { pattern: /\b(?:Mindfulness|MBSR|Meditation|Yoga)[\s-]?(?:Based)?[\s-]?(?:Therap(?:y|ies)|Practice|Training)\b/gi, name: 'Mindfulness/Meditation' },
+        { pattern: /\b(?:MI|Motivational[\s-]?Interviewing)\b/gi, name: 'Motivational Interviewing' },
+        { pattern: /\b(?:Solution[\s-]?Focused|SFBT)[\s-]?(?:Brief)?[\s-]?Therap(?:y|ies)\b/gi, name: 'Solution-Focused Therapy' },
+        { pattern: /\b(?:Narrative)[\s-]?Therap(?:y|ies)\b/gi, name: 'Narrative Therapy' }
     ];
     
-    therapyTypes.forEach(therapy => {
-        const regex = new RegExp(`\\b${therapy}\\b`, 'gi');
-        if (regex.test(allText)) {
-            compiledInfo.therapies.add(therapy);
+    therapyPatterns.forEach(({ pattern, name }) => {
+        if (pattern.test(allText)) {
+            compiledInfo.therapies.add(name);
         }
     });
     
-    // Extract specializations
+    // Extract specializations with comprehensive variations
     const specializations = {
-        'trauma': /\b(?:trauma|PTSD|traumatic)\b/gi,
-        'anxiety': /\b(?:anxiety|anxious)\b/gi,
-        'depression': /\b(?:depression|depressive)\b/gi,
-        'ADHD': /\b(?:ADHD|ADD|attention)\b/gi,
-        'autism/ASD': /\b(?:autism|ASD|spectrum)\b/gi,
-        'substance abuse': /\b(?:substance|addiction|drug|alcohol)\b/gi,
-        'eating disorders': /\b(?:eating disorder|anorexia|bulimia)\b/gi,
-        'adoption/attachment': /\b(?:adoption|attachment|RAD)\b/gi,
-        'LGBTQ+': /\b(?:LGBTQ|gender|transgender)\b/gi
+        'trauma': /\b(?:trauma(?:tic)?|PTSD|post[\s-]?traumatic|complex[\s-]?trauma|C[\s-]?PTSD|developmental[\s-]?trauma)\b/gi,
+        'anxiety': /\b(?:anxiety|anxious|panic|phobia|OCD|obsessive[\s-]?compulsive|social[\s-]?anxiety|generalized[\s-]?anxiety|GAD)\b/gi,
+        'depression': /\b(?:depression|depressive|mood[\s-]?disorder|bipolar|dysthymia|major[\s-]?depressive)\b/gi,
+        'ADHD': /\b(?:ADHD|ADD|attention[\s-]?deficit|hyperactivity|executive[\s-]?function(?:ing)?)\b/gi,
+        'autism/ASD': /\b(?:autism|ASD|spectrum|asperger|neurodivers(?:e|ity)|on[\s-]?the[\s-]?spectrum)\b/gi,
+        'substance abuse': /\b(?:substance[\s-]?(?:use|abuse)|addiction|drug|alcohol|chemical[\s-]?dependency|dual[\s-]?diagnosis|recovery)\b/gi,
+        'eating disorders': /\b(?:eating[\s-]?disorder|anorexia|bulimia|binge[\s-]?eating|ARFID|body[\s-]?image|disordered[\s-]?eating)\b/gi,
+        'adoption/attachment': /\b(?:adoption|adoptive|attachment|RAD|reactive[\s-]?attachment|bonding|foster[\s-]?care)\b/gi,
+        'LGBTQ+': /\b(?:LGBTQ(?:\+)?|lesbian|gay|bisexual|transgender|trans|gender[\s-]?(?:identity|dysphoria|affirming)|queer|non[\s-]?binary|pronouns)\b/gi,
+        'self-harm': /\b(?:self[\s-]?harm|self[\s-]?injury|cutting|SI|NSSI|suicidal|suicide)\b/gi,
+        'behavioral issues': /\b(?:behavioral|behavior[\s-]?(?:issues|problems)|oppositional|defiant|ODD|conduct[\s-]?disorder|anger)\b/gi,
+        'learning differences': /\b(?:learning[\s-]?(?:difference|disability|disorder)|dyslexia|dysgraphia|dyscalculia|processing)\b/gi,
+        'technology/gaming': /\b(?:technology[\s-]?addiction|gaming[\s-]?(?:addiction|disorder)|screen[\s-]?time|internet[\s-]?addiction|digital[\s-]?dependency)\b/gi,
+        'family conflict': /\b(?:family[\s-]?(?:conflict|issues|dynamics|therapy)|parent[\s-]?child|relationship[\s-]?issues)\b/gi
     };
     
     Object.entries(specializations).forEach(([spec, pattern]) => {

@@ -6,6 +6,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewDiv = document.getElementById('preview');
     const copySection = document.getElementById('copySection');
     
+    // Listen for progress updates
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message.action === 'extractionProgress') {
+            const progressSpan = document.getElementById('progress');
+            if (progressSpan) {
+                progressSpan.textContent = `(${message.progress.current}/${message.progress.total} pages)`;
+            }
+        }
+    });
+    
     // Configuration - UPDATE THIS PATH TO YOUR DOC CREATOR HTML FILE
     // For local file, use: file:///C:/path/to/your/doc-creator.html (Windows)
     // Or: file:///Users/username/path/to/doc-creator.html (Mac)
@@ -21,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Extract information from current page
     extractBtn.addEventListener('click', async function() {
         extractBtn.disabled = true;
-        extractBtn.innerHTML = '<span class="spinner"></span> Extracting...';
+            extractBtn.innerHTML = 'Extracting... <span id="progress"></span>';
         statusDiv.style.display = 'none';
         copySection.style.display = 'none';
         
