@@ -3,45 +3,6 @@
 
 console.log('Family First Program Extractor content script loaded');
 
-// Load enhanced extraction patterns
-const TREATMENT_PATTERNS = {
-    // Age patterns
-    ages: {
-        patterns: [
-            /(\d+)\s*[-–]\s*(\d+)\s*(?:years?|yrs?)(?:\s*old)?/gi,
-            /ages?\s*(\d+)\s*(?:to|through|[-–])\s*(\d+)/gi,
-            /(?:adolescents?|teens?|youth)\s*(?:ages?\s*)?(\d+)\s*[-–]\s*(\d+)/gi,
-            /(?:serve|serving|admits?|accept)\s*(?:ages?\s*)?(\d+)\s*[-–]\s*(\d+)/gi
-        ]
-    },
-    
-    // Treatment modalities
-    modalities: {
-        patterns: [
-            /\b(CBT|Cognitive[\s-]?Behavioral[\s-]?Therapy)\b/gi,
-            /\b(DBT|Dialectical[\s-]?Behavior[\s-]?Therapy)\b/gi,
-            /\b(EMDR|Eye[\s-]?Movement[\s-]?Desensitization)\b/gi,
-            /\b(MI|Motivational[\s-]?Interviewing)\b/gi,
-            /\b(ACT|Acceptance[\s-]?Commitment[\s-]?Therapy)\b/gi,
-            /\b(TF[\s-]?CBT|Trauma[\s-]?Focused[\s-]?CBT)\b/gi
-        ],
-        keywords: [
-            'individual therapy', 'group therapy', 'family therapy',
-            'art therapy', 'music therapy', 'equine therapy', 
-            'experiential therapy', 'adventure therapy', 'wilderness therapy',
-            'play therapy', 'sand tray therapy', 'drama therapy'
-        ]
-    },
-    
-    // Level of care indicators
-    levelOfCare: {
-        residential: ['residential', '24/7', '24-hour', 'inpatient', 'RTC'],
-        php: ['PHP', 'partial hospitalization', 'day treatment', 'day program'],
-        iop: ['IOP', 'intensive outpatient', 'after school', 'evening program'],
-        outpatient: ['outpatient', 'weekly sessions', 'counseling', 'therapy services']
-    }
-};
-
 // Listen for messages from the popup or background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'extractInfo') {
@@ -151,81 +112,7 @@ function extractPageInfo() {
         new RegExp(`\\b${therapy}\\b`, 'i').test(allText)
     );
     
-    // Enhanced extraction using smart patterns
-    info.analysis = analyzeContentEnhanced(allText);
-    
     return info;
-}
-
-// Enhanced content analysis function
-function analyzeContentEnhanced(text) {
-    const analysis = {
-        ageRange: null,
-        modalities: [],
-        specialties: [],
-        levelOfCare: [],
-        insurances: []
-    };
-    
-    // Extract age ranges
-    for (const pattern of TREATMENT_PATTERNS.ages.patterns) {
-        const matches = text.matchAll(pattern);
-        for (const match of matches) {
-            if (match[1] && match[2]) {
-                const min = parseInt(match[1]);
-                const max = parseInt(match[2]);
-                if (min >= 5 && min < max && max <= 25) {
-                    analysis.ageRange = `${min}-${max} years`;
-                    break;
-                }
-            }
-        }
-        if (analysis.ageRange) break;
-    }
-    
-    // Extract modalities
-    for (const pattern of TREATMENT_PATTERNS.modalities.patterns) {
-        const matches = text.match(pattern);
-        if (matches) {
-            analysis.modalities.push(...matches);
-        }
-    }
-    
-    // Extract modality keywords
-    const lowerText = text.toLowerCase();
-    TREATMENT_PATTERNS.modalities.keywords.forEach(keyword => {
-        if (lowerText.includes(keyword.toLowerCase())) {
-            analysis.modalities.push(keyword);
-        }
-    });
-    
-    // Level of care detection
-    Object.entries(TREATMENT_PATTERNS.levelOfCare).forEach(([level, keywords]) => {
-        keywords.forEach(keyword => {
-            if (lowerText.includes(keyword.toLowerCase())) {
-                analysis.levelOfCare.push(level);
-            }
-        });
-    });
-    
-    // Insurance patterns
-    const insurancePattern = /(?:accept|take|work with|insurance|covered by|participat\w+)\s*(?:with|by|in)?\s*([^.;]+(?:insurance|health|medicaid|medicare|tricare|aetna|cigna|blue cross|united|anthem|humana)[^.;]*)/gi;
-    const insuranceMatches = text.matchAll(insurancePattern);
-    for (const match of insuranceMatches) {
-        if (match[1]) {
-            const insurance = match[1].trim();
-            if (insurance.length < 100) {
-                analysis.insurances.push(insurance);
-            }
-        }
-    }
-    
-    // Deduplicate arrays
-    analysis.modalities = [...new Set(analysis.modalities)];
-    analysis.levelOfCare = [...new Set(analysis.levelOfCare)];
-    analysis.insurances = [...new Set(analysis.insurances)];
-    
-    return analysis;
 }
 
 // Optional: Add a floating button to pages for quick extraction

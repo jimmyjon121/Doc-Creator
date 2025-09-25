@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            width: 400px;
+            min-height: 500px;
+            padding: 0;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+        }
+        
+        .header {
+            background: linear-gradient(to right, #0066cc, #0099cc);
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .header p {
+            margin: 5px 0 0 0;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 15px;
+        }
+        
+        .status {
+            background: #e7f3ff;
+            border: 1px solid #0099cc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .status.error {
+            background: #ffebee;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .extract-btn {
+            background: #0099cc;
+            color: white;
+        }
+        
+        .extract-btn:hover {
+            background: #0077aa;
+        }
+        
+        .extract-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .open-tool-btn {
+            background: #28a745;
+            color: white;
+        }
+        
+        .open-tool-btn:hover {
+            background: #218838;
+        }
+        
+        .preview {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: monospace;
+            display: none;
+        }
+        
+        .info-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        
+        .info-section h3 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            color: #856404;
+        }
+        
+        .info-section ul {
+            margin: 5px 0 0 20px;
+            padding: 0;
+        }
+        
+        .info-section li {
+            margin: 3px 0;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #0099cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .copy-section {
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .copy-btn {
+            background: #6c757d;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .copy-btn:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Family First Program Extractor</h1>
+        <p>Extract program info from any website</p>
+    </div>
+    
+    <div class="content">
+        <div class="info-section">
+            <h3>📋 How to use:</h3>
+            <ul>
+                <li>Navigate to a treatment program's website</li>
+                <li>Click "Extract Page Info" to grab all content</li>
+                <li>Review the extracted information</li>
+                <li>Click "Copy to Tool" to paste into Doc Creator</li>
+            </ul>
+        </div>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="button-group">
+            <button id="extractBtn" class="extract-btn">
+                Extract Page Info
+            </button>
+            <button id="openToolBtn" class="open-tool-btn">
+                Open Doc Creator
+            </button>
+        </div>
+        
+        <div id="copySection" class="copy-section">
+            <div class="preview" id="preview"></div>
+            <button id="copyBtn" class="copy-btn">Copy to Clipboard</button>
+        </div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>
