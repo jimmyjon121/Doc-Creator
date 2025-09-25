@@ -9,9 +9,63 @@ document.addEventListener('DOMContentLoaded', function() {
     // Listen for progress updates
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (message.action === 'extractionProgress') {
-            const progressSpan = document.getElementById('progress');
-            if (progressSpan) {
-                progressSpan.textContent = `(${message.progress.current}/${message.progress.total} pages)`;
+            // Update progress bar
+            const progressBar = document.getElementById('progressBar');
+            const progressDetails = document.getElementById('progressDetails');
+            const liveStatus = document.getElementById('liveStatus');
+            const statusMessages = document.getElementById('statusMessages');
+            
+            if (progressBar && message.progress) {
+                progressBar.style.width = message.progress + '%';
+            }
+            
+            // Update main progress text
+            if (message.details && message.details.current && message.details.total) {
+                const progressSpan = document.getElementById('progress');
+                if (progressSpan) {
+                    progressSpan.textContent = `(${message.details.current}/${message.details.total} pages)`;
+                }
+                
+                if (progressDetails) {
+                    progressDetails.textContent = `Analyzing page ${message.details.current} of ${message.details.total}: ${message.details.pageName || ''}`;
+                }
+            } else if (progressDetails && message.message) {
+                progressDetails.textContent = message.message;
+            }
+            
+            // Show live status updates
+            if (liveStatus && statusMessages && message.message) {
+                liveStatus.style.display = 'block';
+                
+                // Add timestamp
+                const timestamp = new Date().toLocaleTimeString();
+                const statusLine = document.createElement('div');
+                statusLine.style.marginBottom = '2px';
+                statusLine.innerHTML = `<span style="color: #6b7280; font-size: 10px;">${timestamp}</span> ${message.message}`;
+                
+                statusMessages.appendChild(statusLine);
+                
+                // Auto-scroll to bottom
+                liveStatus.scrollTop = liveStatus.scrollHeight;
+                
+                // Keep only last 10 messages
+                while (statusMessages.children.length > 10) {
+                    statusMessages.removeChild(statusMessages.firstChild);
+                }
+            }
+            
+            // Show final stats if extraction is complete
+            if (message.progress === 100 && message.details) {
+                const stats = message.details;
+                if (progressDetails && stats.pagesAnalyzed) {
+                    progressDetails.innerHTML = `
+                        <strong>✅ Extraction Complete!</strong><br>
+                        📄 Pages analyzed: ${stats.pagesAnalyzed}<br>
+                        💊 Therapies found: ${stats.therapiesFound}<br>
+                        🎯 Specializations: ${stats.specializationsFound}<br>
+                        📞 Contact info: ${stats.contactsFound} items
+                    `;
+                }
             }
         }
     });
@@ -38,6 +92,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show progress indicator
         const progressDiv = document.getElementById('extractionProgress');
         const progressDetails = document.getElementById('progressDetails');
+        const liveStatus = document.getElementById('liveStatus');
+        const statusMessages = document.getElementById('statusMessages');
+        
+        if (progressDiv) {
+            progressDiv.style.display = 'block';
+            document.getElementById('progressBar').style.width = '0%';
+            
+            // Clear previous status messages
+            if (statusMessages) {
+                statusMessages.innerHTML = '';
+            }
+        }
         const progressBar = document.getElementById('progressBar');
         progressDiv.style.display = 'block';
         progressDetails.textContent = 'Analyzing current page...';

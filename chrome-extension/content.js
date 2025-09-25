@@ -52,6 +52,21 @@ const TREATMENT_PATTERNS = {
     }
 };
 
+// Helper function to send progress updates
+function sendProgressUpdate(message, progress, details = {}) {
+    try {
+        chrome.runtime.sendMessage({
+            action: 'extractionProgress',
+            message: message,
+            progress: progress,
+            details: details
+        });
+    } catch (e) {
+        // Popup might not be listening
+        console.log('Progress update:', message, progress);
+    }
+}
+
 // Listen for messages from the popup or background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     console.log('Content script received message:', request.action);
@@ -447,9 +462,11 @@ function analyzeContentEnhanced(text) {
 async function extractComprehensiveInfo() {
     try {
         console.log('Starting comprehensive multi-page extraction...');
+        sendProgressUpdate('🚀 Starting comprehensive extraction...', 0);
         
         // Check if page is ready
         if (!document.body || document.readyState === 'loading') {
+            sendProgressUpdate('⏳ Waiting for page to load...', 0);
             await new Promise(resolve => {
                 if (document.readyState === 'loading') {
                     document.addEventListener('DOMContentLoaded', resolve);
@@ -459,10 +476,13 @@ async function extractComprehensiveInfo() {
             });
         }
         
+        sendProgressUpdate('📄 Analyzing current page...', 5);
         // First, extract from current page
         const currentPageData = extractPageInfo();
         const baseUrl = window.location.origin;
         const currentPath = window.location.pathname;
+        
+        sendProgressUpdate(`✅ Extracted info from: ${document.title}`, 10);
     
     // Initialize comprehensive data structure
     const comprehensiveData = {
@@ -521,6 +541,7 @@ async function extractComprehensiveInfo() {
         'ul a', 'li a', '.list a'
     ];
     
+    sendProgressUpdate('🔎 Discovering related pages...', 15);
     const links = new Set();
     navSelectors.forEach(selector => {
         document.querySelectorAll(selector).forEach(link => {
@@ -530,6 +551,8 @@ async function extractComprehensiveInfo() {
             }
         });
     });
+    
+    sendProgressUpdate(`📊 Found ${links.size} potential pages to analyze`, 20);
     
     // Comprehensive keywords to identify relevant pages - with variations
     const relevantKeywords = [
@@ -585,6 +608,7 @@ async function extractComprehensiveInfo() {
     .slice(0, 25); // Increased limit to 25 pages for comprehensive extraction
     
     console.log(`Found ${relevantLinks.length} relevant pages to extract from`);
+    sendProgressUpdate(`🎯 Prioritized ${relevantLinks.length} most relevant pages`, 25);
     
     // Function to extract data from a page via fetch
     async function extractFromUrl(url) {
@@ -637,41 +661,81 @@ async function extractComprehensiveInfo() {
         }
     }
     
-    // Extract from each relevant page with progress tracking
+    // Extract from each relevant page with detailed progress tracking
     let processedCount = 0;
     for (const url of relevantLinks) {
         processedCount++;
-        console.log(`Extracting from page ${processedCount}/${relevantLinks.length}: ${url}`);
+        const progressPercent = 25 + (processedCount / relevantLinks.length) * 65; // 25-90%
         
-        // Send progress update to popup if it's listening
-        try {
-            chrome.runtime.sendMessage({ 
-                action: 'extractionProgress', 
-                progress: {
-                    current: processedCount,
-                    total: relevantLinks.length,
-                    url: url
-                }
-            });
-        } catch (e) {
-            // Popup might not be listening
-        }
+        // Get page name for display
+        const urlParts = url.split('/');
+        const pageName = urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2] || 'homepage';
+        
+        sendProgressUpdate(
+            `🌐 Extracting from: ${pageName}`,
+            progressPercent,
+            {
+                current: processedCount,
+                total: relevantLinks.length,
+                url: url,
+                pageName: pageName
+            }
+        );
         
         const pageData = await extractFromUrl(url);
         if (pageData) {
-            const pageName = url.split('/').pop() || 'page';
             comprehensiveData.pages[pageName] = pageData;
             
             // Process and compile information
             processPageData(pageData, comprehensiveData.compiledInfo);
+            
+            // Report what was found
+            const foundItems = [];
+            if (pageData.therapies && pageData.therapies.length > 0) {
+                foundItems.push(`${pageData.therapies.length} therapies`);
+            }
+            if (pageData.phones && pageData.phones.length > 0) {
+                foundItems.push(`${pageData.phones.length} phone numbers`);
+            }
+            if (pageData.emails && pageData.emails.length > 0) {
+                foundItems.push(`${pageData.emails.length} emails`);
+            }
+            
+            if (foundItems.length > 0) {
+                sendProgressUpdate(
+                    `✅ Found: ${foundItems.join(', ')} on ${pageName}`,
+                    progressPercent
+                );
+            }
+        } else {
+            sendProgressUpdate(
+                `⚠️ Couldn't extract from: ${pageName}`,
+                progressPercent
+            );
         }
     }
     
     // Process current page data as well
+    sendProgressUpdate('📋 Processing current page data...', 90);
     processPageData(currentPageData, comprehensiveData.compiledInfo);
     
     // Compile final structured data
+    sendProgressUpdate('🎯 Compiling all extracted information...', 95);
     comprehensiveData.structured = compileStructuredData(comprehensiveData.compiledInfo);
+    
+    // Report final stats
+    const stats = {
+        pagesAnalyzed: Object.keys(comprehensiveData.pages).length,
+        therapiesFound: comprehensiveData.compiledInfo.therapies.size,
+        specializationsFound: comprehensiveData.compiledInfo.specializations.size,
+        contactsFound: comprehensiveData.compiledInfo.phones.size + comprehensiveData.compiledInfo.emails.size
+    };
+    
+    sendProgressUpdate(
+        `✅ Extraction complete! Analyzed ${stats.pagesAnalyzed} pages`,
+        100,
+        stats
+    );
     
     return comprehensiveData;
     
