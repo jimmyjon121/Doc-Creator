@@ -557,9 +557,7 @@ function formatComprehensiveInfo(info, url) {
         }
     });
     
-    formatted += `\n---\n`;
-    formatted += `*Comprehensive extraction completed from ${pageCount} pages. `;
-    formatted += `This profile includes information from: ${Object.keys(info.pages).join(', ')}*\n`;
+    // Remove the technical extraction summary - not appropriate for parent-facing documents
     
-    return formatted;
+    return formatted.trim();
 }

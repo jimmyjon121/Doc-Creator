@@ -765,13 +765,69 @@ function processPageData(pageData, compiledInfo) {
         ...pageData.listItems
     ].join(' ');
     
-    // Extract program name (usually in h1 or title)
-    if (!compiledInfo.programName && pageData.headings.length > 0) {
-        const potentialNames = pageData.headings
-            .filter(h => h.level === 'H1')
-            .map(h => h.text);
-        if (potentialNames.length > 0) {
-            compiledInfo.programName = potentialNames[0];
+    // Extract program name with multiple strategies
+    if (!compiledInfo.programName) {
+        // Strategy 1: Look for H1 headings
+        if (pageData.headings.length > 0) {
+            const h1Names = pageData.headings
+                .filter(h => h.level === 'H1')
+                .map(h => h.text)
+                .filter(text => !text.toLowerCase().includes('cookie') && 
+                              !text.toLowerCase().includes('privacy') &&
+                              text.length < 100);
+            if (h1Names.length > 0) {
+                compiledInfo.programName = h1Names[0];
+            }
+        }
+        
+        // Strategy 2: Extract from page title
+        if (!compiledInfo.programName && pageData.title) {
+            // Common patterns in titles: "Key Healthcare - Treatment Center" or "Treatment at Key Healthcare"
+            const titleParts = pageData.title.split(/[-|]/);
+            if (titleParts.length > 0) {
+                const cleanTitle = titleParts[0].trim();
+                // Filter out common generic terms
+                if (!cleanTitle.toLowerCase().includes('home') && 
+                    !cleanTitle.toLowerCase().includes('welcome') &&
+                    cleanTitle.length > 3 && cleanTitle.length < 60) {
+                    compiledInfo.programName = cleanTitle;
+                }
+            }
+        }
+        
+        // Strategy 3: Look for facility/center/program name patterns in text
+        if (!compiledInfo.programName && fullText) {
+            const namePatterns = [
+                /(?:welcome to|at|facility:|center:)\s*([A-Z][A-Za-z\s&'-]+(?:Treatment|Center|Healthcare|Recovery|Services|Academy))/g,
+                /([A-Z][A-Za-z\s&'-]+(?:Treatment|Center|Healthcare|Recovery|Services|Academy))\s*(?:is|provides|offers)/g,
+                /^([A-Z][A-Za-z\s&'-]+(?:Treatment|Center|Healthcare|Recovery|Services|Academy))$/gm
+            ];
+            
+            for (const pattern of namePatterns) {
+                const matches = fullText.match(pattern);
+                if (matches && matches.length > 0) {
+                    // Extract the captured group
+                    const match = matches[0].match(/([A-Z][A-Za-z\s&'-]+(?:Treatment|Center|Healthcare|Recovery|Services|Academy))/);
+                    if (match) {
+                        compiledInfo.programName = match[1].trim();
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Strategy 4: Domain name fallback
+        if (!compiledInfo.programName) {
+            try {
+                const url = new URL(pageData.url || window.location.href);
+                const domain = url.hostname.replace('www.', '').split('.')[0];
+                // Capitalize domain name nicely
+                compiledInfo.programName = domain.split('-').map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1)
+                ).join(' ');
+            } catch (e) {
+                console.error('Error extracting from domain:', e);
+            }
         }
     }
     
