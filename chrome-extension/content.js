@@ -552,17 +552,34 @@ async function extractComprehensiveInfo() {
     ];
     
     sendProgressUpdate('🔎 Discovering related pages...', 15);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     const links = new Set();
+    let linkCount = 0;
     navSelectors.forEach(selector => {
-        document.querySelectorAll(selector).forEach(link => {
-            const href = link.href;
-            if (href && href.startsWith(baseUrl) && href !== window.location.href) {
-                links.add(href);
-            }
-        });
+        try {
+            document.querySelectorAll(selector).forEach(link => {
+                const href = link.href;
+                if (href && href.startsWith(baseUrl) && href !== window.location.href) {
+                    links.add(href);
+                    linkCount++;
+                }
+            });
+        } catch (e) {
+            console.log('Selector error:', selector, e);
+        }
     });
     
+    // Add some common page patterns if we didn't find many links
+    const commonPaths = ['/about', '/programs', '/contact', '/admissions', '/staff', '/approach'];
+    commonPaths.forEach(path => {
+        const potentialUrl = baseUrl + path;
+        links.add(potentialUrl);
+    });
+    
+    console.log('All discovered links:', Array.from(links));
     sendProgressUpdate(`📊 Found ${links.size} potential pages to analyze`, 20);
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     // Comprehensive keywords to identify relevant pages - with variations
     const relevantKeywords = [
@@ -617,13 +634,28 @@ async function extractComprehensiveInfo() {
     .map(item => item.url)
     .slice(0, 25); // Increased limit to 25 pages for comprehensive extraction
     
-    console.log(`Found ${relevantLinks.length} relevant pages to extract from`);
-    sendProgressUpdate(`🎯 Prioritized ${relevantLinks.length} most relevant pages`, 25);
+    // Ensure we have at least some pages to extract
+    if (relevantLinks.length === 0) {
+        console.log('No relevant links found, adding defaults');
+        const defaultPaths = ['/about', '/programs', '/contact', '/admissions'];
+        relevantLinks.push(...defaultPaths.map(path => baseUrl + path));
+    }
+    
+    console.log(`Found ${relevantLinks.length} relevant pages to extract from:`, relevantLinks);
+    sendProgressUpdate(`🎯 Will analyze ${relevantLinks.length} pages for comprehensive extraction`, 25);
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     // Function to extract data from a page via fetch
     async function extractFromUrl(url) {
         try {
+            console.log(`Fetching: ${url}`);
             const response = await fetch(url);
+            
+            if (!response.ok) {
+                console.log(`Failed to fetch ${url}: ${response.status}`);
+                return null;
+            }
+            
             const html = await response.text();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
@@ -673,16 +705,21 @@ async function extractComprehensiveInfo() {
     
     // Extract from each relevant page with detailed progress tracking
     let processedCount = 0;
+    
+    // Always show we're doing multi-page extraction
+    sendProgressUpdate(`🚀 Starting multi-page extraction of ${relevantLinks.length} pages...`, 30);
+    await new Promise(resolve => setTimeout(resolve, 700));
+    
     for (const url of relevantLinks) {
         processedCount++;
-        const progressPercent = 25 + (processedCount / relevantLinks.length) * 65; // 25-90%
+        const progressPercent = 30 + (processedCount / relevantLinks.length) * 60; // 30-90%
         
         // Get page name for display
         const urlParts = url.split('/');
         const pageName = urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2] || 'homepage';
         
         sendProgressUpdate(
-            `🌐 Extracting from: ${pageName}`,
+            `🌐 Extracting page ${processedCount}/${relevantLinks.length}: ${pageName}`,
             progressPercent,
             {
                 current: processedCount,
@@ -691,6 +728,9 @@ async function extractComprehensiveInfo() {
                 pageName: pageName
             }
         );
+        
+        // Add delay to make progress visible
+        await new Promise(resolve => setTimeout(resolve, 800));
         
         const pageData = await extractFromUrl(url);
         if (pageData) {
