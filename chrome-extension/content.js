@@ -482,11 +482,16 @@ async function extractComprehensiveInfo() {
         }
         
         sendProgressUpdate('📄 Analyzing current page...', 5);
+        
+        // Small delay to ensure progress is visible
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
         // First, extract from current page
         const currentPageData = extractPageInfo();
         const baseUrl = window.location.origin;
         const currentPath = window.location.pathname;
         
+        await new Promise(resolve => setTimeout(resolve, 200));
         sendProgressUpdate(`✅ Extracted info from: ${document.title}`, 10);
     
     // Initialize comprehensive data structure

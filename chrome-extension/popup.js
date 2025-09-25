@@ -144,14 +144,28 @@ document.addEventListener('DOMContentLoaded', function() {
                         showStatus('Error: ' + errorMsg, 'error');
                     }
                     console.error('Chrome runtime error:', chrome.runtime.lastError);
-                    progressDiv.style.display = 'none';
+                    // Don't hide progress immediately - show error state
+                    if (progressDetails) {
+                        progressDetails.textContent = '❌ ' + errorMsg;
+                        progressDetails.style.color = '#dc2626';
+                    }
+                    setTimeout(() => {
+                        progressDiv.style.display = 'none';
+                    }, 3000);
                     extractBtn.disabled = false;
                     extractBtn.textContent = 'Extract Page Info';
                 } else if (response && response.error) {
                     // Handle errors from content script
                     showStatus(response.error, 'error');
                     console.error('Content script error:', response.details);
-                    progressDiv.style.display = 'none';
+                    // Show error in progress area
+                    if (progressDetails) {
+                        progressDetails.textContent = '❌ ' + response.error;
+                        progressDetails.style.color = '#dc2626';
+                    }
+                    setTimeout(() => {
+                        progressDiv.style.display = 'none';
+                    }, 3000);
                     extractBtn.disabled = false;
                     extractBtn.textContent = 'Extract Page Info';
                 } else if (response && response.data) {
@@ -159,14 +173,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Update progress based on extraction type
                     if (extractedInfo.pages && Object.keys(extractedInfo.pages).length > 1) {
-                        progressDetails.textContent = `Analyzed ${Object.keys(extractedInfo.pages).length} pages successfully!`;
+                        progressDetails.textContent = `✅ Analyzed ${Object.keys(extractedInfo.pages).length} pages successfully!`;
+                        progressBar.style.width = '100%';
+                        
+                        // Keep progress visible for 3 seconds
+                        setTimeout(() => {
+                            progressDiv.style.display = 'none';
+                        }, 3000);
+                    } else {
+                        // Even for single page, show completion
+                        progressDetails.textContent = '✅ Page analysis complete!';
                         progressBar.style.width = '100%';
                         
                         setTimeout(() => {
                             progressDiv.style.display = 'none';
-                        }, 1500);
-                    } else {
-                        progressDiv.style.display = 'none';
+                        }, 2000);
                     }
                     
                     // Format the extracted information
