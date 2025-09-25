@@ -767,35 +767,27 @@ function processPageData(pageData, compiledInfo) {
     
     // Extract program name with multiple strategies
     if (!compiledInfo.programName) {
-        // Strategy 1: Look for H1 headings
-        if (pageData.headings.length > 0) {
-            const h1Names = pageData.headings
-                .filter(h => h.level === 'H1')
-                .map(h => h.text)
-                .filter(text => !text.toLowerCase().includes('cookie') && 
-                              !text.toLowerCase().includes('privacy') &&
-                              text.length < 100);
-            if (h1Names.length > 0) {
-                compiledInfo.programName = h1Names[0];
-            }
-        }
-        
-        // Strategy 2: Extract from page title
-        if (!compiledInfo.programName && pageData.title) {
-            // Common patterns in titles: "Key Healthcare - Treatment Center" or "Treatment at Key Healthcare"
-            const titleParts = pageData.title.split(/[-|]/);
-            if (titleParts.length > 0) {
-                const cleanTitle = titleParts[0].trim();
-                // Filter out common generic terms
-                if (!cleanTitle.toLowerCase().includes('home') && 
-                    !cleanTitle.toLowerCase().includes('welcome') &&
-                    cleanTitle.length > 3 && cleanTitle.length < 60) {
-                    compiledInfo.programName = cleanTitle;
+        // Strategy 1: Domain name (often most reliable)
+        try {
+            const url = new URL(pageData.url || window.location.href);
+            const domain = url.hostname.replace('www.', '').split('.')[0];
+            // Only use domain if it's not generic
+            if (!['treatment', 'rehab', 'therapy', 'help', 'teen', 'adolescent'].includes(domain.toLowerCase())) {
+                // Capitalize domain name nicely
+                const domainName = domain.split('-').map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1)
+                ).join(' ');
+                
+                // Check if this looks like an actual facility name
+                if (domainName.length > 2 && domainName.length < 50) {
+                    compiledInfo.programName = domainName;
                 }
             }
+        } catch (e) {
+            console.error('Error extracting from domain:', e);
         }
         
-        // Strategy 3: Look for facility/center/program name patterns in text
+        // Strategy 2: Look for facility/center/program name patterns in text
         if (!compiledInfo.programName && fullText) {
             const namePatterns = [
                 /(?:welcome to|at|facility:|center:)\s*([A-Z][A-Za-z\s&'-]+(?:Treatment|Center|Healthcare|Recovery|Services|Academy))/g,
@@ -808,7 +800,7 @@ function processPageData(pageData, compiledInfo) {
                 if (matches && matches.length > 0) {
                     // Extract the captured group
                     const match = matches[0].match(/([A-Z][A-Za-z\s&'-]+(?:Treatment|Center|Healthcare|Recovery|Services|Academy))/);
-                    if (match) {
+                    if (match && match[1] && !match[1].toLowerCase().includes('residential treatment center')) {
                         compiledInfo.programName = match[1].trim();
                         break;
                     }
@@ -816,17 +808,48 @@ function processPageData(pageData, compiledInfo) {
             }
         }
         
-        // Strategy 4: Domain name fallback
-        if (!compiledInfo.programName) {
-            try {
-                const url = new URL(pageData.url || window.location.href);
-                const domain = url.hostname.replace('www.', '').split('.')[0];
-                // Capitalize domain name nicely
-                compiledInfo.programName = domain.split('-').map(word => 
-                    word.charAt(0).toUpperCase() + word.slice(1)
-                ).join(' ');
-            } catch (e) {
-                console.error('Error extracting from domain:', e);
+        // Strategy 3: Extract from page title (if no name found yet)
+        if (!compiledInfo.programName && pageData.title) {
+            // Try to extract facility name from title
+            const titleMatch = pageData.title.match(/^([A-Z][A-Za-z\s&'-]+(?:Healthcare|Academy|Center|Services|Recovery))/);
+            if (titleMatch && titleMatch[1]) {
+                compiledInfo.programName = titleMatch[1].trim();
+            } else {
+                // Common patterns in titles: "Key Healthcare - Treatment Center"
+                const titleParts = pageData.title.split(/[-|–]/);
+                if (titleParts.length > 0) {
+                    const cleanTitle = titleParts[0].trim();
+                    // Filter out common generic terms
+                    if (!cleanTitle.toLowerCase().includes('home') && 
+                        !cleanTitle.toLowerCase().includes('welcome') &&
+                        !cleanTitle.toLowerCase().includes('residential treatment') &&
+                        cleanTitle.length > 3 && cleanTitle.length < 60) {
+                        compiledInfo.programName = cleanTitle;
+                    }
+                }
+            }
+        }
+        
+        // Strategy 4: Look for H1 headings (only very selective)
+        if (!compiledInfo.programName && pageData.headings.length > 0) {
+            const h1Names = pageData.headings
+                .filter(h => h.level === 'H1')
+                .map(h => h.text)
+                .filter(text => {
+                    const lower = text.toLowerCase();
+                    // Must contain facility-type keywords AND not be a generic description
+                    return (lower.includes('healthcare') || 
+                            lower.includes('academy') || 
+                            lower.includes('center') ||
+                            lower.includes('services') ||
+                            lower.includes('recovery')) &&
+                           !lower.includes('residential treatment center') &&
+                           !lower.includes('treatment center for') &&
+                           !lower.includes('we ') &&
+                           text.split(' ').length <= 5;
+                });
+            if (h1Names.length > 0) {
+                compiledInfo.programName = h1Names[0];
             }
         }
     }
