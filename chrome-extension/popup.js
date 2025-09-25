@@ -92,22 +92,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show progress indicator
         const progressDiv = document.getElementById('extractionProgress');
         const progressDetails = document.getElementById('progressDetails');
+        const progressBar = document.getElementById('progressBar');
         const liveStatus = document.getElementById('liveStatus');
         const statusMessages = document.getElementById('statusMessages');
         
         if (progressDiv) {
             progressDiv.style.display = 'block';
-            document.getElementById('progressBar').style.width = '0%';
+            progressBar.style.width = '0%';
+            progressDetails.textContent = 'Starting extraction...';
             
             // Clear previous status messages
             if (statusMessages) {
                 statusMessages.innerHTML = '';
             }
         }
-        const progressBar = document.getElementById('progressBar');
-        progressDiv.style.display = 'block';
-        progressDetails.textContent = 'Analyzing current page...';
-        progressBar.style.width = '10%';
         
         try {
             // Get current active tab
