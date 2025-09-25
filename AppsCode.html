@@ -1521,7 +1521,9 @@
                 <!-- Manual Mode Content -->
                 <div id="manualModeContent" style="display: none;">
                     <div style="margin-bottom: 20px; padding: 15px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
-                        <p style="margin: 0; color: #92400e; font-weight: 600;">📋 Copy and paste text from the program's website, and AI will format it properly</p>
+                        <p style="margin: 0; color: #92400e; font-weight: 600;">📋 Paste program information from any source</p>
+                        <p style="margin: 5px 0 0 0; color: #92400e; font-size: 14px;">• Use "Format with AI" for advanced formatting (requires API key)</p>
+                        <p style="margin: 2px 0 0 0; color: #92400e; font-size: 14px;">• Use "Smart Format" for pattern-based formatting (no AI needed)</p>
                 </div>
                 
                 <label for="customProgramInfo" style="display: block; margin-bottom: 10px; font-weight: 600;">
@@ -1620,6 +1622,9 @@
             <div class="modal-actions">
                 <button id="extractProgramBtn" onclick="extractProgram()" style="padding: 14px 28px; background: #4f46e5; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: all 0.3s;">
                     🚀 Extract Program Information
+                </button>
+                <button id="smartFormatBtn" onclick="smartFormatProgram()" style="padding: 14px 28px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: all 0.3s; display: none; margin-left: 10px;">
+                    🎯 Smart Format (No AI)
                 </button>
                 <button onclick="closeAddProgramModal()" style="padding: 14px 28px; background: #e5e7eb; color: #6b7280; border: none; border-radius: 8px; cursor: pointer; margin-left: 10px;">
                     Cancel
@@ -3903,6 +3908,7 @@
             const manualContent = document.getElementById('manualModeContent');
             const templateContent = document.getElementById('templateModeContent');
             const extractBtn = document.getElementById('extractProgramBtn');
+            const smartBtn = document.getElementById('smartFormatBtn');
             
             // Reset all buttons
             aiBtn.style.background = '#e5e7eb';
@@ -3917,19 +3923,25 @@
             manualContent.style.display = 'none';
             templateContent.style.display = 'none';
             
+            // Hide smart format button by default
+            smartBtn.style.display = 'none';
+            
             if (mode === 'ai') {
                 // AI Mode
                 aiBtn.style.background = '#4f46e5';
                 aiBtn.style.color = 'white';
                 aiContent.style.display = 'block';
                 extractBtn.innerHTML = '🚀 Extract from Website';
+                extractBtn.style.display = 'inline-block';
                 document.getElementById('programUrl').focus();
             } else if (mode === 'manual') {
-                // Manual Mode
+                // Manual Mode - Show both AI and Smart Format buttons
                 manualBtn.style.background = '#f59e0b';
                 manualBtn.style.color = 'white';
                 manualContent.style.display = 'block';
                 extractBtn.innerHTML = '✨ Format with AI';
+                extractBtn.style.display = 'inline-block';
+                smartBtn.style.display = 'inline-block';  // Show Smart Format button
                 document.getElementById('customProgramInfo').focus();
             } else if (mode === 'template') {
                 // Template Mode
@@ -3937,6 +3949,7 @@
                 templateBtn.style.color = 'white';
                 templateContent.style.display = 'block';
                 extractBtn.innerHTML = '📝 Add Program';
+                extractBtn.style.display = 'inline-block';
                 document.getElementById('templateProgramName').focus();
             }
         }
@@ -4353,6 +4366,275 @@ ${formattedData.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
                     </div>
                 </div>
             `;
+        }
+        
+        // Smart Format - Pattern-based extraction without AI
+        async function smartFormatProgram() {
+            const programInfo = document.getElementById('customProgramInfo').value.trim();
+            
+            if (!programInfo) {
+                alert('Please paste program information!');
+                return;
+            }
+            
+            // Show processing status
+            const statusDiv = document.getElementById('customProgramStatus');
+            statusDiv.innerHTML = '🔍 Analyzing and formatting program information...';
+            statusDiv.style.color = '#0099cc';
+            
+            // Extract information using patterns
+            const extractedData = extractProgramInfoSmart(programInfo);
+            
+            // Format according to Family First structure
+            const formattedOutput = formatToFamilyFirstStructure(extractedData);
+            
+            // Show the formatted result
+            statusDiv.innerHTML = `
+                <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 8px; padding: 15px; margin: 10px 0;">
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 16px;">✅</span>
+                        <strong style="margin-left: 8px; color: #16a34a;">Program Formatted Successfully!</strong>
+                    </div>
+                    
+                    <div style="background: white; border: 1px solid #e5e7eb; border-radius: 6px; padding: 15px; margin: 10px 0; font-family: 'Calibri', sans-serif; font-size: 12px; white-space: pre-wrap; max-height: 400px; overflow-y: auto;">
+${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button onclick="
+                            navigator.clipboard.writeText(\`${formattedOutput.replace(/`/g, '\\`').replace(/'/g, "\\'")}\`).then(() => {
+                                alert('Program profile copied to clipboard!');
+                            });
+                        " style="background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                            📋 Copy to Clipboard
+                        </button>
+                        <button onclick="
+                            // Convert formatted text to structured data for document addition
+                            const data = ${JSON.stringify(extractedData).replace(/"/g, '&quot;')};
+                            window.currentAIExtraction = data;
+                            acceptAIExtraction();
+                        " style="background: #4f46e5; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                            ➕ Add to Document
+                        </button>
+                        <button onclick="document.getElementById('addProgramModal').style.display='none';" style="background: #6b7280; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Smart extraction using patterns (no AI needed)
+        function extractProgramInfoSmart(text) {
+            const data = {};
+            
+            // Extract Program Name (usually in title, first line, or after "program")
+            const namePatterns = [
+                /^([A-Z][A-Za-z\s&'-]+?)(?:\s*[-–—]\s*|\s+(?:is|provides|offers))/m,
+                /(?:program|school|academy|center|institute):\s*([A-Za-z\s&'-]+)/i,
+                /^([A-Z][A-Za-z\s&'-]+?)\s*$/m
+            ];
+            for (const pattern of namePatterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    data['Program Name'] = match[1].trim();
+                    break;
+                }
+            }
+            
+            // Extract Location
+            const locationPatterns = [
+                /(?:located in|location:|address:)\s*([A-Za-z\s,]+(?:,\s*[A-Z]{2})?)/i,
+                /([A-Za-z\s]+,\s*[A-Z]{2})\s*\d{5}/,
+                /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s*[A-Z]{2})\b/
+            ];
+            for (const pattern of locationPatterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    data['Location'] = match[1].trim();
+                    break;
+                }
+            }
+            
+            // Extract Phone Number
+            const phonePattern = /(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g;
+            const phones = text.match(phonePattern);
+            if (phones && phones.length > 0) {
+                data['Phone Number'] = phones[0].trim();
+            }
+            
+            // Extract Website
+            const websitePattern = /(?:website:|visit us at:?\s*|www\.|https?:\/\/)([a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(?:\/[^\s]*)?)/i;
+            const websiteMatch = text.match(websitePattern);
+            if (websiteMatch) {
+                data['Website'] = websiteMatch[1].replace(/^(www\.|https?:\/\/)/, '');
+            }
+            
+            // Extract Level of Care
+            const locPatterns = [
+                /(?:level of care|program type|we offer|provides?):\s*([^.]+)/i,
+                /\b(residential|RTC|PHP|IOP|outpatient|wilderness|therapeutic boarding school)\b/i
+            ];
+            for (const pattern of locPatterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    data['Level of Care'] = match[1].trim();
+                    break;
+                }
+            }
+            
+            // Extract Age Range/Population
+            const agePatterns = [
+                /(?:ages?|serving|for)\s*(\d+[-–]\d+)/i,
+                /(?:adolescents?|teens?|young adults?)\s*(?:\()?(\d+[-–]\d+)(?:\))?/i,
+                /\b(adolescents?|teenagers?|young adults?|boys|girls|co-?ed)\b/i
+            ];
+            for (const pattern of agePatterns) {
+                const match = text.match(pattern);
+                if (match) {
+                    data['Population'] = match[0].trim();
+                    break;
+                }
+            }
+            
+            // Extract Therapeutic Modalities
+            const therapyTypes = [
+                'CBT', 'DBT', 'EMDR', 'ACT', 'ART', 'NARM', 'IFS', 'Somatic',
+                'Cognitive Behavioral Therapy', 'Dialectical Behavior Therapy',
+                'Eye Movement Desensitization', 'Acceptance and Commitment',
+                'Neurofeedback', 'Biofeedback', 'Equine', 'Adventure',
+                'Art Therapy', 'Music Therapy', 'Drama Therapy',
+                'Group Therapy', 'Individual Therapy', 'Family Therapy'
+            ];
+            
+            const foundTherapies = [];
+            therapyTypes.forEach(therapy => {
+                const regex = new RegExp(`\\b${therapy}\\b`, 'i');
+                if (regex.test(text)) {
+                    foundTherapies.push(therapy);
+                }
+            });
+            
+            if (foundTherapies.length > 0) {
+                data['Clinical Modalities'] = foundTherapies.join(', ');
+            }
+            
+            // Extract unique features/differentiators
+            const uniqueFeatures = [];
+            
+            // Look for ranch/farm programs
+            if (/\b(?:ranch|farm|equine|horse|animal)\b/i.test(text)) {
+                uniqueFeatures.push('Ranch/Equine Program');
+            }
+            
+            // Look for wilderness/adventure
+            if (/\b(?:wilderness|outdoor|adventure|expedition)\b/i.test(text)) {
+                uniqueFeatures.push('Wilderness/Adventure Based');
+            }
+            
+            // Look for specialized populations
+            if (/\b(?:autism|ASD|spectrum)\b/i.test(text)) {
+                uniqueFeatures.push('Autism Spectrum Specialization');
+            }
+            if (/\b(?:LGBTQ|gender|transgender)\b/i.test(text)) {
+                uniqueFeatures.push('LGBTQ+ Affirming');
+            }
+            if (/\b(?:adoption|attachment|RAD)\b/i.test(text)) {
+                uniqueFeatures.push('Adoption/Attachment Focus');
+            }
+            
+            // Look for academic features
+            if (/\b(?:accredited school|academic|college prep)\b/i.test(text)) {
+                uniqueFeatures.push('Accredited Academic Program');
+            }
+            
+            if (uniqueFeatures.length > 0) {
+                data['Unique Features'] = uniqueFeatures;
+            }
+            
+            // Extract any additional details that don't fit categories
+            data['Additional Info'] = text;
+            
+            return data;
+        }
+        
+        // Format extracted data according to Family First structure
+        function formatToFamilyFirstStructure(data) {
+            let output = '';
+            
+            // 1. Title (Calibri 10 Bold)
+            const programName = data['Program Name'] || 'Treatment Program';
+            const location = data['Location'] || '';
+            output += `${programName}${location ? ' – ' + location : ''}\n\n`;
+            
+            // 2. Level of Care & Services Provided (Calibri 9)
+            output += 'Level of Care & Services Provided:\n';
+            const loc = data['Level of Care'] || 'Therapeutic program';
+            const pop = data['Population'] || 'adolescents and young adults';
+            output += `This is a ${loc} serving ${pop}. `;
+            
+            if (data['Unique Features'] && data['Unique Features'].length > 0) {
+                output += `The program specializes in ${data['Unique Features'].join(', ')}.`;
+            }
+            output += '\n\n';
+            
+            // 3. Program Details / Differentiating Features (Calibri 9, bullets)
+            output += 'Program Details / Differentiating Features:\n';
+            
+            // Clinical Modalities
+            if (data['Clinical Modalities']) {
+                output += `• Clinical Modalities: ${data['Clinical Modalities']}\n`;
+            }
+            
+            // Unique features as bullets
+            if (data['Unique Features']) {
+                data['Unique Features'].forEach(feature => {
+                    if (feature === 'Ranch/Equine Program') {
+                        output += '• Ranch-Based Program: Incorporates equine therapy and animal care into treatment\n';
+                    } else if (feature === 'Wilderness/Adventure Based') {
+                        output += '• Adventure Therapy: Wilderness expeditions and outdoor therapeutic activities\n';
+                    } else if (feature === 'Autism Spectrum Specialization') {
+                        output += '• ASD Specialization: Specialized programming for individuals on the autism spectrum\n';
+                    } else if (feature === 'LGBTQ+ Affirming') {
+                        output += '• LGBTQ+ Affirming: Inclusive environment with specialized support for LGBTQ+ youth\n';
+                    } else if (feature === 'Adoption/Attachment Focus') {
+                        output += '• Adoption/Attachment: Specialized treatment for adoption-related trauma and attachment issues\n';
+                    } else if (feature === 'Accredited Academic Program') {
+                        output += '• Academic Support: Fully accredited on-site school with transferable credits\n';
+                    }
+                });
+            }
+            
+            // Add generic features if we found them in text
+            const text = data['Additional Info'] || '';
+            
+            if (/family (?:therapy|involvement|program)/i.test(text)) {
+                output += '• Family Involvement: Regular family therapy sessions and parent education\n';
+            }
+            
+            if (/trauma[- ]informed/i.test(text)) {
+                output += '• Trauma-Informed Care: All staff trained in trauma-informed approaches\n';
+            }
+            
+            if (/\b24\/7\b/.test(text)) {
+                output += '• Supervision: 24/7 supervision and support by trained staff\n';
+            }
+            
+            output += '\n';
+            
+            // 4. Contact Information (Calibri 9)
+            output += 'Contact Information:\n';
+            if (data['Phone Number']) {
+                output += `Phone: ${data['Phone Number']}\n`;
+            }
+            if (data['Website']) {
+                output += `Website: www.${data['Website'].replace('www.', '')}\n`;
+            }
+            if (data['Location']) {
+                output += `Location: ${data['Location']}\n`;
+            }
+            
+            return output.trim();
         }
         
         // Update selection panel with drag and drop
