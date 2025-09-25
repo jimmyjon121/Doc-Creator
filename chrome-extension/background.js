@@ -8,9 +8,18 @@ chrome.runtime.onInstalled.addListener(() => {
 // Listen for messages
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'openPopup') {
-        // Open the extension popup programmatically (Chrome doesn't allow this directly)
-        // Instead, we'll open the tool in a new tab
         chrome.tabs.create({ url: 'http://localhost:8000' });
+        return;
+    }
+    
+    if (request.action === 'fetchRelatedPages') {
+        handleMultiPageFetch(request.links || [])
+            .then(result => sendResponse(result))
+            .catch(error => {
+                console.error('Background fetch error:', error);
+                sendResponse({ error: error.message });
+            });
+        return true; // Keep message channel open for async response
     }
 });
 
@@ -29,3 +38,56 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
         chrome.action.openPopup();
     }
 });
+
+async function handleMultiPageFetch(links) {
+    const uniqueLinks = [...new Set(links)].slice(0, 20);
+    const pages = [];
+    const total = uniqueLinks.length;
+    let index = 0;
+    
+    for (const url of uniqueLinks) {
+        index++;
+        const progress = 25 + Math.round((index / Math.max(1, total)) * 40);
+        chrome.runtime.sendMessage({
+            action: 'extractionProgress',
+            message: `🛰️ Fetching ${index}/${total}: ${url}`,
+            progress,
+            details: {
+                current: index,
+                total,
+                url,
+                pageName: url
+            }
+        });
+        
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                cache: 'no-store',
+                credentials: 'omit'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            
+            const html = await response.text();
+            pages.push({ url, html });
+        } catch (error) {
+            console.error(`Failed to fetch ${url}:`, error);
+            chrome.runtime.sendMessage({
+                action: 'extractionProgress',
+                message: `⚠️ Failed to fetch ${url}: ${error.message}`,
+                progress,
+                details: {
+                    current: index,
+                    total,
+                    url,
+                    error: error.message
+                }
+            });
+        }
+    }
+    
+    return { pages };
+}

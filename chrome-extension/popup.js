@@ -97,12 +97,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const liveStatus = document.getElementById('liveStatus');
         const statusMessages = document.getElementById('statusMessages');
         
-        // Force show progress div with debugging
         if (progressDiv) {
-            console.log('Showing progress div');
             progressDiv.style.display = 'block';
             progressDiv.style.backgroundColor = '#f0f9ff';
-            progressDiv.style.border = '2px solid #0284c7';
+            progressDiv.style.border = '1px solid #0284c7';
             progressDiv.style.padding = '15px';
             
             if (progressBar) {
@@ -111,27 +109,20 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             if (progressDetails) {
-                progressDetails.textContent = 'Initializing extraction process...';
+                progressDetails.textContent = '🚀 Starting extraction...';
                 progressDetails.style.color = '#075985';
             }
             
-            // Clear and show status messages area
             if (liveStatus && statusMessages) {
-                statusMessages.innerHTML = '<div style="color: #065f46;">🚀 Starting extraction...</div>';
+                statusMessages.innerHTML = '';
                 liveStatus.style.display = 'block';
             }
-        } else {
-            console.error('Progress div not found!');
-            showStatus('Progress indicator not found. Please report this issue.', 'error');
         }
         
         try {
             // Get current active tab
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-            console.log('Current tab:', tab.url);
-            
-            // Just log tab info for debugging
-            console.log('Sending extraction request to tab:', tab.id);
+            console.log('Sending extraction request to tab:', tab.id, tab.url);
             
             // Send message to content script to perform comprehensive extraction
             chrome.tabs.sendMessage(tab.id, { action: 'extractInfo' }, (response) => {

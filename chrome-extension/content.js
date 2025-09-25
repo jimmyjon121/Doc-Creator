@@ -466,15 +466,13 @@ function analyzeContentEnhanced(text) {
 // Comprehensive multi-page extraction
 async function extractComprehensiveInfo() {
     try {
-        console.log('Starting comprehensive multi-page extraction...');
         sendProgressUpdate('🚀 Starting comprehensive extraction...', 0);
         
-        // Check if page is ready
         if (!document.body || document.readyState === 'loading') {
             sendProgressUpdate('⏳ Waiting for page to load...', 0);
             await new Promise(resolve => {
                 if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', resolve);
+                    document.addEventListener('DOMContentLoaded', resolve, { once: true });
                 } else {
                     resolve();
                 }
@@ -482,53 +480,115 @@ async function extractComprehensiveInfo() {
         }
         
         sendProgressUpdate('📄 Analyzing current page...', 5);
-        
-        // Small delay to ensure progress is visible
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // First, extract from current page
         const currentPageData = extractPageInfo();
         const baseUrl = window.location.origin;
-        const currentPath = window.location.pathname;
         
-        await new Promise(resolve => setTimeout(resolve, 200));
-        sendProgressUpdate(`✅ Extracted info from: ${document.title}`, 10);
-    
-    // Initialize comprehensive data structure
-    const comprehensiveData = {
-        ...currentPageData,
-        pages: {
-            current: {
-                url: window.location.href,
-                title: document.title,
-                data: currentPageData
+        const comprehensiveData = {
+            ...currentPageData,
+            pages: {
+                current: {
+                    url: window.location.href,
+                    title: document.title,
+                    data: currentPageData
+                }
+            },
+            compiledInfo: {
+                programName: '',
+                location: '',
+                phones: new Set(),
+                emails: new Set(),
+                addresses: new Set(),
+                agesServed: new Set(),
+                levelOfCare: new Set(),
+                specializations: new Set(),
+                therapies: new Set(),
+                staff: new Set(),
+                accreditations: new Set(),
+                insurance: new Set(),
+                programHighlights: []
             }
-        },
-        compiledInfo: {
-            programName: '',
-            location: '',
-            phones: new Set(),
-            emails: new Set(),
-            addresses: new Set(),
-            agesServed: new Set(),
-            levelOfCare: new Set(),
-            specializations: new Set(),
-            therapies: new Set(),
-            staff: new Set(),
-            accreditations: new Set(),
-            insurance: new Set(),
-            programHighlights: []
+        };
+        
+        sendProgressUpdate(`✅ Extracted info from: ${document.title}`, 10);
+        
+        const relevantLinks = collectRelevantLinks(baseUrl);
+        const uniqueLinks = [...new Set(relevantLinks)]
+            .filter(link => typeof link === 'string' && link.startsWith(baseUrl) && link !== window.location.href)
+            .slice(0, 20);
+        
+        if (uniqueLinks.length === 0) {
+            sendProgressUpdate('ℹ️ No additional pages detected. Focusing on current page.', 30);
         }
-    };
-    
-    // Find navigation links to related pages - comprehensive selectors
+        
+        sendProgressUpdate(`🛰️ Requesting ${uniqueLinks.length} additional pages from background...`, 20);
+        const fetchedPages = uniqueLinks.length > 0
+            ? await requestAdditionalPages(uniqueLinks)
+            : { pages: [] };
+        
+        let processedCount = 0;
+        const totalFetched = fetchedPages.pages.length;
+        
+        for (const page of fetchedPages.pages) {
+            processedCount++;
+            const progressPercent = 30 + Math.round((processedCount / Math.max(1, totalFetched)) * 50);
+            const pageName = derivePageKey(page.url, processedCount);
+            
+            sendProgressUpdate(
+                `🧭 Parsing page ${processedCount}/${totalFetched}: ${pageName}`,
+                progressPercent,
+                {
+                    current: processedCount,
+                    total: totalFetched,
+                    url: page.url,
+                    pageName
+                }
+            );
+            
+            const pageData = extractPageDataFromHtml(page.html, page.url);
+            if (!pageData) {
+                sendProgressUpdate(`⚠️ Unable to parse ${pageName}`, progressPercent);
+                continue;
+            }
+            
+            comprehensiveData.pages[pageName] = pageData;
+            processPageData(pageData, comprehensiveData.compiledInfo);
+        }
+        
+        sendProgressUpdate('📋 Processing current page data...', 85);
+        processPageData(currentPageData, comprehensiveData.compiledInfo);
+        
+        sendProgressUpdate('🎯 Compiling all extracted information...', 95);
+        comprehensiveData.structured = compileStructuredData(comprehensiveData.compiledInfo);
+        
+        const stats = {
+            pagesAnalyzed: Object.keys(comprehensiveData.pages).length,
+            therapiesFound: comprehensiveData.compiledInfo.therapies.size,
+            specializationsFound: comprehensiveData.compiledInfo.specializations.size,
+            contactsFound: comprehensiveData.compiledInfo.phones.size + comprehensiveData.compiledInfo.emails.size
+        };
+        
+        sendProgressUpdate(
+            `✅ Extraction complete! Analyzed ${stats.pagesAnalyzed} pages`,
+            100,
+            stats
+        );
+        
+        return comprehensiveData;
+    } catch (error) {
+        console.error('Extraction error:', error);
+        return {
+            error: true,
+            message: error.message,
+            basicInfo: extractPageInfo()
+        };
+    }
+}
+
+function collectRelevantLinks(baseUrl) {
     const navSelectors = [
-        // Standard navigation selectors
         'nav a', 'header a', '.menu a', '.nav a', '[class*="menu"] a',
         '.navigation a', '.navbar a', '.header-nav a', '.main-nav a',
         '.site-nav a', '.primary-nav a', '.secondary-nav a',
-        
-        // Specific page selectors with variations
         'a[href*="about"]', 'a[href*="who-we-are"]', 'a[href*="mission"]',
         'a[href*="program"]', 'a[href*="treatment"]', 'a[href*="service"]',
         'a[href*="therapy"]', 'a[href*="therapies"]', 'a[href*="approach"]',
@@ -541,262 +601,154 @@ async function extractComprehensiveInfo() {
         'a[href*="insurance"]', 'a[href*="cost"]', 'a[href*="tuition"]',
         'a[href*="testimonial"]', 'a[href*="review"]', 'a[href*="outcome"]',
         'a[href*="daily"]', 'a[href*="typical-day"]', 'a[href*="activities"]',
-        
-        // Footer and sidebar links often contain important pages
         'footer a', '.footer a', '[class*="footer"] a',
         '.sidebar a', '[class*="sidebar"] a', 'aside a',
-        
-        // Sometimes links are in lists or specific sections
         '.links a', '.quick-links a', '.site-links a',
         'ul a', 'li a', '.list a'
     ];
     
-    sendProgressUpdate('🔎 Discovering related pages...', 15);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const links = new Set();
-    let linkCount = 0;
+    const discoveredLinks = new Set();
     navSelectors.forEach(selector => {
-        try {
-            document.querySelectorAll(selector).forEach(link => {
-                const href = link.href;
-                if (href && href.startsWith(baseUrl) && href !== window.location.href) {
-                    links.add(href);
-                    linkCount++;
-                }
-            });
-        } catch (e) {
-            console.log('Selector error:', selector, e);
-        }
+        document.querySelectorAll(selector).forEach(link => {
+            const href = link.href;
+            if (href && href.startsWith(baseUrl)) {
+                discoveredLinks.add(href.split('#')[0]);
+            }
+        });
     });
     
-    // Add some common page patterns if we didn't find many links
     const commonPaths = ['/about', '/programs', '/contact', '/admissions', '/staff', '/approach'];
-    commonPaths.forEach(path => {
-        const potentialUrl = baseUrl + path;
-        links.add(potentialUrl);
-    });
+    commonPaths.forEach(path => discoveredLinks.add(baseUrl + path));
     
-    console.log('All discovered links:', Array.from(links));
-    sendProgressUpdate(`📊 Found ${links.size} potential pages to analyze`, 20);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Comprehensive keywords to identify relevant pages - with variations
     const relevantKeywords = [
-        // About variations
         'about', 'about-us', 'who-we-are', 'mission', 'story', 'history', 'overview',
-        // Program variations
-        'program', 'programmes', 'treatment', 'services', 'therapy', 'therapies', 
+        'program', 'programmes', 'treatment', 'services', 'therapy', 'therapies',
         'approach', 'methodology', 'model', 'curriculum', 'academics',
-        // Contact variations
         'contact', 'contact-us', 'reach', 'location', 'directions', 'visit',
-        // Admission variations
-        'admission', 'admissions', 'enroll', 'enrollment', 'apply', 'application', 
+        'admission', 'admissions', 'enroll', 'enrollment', 'apply', 'application',
         'intake', 'getting-started', 'start', 'begin',
-        // Staff variations
-        'staff', 'team', 'our-team', 'leadership', 'therapists', 'counselors', 
+        'staff', 'team', 'our-team', 'leadership', 'therapists', 'counselors',
         'professionals', 'faculty', 'clinicians',
-        // Clinical variations
         'clinical', 'therapeutic', 'mental-health', 'behavioral', 'wellness',
-        // Facility variations
         'facility', 'facilities', 'campus', 'residential', 'housing', 'dorms',
         'environment', 'setting', 'amenities',
-        // Additional important pages
         'philosophy', 'values', 'faq', 'parent', 'family', 'outcomes', 'success',
         'testimonial', 'review', 'accreditation', 'insurance', 'cost', 'tuition',
         'daily-life', 'typical-day', 'activities', 'recreation', 'discharge',
         'aftercare', 'transition', 'alumni'
     ];
     
-    // Score links based on relevance
-    const scoredLinks = Array.from(links).map(link => {
-        const url = link.toLowerCase();
+    const scoredLinks = Array.from(discoveredLinks).map(link => {
+        const lowerUrl = link.toLowerCase();
         let score = 0;
-        
-        // Higher score for more relevant keywords
         relevantKeywords.forEach(keyword => {
-            if (url.includes(keyword)) {
-                score += keyword.length; // Longer keywords = more specific = higher score
+            if (lowerUrl.includes(keyword)) {
+                score += Math.max(3, keyword.length);
+            }
+        });
+        if (lowerUrl.includes('program') || lowerUrl.includes('treatment')) score += 12;
+        if (lowerUrl.includes('about')) score += 8;
+        if (lowerUrl.includes('contact')) score += 5;
+        if (lowerUrl.includes('admission')) score += 7;
+        if (lowerUrl.includes('staff') || lowerUrl.includes('team')) score += 6;
+        return { url: link, score };
+    })
+    .filter(item => item.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map(item => item.url);
+    
+    return scoredLinks.length > 0 ? scoredLinks : Array.from(discoveredLinks);
+}
+
+function requestAdditionalPages(links) {
+    return new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage({ action: 'fetchRelatedPages', links }, response => {
+            if (chrome.runtime.lastError) {
+                reject(new Error(chrome.runtime.lastError.message));
+                return;
+            }
+            if (!response) {
+                reject(new Error('No response from background fetch.'));
+                return;
+            }
+            if (response.error) {
+                reject(new Error(response.error));
+                return;
+            }
+            resolve(response);
+        });
+    });
+}
+
+function extractPageDataFromHtml(html, url) {
+    if (!html) return null;
+    try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        if (!doc) return null;
+        
+        const pageData = {
+            url,
+            title: (doc.title || '').trim(),
+            headings: [],
+            paragraphs: [],
+            listItems: [],
+            phones: [],
+            emails: [],
+            addresses: []
+        };
+        
+        doc.querySelectorAll('h1, h2, h3, h4').forEach(h => {
+            const text = h.textContent.trim();
+            if (text && text.length > 2 && isValidContent(text)) {
+                pageData.headings.push({ level: h.tagName, text });
             }
         });
         
-        // Extra points for certain critical pages
-        if (url.includes('program') || url.includes('treatment')) score += 10;
-        if (url.includes('about')) score += 8;
-        if (url.includes('contact')) score += 5;
-        if (url.includes('admission')) score += 7;
-        if (url.includes('staff') || url.includes('team')) score += 6;
+        doc.querySelectorAll('p').forEach(p => {
+            const text = p.textContent.trim();
+            if (text && text.length > 20 && text.length < 1200 && isValidContent(text)) {
+                pageData.paragraphs.push(text);
+            }
+        });
         
-        return { url: link, score };
-    })
-    .filter(item => item.score > 0) // Only keep relevant links
-    .sort((a, b) => b.score - a.score) // Sort by relevance
-    .map(item => item.url)
-    .slice(0, 25); // Increased limit to 25 pages for comprehensive extraction
-    
-    // Ensure we have at least some pages to extract
-    if (relevantLinks.length === 0) {
-        console.log('No relevant links found, adding defaults');
-        const defaultPaths = ['/about', '/programs', '/contact', '/admissions'];
-        relevantLinks.push(...defaultPaths.map(path => baseUrl + path));
-    }
-    
-    console.log(`Found ${relevantLinks.length} relevant pages to extract from:`, relevantLinks);
-    sendProgressUpdate(`🎯 Will analyze ${relevantLinks.length} pages for comprehensive extraction`, 25);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Function to extract data from a page via fetch
-    async function extractFromUrl(url) {
-        try {
-            console.log(`Fetching: ${url}`);
-            const response = await fetch(url);
-            
-            if (!response.ok) {
-                console.log(`Failed to fetch ${url}: ${response.status}`);
-                return null;
+        doc.querySelectorAll('li').forEach(li => {
+            const text = li.textContent.trim();
+            if (text && text.length > 10 && text.length < 500 && isValidContent(text)) {
+                pageData.listItems.push(text);
             }
-            
-            const html = await response.text();
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            
-            // Extract key information from the parsed document
-            const pageData = {
-                url: url,
-                title: doc.title,
-                headings: [],
-                paragraphs: [],
-                listItems: []
-            };
-            
-            // Extract headings
-            doc.querySelectorAll('h1, h2, h3, h4').forEach(h => {
-                const text = h.textContent.trim();
-                if (text && text.length > 2 && isValidContent(text)) {
-                    pageData.headings.push({
-                        level: h.tagName,
-                        text: text
-                    });
-                }
-            });
-            
-            // Extract paragraphs
-            doc.querySelectorAll('p').forEach(p => {
-                const text = p.textContent.trim();
-                if (text && text.length > 20 && text.length < 1000 && isValidContent(text)) {
-                    pageData.paragraphs.push(text);
-                }
-            });
-            
-            // Extract list items
-            doc.querySelectorAll('li').forEach(li => {
-                const text = li.textContent.trim();
-                if (text && text.length > 10 && text.length < 500 && isValidContent(text)) {
-                    pageData.listItems.push(text);
-                }
-            });
-            
-            return pageData;
-        } catch (error) {
-            console.error(`Error extracting from ${url}:`, error);
-            return null;
-        }
-    }
-    
-    // Extract from each relevant page with detailed progress tracking
-    let processedCount = 0;
-    
-    // Always show we're doing multi-page extraction
-    sendProgressUpdate(`🚀 Starting multi-page extraction of ${relevantLinks.length} pages...`, 30);
-    await new Promise(resolve => setTimeout(resolve, 700));
-    
-    for (const url of relevantLinks) {
-        processedCount++;
-        const progressPercent = 30 + (processedCount / relevantLinks.length) * 60; // 30-90%
+        });
         
-        // Get page name for display
-        const urlParts = url.split('/');
-        const pageName = urlParts[urlParts.length - 1] || urlParts[urlParts.length - 2] || 'homepage';
+        const bodyText = doc.body ? doc.body.textContent || '' : '';
+        const phoneRegex = /(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g;
+        const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+        const phones = bodyText.match(phoneRegex) || [];
+        const emails = bodyText.match(emailRegex) || [];
+        pageData.phones = [...new Set(phones)].slice(0, 5);
+        pageData.emails = [...new Set(emails)].slice(0, 5);
         
-        sendProgressUpdate(
-            `🌐 Extracting page ${processedCount}/${relevantLinks.length}: ${pageName}`,
-            progressPercent,
-            {
-                current: processedCount,
-                total: relevantLinks.length,
-                url: url,
-                pageName: pageName
+        doc.querySelectorAll('address, .address, [class*="address"], [id*="address"]').forEach(addr => {
+            const text = addr.textContent.trim();
+            if (text && text.length > 10) {
+                pageData.addresses.push(text);
             }
-        );
+        });
         
-        // Add delay to make progress visible
-        await new Promise(resolve => setTimeout(resolve, 800));
-        
-        const pageData = await extractFromUrl(url);
-        if (pageData) {
-            comprehensiveData.pages[pageName] = pageData;
-            
-            // Process and compile information
-            processPageData(pageData, comprehensiveData.compiledInfo);
-            
-            // Report what was found
-            const foundItems = [];
-            if (pageData.therapies && pageData.therapies.length > 0) {
-                foundItems.push(`${pageData.therapies.length} therapies`);
-            }
-            if (pageData.phones && pageData.phones.length > 0) {
-                foundItems.push(`${pageData.phones.length} phone numbers`);
-            }
-            if (pageData.emails && pageData.emails.length > 0) {
-                foundItems.push(`${pageData.emails.length} emails`);
-            }
-            
-            if (foundItems.length > 0) {
-                sendProgressUpdate(
-                    `✅ Found: ${foundItems.join(', ')} on ${pageName}`,
-                    progressPercent
-                );
-            }
-        } else {
-            sendProgressUpdate(
-                `⚠️ Couldn't extract from: ${pageName}`,
-                progressPercent
-            );
-        }
-    }
-    
-    // Process current page data as well
-    sendProgressUpdate('📋 Processing current page data...', 90);
-    processPageData(currentPageData, comprehensiveData.compiledInfo);
-    
-    // Compile final structured data
-    sendProgressUpdate('🎯 Compiling all extracted information...', 95);
-    comprehensiveData.structured = compileStructuredData(comprehensiveData.compiledInfo);
-    
-    // Report final stats
-    const stats = {
-        pagesAnalyzed: Object.keys(comprehensiveData.pages).length,
-        therapiesFound: comprehensiveData.compiledInfo.therapies.size,
-        specializationsFound: comprehensiveData.compiledInfo.specializations.size,
-        contactsFound: comprehensiveData.compiledInfo.phones.size + comprehensiveData.compiledInfo.emails.size
-    };
-    
-    sendProgressUpdate(
-        `✅ Extraction complete! Analyzed ${stats.pagesAnalyzed} pages`,
-        100,
-        stats
-    );
-    
-    return comprehensiveData;
-    
+        return pageData;
     } catch (error) {
-        console.error('Extraction error:', error);
-        // Return basic data even if extraction fails
-        return {
-            error: true,
-            message: error.message,
-            basicInfo: extractPageInfo() // Try to at least get current page info
-        };
+        console.error('Failed to parse fetched HTML:', error);
+        return null;
+    }
+}
+
+function derivePageKey(url, index) {
+    try {
+        const urlObj = new URL(url);
+        const segments = urlObj.pathname.split('/').filter(Boolean);
+        const lastSegment = segments.length > 0 ? segments[segments.length - 1] : 'page';
+        return `${lastSegment || 'page'}-${index}`.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
+    } catch (e) {
+        return `page-${index}`;
     }
 }
 
