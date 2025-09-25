@@ -6,15 +6,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewDiv = document.getElementById('preview');
     const copySection = document.getElementById('copySection');
     
-    // Configuration - UPDATE THIS URL TO YOUR HOSTED DOC CREATOR TOOL
-    const DOC_CREATOR_URL = 'https://your-domain.com/doc-creator'; // Replace with your actual URL
+    // Configuration - UPDATE THIS PATH TO YOUR DOC CREATOR HTML FILE
+    // For local file, use: file:///C:/path/to/your/doc-creator.html (Windows)
+    // Or: file:///Users/username/path/to/doc-creator.html (Mac)
+    // For hosted version: https://your-domain.com/doc-creator
+    // For development: file:///workspaces/Doc-Creator/test-doc-creator.html
+    const DOC_CREATOR_URL = 'file:///workspaces/Doc-Creator/test-doc-creator.html'; // Using test version
     
     // Open Doc Creator tool
     openToolBtn.addEventListener('click', function() {
         chrome.tabs.create({ url: DOC_CREATOR_URL });
-    });
-    
-    // Extract information from current page
+    });    // Extract information from current page
     extractBtn.addEventListener('click', async function() {
         extractBtn.disabled = true;
         extractBtn.innerHTML = '<span class="spinner"></span> Extracting...';
@@ -232,8 +234,21 @@ function formatExtractedInfo(info, url) {
         formatted += `Description: ${info.metaDescription}\n`;
     }
     
+    // Add detected program info
+    if (info.programType) {
+        formatted += `Program Type: ${info.programType}\n`;
+    }
+    if (info.detectedAgeRange) {
+        formatted += `Age Range: ${info.detectedAgeRange}\n`;
+    }
+    if (info.location) {
+        formatted += `Location: ${info.location}\n`;
+    }
+    
     formatted += '\n--- CONTACT INFORMATION ---\n';
-    if (info.phones.length > 0) {
+    if (info.primaryPhone) {
+        formatted += `Primary Phone: ${info.primaryPhone}\n`;
+    } else if (info.phones.length > 0) {
         formatted += `Phone Numbers: ${info.phones.join(', ')}\n`;
     }
     if (info.emails.length > 0) {

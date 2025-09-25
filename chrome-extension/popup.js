@@ -234,8 +234,21 @@ function formatExtractedInfo(info, url) {
         formatted += `Description: ${info.metaDescription}\n`;
     }
     
+    // Add detected program info
+    if (info.programType) {
+        formatted += `Program Type: ${info.programType}\n`;
+    }
+    if (info.detectedAgeRange) {
+        formatted += `Age Range: ${info.detectedAgeRange}\n`;
+    }
+    if (info.location) {
+        formatted += `Location: ${info.location}\n`;
+    }
+    
     formatted += '\n--- CONTACT INFORMATION ---\n';
-    if (info.phones.length > 0) {
+    if (info.primaryPhone) {
+        formatted += `Primary Phone: ${info.primaryPhone}\n`;
+    } else if (info.phones.length > 0) {
         formatted += `Phone Numbers: ${info.phones.join(', ')}\n`;
     }
     if (info.emails.length > 0) {

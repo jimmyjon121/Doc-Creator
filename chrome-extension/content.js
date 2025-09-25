@@ -71,10 +71,34 @@ function extractPageInfo() {
         addresses: []
     };
     
-    // Get all headings
+    // Helper function to check if text contains code/script
+    function isValidContent(text) {
+        if (!text || text.length < 10) return false;
+        
+        // Skip if contains common code patterns
+        const codePatterns = [
+            /function\s*\(/,
+            /\{[\s\S]*\}/,
+            /window\./,
+            /document\./,
+            /setREVStartSize/,
+            /undefined/,
+            /console\./,
+            /var\s+\w+\s*=/,
+            /if\s*\(/,
+            /for\s*\(/,
+            /\(\s*\)\s*=>/,
+            /module\.exports/
+        ];
+        
+        return !codePatterns.some(pattern => pattern.test(text));
+    }
+    
+    // Get all headings (excluding scripts and hidden elements)
     document.querySelectorAll('h1, h2, h3, h4').forEach(h => {
+        if (h.offsetParent === null) return; // Skip hidden elements
         const text = h.textContent.trim();
-        if (text && text.length > 2) {
+        if (text && text.length > 2 && isValidContent(text)) {
             info.headings.push({
                 level: h.tagName,
                 text: text
@@ -82,10 +106,11 @@ function extractPageInfo() {
         }
     });
     
-    // Get all paragraphs
+    // Get all paragraphs (with better filtering)
     document.querySelectorAll('p').forEach(p => {
+        if (p.offsetParent === null) return; // Skip hidden elements
         const text = p.textContent.trim();
-        if (text && text.length > 20) {
+        if (text && text.length > 20 && text.length < 1000 && isValidContent(text)) {
             info.paragraphs.push(text);
         }
     });
@@ -133,14 +158,36 @@ function extractPageInfo() {
     
     for (const [section, keywords] of Object.entries(sectionKeywords)) {
         for (const keyword of keywords) {
-            const elements = Array.from(document.querySelectorAll('*')).filter(el => {
-                const text = el.textContent.toLowerCase();
-                return text.includes(keyword.toLowerCase()) && text.length < 1000;
+            // Look for headings that contain keywords
+            const headingElements = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5')).filter(el => {
+                return el.textContent.toLowerCase().includes(keyword.toLowerCase());
             });
             
-            if (elements.length > 0) {
-                info.sections[section] = elements[0].textContent.trim().substring(0, 500);
-                break;
+            if (headingElements.length > 0) {
+                // Find the content after this heading
+                let content = '';
+                let currentElement = headingElements[0].nextElementSibling;
+                let charCount = 0;
+                
+                while (currentElement && charCount < 500) {
+                    if (currentElement.tagName === 'P' || currentElement.tagName === 'UL' || currentElement.tagName === 'OL') {
+                        const text = currentElement.textContent.trim();
+                        if (isValidContent(text)) {
+                            content += text + ' ';
+                            charCount += text.length;
+                        }
+                    }
+                    
+                    // Stop if we hit another heading
+                    if (/^H[1-6]$/.test(currentElement.tagName)) break;
+                    
+                    currentElement = currentElement.nextElementSibling;
+                }
+                
+                if (content.trim()) {
+                    info.sections[section] = content.trim().substring(0, 500);
+                    break;
+                }
             }
         }
     }
@@ -154,7 +201,83 @@ function extractPageInfo() {
     // Enhanced extraction using smart patterns
     info.analysis = analyzeContentEnhanced(allText);
     
+    // Try to extract more specific info for therapeutic boarding schools
+    const therapeuticInfo = extractTherapeuticSchoolInfo();
+    if (therapeuticInfo) {
+        Object.assign(info, therapeuticInfo);
+    }
+    
     return info;
+}
+
+// Special extraction for therapeutic boarding schools
+function extractTherapeuticSchoolInfo() {
+    const schoolInfo = {};
+    
+    // Look for age information in various formats
+    const agePatterns = [
+        /boys?\s+(?:aged?\s+)?(\d+)\s*[-–to]+\s*(\d+)/i,
+        /girls?\s+(?:aged?\s+)?(\d+)\s*[-–to]+\s*(\d+)/i,
+        /ages?\s+(\d+)\s*[-–to]+\s*(\d+)/i,
+        /(\d+)\s*[-–to]+\s*(\d+)\s*years?\s*old/i,
+        /grades?\s+(\d+)\s*[-–to]+\s*(\d+)/i
+    ];
+    
+    const bodyText = document.body.innerText;
+    for (const pattern of agePatterns) {
+        const match = bodyText.match(pattern);
+        if (match) {
+            schoolInfo.detectedAgeRange = `${match[1]}-${match[2]} years`;
+            break;
+        }
+    }
+    
+    // Look for program type indicators
+    const programTypes = {
+        'therapeutic boarding school': /therapeutic\s+boarding\s+school/i,
+        'residential treatment': /residential\s+treatment/i,
+        'wilderness therapy': /wilderness\s+therapy/i,
+        'therapeutic school': /therapeutic\s+school/i,
+        'treatment center': /treatment\s+center/i
+    };
+    
+    for (const [type, pattern] of Object.entries(programTypes)) {
+        if (pattern.test(bodyText)) {
+            schoolInfo.programType = type;
+            break;
+        }
+    }
+    
+    // Extract clean phone numbers (avoiding duplicates)
+    const cleanPhones = [];
+    const phoneElements = document.querySelectorAll('a[href^="tel:"]');
+    phoneElements.forEach(el => {
+        const phone = el.textContent.trim();
+        if (phone && !cleanPhones.includes(phone)) {
+            cleanPhones.push(phone);
+        }
+    });
+    
+    if (cleanPhones.length > 0) {
+        schoolInfo.primaryPhone = cleanPhones[0];
+    }
+    
+    // Look for location information
+    const locationPatterns = [
+        /located\s+in\s+([^,.]+(?:,\s*[A-Z]{2})?)/i,
+        /campus\s+in\s+([^,.]+(?:,\s*[A-Z]{2})?)/i,
+        /([A-Za-z\s]+,\s*[A-Z]{2})\s*\d{5}/
+    ];
+    
+    for (const pattern of locationPatterns) {
+        const match = bodyText.match(pattern);
+        if (match) {
+            schoolInfo.location = match[1].trim();
+            break;
+        }
+    }
+    
+    return schoolInfo;
 }
 
 // Enhanced content analysis function
