@@ -16,74 +16,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="FFAS Docs">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232196a6'/%3E%3Cpath d='M 20 15 Q 32 12 44 15 L 40 22 Q 32 20 24 22 Q 18 28 18 38 L 26 38 Q 26 32 29 29 Q 32 27 37 28 L 35 33 Q 32 32 30 33 Q 28 35 28 38 L 36 38 Q 36 35 37 33 Q 40 32 44 33 L 42 38 Q 38 37 37 38 Q 36 40 36 45 L 29 45 Q 29 42 26 42 L 18 45 Q 15 32 22 22 Q 26 18 32 15' fill='white'/%3E%3C/svg%3E">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Calibri', Arial, sans-serif;
-            background: #f0f4f8;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            overflow: hidden;
-        }
-        
-        .header {
-            background: linear-gradient(to right, #0066cc, #0099cc);
-            padding: 24px 40px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 10px rgba(0,102,204,0.1);
-        }
-        
-        .header-left {
-            display: flex;
-            align-items: center;
-        }
-        
-        .logo-circle {
-            width: 56px;
-            height: 56px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 20px;
-            font-size: 28px;
-            color: white;
-            font-weight: 700;
-            backdrop-filter: blur(10px);
-        }
-        
-        .header-text h1 {
-            color: white;
-            font-size: 26px;
-            font-weight: 700;
-            margin-bottom: 2px;
-            letter-spacing: -0.5px;
-        }
-        
-        .header-text p {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 15px;
-            font-weight: 500;
-            letter-spacing: 0.5px;
-        }
-        
+            },
         .main-content {
             display: flex;
             min-height: 600px;
@@ -137,6 +70,250 @@
         .doc-type-btn.active {
             background: #0099cc;
             color: white;
+        }
+
+        .guided-btn {
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #34d399, #059669);
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(5, 150, 105, 0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .guided-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 22px rgba(5, 150, 105, 0.35);
+        }
+
+        .guided-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+        }
+
+        .intake-wizard-modal {
+            max-width: 760px;
+        }
+
+        .intake-wizard {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .wizard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .wizard-steps {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .wizard-step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 2px solid #cbd5f5;
+            color: #4c51bf;
+            font-weight: 600;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .wizard-step-indicator.active {
+            background: #4f46e5;
+            color: white;
+            border-color: #4338ca;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+        }
+
+        .wizard-step {
+            display: none;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e0e7ff;
+            padding: 20px;
+        }
+
+        .wizard-step.active {
+            display: block;
+        }
+
+        .wizard-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .wizard-actions button {
+            padding: 10px 18px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .wizard-actions .wizard-back {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .wizard-actions .wizard-next {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .wizard-actions .wizard-finish {
+            background: #059669;
+            color: white;
+        }
+
+        .wizard-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .wizard-card {
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            padding: 16px;
+            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08);
+        }
+
+        .wizard-program-list {
+            display: grid;
+            gap: 10px;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+
+        .wizard-program-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+            transition: border-color 0.2s ease;
+        }
+
+        .wizard-program-item input[type="checkbox"] {
+            margin-top: 4px;
+            transform: scale(1.1);
+        }
+
+        .wizard-program-item.active {
+            border-color: #4f46e5;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.18);
+            background: #eef2ff;
+        }
+
+        .wizard-program-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .wizard-program-meta .name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .wizard-program-meta .location {
+            font-size: 12px;
+            color: #4b5563;
+        }
+
+        .wizard-program-meta .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .wizard-program-meta .chip {
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .wizard-toggles {
+            display: grid;
+            gap: 10px;
+        }
+
+        .wizard-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+        }
+
+        .wizard-toggle span {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .wizard-note {
+            font-size: 13px;
+            color: #4b5563;
+            background: #ecfeff;
+            border-left: 4px solid #0891b2;
+            padding: 12px 14px;
+            border-radius: 8px;
+        }
+
+        .wizard-no-results {
+            text-align: center;
+            padding: 30px 20px;
+            color: #6b7280;
+            font-size: 14px;
+            border: 1px dashed #cbd5f5;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        .input-error {
+            border-color: #f87171 !important;
+            box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.2) !important;
+        }
+
+        .document-preview-modal {
+            max-width: 900px;
+        }
+
+        .document-preview-container {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            padding: 20px;
+            max-height: 70vh;
+            overflow-y: auto;
+            box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.15);
         }
         
         .client-info {
@@ -1045,7 +1222,6 @@
             object-position: center center !important;
             /* Ensure image loads properly in print */
             -webkit-print-color-adjust: exact !important;
-            color-adjust: exact !important;
             print-color-adjust: exact !important;
         }
         
@@ -1397,6 +1573,10 @@
                         <button class="doc-type-btn" onclick="setDocumentType('plans', this)">PLANS (Single)</button>
                     </div>
                 </div>
+
+                <button class="guided-btn" onclick="openIntakeWizard()">
+                    🎯 Guided Intake Wizard
+                </button>
                 
                 <div class="client-info">
                     <h3>Client Information</h3>
@@ -1418,9 +1598,14 @@
                     <div id="atHomeSection" style="display: none; margin-top: 15px; padding: 15px; border: 1px solid #e0e7ff; border-radius: 8px; background: #f8fafc;">
                         <h4 style="margin: 0 0 15px 0; color: #0099cc;">AT HOME Providers</h4>
                         <div id="atHomeProviders"></div>
-                        <button type="button" onclick="addAtHomeProvider()" style="margin-top: 10px; padding: 8px 16px; background: #0099cc; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
-                            + Add Provider
-                        </button>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                            <button type="button" onclick="addAtHomeProvider()" style="padding: 8px 16px; background: #0099cc; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+                                + Add Provider
+                            </button>
+                            <button type="button" onclick="loadAtHomeSuggestions()" style="padding: 8px 16px; background: #e0e7ff; color: #1d4ed8; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
+                                📚 Load Suggestions
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
@@ -1635,6 +1820,109 @@
                 <button onclick="closeAddProgramModal()" style="padding: 14px 28px; background: #e5e7eb; color: #6b7280; border: none; border-radius: 8px; cursor: pointer; margin-left: 10px;">
                     Cancel
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guided Intake Wizard Modal -->
+    <div id="intakeWizardModal" class="modal">
+        <div class="modal-content intake-wizard-modal">
+            <div class="modal-header">
+                <h2>Guided Intake Wizard</h2>
+                <button class="modal-close" onclick="closeIntakeWizard()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="intake-wizard">
+                    <div class="wizard-header">
+                        <div class="wizard-steps">
+                            <div id="wizardStepIndicator1" class="wizard-step-indicator">1</div>
+                            <div id="wizardStepIndicator2" class="wizard-step-indicator">2</div>
+                            <div id="wizardStepIndicator3" class="wizard-step-indicator">3</div>
+                        </div>
+                        <div id="wizardStepLabel" style="font-weight: 600; color: #1f2937;">Client Setup</div>
+                    </div>
+
+                    <div id="wizardStep1" class="wizard-step active">
+                        <div style="display: grid; gap: 16px;">
+                            <div>
+                                <label for="wizardClientName" style="font-weight: 600; color: #0c4a6e;">Client First Name</label>
+                                <input type="text" id="wizardClientName" placeholder="Required" style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5f5; font-size: 15px; margin-top: 8px;">
+                            </div>
+                            <div class="wizard-toggles">
+                                <div class="wizard-toggle">
+                                    <span>Include AT HOME Recommendations</span>
+                                    <label style="display: inline-flex; align-items: center; gap: 8px;">
+                                        <input type="checkbox" id="wizardIncludeAtHome" style="width: 18px; height: 18px;">
+                                    </label>
+                                </div>
+                                <div class="wizard-toggle">
+                                    <span>Include Alumni Services</span>
+                                    <label style="display: inline-flex; align-items: center; gap: 8px;">
+                                        <input type="checkbox" id="wizardIncludeAlumni" style="width: 18px; height: 18px;">
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="wizard-note">
+                                We'll carry these preferences into the main builder automatically.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="wizardStep2" class="wizard-step">
+                        <div style="display: flex; flex-direction: column; gap: 14px;">
+                            <div>
+                                <label for="wizardProgramSearch" style="font-weight: 600; color: #0c4a6e;">Quick Search</label>
+                                <input type="text" id="wizardProgramSearch" placeholder="Search by name, location, modality..." oninput="filterWizardPrograms(this.value)" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5f5; font-size: 14px; margin-top: 6px;">
+                            </div>
+                            <div class="wizard-note">Select programs to include. You can refine later in the main builder.</div>
+                            <div id="wizardProgramList" class="wizard-program-list"></div>
+                        </div>
+                    </div>
+
+                    <div id="wizardStep3" class="wizard-step">
+                        <div class="wizard-summary">
+                            <div class="wizard-card">
+                                <h4 style="margin-bottom: 8px; color: #1f2937;">Client Overview</h4>
+                                <p><strong>Name:</strong> <span id="wizardSummaryName">—</span></p>
+                                <p><strong>AT HOME:</strong> <span id="wizardSummaryAtHome">No</span></p>
+                                <p><strong>Alumni:</strong> <span id="wizardSummaryAlumni">No</span></p>
+                            </div>
+                            <div class="wizard-card">
+                                <h4 style="margin-bottom: 8px; color: #1f2937;">Programs Selected</h4>
+                                <ul id="wizardSummaryPrograms" style="margin: 0; padding-left: 18px; color: #374151; font-size: 14px;"></ul>
+                            </div>
+                        </div>
+                        <div class="wizard-note" style="margin-top: 18px;">
+                            Click “Finish & Apply” to push these selections into the builder and jump straight into formatting.
+                        </div>
+                    </div>
+
+                    <div class="wizard-actions">
+                        <button class="wizard-back" onclick="wizardPrevStep()">Back</button>
+                        <button id="wizardNextButton" class="wizard-next" onclick="wizardNextStep()">Next</button>
+                        <button id="wizardFinishButton" class="wizard-finish" style="display: none;" onclick="wizardFinish()">Finish &amp; Apply</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Preview Modal -->
+    <div id="documentPreviewModal" class="modal">
+        <div class="modal-content document-preview-modal">
+            <div class="modal-header">
+                <h2>Document Preview</h2>
+                <button class="modal-close" onclick="closeDocumentPreview()">&times;</button>
+            </div>
+            <div class="modal-body" style="background: #f8fafc;">
+                <div id="documentPreviewContainer" class="document-preview-container"></div>
+            </div>
+            <div class="modal-actions" style="justify-content: space-between;">
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="downloadDocumentPdf()" style="padding: 10px 20px; border-radius: 8px; border: none; background: #4f46e5; color: white; font-weight: 600; cursor: pointer;">⬇️ Download PDF</button>
+                    <button onclick="printDocumentPreview()" style="padding: 10px 20px; border-radius: 8px; border: none; background: #0ea5e9; color: white; font-weight: 600; cursor: pointer;">🖨️ Print</button>
+                </div>
+                <button onclick="closeDocumentPreview()" style="padding: 10px 20px; border-radius: 8px; border: none; background: #e5e7eb; color: #374151; font-weight: 600; cursor: pointer;">Close</button>
             </div>
         </div>
     </div>
@@ -2857,6 +3145,12 @@
         let currentPreviewProgram = null;
         let atHomeProviders = [];
         let draggedItem = null;
+        let wizardState = {
+            currentStep: 1,
+            selectedProgramIds: new Set(),
+            searchTerm: ''
+        };
+        let lastDocumentHtml = '';
         
         // AI Configuration - Choose OpenAI or Anthropic
         const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY_HERE'; // Replace with your OpenAI API key
@@ -2919,6 +3213,10 @@
                         <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
                     </div>
                     <div class="modal-body" style="padding: 20px;">
+                        <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 8px 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                            <span style="color: #f59e0b; font-size: 16px;">⚠️</span>
+                            <span style="color: #92400e;"><strong>PHI Warning:</strong> Only first name is stored. Do not enter full names, DOB, addresses, or any PHI.</span>
+                        </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                             <strong>Stored Documents: ${vault.length}</strong>
                             <div>
@@ -2962,6 +3260,33 @@
             `;
             document.body.appendChild(modal);
         }
+
+                                        const defaultAtHomeLibrary = [
+                                            {
+                                                id: 'library_provider_1',
+                                                name: 'Clear Path Clinical Group',
+                                                service: 'Family Therapy & Parent Coaching',
+                                                phone: '(561) 480-2232',
+                                                website: 'https://clearpathclinical.com',
+                                                address: 'Telehealth (Florida Based)'
+                                            },
+                                            {
+                                                id: 'library_provider_2',
+                                                name: 'Momentum Teen Psychiatry Collective',
+                                                service: 'Psychiatry & Medication Management',
+                                                phone: '(305) 902-7710',
+                                                website: 'https://momentumteenpsychiatry.com',
+                                                address: 'Miami, FL & Virtual'
+                                            },
+                                            {
+                                                id: 'library_provider_3',
+                                                name: 'Thrive Recovery Coaching Alliance',
+                                                service: 'Recovery Coaching & Transport',
+                                                phone: '(770) 407-0768',
+                                                website: 'https://thriverecoveryalliance.com',
+                                                address: 'National Network'
+                                            }
+                                        ];
         
         // View document from vault
         function viewDocument(index) {
@@ -3034,9 +3359,18 @@
                         </div>
                         
                         <div style="margin-bottom: 20px;">
-                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Patient Name:</label>
-                            <input type="text" id="packetClientName" placeholder="Enter patient name" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Client First Name <span style="color: #92400e; font-size: 12px;">(No PHI)</span>:</label>
+                            <input type="text" id="packetClientName" placeholder="First Name Only (Required)" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;" oninput="validateFirstName(this)">
+                            <div id="packetNameWarning" style="color: #dc2626; font-size: 13px; display: none; margin-top: 5px;">Please enter first name only. No full names, DOB, or PHI.</div>
                         </div>
+        // Inline validation for first name only
+        function validateFirstName(input) {
+            const value = input.value.trim();
+            // Disallow spaces, numbers, or special chars (except hyphen/apostrophe)
+            const invalid = /[\s\d@#\$%\^&\*\(\)_\+=\[\]\{\};:,.<>\/?\\|]/.test(value) || value.length > 20;
+            document.getElementById('packetNameWarning').style.display = invalid ? 'block' : 'none';
+            input.style.borderColor = invalid ? '#dc2626' : '#d1d5db';
+        }
                         
                         <div style="margin-bottom: 20px;">
                             <label style="display: block; margin-bottom: 5px; font-weight: bold;">Discharge Date:</label>
@@ -3735,6 +4069,265 @@
                 });
                 grid.appendChild(card);
             });
+        }
+
+        function openIntakeWizard() {
+            const wizardModal = document.getElementById('intakeWizardModal');
+            const wizardClientInput = document.getElementById('wizardClientName');
+            const wizardAtHomeCheckbox = document.getElementById('wizardIncludeAtHome');
+            const wizardAlumniCheckbox = document.getElementById('wizardIncludeAlumni');
+            const mainClientInput = document.getElementById('clientName');
+            const mainAtHome = document.getElementById('includeAtHome');
+            const mainAlumni = document.getElementById('includeAlumni');
+            const searchInput = document.getElementById('wizardProgramSearch');
+
+            if (!wizardModal || !wizardClientInput || !wizardAtHomeCheckbox || !wizardAlumniCheckbox) {
+                console.warn('Wizard elements missing, cannot open guided intake wizard.');
+                return;
+            }
+
+            wizardState.currentStep = 1;
+            wizardState.selectedProgramIds = new Set(selectedPrograms.map(program => program.id));
+            wizardState.searchTerm = '';
+
+            wizardClientInput.value = mainClientInput ? mainClientInput.value : '';
+            wizardClientInput.classList.remove('input-error');
+            wizardClientInput.oninput = () => wizardClientInput.classList.remove('input-error');
+
+            wizardAtHomeCheckbox.checked = mainAtHome ? mainAtHome.checked : false;
+            wizardAlumniCheckbox.checked = mainAlumni ? mainAlumni.checked : false;
+
+            if (searchInput) {
+                searchInput.value = '';
+            }
+
+            renderWizardPrograms();
+            updateWizardSummary();
+            wizardSetStep(1);
+
+            wizardModal.style.display = 'block';
+            requestAnimationFrame(() => wizardModal.classList.add('show'));
+        }
+
+        function closeIntakeWizard() {
+            const wizardModal = document.getElementById('intakeWizardModal');
+            if (!wizardModal) return;
+            wizardModal.classList.remove('show');
+            setTimeout(() => {
+                wizardModal.style.display = 'none';
+            }, 200);
+        }
+
+        function wizardSetStep(step) {
+            wizardState.currentStep = step;
+            const labels = {
+                1: 'Client Setup',
+                2: 'Program Picks',
+                3: 'Review & Apply'
+            };
+
+            const indicators = [1, 2, 3];
+            indicators.forEach(index => {
+                const stepEl = document.getElementById(`wizardStep${index}`);
+                const indicatorEl = document.getElementById(`wizardStepIndicator${index}`);
+                if (stepEl) {
+                    stepEl.classList.toggle('active', index === step);
+                }
+                if (indicatorEl) {
+                    indicatorEl.classList.toggle('active', index <= step);
+                }
+            });
+
+            const labelEl = document.getElementById('wizardStepLabel');
+            if (labelEl) {
+                labelEl.textContent = labels[step] || '';
+            }
+
+            const backBtn = document.querySelector('.wizard-back');
+            if (backBtn) {
+                backBtn.disabled = step === 1;
+                backBtn.style.visibility = step === 1 ? 'hidden' : 'visible';
+            }
+
+            const nextBtn = document.getElementById('wizardNextButton');
+            const finishBtn = document.getElementById('wizardFinishButton');
+
+            if (nextBtn) {
+                nextBtn.style.display = step === 3 ? 'none' : 'inline-flex';
+            }
+
+            if (finishBtn) {
+                finishBtn.style.display = step === 3 ? 'inline-flex' : 'none';
+            }
+        }
+
+        function wizardNextStep() {
+            if (wizardState.currentStep === 1) {
+                const wizardClientInput = document.getElementById('wizardClientName');
+                if (wizardClientInput && !wizardClientInput.value.trim()) {
+                    wizardClientInput.classList.add('input-error');
+                    wizardClientInput.focus();
+                    return;
+                }
+            }
+
+            const nextStep = Math.min(3, wizardState.currentStep + 1);
+            if (nextStep === 2) {
+                renderWizardPrograms();
+            }
+            if (nextStep === 3) {
+                updateWizardSummary();
+            }
+
+            wizardSetStep(nextStep);
+        }
+
+        function wizardPrevStep() {
+            const prevStep = Math.max(1, wizardState.currentStep - 1);
+            wizardSetStep(prevStep);
+            if (prevStep === 3) {
+                updateWizardSummary();
+            }
+        }
+
+        function filterWizardPrograms(term) {
+            wizardState.searchTerm = (term || '').toLowerCase();
+            renderWizardPrograms();
+        }
+
+        function renderWizardPrograms() {
+            const container = document.getElementById('wizardProgramList');
+            if (!container) return;
+
+            const term = wizardState.searchTerm.trim();
+            const results = programs.filter(program => {
+                if (!term) return true;
+                const haystack = `${program.name} ${program.location} ${program.type} ${program.programCategory || ''} ${program.levelOfCare || ''}`.toLowerCase();
+                return haystack.includes(term);
+            }).slice(0, 60);
+
+            if (results.length === 0) {
+                container.innerHTML = '<div class="wizard-no-results">No programs match that search yet. Try a different keyword.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            results.forEach(program => {
+                const isSelected = wizardState.selectedProgramIds.has(program.id);
+                const item = document.createElement('label');
+                item.className = `wizard-program-item${isSelected ? ' active' : ''}`;
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = isSelected;
+                checkbox.addEventListener('change', (event) => {
+                    toggleWizardProgram(program.id, event.target.checked);
+                    if (event.target.checked) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+
+                const meta = document.createElement('div');
+                meta.className = 'wizard-program-meta';
+                meta.innerHTML = `
+                    <div class="name">${program.name}</div>
+                    <div class="location">${program.location}</div>
+                    <div class="chips">
+                        <span class="chip">${program.type}</span>
+                        ${program.levelOfCare ? `<span class="chip">${program.levelOfCare}</span>` : ''}
+                    </div>
+                `;
+
+                item.appendChild(checkbox);
+                item.appendChild(meta);
+                container.appendChild(item);
+            });
+        }
+
+        function toggleWizardProgram(programId, isChecked) {
+            if (isChecked) {
+                wizardState.selectedProgramIds.add(programId);
+            } else {
+                wizardState.selectedProgramIds.delete(programId);
+            }
+            updateWizardSummary();
+        }
+
+        function updateWizardSummary() {
+            const nameEl = document.getElementById('wizardSummaryName');
+            const atHomeEl = document.getElementById('wizardSummaryAtHome');
+            const alumniEl = document.getElementById('wizardSummaryAlumni');
+            const listEl = document.getElementById('wizardSummaryPrograms');
+            const wizardClientInput = document.getElementById('wizardClientName');
+            const wizardAtHomeCheckbox = document.getElementById('wizardIncludeAtHome');
+            const wizardAlumniCheckbox = document.getElementById('wizardIncludeAlumni');
+
+            if (nameEl && wizardClientInput) {
+                const name = wizardClientInput.value.trim();
+                nameEl.textContent = name || '—';
+            }
+
+            if (atHomeEl && wizardAtHomeCheckbox) {
+                atHomeEl.textContent = wizardAtHomeCheckbox.checked ? 'Yes' : 'No';
+            }
+
+            if (alumniEl && wizardAlumniCheckbox) {
+                alumniEl.textContent = wizardAlumniCheckbox.checked ? 'Yes' : 'No';
+            }
+
+            if (listEl) {
+                listEl.innerHTML = '';
+                const summaryPrograms = programs.filter(program => wizardState.selectedProgramIds.has(program.id));
+                if (summaryPrograms.length === 0) {
+                    listEl.innerHTML = '<li style="color: #6b7280;">No programs selected yet</li>';
+                } else {
+                    summaryPrograms.forEach(program => {
+                        const li = document.createElement('li');
+                        li.textContent = `${program.name} — ${program.location}`;
+                        listEl.appendChild(li);
+                    });
+                }
+            }
+        }
+
+        function wizardFinish() {
+            const wizardClientInput = document.getElementById('wizardClientName');
+            if (wizardClientInput && !wizardClientInput.value.trim()) {
+                wizardClientInput.classList.add('input-error');
+                wizardClientInput.focus();
+                return;
+            }
+
+            const mainClientInput = document.getElementById('clientName');
+            const wizardAtHomeCheckbox = document.getElementById('wizardIncludeAtHome');
+            const wizardAlumniCheckbox = document.getElementById('wizardIncludeAlumni');
+            const mainAtHome = document.getElementById('includeAtHome');
+            const mainAlumni = document.getElementById('includeAlumni');
+
+            if (mainClientInput && wizardClientInput) {
+                mainClientInput.value = wizardClientInput.value.trim();
+            }
+
+            if (mainAtHome && wizardAtHomeCheckbox) {
+                mainAtHome.checked = wizardAtHomeCheckbox.checked;
+                toggleAtHomeSection();
+            }
+
+            if (mainAlumni && wizardAlumniCheckbox) {
+                mainAlumni.checked = wizardAlumniCheckbox.checked;
+            }
+
+            const updatedSelection = programs.filter(program => wizardState.selectedProgramIds.has(program.id));
+            selectedPrograms = updatedSelection;
+
+            updateSelectionPanel();
+            renderPrograms();
+            updateWizardSummary();
+            closeIntakeWizard();
+            showSuccessMessage('Wizard selections applied to builder.');
         }
         
         // Handle program clicks
@@ -5135,7 +5728,7 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             section.style.display = checkbox.checked ? 'block' : 'none';
             
             if (checkbox.checked && atHomeProviders.length === 0) {
-                addAtHomeProvider(); // Add first provider automatically
+                loadAtHomeSuggestions();
             }
         }
         
@@ -5152,6 +5745,31 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             
             atHomeProviders.push(provider);
             renderAtHomeProviders();
+        }
+
+        function loadAtHomeSuggestions() {
+            const seenKeys = new Set(atHomeProviders.map(provider => `${provider.name}|${provider.phone}`));
+            defaultAtHomeLibrary.forEach(suggestion => {
+                const key = `${suggestion.name}|${suggestion.phone}`;
+                if (!seenKeys.has(key)) {
+                    atHomeProviders.push({
+                        id: `${suggestion.id}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+                        name: suggestion.name,
+                        service: suggestion.service,
+                        phone: suggestion.phone,
+                        website: suggestion.website,
+                        address: suggestion.address
+                    });
+                    seenKeys.add(key);
+                }
+            });
+
+            if (atHomeProviders.length === 0) {
+                addAtHomeProvider();
+            } else {
+                renderAtHomeProviders();
+                showSuccessMessage('Loaded suggested AT HOME providers. Review details before sharing.');
+            }
         }
         
         function removeAtHomeProvider(providerId) {
@@ -6038,10 +6656,21 @@ Set Confidence to "low" since this is URL-based inference.`;
         }
         
         function generateDocument() {
-            const clientName = document.getElementById('clientName').value;
+            const clientNameInput = document.getElementById('clientName');
+            const clientName = clientNameInput ? clientNameInput.value.trim() : '';
             
             if (!clientName) {
                 alert('Please enter client name!');
+                if (clientNameInput) {
+                    clientNameInput.focus();
+                    clientNameInput.classList.add('input-error');
+                    setTimeout(() => clientNameInput.classList.remove('input-error'), 1200);
+                }
+                return;
+            }
+            
+            if (selectedPrograms.length === 0) {
+                alert('Please select at least one program to include in the document.');
                 return;
             }
             
@@ -6351,11 +6980,15 @@ Set Confidence to "low" since this is URL-based inference.`;
                 </div>
             `;
             
-            // Set the document content
-            document.getElementById('documentOutput').innerHTML = html;
-            
-            // Print the document
-            window.print();
+            // Cache generated document for preview, printing, and downloads
+            lastDocumentHtml = html;
+            const outputContainer = document.getElementById('documentOutput');
+            if (outputContainer) {
+                outputContainer.innerHTML = html;
+            }
+            renderDocumentPreview(html);
+            openDocumentPreview();
+            showSuccessMessage('Document ready — review before printing.');
             
             // Save to vault and history with enhanced metadata
             const vaultDoc = {
@@ -6385,6 +7018,121 @@ Set Confidence to "low" since this is URL-based inference.`;
         }
         
         // ================ ENHANCED FUNCTIONS ================
+
+        function renderDocumentPreview(html) {
+            const container = document.getElementById('documentPreviewContainer');
+            if (container) {
+                container.innerHTML = html;
+            }
+        }
+
+        function openDocumentPreview() {
+            const modal = document.getElementById('documentPreviewModal');
+            if (!modal) return;
+            modal.style.display = 'block';
+            requestAnimationFrame(() => modal.classList.add('show'));
+        }
+
+        function closeDocumentPreview() {
+            const modal = document.getElementById('documentPreviewModal');
+            if (!modal) return;
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 200);
+        }
+
+        function getDocumentStyles() {
+            const styleTags = Array.from(document.querySelectorAll('head style, head link[rel="stylesheet"]'));
+            return styleTags.map(tag => {
+                if (tag.tagName === 'STYLE') {
+                    return tag.innerHTML;
+                }
+                if (tag.tagName === 'LINK' && tag.href) {
+                    return `@import url('${tag.href}');`;
+                }
+                return '';
+            }).join('\n');
+        }
+
+        function printDocumentPreview() {
+            if (!lastDocumentHtml) {
+                alert('Generate the document before printing.');
+                return;
+            }
+
+            const printWindow = window.open('', '_blank', 'noopener');
+            if (!printWindow) {
+                alert('Unable to open print window. Please allow popups for this site.');
+                return;
+            }
+
+            const styles = getDocumentStyles();
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Aftercare Recommendations</title>
+                    <style>${styles}</style>
+                </head>
+                <body>${lastDocumentHtml}</body>
+                </html>
+            `);
+            printWindow.document.close();
+            setTimeout(() => {
+                printWindow.focus();
+                printWindow.print();
+            }, 300);
+        }
+
+        async function downloadDocumentPdf() {
+            if (!lastDocumentHtml) {
+                alert('Generate the document before downloading.');
+                return;
+            }
+
+            const previewContainer = document.getElementById('documentPreviewContainer');
+            if (!previewContainer) {
+                alert('Preview not available.');
+                return;
+            }
+
+            const sandbox = document.createElement('div');
+            sandbox.style.position = 'fixed';
+            sandbox.style.left = '-9999px';
+            sandbox.style.top = '0';
+            sandbox.style.width = '612px';
+            sandbox.style.background = 'white';
+            const clone = previewContainer.cloneNode(true);
+            clone.style.width = '540px';
+            clone.style.margin = '0 auto';
+            sandbox.appendChild(clone);
+            document.body.appendChild(sandbox);
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'pt', 'letter');
+                await pdf.html(clone, {
+                    callback: (doc) => {
+                        const clientName = (document.getElementById('clientName').value || 'aftercare').trim() || 'aftercare';
+                        const filename = `${clientName.replace(/\s+/g, '-').toLowerCase()}-recommendations.pdf`;
+                        doc.save(filename);
+                    },
+                    margin: [36, 36, 36, 36],
+                    autoPaging: 'text',
+                    html2canvas: {
+                        scale: 0.72,
+                        useCORS: true,
+                        logging: false
+                    }
+                });
+            } catch (error) {
+                console.error('PDF generation failed:', error);
+                alert('Unable to generate PDF. Please try printing to PDF instead.');
+            } finally {
+                document.body.removeChild(sandbox);
+            }
+        }
         
         // Storage Keys
         const STORAGE_KEYS = {
