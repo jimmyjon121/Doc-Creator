@@ -8,6 +8,7 @@
     <!-- PDF Libraries for document merging -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <!-- PWA Meta Tags -->
     <meta name="description" content="Family First Adolescent Services - Document Creation Tool">
@@ -16,28 +17,496 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="FFAS Docs">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232196a6'/%3E%3Cpath d='M 20 15 Q 32 12 44 15 L 40 22 Q 32 20 24 22 Q 18 28 18 38 L 26 38 Q 26 32 29 29 Q 32 27 37 28 L 35 33 Q 32 32 30 33 Q 28 35 28 38 L 36 38 Q 36 35 37 33 Q 40 32 44 33 L 42 38 Q 38 37 37 38 Q 36 40 36 45 L 29 45 Q 29 42 26 42 L 18 45 Q 15 32 22 22 Q 26 18 32 15' fill='white'/%3E%3C/svg%3E">
-            },
+    
+    <style>
+        /* Modern UI Enhancement Styles - Override Existing */
+        
+        /* Beautiful Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes modalSlideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        
+        @keyframes slideIn {
+            from { 
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to { 
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from { 
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to { 
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        /* Override Program Cards for Better Look */
+        .program-card {
+            background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%) !important;
+            padding: 24px !important;
+            border-radius: 16px !important;
+            border: 2px solid transparent !important;
+            cursor: pointer !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative !important;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .program-card:hover {
+            transform: translateY(-6px) scale(1.02) !important;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.18) !important;
+            border-color: #667eea !important;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%) !important;
+        }
+        
+        .program-card.selected {
+            background: linear-gradient(135deg, #f0f4ff, #e5edff) !important;
+            border: 2px solid #667eea !important;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.28) !important;
+            transform: scale(1.02) !important;
+        }
+        
+        /* Beautiful Buttons */
+        .btn-primary, button[onclick*="generate"] {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            padding: 14px 28px !important;
+            border: none !important;
+            border-radius: 12px !important;
+            cursor: pointer !important;
+            font-weight: 600 !important;
+            font-size: 15px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+        
+        .btn-primary:hover, button[onclick*="generate"]:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.45) !important;
+        }
+        
+        .btn-primary:active, button[onclick*="generate"]:active {
+            transform: translateY(-1px) !important;
+        }
+        
+        /* Modern Modal Overlay */
+        .modal {
+            background-color: rgba(0,0,0,0.7) !important;
+            backdrop-filter: blur(10px) !important;
+            animation: modalFadeIn 0.3s ease !important;
+        }
+        
+        .modal-content {
+            border-radius: 20px !important;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3) !important;
+            animation: modalSlideIn 0.3s ease !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
+            padding: 25px 30px !important;
+            border-radius: 20px 20px 0 0 !important;
+        }
+        
+        .modal-header h2 {
+            color: white !important;
+            font-weight: 600 !important;
+            font-size: 24px !important;
+        }
+        
+        /* Input Field Styling */
+        input[type="text"], input[type="email"], input[type="password"], textarea, select {
+            padding: 12px 16px !important;
+            border-radius: 10px !important;
+            border: 2px solid #e5e7eb !important;
+            font-size: 15px !important;
+            transition: all 0.3s ease !important;
+            background: white !important;
+        }
+        
+        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
+            border-color: #667eea !important;
+            outline: none !important;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
+        }
+        
+        /* Checkbox and Radio Styling */
+        input[type="checkbox"], input[type="radio"] {
+            width: 20px !important;
+            height: 20px !important;
+            cursor: pointer !important;
+            accent-color: #667eea !important;
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5a67d8, #6b46a2);
+        }
+        
+        /* Loading Animation */
+        .loading {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .loading::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+        
+        /* Smooth Transitions for All Interactive Elements */
+        button, a, input, textarea, select, .card, .panel {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        
+        /* Responsive Design Improvements */
+        @media screen and (max-width: 1200px) {
+            .container {
+                max-width: 100%;
+                padding: 15px;
+            }
+            
         .main-content {
-            display: flex;
+                flex-direction: column;
+            }
+            
+            .selection-panel {
+                width: 100%;
+                max-width: 100%;
+                border-left: none;
+                border-top: 2px solid #e5e7eb;
+                margin-top: 20px;
+                position: relative;
+                top: 0;
+            }
+            
+            .programs-panel {
+                max-height: none;
+            }
+        }
+        
+        @media screen and (max-width: 768px) {
+            .header {
+                padding: 20px;
+                text-align: center;
+            }
+            
+            .header h1 {
+                font-size: 24px !important;
+            }
+            
+            .program-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 20px auto;
+                max-height: 95vh;
+            }
+            
+            .wizard-steps {
+                gap: 8px;
+            }
+            
+            .wizard-step-indicator {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+            
+            .btn-primary, button[onclick*="generate"] {
+                padding: 12px 20px !important;
+                font-size: 14px !important;
+            }
+            
+            .doc-type-buttons {
+                flex-direction: column;
+            }
+            
+            .doc-type-btn {
+                width: 100%;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            .programs-panel, .selection-panel {
+                padding: 15px;
+            }
+            
+            .program-card {
+                padding: 16px !important;
+            }
+            
+            input[type="text"], textarea, select {
+                font-size: 16px !important; /* Prevents zoom on iOS */
+            }
+            
+            .modal-header {
+                padding: 20px !important;
+            }
+            
+            .modal-header h2 {
+                font-size: 20px !important;
+            }
+            
+            .wizard-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .wizard-actions button {
+                width: 100%;
+            }
+        }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                background: white !important;
+            }
+            
+            .theme-toggle, .modal, button {
+                display: none !important;
+            }
+            
+            .container {
+                box-shadow: none !important;
+                max-width: 100% !important;
+            }
+        }
+        
+        /* High Contrast Mode Support */
+        @media (prefers-contrast: high) {
+            .program-card {
+                border: 3px solid #000 !important;
+            }
+            
+            .btn-primary {
+                border: 2px solid #000 !important;
+            }
+            
+            input, textarea, select {
+                border: 2px solid #000 !important;
+            }
+        }
+        
+        /* Reduced Motion Support */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* Additional Polish */
+        .guided-btn {
+            background: linear-gradient(135deg, #34d399, #059669) !important;
+            color: white !important;
+            font-weight: 600 !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 14px 24px !important;
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.3) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        
+        .guided-btn:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 10px 28px rgba(5, 150, 105, 0.4) !important;
+        }
+        
+        .wizard-back {
+            background: #e5e7eb !important;
+            color: #374151 !important;
+        }
+        
+        .wizard-back:hover {
+            background: #d1d5db !important;
+        }
+        
+        .wizard-next {
+            background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+            color: white !important;
+        }
+        
+        .wizard-next:hover {
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4) !important;
+        }
+        
+        .wizard-finish {
+            background: linear-gradient(135deg, #10b981, #059669) !important;
+            color: white !important;
+        }
+        
+        .wizard-finish:hover {
+            box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4) !important;
+        }
+        
+        /* Fix overlapping elements */
+        .selection-panel {
+            z-index: 10;
+            visibility: visible !important;
+        }
+
+        .programs-panel {
+            z-index: 5;
+        }
+
+        .header {
+            z-index: 20;
+        }
+        
+        /* Ensure text is readable */
+        h1, h2, h3, h4, h5, h6 {
+            line-height: 1.4;
+            margin-bottom: 0.5em;
+        }
+        
+        p {
+            line-height: 1.6;
+            margin-bottom: 1em;
+        }
+        
+        /* Better focus states */
+        a:focus, button:focus, input:focus, textarea:focus, select:focus {
+            outline: 3px solid rgba(102, 126, 234, 0.5) !important;
+            outline-offset: 2px;
+        }
+        
+    </style>
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0099cc 0%, #006699 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: white;
+            box-shadow: 0 4px 20px rgba(0, 153, 204, 0.25);
+        }
+
+        .main-content {
+            display: grid !important;
+            grid-template-columns: 1fr 440px; /* left: programs, right: controls */
+            gap: 20px;
             min-height: 600px;
+            position: relative;
+            align-items: start;
+            visibility: visible !important;
         }
         
         .programs-panel {
-            flex: 1;
             padding: 30px;
             overflow-y: auto;
-            background: #f8fafb;
-            max-height: 70vh;
+            background: #ffffff;
+            max-height: 85vh;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: relative;
+            z-index: 1;
         }
         
         .selection-panel {
-            width: 450px;
+            width: 440px;
             background: white;
-            border-left: 1px solid #e5e7eb;
+            border: 1px solid #e5e7eb;
             padding: 30px;
-            display: flex;
+            display: flex !important;
             flex-direction: column;
-            box-shadow: -4px 0 12px rgba(0,0,0,0.03);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 12px;
+            position: sticky;
+            top: 20px;
+            max-height: 85vh;
+            overflow-y: auto;
+            z-index: 10;
         }
         
         .document-type-selector {
@@ -99,72 +568,109 @@
 
         .intake-wizard-modal {
             max-width: 760px;
+            animation: modalSlideIn 0.3s ease;
         }
 
         .intake-wizard {
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 20px;
+            padding: 10px;
         }
 
         .wizard-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 12px;
+            gap: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
         }
 
         .wizard-steps {
             display: flex;
-            gap: 12px;
+            gap: 15px;
             align-items: center;
+            position: relative;
+        }
+
+        .wizard-steps::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background: #e5e7eb;
+            z-index: 0;
         }
 
         .wizard-step-indicator {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 34px;
-            height: 34px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            border: 2px solid #cbd5f5;
-            color: #4c51bf;
-            font-weight: 600;
             background: white;
+            color: #9ca3af;
+            font-weight: bold;
+            border: 3px solid #e5e7eb;
             transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
         }
 
         .wizard-step-indicator.active {
-            background: #4f46e5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            border-color: #4338ca;
-            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+            border-color: #667eea;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            transform: scale(1.1);
+        }
+
+        .wizard-step-indicator.completed {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
         }
 
         .wizard-step {
             display: none;
-            background: #f8fafc;
-            border-radius: 12px;
-            border: 1px solid #e0e7ff;
-            padding: 20px;
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            padding: 30px;
+            min-height: 350px;
+            animation: fadeIn 0.4s ease;
         }
 
         .wizard-step.active {
             display: block;
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .wizard-actions {
             display: flex;
-            justify-content: flex-end;
-            gap: 10px;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
         }
 
         .wizard-actions button {
-            padding: 10px 18px;
-            border-radius: 8px;
+            padding: 12px 24px;
+            border-radius: 10px;
             border: none;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 15px;
         }
 
         .wizard-actions .wizard-back {
@@ -491,6 +997,8 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 15px;
+            padding: 0;
+            margin-top: 15px;
         }
         
         .program-card {
@@ -573,8 +1081,11 @@
         }
         
         .selected-section {
-            flex: 1;
+            flex: 0 1 auto;
+            min-height: 150px;
+            max-height: 300px;
             overflow-y: auto;
+            margin-bottom: 20px;
         }
         
         .section-title {
@@ -658,16 +1169,18 @@
             background: linear-gradient(135deg, #0099cc, #0077aa);
             color: white;
             border: none;
-            padding: 16px 24px;
+            padding: 12px 20px;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 24px;
+            margin: 0;
             transition: all 0.2s ease;
             box-shadow: 0 4px 12px rgba(0,153,204,0.3);
             width: 100%;
             letter-spacing: 0.5px;
+            min-height: 44px;
+            max-height: 44px;
         }
         
         .generate-btn:hover {
@@ -720,6 +1233,16 @@
             padding: 15px;
             font-style: italic;
             font-size: 13px;
+        }
+        
+        #selectedList {
+            min-height: 80px;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            padding: 10px;
         }
         
         /* Dark Mode Styles */
@@ -1280,10 +1803,10 @@
         }
         
         .doc-intro {
-            font-size: 10pt;
+            font-size: 9pt;
+            font-weight: bold;
             margin-bottom: 18pt;
-            font-style: italic;
-            text-decoration: underline;
+            line-height: 1.4;
         }
         
         /* Section headers - H1-style */
@@ -1515,10 +2038,11 @@
         </div>
         
         <div class="main-content">
+            <!-- Left Panel: Program List -->
             <div class="programs-panel">
-                <div class="instructions">
-                    <h3>📋 How to Create Professional Documents:</h3>
-                    <ul>
+                <div class="instructions" style="margin-bottom: 15px; padding: 15px; background: #fef3c7; border-radius: 8px; border: 1px solid #f59e0b;">
+                    <h3 style="margin-top: 0; font-size: 16px; color: #92400e;">📋 How to Create Professional Documents:</h3>
+                    <ul style="margin: 10px 0 0 0; padding-left: 20px; font-size: 13px; color: #78350f;">
                         <li>Select <strong>"Options"</strong> for multiple program recommendations</li>
                         <li>Select <strong>"Plans"</strong> for single program (discharge facesheet)</li>
                         <li>Click the <strong>"i"</strong> button to preview program details</li>
@@ -1565,9 +2089,11 @@
                 
             </div>
             
+            <!-- Right Panel: Selected Programs & Controls -->
             <div class="selection-panel">
-                <div class="document-type-selector">
-                    <h3 style="font-size: 14px; color: #0099cc; margin-bottom: 8px;">Document Type:</h3>
+
+                <div class="document-type-selector" style="margin-bottom: 20px; display: block !important; visibility: visible !important;">
+                    <h3 style="font-size: 14px; color: #0099cc; margin-bottom: 8px; display: block !important;">Document Type:</h3>
                     <div class="doc-type-buttons">
                         <button class="doc-type-btn active" onclick="setDocumentType('options', this)">OPTIONS (Multiple)</button>
                         <button class="doc-type-btn" onclick="setDocumentType('plans', this)">PLANS (Single)</button>
@@ -1593,17 +2119,97 @@
                         <input type="checkbox" id="includeAlumni" style="width: 18px; height: 18px; cursor: pointer;">
                         <span>Include Alumni Services</span>
                     </label>
+                </div>
+
+                <!-- Case Manager Options Section -->
+                <div style="margin-top: 15px; margin-bottom: 15px; padding: 15px; background: linear-gradient(135deg, #f0f4ff, #e5edff); border-radius: 12px; border: 1px solid #667eea;">
+                    <h4 style="margin: 0 0 12px 0; color: #4c1d95; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                        <span>👥</span> Case Manager Options
+                    </h4>
                     
-                    <!-- AT HOME Providers Section -->
+                    <div style="display: grid; gap: 8px;">
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                            <input type="checkbox" id="includeInsurance" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span>Include Insurance Information</span>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                            <input type="checkbox" id="includeTransportation" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span>Include Transportation Resources</span>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                            <input type="checkbox" id="includeEmergencyContacts" style="width: 16px; height: 16px; cursor: pointer;" checked>
+                            <span>Include Emergency Contacts</span>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                            <input type="checkbox" id="includeMedManagement" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span>Include Medication Management Info</span>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                            <input type="checkbox" id="includeFinancialInfo" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span>Include Financial Assistance Options</span>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+                            <input type="checkbox" id="includeWaitlist" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span>Include Waitlist Information</span>
+                        </label>
+                    </div>
+                    
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(102, 126, 234, 0.2);">
+                        <label style="display: block; font-size: 13px; margin-bottom: 8px; color: #4c1d95; font-weight: 600;">
+                            Priority Level:
+                        </label>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="priority-btn" onclick="setPriority('urgent', this)" style="padding: 6px 12px; background: white; border: 1px solid #dc2626; color: #dc2626; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+                                🔴 Urgent
+                            </button>
+                            <button type="button" class="priority-btn active" onclick="setPriority('high', this)" style="padding: 6px 12px; background: #fbbf24; border: 1px solid #f59e0b; color: #92400e; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+                                🟡 High
+                            </button>
+                            <button type="button" class="priority-btn" onclick="setPriority('standard', this)" style="padding: 6px 12px; background: white; border: 1px solid #10b981; color: #059669; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+                                🟢 Standard
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 12px;">
+                        <label style="display: block; font-size: 13px; margin-bottom: 6px; color: #4c1d95; font-weight: 600;">
+                            Case Notes (Optional):
+                        </label>
+                        <textarea id="caseNotes" placeholder="Add any case management notes or special considerations..." 
+                            style="width: 100%; min-height: 60px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; resize: vertical;"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Quick Action Buttons -->
+                <div style="margin-top: 10px; margin-bottom: 15px; padding: 12px; background: #f8fafc; border-radius: 10px;">
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" onclick="selectLevelOfCare('PHP')" style="padding: 6px 14px; background: white; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+                            Select All PHP
+                        </button>
+                        <button type="button" onclick="selectLevelOfCare('IOP')" style="padding: 6px 14px; background: white; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+                            Select All IOP
+                        </button>
+                        <button type="button" onclick="selectVirtualPrograms()" style="padding: 6px 14px; background: white; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+                            Select Virtual Only
+                        </button>
+                        <button type="button" onclick="clearAllSelections()" style="padding: 6px 14px; background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">
+                            Clear All
+                        </button>
+                    </div>
+                </div>
+                    
+                <!-- Original AT HOME Providers Section -->
                     <div id="atHomeSection" style="display: none; margin-top: 15px; padding: 15px; border: 1px solid #e0e7ff; border-radius: 8px; background: #f8fafc;">
                         <h4 style="margin: 0 0 15px 0; color: #0099cc;">AT HOME Providers</h4>
                         <div id="atHomeProviders"></div>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
                             <button type="button" onclick="addAtHomeProvider()" style="padding: 8px 16px; background: #0099cc; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
                                 + Add Provider
-                            </button>
-                            <button type="button" onclick="loadAtHomeSuggestions()" style="padding: 8px 16px; background: #e0e7ff; color: #1d4ed8; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
-                                📚 Load Suggestions
                             </button>
                         </div>
                     </div>
@@ -1616,9 +2222,11 @@
                     </div>
                 </div>
                 
-                <button class="generate-btn" id="generateBtn" onclick="generateDocument()">
-                    📄 GENERATE DOCUMENT
-                </button>
+                <div style="margin-top: 16px;">
+                    <button class="generate-btn" id="generateBtn" onclick="generateDocument()">
+                        📄 GENERATE DOCUMENT
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1919,7 +2527,7 @@
             </div>
             <div class="modal-actions" style="justify-content: space-between;">
                 <div style="display: flex; gap: 10px;">
-                    <button onclick="downloadDocumentPdf()" style="padding: 10px 20px; border-radius: 8px; border: none; background: #4f46e5; color: white; font-weight: 600; cursor: pointer;">⬇️ Download PDF</button>
+                    <button onclick="downloadDocumentPdf(event)" style="padding: 10px 20px; border-radius: 8px; border: none; background: #4f46e5; color: white; font-weight: 600; cursor: pointer;">⬇️ Download PDF</button>
                     <button onclick="printDocumentPreview()" style="padding: 10px 20px; border-radius: 8px; border: none; background: #0ea5e9; color: white; font-weight: 600; cursor: pointer;">🖨️ Print</button>
                 </div>
                 <button onclick="closeDocumentPreview()" style="padding: 10px 20px; border-radius: 8px; border: none; background: #e5e7eb; color: #374151; font-weight: 600; cursor: pointer;">Close</button>
@@ -3828,10 +4436,26 @@
         }
         
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded - Starting initialization...');
+
             // Load any saved custom programs first
             loadCustomPrograms();
             console.log('Programs loaded:', programs.length);
+            console.log('First program:', programs[0]);
+
+            // DEBUG: Check if selection panel exists
+            const selectionPanel = document.querySelector('.selection-panel');
+            console.log('Selection panel found:', !!selectionPanel);
+
+            if (selectionPanel) {
+                console.log('Selection panel styles:', window.getComputedStyle(selectionPanel));
+            }
+
+            // Add a small delay to ensure DOM is fully ready
+            setTimeout(() => {
             renderPrograms();
+                console.log('Programs rendered');
+            }, 100);
             
             // Search functionality (combined with active filter)
             document.getElementById('searchBox').addEventListener('input', function(e) {
@@ -4036,13 +4660,23 @@
             const grid = document.getElementById('programGrid');
             if (!grid) {
                 console.error('programGrid element not found!');
+                alert('Error: Program grid not found. Please refresh the page.');
                 return;
             }
             
             // Use provided programs or fall back to filtered programs
             const programList = programsToRender || getFilteredPrograms();
             console.log('Rendering', programList.length, 'programs');
+            
+            // Clear and ensure grid is visible
             grid.innerHTML = '';
+            grid.style.display = 'grid';
+            
+            // Show message if no programs
+            if (programList.length === 0) {
+                grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No programs found. Try adjusting your filters.</div>';
+                return;
+            }
             
             programList.forEach(program => {
                 const card = document.createElement('div');
@@ -5726,10 +6360,6 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             const checkbox = document.getElementById('includeAtHome');
             const section = document.getElementById('atHomeSection');
             section.style.display = checkbox.checked ? 'block' : 'none';
-            
-            if (checkbox.checked && atHomeProviders.length === 0) {
-                loadAtHomeSuggestions();
-            }
         }
         
         function addAtHomeProvider() {
@@ -5747,30 +6377,10 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             renderAtHomeProviders();
         }
 
-        function loadAtHomeSuggestions() {
-            const seenKeys = new Set(atHomeProviders.map(provider => `${provider.name}|${provider.phone}`));
-            defaultAtHomeLibrary.forEach(suggestion => {
-                const key = `${suggestion.name}|${suggestion.phone}`;
-                if (!seenKeys.has(key)) {
-                    atHomeProviders.push({
-                        id: `${suggestion.id}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-                        name: suggestion.name,
-                        service: suggestion.service,
-                        phone: suggestion.phone,
-                        website: suggestion.website,
-                        address: suggestion.address
-                    });
-                    seenKeys.add(key);
-                }
-            });
-
-            if (atHomeProviders.length === 0) {
-                addAtHomeProvider();
-            } else {
-                renderAtHomeProviders();
-                showSuccessMessage('Loaded suggested AT HOME providers. Review details before sharing.');
-            }
-        }
+        // REMOVED: loadAtHomeSuggestions function
+        // This was intended to pre-populate common AT HOME therapy providers
+        // to save time for case managers, but it's better to manually add
+        // specific providers as needed for each client's situation
         
         function removeAtHomeProvider(providerId) {
             atHomeProviders = atHomeProviders.filter(p => p.id !== providerId);
@@ -7085,53 +7695,205 @@ Set Confidence to "low" since this is URL-based inference.`;
             }, 300);
         }
 
-        async function downloadDocumentPdf() {
-            if (!lastDocumentHtml) {
-                alert('Generate the document before downloading.');
-                return;
-            }
-
+        async function downloadDocumentPdf(event) {
+            // Check if there's content to download
             const previewContainer = document.getElementById('documentPreviewContainer');
-            if (!previewContainer) {
-                alert('Preview not available.');
+            if (!previewContainer || !previewContainer.innerHTML.trim()) {
+                // If no preview, check if there's a generated document
+                const outputContainer = document.getElementById('documentOutput');
+                if (!outputContainer || !outputContainer.innerHTML.trim()) {
+                    alert('Please generate a document first before downloading.');
                 return;
+                }
+                // Use the generated document if preview is not available
+                previewContainer.innerHTML = outputContainer.innerHTML;
             }
 
-            const sandbox = document.createElement('div');
-            sandbox.style.position = 'fixed';
-            sandbox.style.left = '-9999px';
-            sandbox.style.top = '0';
-            sandbox.style.width = '612px';
-            sandbox.style.background = 'white';
-            const clone = previewContainer.cloneNode(true);
-            clone.style.width = '540px';
-            clone.style.margin = '0 auto';
-            sandbox.appendChild(clone);
-            document.body.appendChild(sandbox);
+            // Show loading indicator
+            const originalButtonText = event?.target?.innerHTML;
+            if (event?.target) {
+                event.target.innerHTML = '⏳ Generating PDF...';
+                event.target.disabled = true;
+            }
 
             try {
+                // Check if jsPDF is loaded
+                if (!window.jspdf) {
+                    throw new Error('PDF library not loaded. Please refresh the page and try again.');
+                }
+
+                // Create a clean container for PDF generation
+                const pdfContainer = document.createElement('div');
+                pdfContainer.style.position = 'absolute';
+                pdfContainer.style.left = '-9999px';
+                pdfContainer.style.top = '0';
+                pdfContainer.style.width = '612px'; // Letter width in points
+                pdfContainer.style.padding = '36px';
+                pdfContainer.style.background = 'white';
+                pdfContainer.style.fontFamily = 'Arial, sans-serif';
+                
+                // Clone and clean the content
+                const contentClone = previewContainer.cloneNode(true);
+                contentClone.style.width = '100%';
+                contentClone.style.margin = '0';
+                contentClone.style.padding = '0';
+                
+                // Remove any buttons or interactive elements
+                const buttons = contentClone.querySelectorAll('button');
+                buttons.forEach(btn => btn.remove());
+                
+                pdfContainer.appendChild(contentClone);
+                document.body.appendChild(pdfContainer);
+
+                // Generate PDF using jsPDF
                 const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'pt', 'letter');
-                await pdf.html(clone, {
-                    callback: (doc) => {
-                        const clientName = (document.getElementById('clientName').value || 'aftercare').trim() || 'aftercare';
-                        const filename = `${clientName.replace(/\s+/g, '-').toLowerCase()}-recommendations.pdf`;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'pt',
+                    format: 'letter'
+                });
+
+                // Use html2canvas for better rendering
+                await pdf.html(pdfContainer, {
+                    callback: function(doc) {
+                        // Get client name for filename
+                        const clientNameInput = document.getElementById('clientName');
+                        const clientName = clientNameInput ? 
+                            (clientNameInput.value || 'Client').trim().replace(/[^a-zA-Z0-9]/g, '-') : 
+                            'Client';
+                        
+                        const date = new Date().toISOString().split('T')[0];
+                        const filename = `${clientName}_Aftercare_${date}.pdf`;
+                        
+                        // Save the PDF
                         doc.save(filename);
+                        
+                        // Show success message
+                        showSuccessMessage('PDF downloaded successfully!');
                     },
+                    x: 10,
+                    y: 10,
+                    width: 580, // Adjusted for margins
+                    windowWidth: 650,
                     margin: [36, 36, 36, 36],
                     autoPaging: 'text',
                     html2canvas: {
-                        scale: 0.72,
+                        scale: 0.8,
                         useCORS: true,
-                        logging: false
+                        logging: false,
+                        letterRendering: true,
+                        imageTimeout: 0
                     }
                 });
+
             } catch (error) {
-                console.error('PDF generation failed:', error);
-                alert('Unable to generate PDF. Please try printing to PDF instead.');
+                console.error('PDF generation error:', error);
+                
+                // Fallback to simple download method
+                try {
+                    fallbackDownloadMethod();
+                } catch (fallbackError) {
+                    console.error('Fallback download failed:', fallbackError);
+                    alert('Unable to generate PDF. Please try the Print option and save as PDF instead.');
+                }
             } finally {
-                document.body.removeChild(sandbox);
+                // Clean up
+                const pdfContainer = document.querySelector('div[style*="-9999px"]');
+                if (pdfContainer) {
+                    document.body.removeChild(pdfContainer);
+                }
+                
+                // Restore button
+                if (event?.target) {
+                    event.target.innerHTML = originalButtonText || '⬇️ Download PDF';
+                    event.target.disabled = false;
+                }
             }
+        }
+
+        // Fallback download method using data URL
+        function fallbackDownloadMethod() {
+            const previewContainer = document.getElementById('documentPreviewContainer');
+            const content = previewContainer ? previewContainer.innerHTML : lastDocumentHtml;
+            
+            if (!content) {
+                throw new Error('No content to download');
+            }
+
+            // Create a complete HTML document
+            const fullHtml = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Aftercare Recommendations</title>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            margin: 40px;
+                        }
+                        h1 { color: #0099cc; }
+                        h2 { color: #333; margin-top: 30px; }
+                        h3 { color: #666; }
+                        .program-section {
+                            margin-bottom: 30px;
+                            page-break-inside: avoid;
+                        }
+                        @media print {
+                            body { margin: 20px; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    ${content}
+                </body>
+                </html>
+            `;
+
+            // Create blob and download
+            const blob = new Blob([fullHtml], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            
+            const clientNameInput = document.getElementById('clientName');
+            const clientName = clientNameInput ? 
+                (clientNameInput.value || 'Client').trim().replace(/[^a-zA-Z0-9]/g, '-') : 
+                'Client';
+            
+            a.href = url;
+            a.download = `${clientName}_Aftercare.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showSuccessMessage('Document downloaded as HTML. You can open it and print to PDF.');
+        }
+
+        // Helper function to show success messages
+        function showSuccessMessage(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+                font-weight: 600;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
         }
         
         // Storage Keys
@@ -7160,6 +7922,58 @@ Set Confidence to "low" since this is URL-based inference.`;
                 text.textContent = 'Dark Mode';
                 localStorage.setItem(STORAGE_KEYS.theme, 'light');
             }
+        }
+        
+        // Priority Management
+        let currentPriority = 'high';
+        function setPriority(level, btn) {
+            currentPriority = level;
+            document.querySelectorAll('.priority-btn').forEach(b => {
+                b.classList.remove('active');
+                b.style.background = 'white';
+            });
+            btn.classList.add('active');
+            if (level === 'urgent') {
+                btn.style.background = '#fee2e2';
+            } else if (level === 'high') {
+                btn.style.background = '#fef3c7';
+            } else {
+                btn.style.background = '#dcfce7';
+            }
+        }
+        
+        // Quick Selection Functions for Case Managers
+        function selectLevelOfCare(level) {
+            const programs = document.querySelectorAll('.program-card');
+            programs.forEach(card => {
+                const programText = card.textContent.toLowerCase();
+                if ((level === 'PHP' && programText.includes('partial hospitalization')) ||
+                    (level === 'IOP' && (programText.includes('intensive outpatient') || programText.includes('iop')))) {
+                    if (!card.classList.contains('selected')) {
+                        card.click();
+                    }
+                }
+            });
+            showSuccessMessage(`Selected all ${level} programs`);
+        }
+        
+        function selectVirtualPrograms() {
+            const programs = document.querySelectorAll('.program-card');
+            programs.forEach(card => {
+                const programText = card.textContent.toLowerCase();
+                if (programText.includes('virtual') || programText.includes('online') || programText.includes('telehealth')) {
+                    if (!card.classList.contains('selected')) {
+                        card.click();
+                    }
+                }
+            });
+            showSuccessMessage('Selected all virtual programs');
+        }
+        
+        function clearAllSelections() {
+            const selectedPrograms = document.querySelectorAll('.program-card.selected');
+            selectedPrograms.forEach(card => card.click());
+            showSuccessMessage('Cleared all selections');
         }
         
         // Select All Programs
