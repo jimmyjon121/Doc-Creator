@@ -8,6 +8,16 @@
 
 ---
 
+## 🚀 Super Simple Setup - No Server Required!
+
+**Just 3 Steps:** See [SIMPLE-SETUP.md](SIMPLE-SETUP.md)
+
+1. **Open**: Double-click `AppsCode.html` 
+2. **Install**: Load the Chrome extension
+3. **Use**: Extract from any program website!
+
+**Works on Windows & Mac!** No configuration needed.
+
 ## About ClearHive Health
 
 ClearHive Health provides healthcare facilities with a powerful, customizable document generation system that:

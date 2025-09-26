@@ -495,6 +495,7 @@
         
         .selection-panel {
             width: 440px;
+            min-width: 440px;
             background: white;
             border: 1px solid #e5e7eb;
             padding: 30px;
@@ -506,6 +507,7 @@
             top: 20px;
             max-height: 85vh;
             overflow-y: auto;
+            overflow-x: hidden;
             z-index: 10;
         }
         
@@ -566,88 +568,6 @@
             box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
         }
 
-        .intake-wizard-modal {
-            max-width: 760px;
-            animation: modalSlideIn 0.3s ease;
-        }
-
-        .intake-wizard {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            padding: 10px;
-        }
-
-        .wizard-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-
-        .wizard-steps {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            position: relative;
-        }
-
-        .wizard-steps::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 20px;
-            right: 20px;
-            height: 2px;
-            background: #e5e7eb;
-            z-index: 0;
-        }
-
-        .wizard-step-indicator {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: white;
-            color: #9ca3af;
-            font-weight: bold;
-            border: 3px solid #e5e7eb;
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 1;
-        }
-
-        .wizard-step-indicator.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: #667eea;
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-            transform: scale(1.1);
-        }
-
-        .wizard-step-indicator.completed {
-            background: #10b981;
-            color: white;
-            border-color: #10b981;
-        }
-
-        .wizard-step {
-            display: none;
-            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-            border-radius: 16px;
-            border: 1px solid #e5e7eb;
-            padding: 30px;
-            min-height: 350px;
-            animation: fadeIn 0.4s ease;
-        }
-
-        .wizard-step.active {
-            display: block;
-        }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -809,17 +729,47 @@
         }
 
         .document-preview-modal {
-            max-width: 900px;
+            max-width: 95%;
+            width: 900px;
         }
 
-        .document-preview-container {
+        /* Document preview container - clean and simple */
+        #documentPreviewContainer {
             background: white;
-            border-radius: 12px;
-            border: 1px solid #e5e7eb;
-            padding: 20px;
+            margin: 0 auto;
+            padding: 40px 60px;
+            box-sizing: border-box;
             max-height: 70vh;
             overflow-y: auto;
-            box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.15);
+            overflow-x: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        
+        /* Ensure all document styles apply in preview */
+        #documentPreviewContainer .doc-page {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        #documentPreviewContainer .doc-content {
+            padding-bottom: 40px;
+        }
+        
+        #documentPreviewContainer .doc-footer {
+            position: relative;
+            bottom: auto;
+            margin-top: 40px;
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
+        }
+        
+        @media screen and (max-width: 900px) {
+            #documentPreviewContainer {
+                padding: 20px 30px;
+            }
         }
         
         .client-info {
@@ -1083,8 +1033,6 @@
         .selected-section {
             flex: 0 1 auto;
             min-height: 150px;
-            max-height: 300px;
-            overflow-y: auto;
             margin-bottom: 20px;
         }
         
@@ -1237,8 +1185,6 @@
         
         #selectedList {
             min-height: 80px;
-            max-height: 200px;
-            overflow-y: auto;
             background: #f8fafc;
             border-radius: 8px;
             border: 1px solid #e5e7eb;
@@ -1710,12 +1656,18 @@
             position: relative;
             min-height: 100%;
             overflow: visible; /* allow header graphics to render fully */
+            width: 720px; /* 7.5 inches of usable space at 96 DPI */
+            margin: 0 auto;
+            box-sizing: border-box;
         }
         
         .doc-content {
             padding-bottom: 100px; /* More space for footer to prevent overlap */
             padding-top: 0; /* Remove top padding */
             margin-top: 0;
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
             min-height: calc(100vh - 150px); /* Ensure proper page height */
         }
         
@@ -1804,7 +1756,10 @@
         
         .doc-intro {
             font-size: 9pt;
+            font-family: 'Calibri', Arial, sans-serif;
             font-weight: bold;
+            font-style: italic;
+            text-decoration: underline;
             margin-bottom: 18pt;
             line-height: 1.4;
         }
@@ -1831,20 +1786,23 @@
             break-inside: avoid;
         }
         
-        /* Program title line with en dash */
+        /* Program title line with en dash - MUST BE CALIBRI 10PT BOLD */
         .doc-program-title {
-            font-family: Calibri, Arial, sans-serif;
+            font-family: 'Calibri', Arial, sans-serif;
             font-size: 10pt;
             font-weight: bold;
             color: #000;
-            margin-bottom: 12pt;
+            margin-bottom: 0;
+            line-height: 1.4;
         }
         
-        /* Level of Care & Services section */
+        /* Level of Care & Services section - MUST BE SINGLE PARAGRAPH, CALIBRI 9PT */
         .doc-program-descriptor {
-            font-family: Calibri, Arial, sans-serif;
+            font-family: 'Calibri', Arial, sans-serif;
             font-size: 9pt;
-            margin-bottom: 12pt;
+            font-weight: normal;
+            margin-top: 12pt;
+            margin-bottom: 0;
             line-height: 1.4;
         }
         
@@ -1852,26 +1810,27 @@
             font-weight: bold;
         }
         
-        /* Program Details heading */
+        /* Program Details heading - CALIBRI 9PT BOLD */
         .doc-program-details-heading {
-            font-family: Calibri, Arial, sans-serif;
+            font-family: 'Calibri', Arial, sans-serif;
             font-weight: bold;
             font-size: 9pt;
-            margin-bottom: 8pt;
+            margin-bottom: 6pt;
             margin-top: 12pt;
         }
         
-        /* Bullet lists */
+        /* Bullet lists - REAL BULLETS, CALIBRI 9PT */
         .doc-program-bullets {
-            margin: 0 0 12pt 20px;
+            margin: 0 0 0 20px;
             padding-left: 0;
             list-style: none;
         }
         
         .doc-program-bullets li {
-            font-family: Calibri, Arial, sans-serif;
+            font-family: 'Calibri', Arial, sans-serif;
             font-size: 9pt;
-            margin-bottom: 6pt;
+            font-weight: normal;
+            margin-bottom: 4pt;
             position: relative;
             padding-left: 15px;
             line-height: 1.4;
@@ -1881,6 +1840,11 @@
             content: "•";
             position: absolute;
             left: 0;
+        }
+        
+        /* Bold concept introductions in bullets */
+        .doc-program-bullets li strong {
+            font-weight: bold;
         }
         
         /* Sub-bullets with dashes */
@@ -1903,15 +1867,20 @@
             left: 0;
         }
         
-        /* Contact Information block */
+        /* Contact Information block - CALIBRI 9PT */
         .doc-contact-section {
-            font-family: Calibri, Arial, sans-serif;
+            font-family: 'Calibri', Arial, sans-serif;
             font-size: 9pt;
+            font-weight: normal;
             line-height: 1.4;
-            margin-top: 12pt;
+            margin-top: 6pt;
             word-wrap: break-word;
             overflow-wrap: break-word;
             hyphens: auto;
+        }
+        
+        .doc-contact-section strong {
+            font-weight: bold;
         }
         
         .doc-contact-section a {
@@ -1947,22 +1916,53 @@
         
         /* Mini card styles for AT HOME sections */
         .doc-mini-card {
-            margin-bottom: 12pt;
+            margin-bottom: 18pt;
+            padding: 12pt;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #fafbfc;
         }
         
         .doc-mini-title {
             font-size: 11pt;
             font-weight: bold;
-            margin-bottom: 2pt;
+            margin-bottom: 8pt;
+            color: #374151;
+            border-bottom: 1px solid #d1d5db;
+            padding-bottom: 4pt;
         }
         
         .doc-mini-blurb {
-            font-size: 11pt;
-            margin-bottom: 4pt;
+            font-size: 10pt;
+            margin-bottom: 8pt;
+            min-height: 24pt;
+            border-bottom: 1px dotted #9ca3af;
+            padding-bottom: 4pt;
+            color: #6b7280;
         }
         
         .doc-mini-contact {
-            font-size: 11pt;
+            font-size: 10pt;
+            color: #374151;
+        }
+        
+        .doc-mini-contact .contact-line {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4pt;
+        }
+        
+        .doc-mini-contact .contact-label {
+            font-weight: 600;
+            min-width: 70px;
+            color: #1f2937;
+        }
+        
+        .doc-mini-contact .contact-fill {
+            flex: 1;
+            border-bottom: 1px solid #d1d5db;
+            min-height: 16pt;
+            margin-left: 8px;
         }
         
         /* Special emphasis for AT HOME Recommendation */
@@ -1999,6 +1999,36 @@
     </style>
 </head>
 <body>
+    <!-- Login Screen -->
+    <div id="loginScreen" style="display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 400px; max-width: 90%;">
+            <h2 style="margin: 0 0 10px 0; color: #1a202c; text-align: center; font-size: 28px;">Family First</h2>
+            <p style="text-align: center; color: #718096; margin-bottom: 30px; font-size: 14px;">ADOLESCENT SERVICES - Document Creator</p>
+            
+            <div id="loginError" style="display: none; background: #fed7d7; color: #9b2c2c; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 14px;"></div>
+            
+            <form onsubmit="handleLogin(event)">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 6px; color: #4a5568; font-weight: 600; font-size: 14px;">Username</label>
+                    <input type="text" id="loginUsername" required style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 16px; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e2e8f0'">
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; margin-bottom: 6px; color: #4a5568; font-weight: 600; font-size: 14px;">Password</label>
+                    <input type="password" id="loginPassword" required style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 6px; font-size: 16px; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#667eea'" onblur="this.style.borderColor='#e2e8f0'">
+                </div>
+                
+                <button type="submit" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.2s;">
+                    Sign In
+                </button>
+            </form>
+            
+            <p style="text-align: center; margin-top: 20px; color: #a0aec0; font-size: 12px;">Secure Document Generation System</p>
+        </div>
+    </div>
+
+    <!-- Main App (Hidden until login) -->
+    <div id="mainApp" style="display: none;">
     <!-- Theme Toggle Button -->
     <button class="theme-toggle" onclick="toggleTheme()">
         <span id="themeIcon">🌙</span>
@@ -2100,9 +2130,6 @@
                     </div>
                 </div>
 
-                <button class="guided-btn" onclick="openIntakeWizard()">
-                    🎯 Guided Intake Wizard
-                </button>
                 
                 <div class="client-info">
                     <h3>Client Information</h3>
@@ -2121,104 +2148,35 @@
                     </label>
                 </div>
 
-                <!-- Case Manager Options Section -->
-                <div style="margin-top: 15px; margin-bottom: 15px; padding: 15px; background: linear-gradient(135deg, #f0f4ff, #e5edff); border-radius: 12px; border: 1px solid #667eea;">
-                    <h4 style="margin: 0 0 12px 0; color: #4c1d95; font-size: 15px; display: flex; align-items: center; gap: 8px;">
-                        <span>👥</span> Case Manager Options
-                    </h4>
-                    
-                    <div style="display: grid; gap: 8px;">
-                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
-                            <input type="checkbox" id="includeInsurance" style="width: 16px; height: 16px; cursor: pointer;">
-                            <span>Include Insurance Information</span>
-                        </label>
-                        
-                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
-                            <input type="checkbox" id="includeTransportation" style="width: 16px; height: 16px; cursor: pointer;">
-                            <span>Include Transportation Resources</span>
-                        </label>
-                        
-                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
-                            <input type="checkbox" id="includeEmergencyContacts" style="width: 16px; height: 16px; cursor: pointer;" checked>
-                            <span>Include Emergency Contacts</span>
-                        </label>
-                        
-                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
-                            <input type="checkbox" id="includeMedManagement" style="width: 16px; height: 16px; cursor: pointer;">
-                            <span>Include Medication Management Info</span>
-                        </label>
-                        
-                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
-                            <input type="checkbox" id="includeFinancialInfo" style="width: 16px; height: 16px; cursor: pointer;">
-                            <span>Include Financial Assistance Options</span>
-                        </label>
-                        
-                        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
-                            <input type="checkbox" id="includeWaitlist" style="width: 16px; height: 16px; cursor: pointer;">
-                            <span>Include Waitlist Information</span>
-                        </label>
-                    </div>
-                    
-                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(102, 126, 234, 0.2);">
-                        <label style="display: block; font-size: 13px; margin-bottom: 8px; color: #4c1d95; font-weight: 600;">
-                            Priority Level:
-                        </label>
-                        <div style="display: flex; gap: 8px;">
-                            <button type="button" class="priority-btn" onclick="setPriority('urgent', this)" style="padding: 6px 12px; background: white; border: 1px solid #dc2626; color: #dc2626; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">
-                                🔴 Urgent
-                            </button>
-                            <button type="button" class="priority-btn active" onclick="setPriority('high', this)" style="padding: 6px 12px; background: #fbbf24; border: 1px solid #f59e0b; color: #92400e; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">
-                                🟡 High
-                            </button>
-                            <button type="button" class="priority-btn" onclick="setPriority('standard', this)" style="padding: 6px 12px; background: white; border: 1px solid #10b981; color: #059669; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">
-                                🟢 Standard
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-top: 12px;">
-                        <label style="display: block; font-size: 13px; margin-bottom: 6px; color: #4c1d95; font-weight: 600;">
-                            Case Notes (Optional):
-                        </label>
-                        <textarea id="caseNotes" placeholder="Add any case management notes or special considerations..." 
-                            style="width: 100%; min-height: 60px; padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; resize: vertical;"></textarea>
-                    </div>
-                </div>
-                
-                <!-- Quick Action Buttons -->
-                <div style="margin-top: 10px; margin-bottom: 15px; padding: 12px; background: #f8fafc; border-radius: 10px;">
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button type="button" onclick="selectLevelOfCare('PHP')" style="padding: 6px 14px; background: white; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">
-                            Select All PHP
-                        </button>
-                        <button type="button" onclick="selectLevelOfCare('IOP')" style="padding: 6px 14px; background: white; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">
-                            Select All IOP
-                        </button>
-                        <button type="button" onclick="selectVirtualPrograms()" style="padding: 6px 14px; background: white; border: 1px solid #cbd5e1; color: #475569; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">
-                            Select Virtual Only
-                        </button>
-                        <button type="button" onclick="clearAllSelections()" style="padding: 6px 14px; background: #fee2e2; border: 1px solid #fca5a5; color: #dc2626; border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s;">
-                            Clear All
-                        </button>
+                <div class="selected-section">
+                    <div class="section-title" id="selectedTitle">Selected Programs (Drag to reorder)</div>
+                    <div id="selectedList">
+                        <div class="empty-state">Click programs to add to selection</div>
                     </div>
                 </div>
                     
                 <!-- Original AT HOME Providers Section -->
-                    <div id="atHomeSection" style="display: none; margin-top: 15px; padding: 15px; border: 1px solid #e0e7ff; border-radius: 8px; background: #f8fafc;">
-                        <h4 style="margin: 0 0 15px 0; color: #0099cc;">AT HOME Providers</h4>
+                <div id="atHomeSection" style="display: none; margin-top: 25px; padding: 0; border: 1px solid #e0e7ff; border-radius: 8px; background: #f8fafc; width: 100%; box-sizing: border-box; overflow: hidden;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); cursor: pointer; border-bottom: 2px solid #0099cc; transition: all 0.2s ease;" 
+                         onmouseover="this.style.background='linear-gradient(135deg, #e0f2fe, #bae6fd)'" 
+                         onmouseout="this.style.background='linear-gradient(135deg, #f0f9ff, #e0f2fe)'" 
+                         onclick="toggleAtHomeContent()">
+                        <h4 style="margin: 0; color: #0099cc; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                            AT HOME Providers
+                            <span id="atHomeProviderCount" style="background: #0099cc; color: white; padding: 2px 6px; border-radius: 10px; font-size: 11px; font-weight: normal;"></span>
+                        </h4>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span id="atHomeToggleText" style="color: #0099cc; font-size: 12px; font-weight: 600; text-transform: uppercase;">Expand</span>
+                            <button type="button" id="atHomeToggleBtn" style="background: #0099cc; color: white; border: none; border-radius: 4px; font-size: 20px; cursor: pointer; padding: 2px 8px; line-height: 1; font-weight: bold; box-shadow: 0 2px 4px rgba(0,153,204,0.3);">▶</button>
+                        </div>
+                    </div>
+                    <div id="atHomeContent" style="padding: 15px; display: block; transition: all 0.3s ease;">
                         <div id="atHomeProviders"></div>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
                             <button type="button" onclick="addAtHomeProvider()" style="padding: 8px 16px; background: #0099cc; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
                                 + Add Provider
                             </button>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="selected-section">
-                    <div class="section-title" id="selectedTitle">Selected Programs (Drag to reorder)</div>
-                    <div id="selectedList">
-                        <div class="empty-state">Click programs to add to selection</div>
                     </div>
                 </div>
                 
@@ -2256,12 +2214,51 @@
                 <button class="modal-close" onclick="closeAddProgramModal()">&times;</button>
             </div>
             <div class="modal-body" style="padding: 20px;">
+                <!-- Chrome Extension Info -->
+                <div style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+                    <h3 style="margin: 0 0 10px 0; color: white; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 24px;">🔍</span>
+                        Chrome Extension - The Best Way to Add Programs
+                    </h3>
+                    <p style="margin: 0 0 15px 0; font-size: 16px; line-height: 1.5;">
+                        The Family First Program Extractor Chrome Extension automatically extracts program information from any treatment center website with advanced pattern matching and multi-page analysis.
+                    </p>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                            <h4 style="margin: 0 0 8px 0; color: white;">✅ Features:</h4>
+                            <ul style="margin: 0; padding-left: 20px; font-size: 14px;">
+                                <li>Extracts from multiple pages</li>
+                                <li>Finds contact info automatically</li>
+                                <li>Detects therapies & specializations</li>
+                                <li>Works on any program website</li>
+                                <li>No API keys needed</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1; min-width: 200px; background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                            <h4 style="margin: 0 0 8px 0; color: white;">📥 Simple Steps:</h4>
+                            <ol style="margin: 0; padding-left: 20px; font-size: 14px;">
+                                <li>Install the extension</li>
+                                <li>Visit any program website</li>
+                                <li>Click extension icon</li>
+                                <li>Click "Extract Page Info"</li>
+                                <li>Click "Copy to Tool"</li>
+                                <li>Data appears here instantly!</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; padding: 12px; background: rgba(255,255,255,0.15); border-radius: 6px; text-align: center;">
+                        <p style="margin: 0; font-size: 14px;">
+                            <strong>📁 Extension Location:</strong> Load the chrome-extension folder from Chrome Extensions page
+                        </p>
+                        <p style="margin: 5px 0 0 0; font-size: 13px;">
+                            <strong>No server needed!</strong> Just open this HTML file directly in Chrome
+                        </p>
+                    </div>
+                </div>
+                
                 <!-- Mode Toggle -->
                 <div style="display: flex; gap: 10px; margin-bottom: 20px; background: #f8f9fa; padding: 10px; border-radius: 8px;">
-                    <button id="aiModeBtn" onclick="setAddProgramMode('ai')" style="flex: 1; padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
-                        🤖 AI Website Extraction
-                    </button>
-                    <button id="manualModeBtn" onclick="setAddProgramMode('manual')" style="flex: 1; padding: 12px; background: #e5e7eb; color: #6b7280; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s;">
+                    <button id="manualModeBtn" onclick="setAddProgramMode('manual')" style="flex: 1; padding: 12px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s;">
                         ✍️ Manual Text Entry
                     </button>
                     <button id="templateModeBtn" onclick="setAddProgramMode('template')" style="flex: 1; padding: 12px; background: #e5e7eb; color: #6b7280; border: none; border-radius: 6px; cursor: pointer; transition: all 0.3s;">
@@ -2269,8 +2266,8 @@
                     </button>
                 </div>
                 
-                <!-- AI Mode Content -->
-                <div id="aiModeContent">
+                <!-- AI Mode Content - Removed -->
+                <div id="aiModeContent" style="display: none;">
                 <div style="margin-bottom: 20px; padding: 15px; background: #f0f8ff; border-radius: 8px; border-left: 4px solid #0066cc;">
                         <p style="margin: 0; color: #0066cc; font-weight: 600;">🌐 Enter the program's website URL and AI will extract all information automatically</p>
                     </div>
@@ -2321,8 +2318,9 @@
                 <div id="manualModeContent" style="display: none;">
                     <div style="margin-bottom: 20px; padding: 15px; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
                         <p style="margin: 0; color: #92400e; font-weight: 600;">📋 Paste program information from any source</p>
-                        <p style="margin: 5px 0 0 0; color: #92400e; font-size: 14px;">• Use "Format with AI" for advanced formatting (requires API key)</p>
-                        <p style="margin: 2px 0 0 0; color: #92400e; font-size: 14px;">• Use "Smart Format" for pattern-based formatting (no AI needed)</p>
+                        <p style="margin: 5px 0 0 0; color: #92400e; font-size: 14px;">• Paste content extracted by the Chrome Extension</p>
+                        <p style="margin: 2px 0 0 0; color: #92400e; font-size: 14px;">• Or paste from emails, PDFs, or other sources</p>
+                        <p style="margin: 2px 0 0 0; color: #92400e; font-size: 14px;">• Use "Smart Format" for automatic pattern-based formatting</p>
                 </div>
                 
                 <label for="customProgramInfo" style="display: block; margin-bottom: 10px; font-weight: 600;">
@@ -2411,7 +2409,7 @@
                     
                     <div style="margin-top: 15px; padding: 15px; background: #fef3c7; border-radius: 8px; border: 1px solid #fde68a;">
                         <p style="margin: 0; font-size: 14px; color: #92400e;">
-                            <strong>💡 Tip:</strong> Use the Chrome Extension to extract data from any treatment program website, then paste it here in the template fields for consistent formatting.
+                            <strong>💡 Tip:</strong> Use the Chrome Extension to extract data from any treatment program website. The extension will automatically populate these fields when you click "Copy to Tool".
                         </p>
                     </div>
                 </div>
@@ -2419,11 +2417,11 @@
                 <div id="customProgramStatus" style="margin: 15px 0;"></div>
             </div>
             <div class="modal-actions">
-                <button id="extractProgramBtn" onclick="extractProgram()" style="padding: 14px 28px; background: #4f46e5; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: all 0.3s;">
-                    🚀 Extract Program Information
+                <button id="smartFormatBtn" onclick="smartFormatProgram()" style="padding: 14px 28px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: all 0.3s;">
+                    🎯 Smart Format & Add Program
                 </button>
-                <button id="smartFormatBtn" onclick="smartFormatProgram()" style="padding: 14px 28px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: all 0.3s; display: none; margin-left: 10px;">
-                    🎯 Smart Format (No AI)
+                <button id="addTemplateBtn" onclick="addTemplateProgram()" style="padding: 14px 28px; background: #0284c7; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: all 0.3s; display: none;">
+                    📋 Add Template Program
                 </button>
                 <button onclick="closeAddProgramModal()" style="padding: 14px 28px; background: #e5e7eb; color: #6b7280; border: none; border-radius: 8px; cursor: pointer; margin-left: 10px;">
                     Cancel
@@ -2432,88 +2430,6 @@
         </div>
     </div>
 
-    <!-- Guided Intake Wizard Modal -->
-    <div id="intakeWizardModal" class="modal">
-        <div class="modal-content intake-wizard-modal">
-            <div class="modal-header">
-                <h2>Guided Intake Wizard</h2>
-                <button class="modal-close" onclick="closeIntakeWizard()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="intake-wizard">
-                    <div class="wizard-header">
-                        <div class="wizard-steps">
-                            <div id="wizardStepIndicator1" class="wizard-step-indicator">1</div>
-                            <div id="wizardStepIndicator2" class="wizard-step-indicator">2</div>
-                            <div id="wizardStepIndicator3" class="wizard-step-indicator">3</div>
-                        </div>
-                        <div id="wizardStepLabel" style="font-weight: 600; color: #1f2937;">Client Setup</div>
-                    </div>
-
-                    <div id="wizardStep1" class="wizard-step active">
-                        <div style="display: grid; gap: 16px;">
-                            <div>
-                                <label for="wizardClientName" style="font-weight: 600; color: #0c4a6e;">Client First Name</label>
-                                <input type="text" id="wizardClientName" placeholder="Required" style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid #cbd5f5; font-size: 15px; margin-top: 8px;">
-                            </div>
-                            <div class="wizard-toggles">
-                                <div class="wizard-toggle">
-                                    <span>Include AT HOME Recommendations</span>
-                                    <label style="display: inline-flex; align-items: center; gap: 8px;">
-                                        <input type="checkbox" id="wizardIncludeAtHome" style="width: 18px; height: 18px;">
-                                    </label>
-                                </div>
-                                <div class="wizard-toggle">
-                                    <span>Include Alumni Services</span>
-                                    <label style="display: inline-flex; align-items: center; gap: 8px;">
-                                        <input type="checkbox" id="wizardIncludeAlumni" style="width: 18px; height: 18px;">
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="wizard-note">
-                                We'll carry these preferences into the main builder automatically.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="wizardStep2" class="wizard-step">
-                        <div style="display: flex; flex-direction: column; gap: 14px;">
-                            <div>
-                                <label for="wizardProgramSearch" style="font-weight: 600; color: #0c4a6e;">Quick Search</label>
-                                <input type="text" id="wizardProgramSearch" placeholder="Search by name, location, modality..." oninput="filterWizardPrograms(this.value)" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5f5; font-size: 14px; margin-top: 6px;">
-                            </div>
-                            <div class="wizard-note">Select programs to include. You can refine later in the main builder.</div>
-                            <div id="wizardProgramList" class="wizard-program-list"></div>
-                        </div>
-                    </div>
-
-                    <div id="wizardStep3" class="wizard-step">
-                        <div class="wizard-summary">
-                            <div class="wizard-card">
-                                <h4 style="margin-bottom: 8px; color: #1f2937;">Client Overview</h4>
-                                <p><strong>Name:</strong> <span id="wizardSummaryName">—</span></p>
-                                <p><strong>AT HOME:</strong> <span id="wizardSummaryAtHome">No</span></p>
-                                <p><strong>Alumni:</strong> <span id="wizardSummaryAlumni">No</span></p>
-                            </div>
-                            <div class="wizard-card">
-                                <h4 style="margin-bottom: 8px; color: #1f2937;">Programs Selected</h4>
-                                <ul id="wizardSummaryPrograms" style="margin: 0; padding-left: 18px; color: #374151; font-size: 14px;"></ul>
-                            </div>
-                        </div>
-                        <div class="wizard-note" style="margin-top: 18px;">
-                            Click “Finish & Apply” to push these selections into the builder and jump straight into formatting.
-                        </div>
-                    </div>
-
-                    <div class="wizard-actions">
-                        <button class="wizard-back" onclick="wizardPrevStep()">Back</button>
-                        <button id="wizardNextButton" class="wizard-next" onclick="wizardNextStep()">Next</button>
-                        <button id="wizardFinishButton" class="wizard-finish" style="display: none;" onclick="wizardFinish()">Finish &amp; Apply</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Document Preview Modal -->
     <div id="documentPreviewModal" class="modal">
@@ -2522,13 +2438,53 @@
                 <h2>Document Preview</h2>
                 <button class="modal-close" onclick="closeDocumentPreview()">&times;</button>
             </div>
-            <div class="modal-body" style="background: #f8fafc;">
-                <div id="documentPreviewContainer" class="document-preview-container"></div>
+            <div class="modal-body" style="background: #f3f4f6; padding: 20px;">
+                <!-- Case Manager Workflow Options -->
+            <div style="background: linear-gradient(135deg, #f0f4ff, #e5edff); border-radius: 12px; padding: 16px; margin: 16px 0; border: 1px solid #667eea;">
+                <h4 style="margin: 0 0 12px 0; color: #4c1d95; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                    <span>👥</span> Case Manager Options
+                </h4>
+                
+                <!-- Document Actions Row 1 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 12px;">
+                    <button onclick="downloadDocumentPdf(event)" style="padding: 8px 12px; border-radius: 6px; border: none; background: #4f46e5; color: white; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                        <span>📄</span> Download PDF
+                    </button>
+                    <button onclick="printDocumentPreview()" style="padding: 8px 12px; border-radius: 6px; border: none; background: #0ea5e9; color: white; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                        <span>🖨️</span> Print Document
+                    </button>
+                    <button onclick="emailDocument()" style="padding: 8px 12px; border-radius: 6px; border: none; background: #10b981; color: white; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                        <span>📧</span> Email Document
+                    </button>
+                    <button onclick="saveToVault()" style="padding: 8px 12px; border-radius: 6px; border: none; background: #f59e0b; color: white; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                        <span>💾</span> Save to Vault
+                    </button>
+                </div>
+                
+                <!-- Document Actions Row 2 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 12px;">
+                    <button onclick="addToDischargePacket()" style="padding: 8px 12px; border-radius: 6px; border: none; background: #8b5cf6; color: white; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                        <span>📋</span> Add to Packet
+                    </button>
+                    <button onclick="scheduleFollowUp()" style="padding: 8px 12px; border-radius: 6px; border: none; background: #ef4444; color: white; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                        <span>📅</span> Schedule Follow-up
+                    </button>
+                    <button onclick="createTaskReminder()" style="padding: 8px 12px; border-radius: 6px; border: none; background: #06b6d4; color: white; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                        <span>⏰</span> Set Reminder
+                    </button>
+                    <button onclick="shareWithTeam()" style="padding: 8px 12px; border-radius: 6px; border: none; background: #84cc16; color: white; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; justify-content: center;">
+                        <span>👥</span> Share with Team
+                    </button>
+                </div>
             </div>
+            
+            <!-- Document Preview Container -->
+            <div id="documentPreviewContainer" class="document-preview-container"></div>
+            </div>
+            
             <div class="modal-actions" style="justify-content: space-between;">
                 <div style="display: flex; gap: 10px;">
-                    <button onclick="downloadDocumentPdf(event)" style="padding: 10px 20px; border-radius: 8px; border: none; background: #4f46e5; color: white; font-weight: 600; cursor: pointer;">⬇️ Download PDF</button>
-                    <button onclick="printDocumentPreview()" style="padding: 10px 20px; border-radius: 8px; border: none; background: #0ea5e9; color: white; font-weight: 600; cursor: pointer;">🖨️ Print</button>
+                    <button onclick="generateNewDocument()" style="padding: 10px 20px; border-radius: 8px; border: none; background: #059669; color: white; font-weight: 600; cursor: pointer;">✨ Generate New</button>
                 </div>
                 <button onclick="closeDocumentPreview()" style="padding: 10px 20px; border-radius: 8px; border: none; background: #e5e7eb; color: #374151; font-weight: 600; cursor: pointer;">Close</button>
             </div>
@@ -2536,9 +2492,72 @@
     </div>
     
     <!-- Hidden document output for printing -->
-    <div class="document-output" id="documentOutput"></div>
+    <div class="document-output" id="documentOutput">    </div>
+    </div> <!-- End of mainApp -->
     
     <script>
+        // Login System
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            // Check credentials
+            if (username === 'Doc121' && password === 'FFA121') {
+                // Successful login
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                
+                // Store login state in session
+                sessionStorage.setItem('isLoggedIn', 'true');
+            } else {
+                // Failed login
+                errorDiv.textContent = 'Invalid username or password. Please try again.';
+                errorDiv.style.display = 'block';
+                
+                // Clear password field
+                document.getElementById('loginPassword').value = '';
+                
+                // Hide error after 3 seconds
+                setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // Check if already logged in on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+            }
+        });
+        
+        // Session timeout - auto logout after 30 minutes of inactivity
+        let lastActivity = Date.now();
+        const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+        
+        function updateActivity() {
+            lastActivity = Date.now();
+        }
+        
+        // Track user activity
+        document.addEventListener('click', updateActivity);
+        document.addEventListener('keypress', updateActivity);
+        document.addEventListener('scroll', updateActivity);
+        
+        // Check for timeout every minute
+        setInterval(() => {
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                if (Date.now() - lastActivity > SESSION_TIMEOUT) {
+                    sessionStorage.clear();
+                    alert('Your session has expired. Please log in again.');
+                    location.reload();
+                }
+            }
+        }, 60000);
+        
         // Logo - Family First WebP image
         const LOGO_WEBP = 'data:image/webp;base64,UklGRjQvAABXRUJQVlA4TCgvAAAv/8F/EGph0EiKmF38u344aBVExATwb8cj8wP3Gy8jb7/TybRStDOsJbta6+Nce9qpLvUPfgJgfSo4AhcgYc2mUZ1aONYRYULoY59U1dBKe2KDb70cJ+njwMOlDnhMekMuWwWcAY202ZpyL8jPsdz/v162mwf0iWN4BszMzAzPgpl9ngLT40ieS3LnwPf7+/2+v/+47xobyzQyzMzMcEFlLSjzkYVd3qLM3D4A5q3aI48M6axLriiZL8kyhjPlypAs44gyM3MruQ1nyqiqwhkZea+9a+RZVYER4RxZ7vcBhFxpZBmnIEeWmXtkGMsd15A88sKsKuZwplx5Zblh3LKSGR0Gtiz3qLIL8y7PquOG5BTklDyqrt21jiwz2jpuHwBdGU5UcZeZtywzzEITSU5WR7p0EYEFejCAorRoAklwIwFAmGz4SWlVVnD3VO7utgPulJQcHQNkCkkAAJaRZNu2be/Lo7Vt27a9+7Rtm2ffYG3bZkOLtu24bXOOtMQMopPOBZ6Ah/f+rEgA9uyNc6DvV2/uv6xi9bW6ZHWtJW1x+1XcffpNfZ/ve5/3waY2NA8KrayijOFiHyANZkZmwmlHWJx2gj/lDMvTFPSh0F5YUHWjpotzhOVpaE+SI/TiwlLEc4eghxl7QrM83TPPGYJCF6UnP9vGHFSR6VKhVN7LAcJEt6D0Hh3BE9gTz+gIHtMU2pvOEB70zbKU7eKbM4SG+QI5QFhCw4z+9J4wHSIX6F238CFCoq1tSyrdIf9PC3aAS6kDjAxtdxETJnHCvEkIsm2nbfa/slq2vr5YMmMYDGGqJDGSpEiS+9Qy411SV8/+7FjbttySMvF2l3PK3d3d3d3b3d3d/fT5ZVe9UmGjNYaKcAirB4C7Q9Q7xGECdISdHHfISCuqCAvd3d3dYQis5RLRYckcalWOtqR6BtATQCIdQMdI6LI7wu2tjNUhDrGeqMKaCR7ZEGyvCgkJ3R0mUBLhLlmnnAyLOiWzyAfQDMAtcj0hDnsOaETe/kVo5FnFRUboqf3oF2ITcHeXVtz2MPDMDrEESJJM2+pn27Zt27Zt27Zt27b9bdu27S8xAMC0bf7/JYxmliNDZWYnM2iOsczYf0mQJMltkx0T0K2fDQKL3QH003gKyAEvUAUo4AACQCIoBFWgG4yDWYAGi2AbnIPrWgC6Ym0tOGsGCyf7iybQdQnVIOE3Lwcg23sAMi03CvABWzuwAKGgCHSAb2AV3Bmzo1wl+Araqw8JzIHKmYvlNgAREAIwEAhKwQBYBq/m3PxRtwWKj1kDBDPlqvcCMWAGkkArwObNM/M3OsIN9v+oTLkHQAHUgC+oAL/Bi3kseNoAKAc+L1kopwAIgQzwBtWPAz4sCCse5xKAF5CuK18AaAECZINpcG+BOcqeQVYNoCkfABiAyeeAPxUWqBVfDQpupSHZkwY6IA/8B5AFbg78AzlAO53QAZIgvAk8mhB2gFEQBiSSNoAU6G8SbJkwgs1NAj1AkpgBdMDx7KOYSILbs3/PFhMwgBm4rx68mWCuePW3CxiT7f9jdIKpChPPio97xoakOqYIbLbVaEKaB/29CokTQHCloPHBTFQfDDQA3WySBAiANLBrAgt2Ngz4EyIF4ARmTGz3/D3p5AcQ/RxwaaI7ZjUQTnQA4uv8OIuAYHLvmcQ2xPAp4NAiITgA8YApiQGkWvdhEXEfv/QnSStaFMDBhEXHJmCQoCJYM8AOYCxKngzYZhLS/2cCv2+1aJk6biH5AKhADDi1qAlOTjdw0rmqt+hZf7qBE89Vuf2i8KgBXlnI1wLLWblKwzsOmUDGozO3G8DUkgVukVgfQ7lhZebnSLoY5eqkyIWKiazfpnv/6ScdNoF0ackeM29hzjPMe4ezq3f6ZQPJMumw/n5Qilyaq8dpQvSkpBI74E8WuFtIcLxrB26ZhDHOACzBivmrBd6RWJ3Acj8X5+ikfCQaw+obs+6BQe0IJHNDUJUNebZGnnTH//xenOtRr7OYIACa4KenIeER6CqxiGkCKfZYQ1C2ZPe578C26j6wvciD1C758QX7xZGC7ydKDFEFfcw/ffAcz8jVZUO572HdwQ6yY2jR6viCvKc4zw+500QQRVydN7/wwTGRFVkqqV35B7JDfWDN0mWpcQIr2p1Wp7ofQBf9eDLg+R5ehXxGE1kyH5eP5HnY8U67TkteGE3k88VBloBHNuq0b8CjWM8Yyq+u32Qzbz/Wxpm3b906XR1Degf9ZxX8ao83gGWA+WIUXqV24vpNPuv+z9q5pm6dpXTizY759/El7D7S7wI+teYFFphG1OAJrfmDtbU1v5cNxfcsMIsjBFedMX4TkN6e+WAk1qQJcWPUznkF1txwY9gs6BMnuL3e0f0QSUujuSeGSvMMCCQTI+HBub2kR+y3seUgUeVKU+7/XR1Lu3wLWrIbo2JLdsk3YZP9sanUuePJC7aaa3v3MKA1vzFCBvMMGk0UYretLxhJXnHt5pYLZirJ1MuJ0XJDhhJHoGu7s1EAHsVxRlBrTv3nqDo0BK3LqOk2BPXIOrXAQ2z1fiujxxHBvtv/0izxRTcj6Mzbp9jjMWQmdgr2jhi5haI2aQ61wNXP0UmHHaPpvoftZ20tXAAl6YgBFMGSuSMKrwtd3s2ourPAxii8EfscHChEa6ARxLoba+hPKomJQc346k7cVzfrty8GAaKzUQKwu/soUefYdjLtOjLSbkjmk06xy6ozR4gLLZkjfPCUo9OZtzcj7oyfV7ZGbatTKAFYbDhstbNBhjWz7v+MvGsOtC0UsZ/DRgXA4yqwsK9iYjw2gN6EsbYrMQV+bC0i1NQ7uqqYWpcNofscm+6oBwbR2BEApOZcXpn9jhxIqYsCw1SZCwfKR8Zlw+iWDVUEurFnWMEwEQDINZsDfPBQ6AiPDaSXb6EPHsUGm4Gs+ADrDhfjDDk6rGFDOev+zVJpp8ALHnYu/D0u0EXwuJ+Dts87G8zdY1rQL/C21Em+HxAYNn4SWT35uGfDOfm4i2eUwPuyWxSbAziYZorEhrp1wQa0dpVFoIMNiagDCA3Qeg/+oJJcnXlsRGc//k/YBh+FPpHIXM6KjZsRNQyyMW3JluEVhO9PBPYCrySwa+P2TnvuKjaqR15QoH2forQrBoMa9qn2DBnWsGGddf+lSzQkwA7IyLqC1OqNmVjKTzkd2MDuAG9WASOAUlAAK/hrvGzLt6TLRtbNNxH6dfbduJi0pYyXuIINJCMb22mXcxxtoTuT2oQEyJSYR5mLXO2ywXULHQEcib7enjIuIgVujJVYOj2GDe+063mXgHoFQEPCGBPeiaaTcnsYZuMbztEZ7H9AOmrkm2fMGyeLJh22TAKHYGtS8sBKOHbEuyRTMs/WMBF846Ng87I7Eo3lsz6XVS8zJoRVc78M9ALcBOO4xmks7YNMCpvTCfaVHTcKz3EyCzMx9NIEgL3I/1xWuyqYINYsUwssoBfpn12BdGKSGEjGLtwvyzdG/BzOfgQmittHN1EABW6Cf9WTilzFhLHAFiG0X+nOGZ8/b4w6Jo0vAxxuX/Eusgw2M4429gaZODanM+CLyNdIMtXUYWwMr8g3Mnl847CyAMxByDEJ1ZNxpjFDQZcJpJsuMcAspBTT0G18cQYnlY8sE8nSgToJrg6hTYYgsxTfYJNT1DGZfJkFLnCVSBKEog3c17iIQLdTzkcmlDt8cAdXizhw+AHmqzcuoomqNb8yqQxG4SVcNXLo4ehFvs8XJLBmJxPLS8cVDFw/QjFsdm1cDK9Kj8mlB/d63yfszxYaF36Oh5lghkc3mUAZ8gj0iVbMRbrIXSaZbmqXgTWlnijcdQVKxkTuL85kM0dHsLb0A4S6qghYNCbGm4YJ5xawwRRbDHNNoZc1JopcyaTz/WCjaepCBOQaE0WeZuK5mG1xqhAjDYyJ0oFjJvJl5+EtJ9nBRJFnmKl8Od83C20x2Wbud1D4GZqHCesOTcZDvmn47Erf19MU1A127Wq8gbrxh12HFGaY4yFd4kxIgSKQuXD2KdhaPdNcg0tJXKCOhPqthbKHUD9jYURVhpmUhoGykN9x2DCoZooz8JiYehcTEKvD2EDOWIgmyp1MTi+9WUCsCWH7yBILh+9mghr8AEwK8q393zy2iifCeMr5xCR1B0w1clXWd56X5/MFhzJRfdlJAuHpPOdSGlk4kcnqH2EmePu9a3maZyeRDIUzYYVpSRs87TOb5BlwcCmLCxN+2KTPSWMYBzFksYZJ6xu7BMIj+psyynOybBPfkl2ZuG4XZDDFl1T6yv2y3L0p7pm8NoZ1CGT3Mp4CEMbBs1lROpehfKOf2UKtnQM/j0xiQfqR1g5ofKSV5Q4ejdkO8gJaPWRElhQAA+';
 
@@ -3760,6 +3779,130 @@
         };
         let lastDocumentHtml = '';
         
+        // Auto-save functionality
+        let autoSaveTimer = null;
+        const AUTO_SAVE_DELAY = 30000; // 30 seconds
+        
+        function autoSaveState() {
+            const state = {
+                selectedPrograms: selectedPrograms,
+                atHomeProviders: atHomeProviders,
+                documentType: documentType,
+                clientName: document.getElementById('clientName')?.value || '',
+                includeAtHome: document.getElementById('includeAtHome')?.checked || false,
+                includeAlumni: document.getElementById('includeAlumni')?.checked || false,
+                timestamp: Date.now()
+            };
+            
+            localStorage.setItem('ffas_autosave', JSON.stringify(state));
+            showSuccessMessage('Work automatically saved', 1000);
+        }
+        
+        function restoreAutoSave() {
+            const saved = localStorage.getItem('ffas_autosave');
+            if (saved) {
+                try {
+                    const state = JSON.parse(saved);
+                    // Only restore if less than 24 hours old
+                    if (Date.now() - state.timestamp < 24 * 60 * 60 * 1000) {
+                        selectedPrograms = state.selectedPrograms || [];
+                        atHomeProviders = state.atHomeProviders || [];
+                        documentType = state.documentType || 'options';
+                        
+                        // Restore UI state
+                        setTimeout(() => {
+                            if (document.getElementById('clientName')) {
+                                document.getElementById('clientName').value = state.clientName || '';
+                            }
+                            if (document.getElementById('includeAtHome')) {
+                                document.getElementById('includeAtHome').checked = state.includeAtHome || false;
+                            }
+                            if (document.getElementById('includeAlumni')) {
+                                document.getElementById('includeAlumni').checked = state.includeAlumni || false;
+                            }
+                            
+                            // Update displays
+                            updateSelectedDisplay();
+                            toggleAtHomeSection();
+                            
+                            showSuccessMessage('Previous work restored', 2000);
+                        }, 500);
+                    }
+                } catch (e) {
+                    console.error('Failed to restore auto-save:', e);
+                }
+            }
+        }
+        
+        function scheduleAutoSave() {
+            clearTimeout(autoSaveTimer);
+            autoSaveTimer = setTimeout(autoSaveState, AUTO_SAVE_DELAY);
+        }
+        
+        // Trigger auto-save on any change
+        document.addEventListener('input', scheduleAutoSave);
+        document.addEventListener('change', scheduleAutoSave);
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + S = Save to vault
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                if (lastDocumentHtml) {
+                    saveToVault();
+                } else {
+                    showErrorMessage('Generate a document first before saving');
+                }
+            }
+            
+            // Ctrl/Cmd + P = Print
+            if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                e.preventDefault();
+                if (lastDocumentHtml) {
+                    printDocumentPreview();
+                } else {
+                    showErrorMessage('Generate a document first before printing');
+                }
+            }
+            
+            // Ctrl/Cmd + G = Generate document
+            if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
+                e.preventDefault();
+                generateDocument();
+            }
+            
+            // ESC = Close modals
+            if (e.key === 'Escape') {
+                const modals = document.querySelectorAll('.modal.show');
+                modals.forEach(modal => {
+                    if (modal.id === 'documentPreviewModal') {
+                        closeDocumentPreview();
+                    } else if (modal.id === 'previewModal') {
+                        closePreview();
+                    }
+                });
+            }
+        });
+        
+        // Input sanitization helper
+        function sanitizeInput(input) {
+            if (typeof input !== 'string') return '';
+            // Create a temporary div to convert HTML entities
+            const div = document.createElement('div');
+            div.textContent = input;
+            return div.innerHTML
+                .replace(/[<>]/g, '') // Remove angle brackets
+                .trim();
+        }
+        
+        // Sanitize client name on input
+        const clientNameInput = document.getElementById('clientName');
+        if (clientNameInput) {
+            clientNameInput.addEventListener('input', function() {
+                this.value = sanitizeInput(this.value);
+            });
+        }
+        
         // AI Configuration - Choose OpenAI or Anthropic
         const OPENAI_API_KEY = 'YOUR_OPENAI_API_KEY_HERE'; // Replace with your OpenAI API key
         const ANTHROPIC_API_KEY = 'YOUR_ANTHROPIC_API_KEY_HERE'; // Or use Anthropic Claude
@@ -4705,52 +4848,7 @@
             });
         }
 
-        function openIntakeWizard() {
-            const wizardModal = document.getElementById('intakeWizardModal');
-            const wizardClientInput = document.getElementById('wizardClientName');
-            const wizardAtHomeCheckbox = document.getElementById('wizardIncludeAtHome');
-            const wizardAlumniCheckbox = document.getElementById('wizardIncludeAlumni');
-            const mainClientInput = document.getElementById('clientName');
-            const mainAtHome = document.getElementById('includeAtHome');
-            const mainAlumni = document.getElementById('includeAlumni');
-            const searchInput = document.getElementById('wizardProgramSearch');
 
-            if (!wizardModal || !wizardClientInput || !wizardAtHomeCheckbox || !wizardAlumniCheckbox) {
-                console.warn('Wizard elements missing, cannot open guided intake wizard.');
-                return;
-            }
-
-            wizardState.currentStep = 1;
-            wizardState.selectedProgramIds = new Set(selectedPrograms.map(program => program.id));
-            wizardState.searchTerm = '';
-
-            wizardClientInput.value = mainClientInput ? mainClientInput.value : '';
-            wizardClientInput.classList.remove('input-error');
-            wizardClientInput.oninput = () => wizardClientInput.classList.remove('input-error');
-
-            wizardAtHomeCheckbox.checked = mainAtHome ? mainAtHome.checked : false;
-            wizardAlumniCheckbox.checked = mainAlumni ? mainAlumni.checked : false;
-
-            if (searchInput) {
-                searchInput.value = '';
-            }
-
-            renderWizardPrograms();
-            updateWizardSummary();
-            wizardSetStep(1);
-
-            wizardModal.style.display = 'block';
-            requestAnimationFrame(() => wizardModal.classList.add('show'));
-        }
-
-        function closeIntakeWizard() {
-            const wizardModal = document.getElementById('intakeWizardModal');
-            if (!wizardModal) return;
-            wizardModal.classList.remove('show');
-            setTimeout(() => {
-                wizardModal.style.display = 'none';
-            }, 200);
-        }
 
         function wizardSetStep(step) {
             wizardState.currentStep = step;
@@ -5131,63 +5229,48 @@
             if (modal) {
                 modal.style.display = ''; // Reset display property
                 modal.classList.add('show');
-                // Default to AI mode
-                setAddProgramMode('ai');
+                // Default to manual mode
+                setAddProgramMode('manual');
             }
         }
         
         // Set the mode for adding programs
         function setAddProgramMode(mode) {
-            const aiBtn = document.getElementById('aiModeBtn');
             const manualBtn = document.getElementById('manualModeBtn');
             const templateBtn = document.getElementById('templateModeBtn');
-            const aiContent = document.getElementById('aiModeContent');
             const manualContent = document.getElementById('manualModeContent');
             const templateContent = document.getElementById('templateModeContent');
-            const extractBtn = document.getElementById('extractProgramBtn');
             const smartBtn = document.getElementById('smartFormatBtn');
+            const addTemplateBtn = document.getElementById('addTemplateBtn');
             
             // Reset all buttons
-            aiBtn.style.background = '#e5e7eb';
-            aiBtn.style.color = '#6b7280';
             manualBtn.style.background = '#e5e7eb';
             manualBtn.style.color = '#6b7280';
             templateBtn.style.background = '#e5e7eb';
             templateBtn.style.color = '#6b7280';
             
             // Hide all content
-            aiContent.style.display = 'none';
             manualContent.style.display = 'none';
             templateContent.style.display = 'none';
             
-            // Hide smart format button by default
+            // Hide all action buttons
             smartBtn.style.display = 'none';
+            addTemplateBtn.style.display = 'none';
             
-            if (mode === 'ai') {
-                // AI Mode
-                aiBtn.style.background = '#4f46e5';
-                aiBtn.style.color = 'white';
-                aiContent.style.display = 'block';
-                extractBtn.innerHTML = '🚀 Extract from Website';
-                extractBtn.style.display = 'inline-block';
-                document.getElementById('programUrl').focus();
-            } else if (mode === 'manual') {
-                // Manual Mode - Show both AI and Smart Format buttons
-                manualBtn.style.background = '#f59e0b';
+            if (mode === 'manual') {
+                // Manual Mode
+                manualBtn.style.background = '#4f46e5';
                 manualBtn.style.color = 'white';
                 manualContent.style.display = 'block';
-                extractBtn.innerHTML = '✨ Format with AI';
-                extractBtn.style.display = 'inline-block';
-                smartBtn.style.display = 'inline-block';  // Show Smart Format button
+                smartBtn.style.display = 'inline-block';
                 document.getElementById('customProgramInfo').focus();
             } else if (mode === 'template') {
                 // Template Mode
-                templateBtn.style.background = '#10b981';
+                templateBtn.style.background = '#4f46e5';
                 templateBtn.style.color = 'white';
                 templateContent.style.display = 'block';
-                extractBtn.innerHTML = '📝 Add Program';
-                extractBtn.style.display = 'inline-block';
-                document.getElementById('templateProgramName').focus();
+                addTemplateBtn.style.display = 'inline-block';
+                document.getElementById('templateName').focus();
             }
         }
         
@@ -5530,14 +5613,14 @@
         async function addTemplateProgram() {
             // Collect all form data
             const programData = {
-                'Program Name': document.getElementById('templateProgramName').value.trim(),
+                'Program Name': document.getElementById('templateName').value.trim(),
                 'Location': document.getElementById('templateLocation').value.trim(),
                 'Phone Number': document.getElementById('templatePhone').value.trim(),
                 'Email': document.getElementById('templateEmail').value.trim(),
-                'Level of Care': document.getElementById('templateLevelOfCare').value.trim(),
-                'Age Range': document.getElementById('templateAgeRange').value.trim(),
-                'Primary Issues Treated': document.getElementById('templateTreatmentSpecialties').value.trim(),
-                'Specialized Therapies': document.getElementById('templateTherapeuticModalities').value.trim(),
+                'Level of Care': document.getElementById('templateLevel').value.trim(),
+                'Age Range': document.getElementById('templateAges').value.trim(),
+                'Primary Issues Treated': document.getElementById('templateSpecialties').value.trim(),
+                'Specialized Therapies': document.getElementById('templateModalities').value.trim(),
                 'Insurance Accepted': document.getElementById('templateInsurance').value.trim(),
                 'Program Philosophy': document.getElementById('templateDescription').value.trim(),
                 'Website': document.getElementById('templateWebsite').value.trim()
@@ -6360,6 +6443,34 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             const checkbox = document.getElementById('includeAtHome');
             const section = document.getElementById('atHomeSection');
             section.style.display = checkbox.checked ? 'block' : 'none';
+            
+            // Start collapsed when first shown
+            if (checkbox.checked) {
+                const content = document.getElementById('atHomeContent');
+                const toggleBtn = document.getElementById('atHomeToggleBtn');
+                const toggleText = document.getElementById('atHomeToggleText');
+                content.style.display = 'none';
+                toggleBtn.textContent = '▶';
+                if (toggleText) toggleText.textContent = 'EXPAND';
+            }
+        }
+        
+        function toggleAtHomeContent() {
+            const content = document.getElementById('atHomeContent');
+            const toggleBtn = document.getElementById('atHomeToggleBtn');
+            const toggleText = document.getElementById('atHomeToggleText');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                toggleBtn.textContent = '▼';
+                toggleBtn.style.transform = 'rotate(0deg)';
+                if (toggleText) toggleText.textContent = 'COLLAPSE';
+            } else {
+                content.style.display = 'none';
+                toggleBtn.textContent = '▶';
+                toggleBtn.style.transform = 'rotate(0deg)';
+                if (toggleText) toggleText.textContent = 'EXPAND';
+            }
         }
         
         function addAtHomeProvider() {
@@ -6425,6 +6536,17 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             const container = document.getElementById('atHomeProviders');
             container.innerHTML = '';
             
+            // Update the provider count badge
+            const countBadge = document.getElementById('atHomeProviderCount');
+            if (countBadge) {
+                if (atHomeProviders.length > 0) {
+                    countBadge.textContent = atHomeProviders.length;
+                    countBadge.style.display = 'inline-block';
+                } else {
+                    countBadge.style.display = 'none';
+                }
+            }
+            
             atHomeProviders.forEach(provider => {
                 const providerDiv = document.createElement('div');
                 providerDiv.style.cssText = 'margin-bottom: 15px; padding: 12px; border: 1px solid #ddd; border-radius: 6px; background: white;';
@@ -6435,25 +6557,27 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
                         <strong>Provider ${atHomeProviders.indexOf(provider) + 1}</strong>
                         <button type="button" onclick="removeAtHomeProvider('${provider.id}')" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px;">Remove</button>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                        <input type="text" placeholder="Provider Name/Office/Group *" value="${provider.name}" 
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px;">
+                            <input type="text" placeholder="Provider Name *" value="${provider.name}" 
                                onchange="updateAtHomeProvider('${provider.id}', 'name', this.value)"
-                               style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        <input type="text" placeholder="Service Type (e.g., Individual Therapy, Med Management)" value="${provider.service}" 
+                                   style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;">
+                            <input type="text" placeholder="Service Type" value="${provider.service}" 
                                onchange="updateAtHomeProvider('${provider.id}', 'service', this.value)"
-                               style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                   style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;">
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px;">
                         <input type="text" placeholder="Phone Number *" value="${provider.phone}" 
                                onchange="updateAtHomeProvider('${provider.id}', 'phone', this.value)"
-                               style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        <input type="text" placeholder="Website (optional)" value="${provider.website}" 
+                                   style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;">
+                            <input type="text" placeholder="Website" value="${provider.website}" 
                                onchange="updateAtHomeProvider('${provider.id}', 'website', this.value)"
-                               style="padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                   style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;">
                     </div>
                     <input type="text" placeholder="Address (optional)" value="${provider.address}" 
                            onchange="updateAtHomeProvider('${provider.id}', 'address', this.value)"
-                           style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                               style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    </div>
                 `;
                 
                 container.appendChild(providerDiv);
@@ -7360,15 +7484,22 @@ Set Confidence to "low" since this is URL-based inference.`;
                         <div class="doc-program">
                             <div class="doc-program-title">${program.name}${location ? ` – ${location}` : ''}</div>
                             
-                            <div class="doc-program-details-heading">Level of Care & Services Provided:</div>
                             <div class="doc-program-descriptor">
+                                <strong>Level of Care & Services Provided:</strong><br>
                                 ${data['Level of Care'] || program.type || 'Treatment program'} for ${data['Population Served'] || 'adolescents and young adults'}.
                             </div>
                             
                             <div class="doc-program-details-heading">Program Details / Differentiating Features:</div>
                             <ul class="doc-program-bullets">
-                                ${program.features.map(feature => `<li>${feature}</li>`).join('')}
-                                ${data['Insurance Accepted'] && data['Insurance Accepted'] !== 'Not specified' ? `<li><strong>Insurance:</strong> ${data['Insurance Accepted']}</li>` : ''}
+                                ${program.features.map(feature => {
+                                    // Format features with bold concept introductions
+                                    if (feature.includes(':')) {
+                                        const [concept, description] = feature.split(':');
+                                        return `<li><strong>${concept}:</strong>${description}</li>`;
+                                    }
+                                    return `<li>${feature}</li>`;
+                                }).join('')}
+                                ${data['Insurance Accepted'] && data['Insurance Accepted'] !== 'Not specified' ? `<li><strong>Insurance Accepted:</strong> ${data['Insurance Accepted']}</li>` : ''}
                                 ${data['Accreditations'] && data['Accreditations'] !== 'Not specified' ? `<li><strong>Accreditations:</strong> ${data['Accreditations']}</li>` : ''}
                             </ul>
                             
@@ -7378,9 +7509,10 @@ Set Confidence to "low" since this is URL-based inference.`;
                             
                             <div class="doc-program-details-heading">Contact Information:</div>
                             <div class="doc-contact-section">
-                                ${data['Phone Number'] && data['Phone Number'] !== 'Not specified' ? `<strong>Phone:</strong> ${data['Phone Number']}<br>` : ''}
-                                ${data['Website'] && data['Website'] !== 'Not specified' ? `<strong>Website:</strong> ${data['Website']}<br>` : ''}
-                                ${location ? `<strong>Address:</strong> ${location}` : ''}
+                                ${data['Phone Number'] && data['Phone Number'] !== 'Not specified' ? `Phone: ${data['Phone Number']}<br>` : ''}
+                                ${data['Email'] && data['Email'] !== 'Not specified' ? `Email: ${data['Email']}<br>` : ''}
+                                ${data['Website'] && data['Website'] !== 'Not specified' ? `Website: ${data['Website']}<br>` : ''}
+                                ${location ? `Address: ${location}` : ''}
                             </div>
                         </div>
                     `;
@@ -7395,24 +7527,18 @@ Set Confidence to "low" since this is URL-based inference.`;
                         <div class="doc-program">
                             <div class="doc-program-title">${program.name}${location ? ` – ${location}` : ''}</div>
                             
-                            <div class="doc-program-details-heading">Level of Care & Services Provided:</div>
                             <div class="doc-program-descriptor">
+                                <strong>Level of Care & Services Provided:</strong><br>
                                 ${program.type || 'Residential treatment'} program for ${demographics || ageRange || 'adolescents and young adults'}. ${services ? `Provides ${services.toLowerCase()}.` : ''}
                             </div>
                             
                             <div class="doc-program-details-heading">Program Details / Differentiating Features:</div>
                             <ul class="doc-program-bullets">
                                 ${program.features.map(feature => {
-                                // Check if this feature has sub-points (look for specific patterns)
-                                if (feature.toLowerCase().includes('family') && feature.toLowerCase().includes('care')) {
-                                    return `<li>${feature}
-                                        <ul class="doc-sub-bullets">
-                                            <li>Weekly family therapy via telehealth</li>
-                                            <li>Monthly family weekends on campus</li>
-                                            <li>Parent support groups</li>
-                                            <li>Structured home visits for reintegration practice</li>
-                                        </ul>
-                                    </li>`;
+                                // Format features with bold concept introductions
+                                if (feature.includes(':')) {
+                                    const [concept, description] = feature.split(':');
+                                    return `<li><strong>${concept}:</strong>${description}</li>`;
                                 }
                                 return `<li>${feature}</li>`;
                             }).join('')}
@@ -7420,11 +7546,10 @@ Set Confidence to "low" since this is URL-based inference.`;
                         
                         <div class="doc-program-details-heading">Contact Information:</div>
                         <div class="doc-contact-section">
-                            ${program.contact.phone ? `<strong>Phone:</strong> ${program.contact.phone}<br>` : ''}
-                            ${program.contact.website ? (() => { 
-                                const w = normalizeUrl(program.contact.website); 
-                                return `<strong>Website:</strong> <a href="${w}" target="_blank" rel="noopener">${w}</a>`;
-                            })() : ''}
+                            ${program.contact.phone ? `Phone: ${program.contact.phone}<br>` : ''}
+                            ${program.contact.email ? `Email: ${program.contact.email}<br>` : ''}
+                            ${program.contact.website ? `Website: ${normalizeUrl(program.contact.website)}<br>` : ''}
+                            ${program.location ? `Address: ${program.location}` : ''}
                         </div>
                     </div>
                 `;
@@ -7453,7 +7578,7 @@ Set Confidence to "low" since this is URL-based inference.`;
                     }
                 });
                 
-                // Render each service group
+                // Render each service group using standard program formatting
                 Object.keys(serviceGroups).forEach(service => {
                     html += `<div class="doc-category-header">${service}</div>`;
                     
@@ -7464,7 +7589,8 @@ Set Confidence to "low" since this is URL-based inference.`;
                                 <div class="doc-program-title">${provider.name}${provider.address ? ` – ${provider.address}` : ''}</div>
                                 
                                 <div class="doc-program-descriptor">
-                                    <strong>Service:</strong> ${provider.service || 'General Services'}
+                                    <strong>Level of Care & Services Provided:</strong><br>
+                                    ${provider.service || 'General Services'} - Community-based support for continued care at home.
                                 </div>
                                 
                                 <div class="doc-program-details-heading">Contact Information:</div>
@@ -7483,55 +7609,125 @@ Set Confidence to "low" since this is URL-based inference.`;
                         AT HOME Recommendation: If extended residential care is not a viable option, below are the clinical recommendations should your child return home.
                     </div>
                     
-                    <div class="doc-category-header">No Providers Added</div>
+                    <div class="doc-category-header">PHP Options</div>
                     
-                    <!-- Blank mini-cards for manual entry -->
-                    <div class="doc-mini-card">
-                        <div class="doc-mini-title">___________________________ – PHP, ___________ Location</div>
-                        <div class="doc-mini-blurb">________________________________________________________________</div>
-                        <div class="doc-mini-contact">
+                    <!-- Standard program format for manual entry -->
+                    <div class="doc-program">
+                        <div class="doc-program-title">_________________________ – PHP, _____________ Location</div>
+                        
+                        <div class="doc-program-descriptor">
+                            <strong>Level of Care & Services Provided:</strong><br>
+                            Partial Hospitalization Program - Intensive day treatment for adolescents requiring structured support.
+                        </div>
+                        
+                        <div class="doc-program-details-heading">Program Details / Differentiating Features:</div>
+                        <div class="doc-program-details">
+                            • <strong>Clinical Approach:</strong> _________________________________________________<br>
+                            • <strong>Population Served:</strong> ________________________________________________<br>
+                            • <strong>Schedule:</strong> _________________________________________________________
+                        </div>
+                        
+                        <div class="doc-program-details-heading">Contact Information:</div>
+                        <div class="doc-contact-section">
                             <strong>Phone:</strong> ___________________________________<br>
-                            <strong>Website:</strong> _________________________________
+                            <strong>Website:</strong> _________________________________<br>
+                            <strong>Address:</strong> __________________________________
                         </div>
                     </div>
                     
-                    <div class="doc-mini-card">
-                        <div class="doc-mini-title">___________________________ – PHP, ___________ Location</div>
-                        <div class="doc-mini-blurb">________________________________________________________________</div>
-                        <div class="doc-mini-contact">
+                    <div class="doc-program">
+                        <div class="doc-program-title">_________________________ – PHP, _____________ Location</div>
+                        
+                        <div class="doc-program-descriptor">
+                            <strong>Level of Care & Services Provided:</strong><br>
+                            Partial Hospitalization Program - Intensive day treatment for adolescents requiring structured support.
+                        </div>
+                        
+                        <div class="doc-program-details-heading">Program Details / Differentiating Features:</div>
+                        <div class="doc-program-details">
+                            • <strong>Clinical Approach:</strong> _________________________________________________<br>
+                            • <strong>Population Served:</strong> ________________________________________________<br>
+                            • <strong>Schedule:</strong> _________________________________________________________
+                        </div>
+                        
+                        <div class="doc-program-details-heading">Contact Information:</div>
+                        <div class="doc-contact-section">
                             <strong>Phone:</strong> ___________________________________<br>
-                            <strong>Website:</strong> _________________________________
+                            <strong>Website:</strong> _________________________________<br>
+                            <strong>Address:</strong> __________________________________
                         </div>
                     </div>
                     
                     <div class="doc-category-header">IOP Options</div>
                     
-                    <div class="doc-mini-card">
-                        <div class="doc-mini-title">___________________________ – IOP, ___________ Location</div>
-                        <div class="doc-mini-blurb">________________________________________________________________</div>
-                        <div class="doc-mini-contact">
+                    <div class="doc-program">
+                        <div class="doc-program-title">_________________________ – IOP, _____________ Location</div>
+                        
+                        <div class="doc-program-descriptor">
+                            <strong>Level of Care & Services Provided:</strong><br>
+                            Intensive Outpatient Program - Structured outpatient treatment for adolescents transitioning to community care.
+                        </div>
+                        
+                        <div class="doc-program-details-heading">Program Details / Differentiating Features:</div>
+                        <div class="doc-program-details">
+                            • <strong>Clinical Approach:</strong> _________________________________________________<br>
+                            • <strong>Population Served:</strong> ________________________________________________<br>
+                            • <strong>Schedule:</strong> _________________________________________________________
+                        </div>
+                        
+                        <div class="doc-program-details-heading">Contact Information:</div>
+                        <div class="doc-contact-section">
                             <strong>Phone:</strong> ___________________________________<br>
-                            <strong>Website:</strong> _________________________________
+                            <strong>Website:</strong> _________________________________<br>
+                            <strong>Address:</strong> __________________________________
                         </div>
                     </div>
                     
                     <div class="doc-category-header">Therapeutic Support</div>
                     
-                    <div class="doc-mini-card">
-                        <div class="doc-mini-title">___________________________ – Individual Therapy</div>
-                        <div class="doc-mini-blurb">________________________________________________________________</div>
-                        <div class="doc-mini-contact">
+                    <div class="doc-program">
+                        <div class="doc-program-title">_________________________ – Individual Therapy</div>
+                        
+                        <div class="doc-program-descriptor">
+                            <strong>Level of Care & Services Provided:</strong><br>
+                            Individual Therapy - One-on-one therapeutic support for continued mental health care.
+                        </div>
+                        
+                        <div class="doc-program-details-heading">Program Details / Differentiating Features:</div>
+                        <div class="doc-program-details">
+                            • <strong>Therapeutic Approach:</strong> _______________________________________________<br>
+                            • <strong>Specialties:</strong> _______________________________________________________<br>
+                            • <strong>Session Frequency:</strong> __________________________________________________
+                        </div>
+                        
+                        <div class="doc-program-details-heading">Contact Information:</div>
+                        <div class="doc-contact-section">
                             <strong>Phone:</strong> ___________________________________<br>
-                            <strong>Website:</strong> _________________________________
+                            <strong>Website:</strong> _________________________________<br>
+                            <strong>Address:</strong> __________________________________
                         </div>
                     </div>
                     
-                    <div class="doc-mini-card">
-                        <div class="doc-mini-title">___________________________ – Psychiatry</div>
-                        <div class="doc-mini-blurb">________________________________________________________________</div>
-                        <div class="doc-mini-contact">
+                    <div class="doc-program">
+                        <div class="doc-program-title">_________________________ – Psychiatry</div>
+                        
+                        <div class="doc-program-descriptor">
+                            <strong>Level of Care & Services Provided:</strong><br>
+                            Psychiatric Services - Medication management and psychiatric evaluation for ongoing mental health care.
+                        </div>
+                        
+                        <div class="doc-program-details-heading">Program Details / Differentiating Features:</div>
+                        <div class="doc-program-details">
+                            • <strong>Services Offered:</strong> __________________________________________________<br>
+                            • <strong>Specialties:</strong> _______________________________________________________<br>
+                            • <strong>Appointment Frequency:</strong> ______________________________________________
+                        </div>
+                        
+                        <div class="doc-program-details-heading">Contact Information:</div>
+                        <div class="doc-contact-section">
                             <strong>Phone:</strong> ___________________________________<br>
-                            <strong>Website:</strong> _________________________________
+                            <strong>Website:</strong> _________________________________<br>
+                            <strong>Address:</strong> __________________________________
                         </div>
                     </div>
                 `;
@@ -7696,17 +7892,22 @@ Set Confidence to "low" since this is URL-based inference.`;
         }
 
         async function downloadDocumentPdf(event) {
-            // Check if there's content to download
+            // Get the document content
+            let documentContent = '';
             const previewContainer = document.getElementById('documentPreviewContainer');
-            if (!previewContainer || !previewContainer.innerHTML.trim()) {
-                // If no preview, check if there's a generated document
+            
+            if (previewContainer && previewContainer.innerHTML.trim()) {
+                documentContent = previewContainer.innerHTML;
+            } else if (lastDocumentHtml) {
+                documentContent = lastDocumentHtml;
+            } else {
                 const outputContainer = document.getElementById('documentOutput');
-                if (!outputContainer || !outputContainer.innerHTML.trim()) {
+                if (outputContainer && outputContainer.innerHTML.trim()) {
+                    documentContent = outputContainer.innerHTML;
+                } else {
                     alert('Please generate a document first before downloading.');
-                return;
+                    return;
                 }
-                // Use the generated document if preview is not available
-                previewContainer.innerHTML = outputContainer.innerHTML;
             }
 
             // Show loading indicator
@@ -7717,9 +7918,9 @@ Set Confidence to "low" since this is URL-based inference.`;
             }
 
             try {
-                // Check if jsPDF is loaded
-                if (!window.jspdf) {
-                    throw new Error('PDF library not loaded. Please refresh the page and try again.');
+                // Check if jsPDF and html2canvas are loaded
+                if (!window.jspdf || !window.html2canvas) {
+                    throw new Error('PDF libraries not loaded. Please refresh the page and try again.');
                 }
 
                 // Create a clean container for PDF generation
@@ -7727,64 +7928,149 @@ Set Confidence to "low" since this is URL-based inference.`;
                 pdfContainer.style.position = 'absolute';
                 pdfContainer.style.left = '-9999px';
                 pdfContainer.style.top = '0';
-                pdfContainer.style.width = '612px'; // Letter width in points
-                pdfContainer.style.padding = '36px';
+                pdfContainer.style.width = '816px'; // 8.5 inches at 96 DPI
+                pdfContainer.style.padding = '48px'; // 0.5 inch margins
                 pdfContainer.style.background = 'white';
-                pdfContainer.style.fontFamily = 'Arial, sans-serif';
+                pdfContainer.style.fontFamily = 'Calibri, Arial, sans-serif';
+                pdfContainer.style.fontSize = '12pt';
+                pdfContainer.style.lineHeight = '1.4';
+                pdfContainer.style.color = '#000';
                 
-                // Clone and clean the content
-                const contentClone = previewContainer.cloneNode(true);
-                contentClone.style.width = '100%';
-                contentClone.style.margin = '0';
-                contentClone.style.padding = '0';
+                // Set the content
+                pdfContainer.innerHTML = documentContent;
                 
-                // Remove any buttons or interactive elements
-                const buttons = contentClone.querySelectorAll('button');
+                // Ensure header and footer are properly styled
+                const docHeader = pdfContainer.querySelector('.doc-letterhead');
+                if (docHeader) {
+                    docHeader.style.marginBottom = '20px';
+                }
+                
+                // Remove the original footer since we'll add it consistently on each page
+                const docFooter = pdfContainer.querySelector('.doc-footer');
+                if (docFooter) {
+                    docFooter.remove();
+                }
+                
+                // Clean up any interactive elements
+                const buttons = pdfContainer.querySelectorAll('button');
                 buttons.forEach(btn => btn.remove());
                 
-                pdfContainer.appendChild(contentClone);
+                // Ensure all styles are applied
+                const allElements = pdfContainer.querySelectorAll('*');
+                allElements.forEach(el => {
+                    const computedStyle = window.getComputedStyle(el);
+                    if (computedStyle.fontFamily.includes('Calibri')) {
+                        el.style.fontFamily = 'Calibri, Arial, sans-serif';
+                    }
+                });
+                
                 document.body.appendChild(pdfContainer);
 
-                // Generate PDF using jsPDF
+                // Wait for content to render
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                // Use html2canvas to capture the content
+                const canvas = await html2canvas(pdfContainer, {
+                    scale: 2, // Higher quality
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff',
+                    width: 816,
+                    windowWidth: 816
+                });
+
+                // Remove the temporary container
+                document.body.removeChild(pdfContainer);
+
+                // Create PDF from canvas
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF({
                     orientation: 'portrait',
                     unit: 'pt',
-                    format: 'letter'
+                    format: 'letter' // 612 x 792 pt
                 });
 
-                // Use html2canvas for better rendering
-                await pdf.html(pdfContainer, {
-                    callback: function(doc) {
-                        // Get client name for filename
-                        const clientNameInput = document.getElementById('clientName');
-                        const clientName = clientNameInput ? 
-                            (clientNameInput.value || 'Client').trim().replace(/[^a-zA-Z0-9]/g, '-') : 
-                            'Client';
-                        
-                        const date = new Date().toISOString().split('T')[0];
-                        const filename = `${clientName}_Aftercare_${date}.pdf`;
-                        
-                        // Save the PDF
-                        doc.save(filename);
-                        
-                        // Show success message
-                        showSuccessMessage('PDF downloaded successfully!');
-                    },
-                    x: 10,
-                    y: 10,
-                    width: 580, // Adjusted for margins
-                    windowWidth: 650,
-                    margin: [36, 36, 36, 36],
-                    autoPaging: 'text',
-                    html2canvas: {
-                        scale: 0.8,
-                        useCORS: true,
-                        logging: false,
-                        letterRendering: true,
-                        imageTimeout: 0
+                // Calculate dimensions
+                const imgWidth = 612; // Letter width in points
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                const pageHeight = 792; // Letter height in points
+                
+                // Add image to PDF, handling multiple pages if needed
+                let position = 0;
+                let remainingHeight = imgHeight;
+                let pageNum = 0;
+                
+                while (remainingHeight > 0) {
+                    // Add a new page if not the first page
+                    if (position > 0) {
+                        pdf.addPage();
                     }
-                });
+                    pageNum++;
+                    
+                    // Calculate how much of the image to add to this page
+                    const pageCanvas = document.createElement('canvas');
+                    const pageCtx = pageCanvas.getContext('2d');
+                    const sourceY = (position * canvas.height) / imgHeight;
+                    const sourceHeight = Math.min((pageHeight * canvas.height) / imgHeight, canvas.height - sourceY);
+                    
+                    pageCanvas.width = canvas.width;
+                    pageCanvas.height = sourceHeight;
+                    
+                    // Draw the portion of the image for this page
+                    pageCtx.drawImage(
+                        canvas,
+                        0, sourceY, canvas.width, sourceHeight,
+                        0, 0, canvas.width, sourceHeight
+                    );
+                    
+                    // Add to PDF
+                    const pageData = pageCanvas.toDataURL('image/png');
+                    const addHeight = Math.min(pageHeight, remainingHeight);
+                    
+                    // Add image with space for header and footer
+                    const headerSpace = pageNum === 1 ? 0 : 60; // Space for header on pages 2+
+                    const footerSpace = 60; // Space for footer on all pages
+                    const contentHeight = Math.min(pageHeight - headerSpace - footerSpace, addHeight);
+                    
+                    pdf.addImage(pageData, 'PNG', 0, headerSpace, imgWidth, contentHeight);
+                    
+                    // Add header on pages 2+
+                    if (pageNum > 1) {
+                        pdf.setFontSize(16);
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.setTextColor(0, 153, 204); // #0099cc
+                        pdf.text('Family First', 306, 30, { align: 'center' });
+                        pdf.setFontSize(12);
+                        pdf.setFont('helvetica', 'normal');
+                        pdf.setTextColor(0, 0, 0);
+                        pdf.text('ADOLESCENT SERVICES', 306, 45, { align: 'center' });
+                    }
+                    
+                    // Add footer on all pages
+                    pdf.setFontSize(10);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.setTextColor(51, 51, 51);
+                    pdf.text('700 Village Square Crossing, Unit 101, Palm Beach Gardens, FL 33410', 306, pageHeight - 35, { align: 'center' });
+                    pdf.text('(561) 328-7370 • familyfirstas.com', 306, pageHeight - 20, { align: 'center' });
+                    
+                    position += pageHeight - headerSpace;
+                    remainingHeight -= pageHeight - headerSpace;
+                }
+
+                // Get client name for filename
+                const clientNameInput = document.getElementById('clientName');
+                const clientName = clientNameInput ? 
+                    (clientNameInput.value || 'Client').trim().replace(/[^a-zA-Z0-9]/g, '-') : 
+                    'Client';
+                
+                const date = new Date().toISOString().split('T')[0];
+                const filename = `${clientName}_Aftercare_${date}.pdf`;
+                
+                // Save the PDF
+                pdf.save(filename);
+                
+                // Show success message
+                showSuccessMessage('PDF downloaded successfully!');
 
             } catch (error) {
                 console.error('PDF generation error:', error);
@@ -7809,6 +8095,170 @@ Set Confidence to "low" since this is URL-based inference.`;
                     event.target.disabled = false;
                 }
             }
+        }
+
+        // Case Manager Workflow Functions
+        function emailDocument() {
+            const clientName = document.getElementById('clientName')?.value || 'Client';
+            const notes = document.getElementById('caseManagementNotes')?.value || '';
+            
+            // Create email content
+            const subject = `Aftercare Document - ${clientName}`;
+            const body = `Please find the aftercare document for ${clientName}.${notes ? '\n\nCase Management Notes:\n' + notes : ''}`;
+            
+            // Open email client
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.open(mailtoLink);
+            
+            showSuccessMessage('Email client opened with document details');
+        }
+
+        function saveToVault() {
+            const clientName = document.getElementById('clientName')?.value || 'Client';
+            const notes = document.getElementById('caseManagementNotes')?.value || '';
+            
+            if (!lastDocumentHtml) {
+                alert('Please generate a document first');
+                return;
+            }
+            
+            // Save to document vault
+            const vault = JSON.parse(localStorage.getItem(STORAGE_KEYS.documentVault) || '[]');
+            const documentData = {
+                id: Date.now(),
+                clientName: clientName,
+                type: 'aftercare',
+                content: lastDocumentHtml,
+                notes: notes,
+                date: new Date().toISOString(),
+                programs: getSelectedPrograms()
+            };
+            
+            vault.push(documentData);
+            localStorage.setItem(STORAGE_KEYS.documentVault, JSON.stringify(vault));
+            
+            showSuccessMessage('Document saved to vault successfully');
+        }
+
+        function addToDischargePacket() {
+            const clientName = document.getElementById('clientName')?.value || 'Client';
+            const notes = document.getElementById('caseManagementNotes')?.value || '';
+            
+            if (!lastDocumentHtml) {
+                alert('Please generate a document first');
+                return;
+            }
+            
+            // Add to discharge packet
+            const packets = JSON.parse(localStorage.getItem(STORAGE_KEYS.dischargePackets) || '[]');
+            let clientPacket = packets.find(p => p.clientName === clientName);
+            
+            if (!clientPacket) {
+                clientPacket = {
+                    clientName: clientName,
+                    documents: [],
+                    created: new Date().toISOString()
+                };
+                packets.push(clientPacket);
+            }
+            
+            clientPacket.documents.push({
+                type: 'aftercare',
+                content: lastDocumentHtml,
+                notes: notes,
+                added: new Date().toISOString()
+            });
+            
+            localStorage.setItem(STORAGE_KEYS.dischargePackets, JSON.stringify(packets));
+            showSuccessMessage('Document added to discharge packet');
+        }
+
+        function scheduleFollowUp() {
+            const clientName = document.getElementById('clientName')?.value || 'Client';
+            const notes = document.getElementById('caseManagementNotes')?.value || '';
+            
+            // Create calendar event
+            const title = `Follow-up: ${clientName} Aftercare`;
+            const details = `Follow-up for aftercare document.${notes ? '\n\nNotes: ' + notes : ''}`;
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() + 7); // Default to 1 week from now
+            
+            const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&details=${encodeURIComponent(details)}&dates=${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z/${startDate.toISOString().replace(/[-:]/g, '').split('.')[0]}Z`;
+            
+            window.open(calendarUrl, '_blank');
+            showSuccessMessage('Calendar opened for follow-up scheduling');
+        }
+
+        function createTaskReminder() {
+            const clientName = document.getElementById('clientName')?.value || 'Client';
+            const notes = document.getElementById('caseManagementNotes')?.value || '';
+            
+            // Save reminder to local storage
+            const reminders = JSON.parse(localStorage.getItem('ffas_reminders') || '[]');
+            const reminder = {
+                id: Date.now(),
+                clientName: clientName,
+                task: 'Follow up on aftercare document',
+                notes: notes,
+                dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week from now
+                created: new Date().toISOString(),
+                completed: false
+            };
+            
+            reminders.push(reminder);
+            localStorage.setItem('ffas_reminders', JSON.stringify(reminders));
+            
+            showSuccessMessage('Task reminder created for 1 week from now');
+        }
+
+        function shareWithTeam() {
+            const clientName = document.getElementById('clientName')?.value || 'Client';
+            const notes = document.getElementById('caseManagementNotes')?.value || '';
+            
+            // Create shareable link or copy content
+            if (navigator.share) {
+                navigator.share({
+                    title: `Aftercare Document - ${clientName}`,
+                    text: `Aftercare document for ${clientName}${notes ? '\n\nNotes: ' + notes : ''}`,
+                    url: window.location.href
+                });
+            } else {
+                // Fallback: copy to clipboard
+                const shareText = `Aftercare Document - ${clientName}\n\nGenerated: ${new Date().toLocaleDateString()}\n${notes ? 'Notes: ' + notes + '\n' : ''}\nDocument available in system.`;
+                
+                navigator.clipboard.writeText(shareText).then(() => {
+                    showSuccessMessage('Document details copied to clipboard for sharing');
+                }).catch(() => {
+                    // Fallback for older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = shareText;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    showSuccessMessage('Document details copied to clipboard for sharing');
+                });
+            }
+        }
+
+        function generateNewDocument() {
+            // Clear current document and return to form
+            closeDocumentPreview();
+            
+            // Optionally clear form or keep current selections
+            const keepSelections = confirm('Keep current program selections for new document?');
+            if (!keepSelections) {
+                clearAllSelections();
+            }
+            
+            // Clear client name to encourage new entry
+            const clientNameField = document.getElementById('clientName');
+            if (clientNameField) {
+                clientNameField.value = '';
+                clientNameField.focus();
+            }
+            
+            showSuccessMessage('Ready to generate new document');
         }
 
         // Fallback download method using data URL
@@ -8182,21 +8632,60 @@ Set Confidence to "low" since this is URL-based inference.`;
             }
         });
         
+        // Global error handler
+        window.addEventListener('error', function(event) {
+            console.error('Application error:', event.error);
+            showErrorMessage('Something went wrong. Your work has been saved. Please refresh the page.');
+            // Try to save state before potential crash
+            try {
+                autoSaveState();
+            } catch (e) {
+                console.error('Failed to save state during error:', e);
+            }
+        });
+        
+        // Handle unhandled promise rejections
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            showErrorMessage('An error occurred. Please try again.');
+        });
+        
         // Initialize on load
         window.addEventListener('DOMContentLoaded', function() {
-            // Load theme
-            const savedTheme = localStorage.getItem(STORAGE_KEYS.theme);
-            if (savedTheme === 'dark') {
-                document.body.classList.add('dark-mode');
-                document.getElementById('themeIcon').textContent = '☀️';
-                document.getElementById('themeText').textContent = 'Light Mode';
+            try {
+                // Load theme
+                const savedTheme = localStorage.getItem(STORAGE_KEYS.theme);
+                if (savedTheme === 'dark') {
+                    document.body.classList.add('dark-mode');
+                    document.getElementById('themeIcon').textContent = '☀️';
+                    document.getElementById('themeText').textContent = 'Light Mode';
+                }
+                
+                // Update history
+                updateHistoryPanel();
+                
+                // Update compare count
+                document.getElementById('compareCount').textContent = '0';
+                
+                // Initialize programs and other features
+                renderPrograms();
+                loadCustomPrograms();
+                
+                // Restore auto-saved work
+                if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                    restoreAutoSave();
+                }
+                
+                // Show keyboard shortcuts hint
+                setTimeout(() => {
+                    if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                        showSuccessMessage('Tip: Use Ctrl+G to generate, Ctrl+S to save, Ctrl+P to print', 5000);
+                    }
+                }, 3000);
+            } catch (error) {
+                console.error('Initialization error:', error);
+                showErrorMessage('Failed to initialize. Please refresh the page.');
             }
-            
-            // Update history
-            updateHistoryPanel();
-            
-            // Update compare count
-            document.getElementById('compareCount').textContent = '0';
         });
     </script>
     
