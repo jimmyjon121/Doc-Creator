@@ -6352,11 +6352,10 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
         // Listen for messages from Chrome extension
         window.addEventListener('message', function(event) {
             if (event.data && event.data.type === 'PROGRAM_INFO_EXTRACTED') {
-                // Show the add program dialog with extracted content
-                document.getElementById('addProgramModal').style.display = 'block';
+                // Use the proper function to show the modal
+                showAddProgramDialog();
                 
-                // Set to manual mode and populate the textarea
-                setAddProgramMode('manual');
+                // Populate the textarea with extracted content
                 document.getElementById('customProgramInfo').value = event.data.content;
                 
                 // Clear any existing status messages
@@ -6365,7 +6364,7 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
                 // Show success message
                 const statusDiv = document.createElement('div');
                 statusDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #d4f4dd; color: #28a745; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 10000;';
-                statusDiv.innerHTML = '✅ Content received from Chrome extension! Use "Smart Format" or "Format with AI" to process it.';
+                statusDiv.innerHTML = '✅ Content received from Chrome extension! Click "Smart Format & Add Program" to process it.';
                 document.body.appendChild(statusDiv);
                 
                 setTimeout(() => {
