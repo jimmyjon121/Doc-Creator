@@ -2178,13 +2178,13 @@
                             <span style="color: #f59e0b; font-size: 16px;">🔒</span>
                             <div>
                                 <div style="color: #92400e; font-weight: 600; font-size: 13px;">HIPAA Compliance Notice</div>
-                                <div style="font-size: 12px; margin-top: 2px; color: #451a03;">
-                                    <span style="background-color: #bbf7d0; padding: 2px 4px; border-radius: 3px; font-weight: 600;">Enter first name only.</span>
-                                    <span style="background-color: #fecaca; padding: 2px 4px; border-radius: 3px; font-weight: 600;">No last names, DOB, SSN, or other PHI.</span>
-                                </div>
-                            </div>
-                        </div>
+                                <div style="font-size: 12px; margin-top: 4px; color: #451a03; line-height: 1.6;">
+                                    <span style="background-color: #bbf7d0; padding: 3px 6px; border-radius: 3px; font-weight: 600; display: inline-block; margin-bottom: 3px;">Enter first name only.</span>
+                                    <span style="background-color: #fecaca; padding: 3px 6px; border-radius: 3px; font-weight: 600; display: inline-block;">No last names, DOB, SSN, or other PHI.</span>
                     </div>
+                </div>
+                    </div>
+                        </div>
                     <div style="position: relative; margin-bottom: 8px;">
                         <input type="text" 
                                id="clientName" 
@@ -2198,19 +2198,19 @@
                     <label style="display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 14px; cursor: pointer; position: relative; z-index: 10;">
                         <input type="checkbox" id="includeAtHome" style="width: 16px; height: 16px; cursor: pointer;" onchange="toggleAtHomeSection()">
                         <span>Include AT HOME Recommendations</span>
-                    </label>
+                        </label>
                     <label style="display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 14px; cursor: pointer;">
                         <input type="checkbox" id="includeAlumni" style="width: 16px; height: 16px; cursor: pointer;">
                         <span>Include Alumni Services</span>
                     </label>
                 </div>
-
+                
                 <div class="selected-section">
                     <div class="section-title" id="selectedTitle">Selected Programs (Drag to reorder)</div>
                     <div id="selectedList">
                         <div class="empty-state">Click programs to add to selection</div>
-                        </div>
                     </div>
+                </div>
                     
                 <!-- Original AT HOME Providers Section -->
                 <div id="atHomeSection" style="display: none; margin-top: 15px; padding: 0; border: 1px solid #e0e7ff; border-radius: 8px; background: #f8fafc; width: 100%; box-sizing: border-box; position: relative;">
@@ -8812,7 +8812,7 @@ Set Confidence to "low" since this is URL-based inference.`;
             if (confirm(msg)) {
                 // Save for undo
                 saveUndoAction('clear', { programs: [...selectedPrograms] });
-                selectedPrograms = [];
+            selectedPrograms = [];
                 updateSelectionPanel();
                 renderPrograms();
                 showNotification(`Cleared ${count} program${count > 1 ? 's' : ''}`, 'info');
