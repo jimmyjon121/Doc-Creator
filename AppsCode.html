@@ -436,6 +436,43 @@
             outline-offset: 2px;
         }
         
+        /* Loading Spinner */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+        }
+        
+        .loading-spinner {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 15px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0099cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
     </style>
     <style>
         /* CSS Reset and Base Styles */
@@ -2138,7 +2175,7 @@
                         <span style="color: #f59e0b; font-size: 14px;">⚠️</span>
                         <span style="color: #92400e;"><strong>PHI:</strong> First name only</span>
                     </div>
-                    <input type="text" id="clientName" placeholder="First Name Only (Required)" style="margin-bottom: 8px;">
+                    <input type="text" id="clientName" placeholder="First Name Only (Required)" style="margin-bottom: 8px; text-transform: capitalize;" oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1).toLowerCase();">
                     <label style="display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 14px; cursor: pointer; position: relative; z-index: 10;">
                         <input type="checkbox" id="includeAtHome" style="width: 16px; height: 16px; cursor: pointer;" onchange="toggleAtHomeSection()">
                         <span>Include AT HOME Recommendations</span>
@@ -2536,9 +2573,30 @@
             }
         });
         
+        // Loading spinner helpers
+        function showLoadingSpinner(message = 'Processing...') {
+            const overlay = document.createElement('div');
+            overlay.id = 'loadingOverlay';
+            overlay.className = 'loading-overlay';
+            overlay.innerHTML = `
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p style="margin: 0; color: #333; font-size: 16px;">${message}</p>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+        
+        function hideLoadingSpinner() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+        
         // Session timeout - auto logout after 30 minutes of inactivity
         let lastActivity = Date.now();
-        const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+        const SESSION_TIMEOUT = 4 * 60 * 60 * 1000; // 4 hours for clinical workflow
         
         function updateActivity() {
             lastActivity = Date.now();
@@ -5069,12 +5127,28 @@
             const isSelected = selectedPrograms.some(p => p.id === program.id);
             
             if (isSelected) {
+                // Check if this is a duplicate (same program added twice)
+                const duplicateCount = selectedPrograms.filter(p => p.id === program.id).length;
+                if (duplicateCount > 1) {
+                    // This is a duplicate, confirm removal
+                    if (!confirm(`"${program.name}" appears ${duplicateCount} times in your selection. Remove this instance?`)) {
+                        return;
+                    }
+                }
+                
                 // Remove from selection
                 selectedPrograms = selectedPrograms.filter(p => p.id !== program.id);
                 card.classList.remove('primary');
                 const badge = card.querySelector('.program-badge');
                 if (badge) badge.remove();
             } else {
+                // Check if trying to add a duplicate
+                if (selectedPrograms.some(p => p.id === program.id)) {
+                    if (!confirm(`"${program.name}" is already in your selection. Add it again?`)) {
+                        return;
+                    }
+                }
+                
                 // Add to selection
                 if (documentType === 'plans' && selectedPrograms.length >= 1) {
                     // For plans, replace the existing selection
@@ -7417,23 +7491,74 @@ Set Confidence to "low" since this is URL-based inference.`;
             const clientNameInput = document.getElementById('clientName');
             const clientName = clientNameInput ? clientNameInput.value.trim() : '';
             
+            // Validation with better feedback
+            const validationErrors = [];
+            
             if (!clientName) {
-                alert('Please enter client name!');
+                validationErrors.push('• Client first name is required');
                 if (clientNameInput) {
+                    clientNameInput.style.border = '2px solid #ef4444';
                     clientNameInput.focus();
-                    clientNameInput.classList.add('input-error');
-                    setTimeout(() => clientNameInput.classList.remove('input-error'), 1200);
                 }
-                return;
             }
             
             if (selectedPrograms.length === 0) {
-                alert('Please select at least one program to include in the document.');
+                validationErrors.push('• Select at least one program');
+            }
+            
+            // Check AT HOME providers if enabled
+            const includeAtHome = document.getElementById('includeAtHome')?.checked;
+            if (includeAtHome && atHomeProviders.length > 0) {
+                const missingInfo = atHomeProviders.filter(p => !p.name || !p.phone);
+                if (missingInfo.length > 0) {
+                    validationErrors.push(`• ${missingInfo.length} AT HOME provider(s) missing name or phone`);
+                }
+            }
+            
+            if (validationErrors.length > 0) {
+                // Show friendly validation message
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    border: 2px solid #ef4444;
+                    border-radius: 12px;
+                    padding: 20px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                    z-index: 99999;
+                    max-width: 400px;
+                `;
+                errorDiv.innerHTML = `
+                    <h3 style="color: #ef4444; margin: 0 0 15px 0;">⚠️ Please complete required fields:</h3>
+                    <div style="color: #333; margin-bottom: 20px;">
+                        ${validationErrors.join('<br>')}
+                    </div>
+                    <button onclick="this.parentElement.remove(); document.getElementById('clientName').focus();" 
+                            style="background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; width: 100%;">
+                        OK, I'll fix it
+                    </button>
+                `;
+                document.body.appendChild(errorDiv);
+                
+                // Reset client name border after a moment
+                setTimeout(() => {
+                    if (clientNameInput) clientNameInput.style.border = '';
+                }, 3000);
+                
                 return;
             }
             
+            // Show loading spinner
+            showLoadingSpinner('Generating document...');
+            
             // Use the order as arranged by the user
             const orderedPrograms = [...selectedPrograms];
+            
+            // Small delay for better UX
+            setTimeout(() => {
             
             // Generate document with professional letterhead styling
             let html = `
@@ -7817,7 +7942,9 @@ Set Confidence to "low" since this is URL-based inference.`;
                 outputContainer.innerHTML = html;
             }
             renderDocumentPreview(html);
+            hideLoadingSpinner();
             openDocumentPreview();
+            }, 300); // End of setTimeout
             showSuccessMessage('Document ready — review before printing.');
             
             // Save to vault and history with enhanced metadata
