@@ -1,4 +1,6 @@
-tmobil# Family First Program Extractor - Chrome Extension
+# Family First Program Extractor - Chrome Extension
+
+> ✅ **Cross-Platform Compatible** - Works on Windows, Mac, and Linux!
 
 This Chrome extension makes it easy to extract treatment program information from websites and paste it directly into the Family First Doc Creator tool.
 
@@ -44,22 +46,23 @@ This Chrome extension makes it easy to extract treatment program information fro
 
 ## Features
 
-- ✅ Works on ANY website
+- ✅ **Auto-Detection**: No configuration needed! Automatically finds Doc Creator on localhost
+- ✅ **Multi-Page Extraction**: Analyzes up to 5 pages for comprehensive data
+- ✅ Works on ANY treatment center website
 - ✅ Automatically finds contact information
 - ✅ Detects therapy modalities (DBT, CBT, EMDR, etc.)
-- ✅ Extracts program descriptions and features
-- ✅ One-click copy to clipboard
-- ✅ Direct link to open Doc Creator
+- ✅ Identifies specializations and age ranges
+- ✅ Direct integration with Doc Creator (no copy/paste needed)
+- ✅ Manual editing before sending
+- ✅ **Cross-Platform**: Works identically on Windows, Mac, and Linux
 
-## Updating the Tool URL
+## No Configuration Needed!
 
-If your Doc Creator tool is hosted somewhere other than `localhost:8000`:
-
-1. Open `popup.js`
-2. Find line 11: `chrome.tabs.create({ url: 'http://localhost:8000' });`
-3. Change the URL to your hosted location
-4. Repeat for line 65
-5. Save and reload the extension
+The extension automatically detects your Doc Creator tool:
+- Checks common localhost ports (8000, 8080)
+- Remembers the URL once found
+- No file paths to configure
+- Works the same on all platforms
 
 ## Troubleshooting
 

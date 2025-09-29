@@ -78,15 +78,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Sanitize input helper
+    function sanitizeInput(input) {
+        if (typeof input !== 'string') return '';
+        // Remove HTML tags and dangerous characters
+        return input
+            .replace(/[<>]/g, '')
+            .replace(/javascript:/gi, '')
+            .replace(/on\w+\s*=/gi, '')
+            .trim();
+    }
+    
     // Handle update preview button
     updatePreviewBtn.addEventListener('click', function() {
         if (!currentExtractedData) return;
         
-        // Update the structured data with user inputs
+        // Update the structured data with sanitized user inputs
         if (currentExtractedData.structured) {
-            currentExtractedData.structured.programName = programNameInput.value || currentExtractedData.structured.programName;
-            currentExtractedData.structured.phones = phoneInput.value ? [phoneInput.value] : currentExtractedData.structured.phones;
-            currentExtractedData.structured.location = locationInput.value || currentExtractedData.structured.location;
+            currentExtractedData.structured.programName = sanitizeInput(programNameInput.value) || currentExtractedData.structured.programName;
+            currentExtractedData.structured.phones = phoneInput.value ? [sanitizeInput(phoneInput.value)] : currentExtractedData.structured.phones;
+            currentExtractedData.structured.location = sanitizeInput(locationInput.value) || currentExtractedData.structured.location;
         }
         
         // Re-format and display the updated information
@@ -102,16 +113,43 @@ document.addEventListener('DOMContentLoaded', function() {
         showStatus('✓ Preview updated!', 'success');
     });
     
-    // Configuration - UPDATE THIS PATH TO YOUR DOC CREATOR HTML FILE
-    // For local file, use: file:///C:/path/to/your/doc-creator.html (Windows)
-    // Or: file:///Users/username/path/to/doc-creator.html (Mac)
-    // For hosted version: https://your-domain.com/doc-creator
-    // For development: file:///workspaces/Doc-Creator/test-doc-creator.html
-    const DOC_CREATOR_URL = 'file:///workspaces/Doc-Creator/test-doc-creator.html'; // Using test version
+    // Configuration - Simple approach for file-based usage
+    // Users just need to open AppsCode.html in their browser
+    async function getDocCreatorUrl() {
+        // First, check if we already found it
+        const stored = await chrome.storage.local.get('docCreatorUrl');
+        if (stored.docCreatorUrl) {
+            return stored.docCreatorUrl;
+        }
+        
+        // Look for any tab with AppsCode.html open
+        const tabs = await chrome.tabs.query({});
+        const docCreatorTab = tabs.find(tab => 
+            tab.url && tab.url.includes('AppsCode.html')
+        );
+        
+        if (docCreatorTab) {
+            // Save the URL for future use
+            await chrome.storage.local.set({ docCreatorUrl: docCreatorTab.url });
+            return docCreatorTab.url;
+        }
+        
+        // If not found, return instructions
+        return null;
+    }
     
     // Open Doc Creator tool
-    openToolBtn.addEventListener('click', function() {
-        chrome.tabs.create({ url: DOC_CREATOR_URL });
+    openToolBtn.addEventListener('click', async function() {
+        const url = await getDocCreatorUrl();
+        if (url) {
+            chrome.tabs.create({ url: url });
+        } else {
+            showStatus('⚠️ Please open AppsCode.html in Chrome first, then try again.', 'error');
+            // Show more detailed instructions
+            setTimeout(() => {
+                showStatus('💡 Tip: Double-click AppsCode.html from your Doc Creator folder to open it.', 'info');
+            }, 3000);
+        }
     });
     
     // Extract information from current page
@@ -264,11 +302,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // First, try to find an open Doc Creator tab
             const tabs = await chrome.tabs.query({});
             const docCreatorTab = tabs.find(tab => 
-                tab.url && (
-                    tab.url.includes('AppsCode.html') || 
-                    tab.url.includes('localhost') && tab.url.includes('AppsCode') ||
-                    tab.url.includes('127.0.0.1') && tab.url.includes('AppsCode')
-                )
+                tab.url && tab.url.includes('AppsCode.html')
             );
             
             if (docCreatorTab) {
@@ -301,9 +335,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 await navigator.clipboard.writeText(textToCopy);
                 showStatus('✓ Copied to clipboard! Opening Doc Creator...', 'success');
                 
-                setTimeout(() => {
-                    chrome.tabs.create({ url: DOC_CREATOR_URL });
-                }, 1000);
+                // Get the URL dynamically
+                const docCreatorUrl = await getDocCreatorUrl();
+                if (docCreatorUrl) {
+                    setTimeout(() => {
+                        chrome.tabs.create({ url: docCreatorUrl });
+                    }, 1000);
+                } else {
+                    showStatus('✓ Copied! Now open AppsCode.html from your Doc Creator folder.', 'success');
+                }
             }
         } catch (error) {
             showStatus('Failed to copy to clipboard', 'error');
