@@ -2222,7 +2222,7 @@
                 <!-- Generate button at bottom -->
                 <div style="margin-top: auto; padding-top: 20px;">
                     <button class="generate-btn" id="generateBtn" onclick="generateDocument()" style="width: 100%;" title="Keyboard shortcut: Ctrl+Enter (or Cmd+Enter on Mac)">
-                        📄 GENERATE & PRINT
+                        📄 GENERATE DOCUMENT
                     </button>
                 </div>
             </div>
@@ -8011,14 +8011,8 @@ Set Confidence to "low" since this is URL-based inference.`;
             renderDocumentPreview(html);
             hideLoadingSpinner();
             openDocumentPreview();
-            
-            // Auto-open print dialog after a brief moment
-            setTimeout(() => {
-                printDocumentPreview();
-            }, 500);
-            
             }, 300); // End of setTimeout
-            showSuccessMessage('Document ready — printing...');
+            showSuccessMessage('Document ready — review before printing.');
             
             // Save to vault and history with enhanced metadata
             const vaultDoc = {
