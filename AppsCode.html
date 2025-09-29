@@ -2105,6 +2105,7 @@
             <div style="font-size: 14px; color: rgba(255,255,255,0.9); text-align: right;">
                 Professional Aftercare Document Builder<br>
                 <small style="color: rgba(255,255,255,0.7); font-size: 12px;">💾 Generate → Print → Save as PDF</small>
+                <small style="color: rgba(255,255,255,0.5); font-size: 11px; display: block; margin-top: 4px;">v2.3</small>
             </div>
         </div>
         
@@ -2172,11 +2173,25 @@
                 
                 <div class="client-info" style="margin-bottom: 15px;">
                     <h3 style="font-size: 16px; margin-bottom: 10px;">Client Information</h3>
-                    <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 6px 10px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; font-size: 12px;">
-                        <span style="color: #f59e0b; font-size: 14px;">⚠️</span>
-                        <span style="color: #92400e;"><strong>PHI:</strong> First name only</span>
+                    <div style="background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1px solid #f59e0b; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="color: #f59e0b; font-size: 16px;">🔒</span>
+                            <div>
+                                <div style="color: #92400e; font-weight: 600; font-size: 13px;">HIPAA Compliance Notice</div>
+                                <div style="color: #78350f; font-size: 12px; margin-top: 2px;">Enter first name only. No last names, DOB, SSN, or other PHI.</div>
+                            </div>
+                        </div>
                     </div>
-                    <input type="text" id="clientName" placeholder="First Name Only (Required)" style="margin-bottom: 8px; text-transform: capitalize;" oninput="this.value = this.value.charAt(0).toUpperCase() + this.value.slice(1).toLowerCase();">
+                    <div style="position: relative; margin-bottom: 8px;">
+                        <input type="text" 
+                               id="clientName" 
+                               placeholder="First Name Only (Required)" 
+                               style="width: 100%; padding-right: 40px; text-transform: capitalize;" 
+                               oninput="validateClientName(this)"
+                               maxlength="20">
+                        <span id="nameValidIcon" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 16px; display: none;"></span>
+                        <div id="nameValidationMsg" style="margin-top: 4px; font-size: 12px; display: none;"></div>
+                    </div>
                     <label style="display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 14px; cursor: pointer; position: relative; z-index: 10;">
                         <input type="checkbox" id="includeAtHome" style="width: 16px; height: 16px; cursor: pointer;" onchange="toggleAtHomeSection()">
                         <span>Include AT HOME Recommendations</span>
@@ -3830,6 +3845,7 @@
         let selectedPrograms = [];
         let documentType = 'options';
         let currentFilter = 'all';
+        let lastAction = null; // For undo functionality
         let currentPreviewProgram = null;
         let atHomeProviders = [];
         let draggedItem = null;
@@ -3951,6 +3967,12 @@
             if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
                 e.preventDefault();
                 generateDocument();
+            }
+            
+            // Ctrl/Cmd + Z = Undo
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                e.preventDefault();
+                undoLastAction();
             }
             
             // ESC = Close modals
@@ -4196,9 +4218,80 @@
                             <input type="text" id="packetClientName" placeholder="First Name Only (Required)" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;" oninput="validateFirstName(this)">
                             <div id="packetNameWarning" style="color: #dc2626; font-size: 13px; display: none; margin-top: 5px;">Please enter first name only. No full names, DOB, or PHI.</div>
                         </div>
-        // Inline validation for first name only
+        // Professional first name validation
+        function validateClientName(input) {
+            const value = input.value.trim();
+            const icon = document.getElementById('nameValidIcon');
+            const msg = document.getElementById('nameValidationMsg');
+            
+            // Auto-capitalize first letter
+            if (value.length > 0) {
+                input.value = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+            }
+            
+            // Validation rules
+            const hasSpace = /\s/.test(value);
+            const hasNumbers = /\d/.test(value);
+            const hasInvalidChars = /[^a-zA-Z'-]/.test(value);
+            const tooLong = value.length > 20;
+            
+            // Reset styles
+            input.style.border = '';
+            icon.style.display = 'none';
+            msg.style.display = 'none';
+            
+            if (value.length === 0) {
+                return; // Empty is ok, will be caught on submit
+            }
+            
+            if (hasSpace) {
+                input.style.border = '2px solid #ef4444';
+                icon.innerHTML = '❌';
+                icon.style.color = '#ef4444';
+                icon.style.display = 'block';
+                msg.innerHTML = 'First name only - no spaces allowed';
+                msg.style.color = '#dc2626';
+                msg.style.display = 'block';
+            } else if (hasNumbers) {
+                input.style.border = '2px solid #ef4444';
+                icon.innerHTML = '❌';
+                icon.style.color = '#ef4444';
+                icon.style.display = 'block';
+                msg.innerHTML = 'Names cannot contain numbers';
+                msg.style.color = '#dc2626';
+                msg.style.display = 'block';
+            } else if (hasInvalidChars) {
+                input.style.border = '2px solid #ef4444';
+                icon.innerHTML = '⚠️';
+                icon.style.color = '#f59e0b';
+                icon.style.display = 'block';
+                msg.innerHTML = 'Only letters, hyphens, and apostrophes allowed';
+                msg.style.color = '#ea580c';
+                msg.style.display = 'block';
+            } else if (tooLong) {
+                input.style.border = '2px solid #f59e0b';
+                icon.innerHTML = '⚠️';
+                icon.style.color = '#f59e0b';
+                icon.style.display = 'block';
+                msg.innerHTML = 'Maximum 20 characters';
+                msg.style.color = '#ea580c';
+                msg.style.display = 'block';
+            } else if (value.length >= 2) {
+                // Valid name
+                input.style.border = '2px solid #10b981';
+                icon.innerHTML = '✓';
+                icon.style.color = '#10b981';
+                icon.style.display = 'block';
+            }
+        }
+        
+        // Inline validation for first name only (packet modal)
         function validateFirstName(input) {
             const value = input.value.trim();
+            // Auto-capitalize
+            if (value.length > 0) {
+                input.value = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+            }
             // Disallow spaces, numbers, or special chars (except hyphen/apostrophe)
             const invalid = /[\s\d@#\$%\^&\*\(\)_\+=\[\]\{\};:,.<>\/?\\|]/.test(value) || value.length > 20;
             document.getElementById('packetNameWarning').style.display = invalid ? 'block' : 'none';
@@ -5188,6 +5281,42 @@
                 .filter(Boolean);
         }
         
+        // Save action for undo
+        function saveUndoAction(type, data) {
+            lastAction = { type, data, timestamp: Date.now() };
+        }
+        
+        // Undo last action
+        function undoLastAction() {
+            if (!lastAction) return;
+            
+            const { type, data } = lastAction;
+            
+            switch (type) {
+                case 'add':
+                    // Remove the program that was added
+                    selectedPrograms = selectedPrograms.filter(p => p.id !== data.program.id);
+                    break;
+                case 'remove':
+                    // Re-add the program that was removed
+                    selectedPrograms.splice(data.index, 0, data.program);
+                    break;
+                case 'reorder':
+                    // Restore original order
+                    selectedPrograms = [...data.originalOrder];
+                    break;
+                case 'clear':
+                    // Restore all cleared programs
+                    selectedPrograms = [...data.programs];
+                    break;
+            }
+            
+            lastAction = null;
+            updateSelectionPanel();
+            renderPrograms();
+            showNotification('↶ Undone', 'info');
+        }
+        
         // Handle program clicks
         function handleProgramClick(program, card) {
             const isSelected = selectedPrograms.some(p => p.id === program.id);
@@ -5203,6 +5332,8 @@
                 }
                 
                 // Remove from selection
+                const index = selectedPrograms.findIndex(p => p.id === program.id);
+                saveUndoAction('remove', { program, index });
                 selectedPrograms = selectedPrograms.filter(p => p.id !== program.id);
                 card.classList.remove('primary');
                 const badge = card.querySelector('.program-badge');
@@ -5224,6 +5355,7 @@
                 } else {
                     selectedPrograms.push(program);
                     trackProgramUsage(program.id); // Track usage
+                    saveUndoAction('add', { program });
                     card.classList.add('primary');
                     
                     const badge = document.createElement('div');
@@ -8282,7 +8414,8 @@ Set Confidence to "low" since this is URL-based inference.`;
                             'Client';
                         
                         const date = new Date().toISOString().split('T')[0];
-                        const filename = `${clientName}_Aftercare_${date}.pdf`;
+                        const docTypeLabel = documentType === 'options' ? 'Options' : 'Plans';
+                        const filename = `${clientName}_${docTypeLabel}_${date}.pdf`;
                         
                         // Save the PDF
                 pdf.save(filename);
@@ -8665,9 +8798,22 @@ Set Confidence to "low" since this is URL-based inference.`;
         
         // Clear All Programs
         function clearAllPrograms() {
-            selectedPrograms = [];
-            updateSelectedPrograms();
-            displayPrograms();
+            if (selectedPrograms.length === 0) {
+                showNotification('No programs to clear', 'info');
+                return;
+            }
+            
+            const count = selectedPrograms.length;
+            const msg = `Clear ${count} program${count > 1 ? 's' : ''}?`;
+            
+            if (confirm(msg)) {
+                // Save for undo
+                saveUndoAction('clear', { programs: [...selectedPrograms] });
+                selectedPrograms = [];
+                updateSelectionPanel();
+                renderPrograms();
+                showNotification(`Cleared ${count} program${count > 1 ? 's' : ''}`, 'info');
+            }
         }
         
         // Select by Category
