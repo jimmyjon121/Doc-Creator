@@ -2140,6 +2140,7 @@
                 
                 <div class="filter-buttons">
                     <button class="filter-btn active" onclick="filterPrograms('all', this)">All</button>
+                    <button class="filter-btn" onclick="filterPrograms('frequent', this)" style="background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; font-weight: bold;">⭐ Frequently Used</button>
                     <button class="filter-btn" onclick="filterPrograms('rtc', this)">RTC</button>
                     <button class="filter-btn" onclick="filterPrograms('tbs', this)">TBS</button>
                     <button class="filter-btn" onclick="filterPrograms('wilderness', this)">Wilderness</button>
@@ -2220,8 +2221,8 @@
                 
                 <!-- Generate button at bottom -->
                 <div style="margin-top: auto; padding-top: 20px;">
-                    <button class="generate-btn" id="generateBtn" onclick="generateDocument()" style="width: 100%;">
-                        📄 GENERATE DOCUMENT
+                    <button class="generate-btn" id="generateBtn" onclick="generateDocument()" style="width: 100%;" title="Shortcut: Ctrl+Enter">
+                        📄 GENERATE & PRINT
                     </button>
                 </div>
             </div>
@@ -3905,6 +3906,12 @@
         
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + Enter = Generate Document (NEW - Quick Generate)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                generateDocument();
+            }
+            
             // Ctrl/Cmd + S = Save to vault
             if ((e.ctrlKey || e.metaKey) && e.key === 's') {
                 e.preventDefault();
@@ -4811,6 +4818,19 @@
             });
             if (el) el.classList.add('active');
             
+            // Handle frequently used filter
+            if (category === 'frequent') {
+                const frequentPrograms = getFrequentlyUsedPrograms(10);
+                if (frequentPrograms.length === 0) {
+                    // Show message if no frequent programs yet
+                    const grid = document.getElementById('programGrid');
+                    grid.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No frequently used programs yet. Start selecting programs to build your favorites!</div>';
+                    return;
+                }
+                renderPrograms(frequentPrograms);
+                return;
+            }
+            
             // Map filter categories to program categories
             const categoryMap = {
                 'rtc': 'residential',
@@ -5122,6 +5142,23 @@
             showSuccessMessage('Wizard selections applied to builder.');
         }
         
+        // Track program usage for frequently used
+        function trackProgramUsage(programId) {
+            const usage = JSON.parse(localStorage.getItem('programUsage') || '{}');
+            usage[programId] = (usage[programId] || 0) + 1;
+            localStorage.setItem('programUsage', JSON.stringify(usage));
+        }
+        
+        // Get frequently used programs
+        function getFrequentlyUsedPrograms(limit = 5) {
+            const usage = JSON.parse(localStorage.getItem('programUsage') || '{}');
+            return Object.entries(usage)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, limit)
+                .map(([id]) => programs.find(p => p.id === id))
+                .filter(Boolean);
+        }
+        
         // Handle program clicks
         function handleProgramClick(program, card) {
             const isSelected = selectedPrograms.some(p => p.id === program.id);
@@ -5157,6 +5194,7 @@
                     renderPrograms();
                 } else {
                     selectedPrograms.push(program);
+                    trackProgramUsage(program.id); // Track usage
                     card.classList.add('primary');
                     
                     const badge = document.createElement('div');
@@ -7944,8 +7982,14 @@ Set Confidence to "low" since this is URL-based inference.`;
             renderDocumentPreview(html);
             hideLoadingSpinner();
             openDocumentPreview();
+            
+            // Auto-open print dialog after a brief moment
+            setTimeout(() => {
+                printDocumentPreview();
+            }, 500);
+            
             }, 300); // End of setTimeout
-            showSuccessMessage('Document ready — review before printing.');
+            showSuccessMessage('Document ready — printing...');
             
             // Save to vault and history with enhanced metadata
             const vaultDoc = {
