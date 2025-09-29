@@ -5225,10 +5225,17 @@
         function showAddProgramDialog() {
             const modal = document.getElementById('addProgramModal');
             if (modal) {
-                modal.style.display = ''; // Reset display property
+                modal.style.display = 'block';
                 modal.classList.add('show');
                 // Default to manual mode
                 setAddProgramMode('manual');
+                // Ensure the button is visible
+                setTimeout(() => {
+                    const smartBtn = document.getElementById('smartFormatBtn');
+                    if (smartBtn) {
+                        smartBtn.style.display = 'inline-block';
+                    }
+                }, 100);
             }
         }
         
@@ -5260,15 +5267,17 @@
                 manualBtn.style.background = '#4f46e5';
                 manualBtn.style.color = 'white';
                 manualContent.style.display = 'block';
-                smartBtn.style.display = 'inline-block';
-                document.getElementById('customProgramInfo').focus();
+                if (smartBtn) smartBtn.style.display = 'inline-block';
+                const textarea = document.getElementById('customProgramInfo');
+                if (textarea) textarea.focus();
             } else if (mode === 'template') {
                 // Template Mode
                 templateBtn.style.background = '#4f46e5';
                 templateBtn.style.color = 'white';
                 templateContent.style.display = 'block';
-                addTemplateBtn.style.display = 'inline-block';
-                document.getElementById('templateName').focus();
+                if (addTemplateBtn) addTemplateBtn.style.display = 'inline-block';
+                const nameInput = document.getElementById('templateName');
+                if (nameInput) nameInput.focus();
             }
         }
         
