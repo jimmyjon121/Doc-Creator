@@ -2221,7 +2221,7 @@
                 
                 <!-- Generate button at bottom -->
                 <div style="margin-top: auto; padding-top: 20px;">
-                    <button class="generate-btn" id="generateBtn" onclick="generateDocument()" style="width: 100%;" title="Shortcut: Ctrl+Enter">
+                    <button class="generate-btn" id="generateBtn" onclick="generateDocument()" style="width: 100%;" title="Keyboard shortcut: Ctrl+Enter (or Cmd+Enter on Mac)">
                         📄 GENERATE & PRINT
                     </button>
                 </div>
@@ -3906,10 +3906,25 @@
         
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            // Ctrl/Cmd + Enter = Generate Document (NEW - Quick Generate)
+            // Ctrl/Cmd + Enter = Generate Document (Quick Generate)
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
                 e.preventDefault();
-                generateDocument();
+                const clientNameInput = document.getElementById('clientName');
+                if (clientNameInput && clientNameInput.value.trim() && selectedPrograms.length > 0) {
+                    generateDocument();
+                } else {
+                    // Show what's missing
+                    if (!clientNameInput || !clientNameInput.value.trim()) {
+                        clientNameInput.focus();
+                        clientNameInput.style.border = '2px solid #ef4444';
+                        setTimeout(() => {
+                            clientNameInput.style.border = '';
+                        }, 2000);
+                    }
+                    if (selectedPrograms.length === 0) {
+                        showNotification('Select at least one program first', 'warning');
+                    }
+                }
             }
             
             // Ctrl/Cmd + S = Save to vault
@@ -4645,6 +4660,20 @@
             setTimeout(() => msg.remove(), 3000);
         }
         
+        function showNotification(message, type = 'info') {
+            const colors = {
+                info: '#0099cc',
+                warning: '#f59e0b',
+                error: '#ef4444',
+                success: '#10b981'
+            };
+            const msg = document.createElement('div');
+            msg.style.cssText = `position: fixed; top: 20px; right: 20px; background: ${colors[type]}; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 10000;`;
+            msg.innerHTML = message;
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 3000);
+        }
+        
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded - Starting initialization...');
 
@@ -5150,7 +5179,7 @@
         }
         
         // Get frequently used programs
-        function getFrequentlyUsedPrograms(limit = 5) {
+        function getFrequentlyUsedPrograms(limit = 10) {
             const usage = JSON.parse(localStorage.getItem('programUsage') || '{}');
             return Object.entries(usage)
                 .sort((a, b) => b[1] - a[1])
