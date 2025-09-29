@@ -464,9 +464,9 @@
 
         .header {
             background: linear-gradient(135deg, #0099cc 0%, #006699 100%);
-            padding: 30px;
+            padding: 20px 30px;
             border-radius: 12px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: white;
             box-shadow: 0 4px 20px rgba(0, 153, 204, 0.25);
         }
@@ -498,14 +498,14 @@
             min-width: 440px;
             background: white;
             border: 1px solid #e5e7eb;
-            padding: 30px;
+            padding: 20px;
             display: flex !important;
             flex-direction: column;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             border-radius: 12px;
             position: sticky;
-            top: 20px;
-            max-height: 85vh;
+            top: 10px;
+            height: 90vh;
             overflow-y: auto;
             overflow-x: hidden;
             z-index: 10;
@@ -513,9 +513,9 @@
         
         .document-type-selector {
             background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 24px;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
             border: 1px solid #bae6fd;
             box-shadow: 0 2px 8px rgba(0,153,204,0.08);
         }
@@ -1032,8 +1032,8 @@
         
         .selected-section {
             flex: 0 1 auto;
-            min-height: 150px;
-            margin-bottom: 20px;
+            min-height: 120px;
+            margin-bottom: 10px;
         }
         
         .section-title {
@@ -2070,15 +2070,12 @@
         <div class="main-content">
             <!-- Left Panel: Program List -->
             <div class="programs-panel">
-                <div class="instructions" style="margin-bottom: 15px; padding: 15px; background: #fef3c7; border-radius: 8px; border: 1px solid #f59e0b;">
-                    <h3 style="margin-top: 0; font-size: 16px; color: #92400e;">📋 How to Create Professional Documents:</h3>
-                    <ul style="margin: 10px 0 0 0; padding-left: 20px; font-size: 13px; color: #78350f;">
-                        <li>Select <strong>"Options"</strong> for multiple program recommendations</li>
-                        <li>Select <strong>"Plans"</strong> for single program (discharge facesheet)</li>
-                        <li>Click the <strong>"i"</strong> button to preview program details</li>
-                        <li><strong>Click programs</strong> to add to your selection</li>
-                        <li><strong>Drag & drop</strong> selected programs to reorder them</li>
-                        <li>Click "Generate Document" → Use Print dialog → Save as PDF</li>
+                <div class="instructions" style="margin-bottom: 10px; padding: 10px; background: #fef3c7; border-radius: 8px; border: 1px solid #f59e0b;">
+                    <h3 style="margin-top: 0; font-size: 14px; color: #92400e;">📋 Quick Guide:</h3>
+                    <ul style="margin: 5px 0 0 0; padding-left: 20px; font-size: 12px; color: #78350f; line-height: 1.4;">
+                        <li><strong>Options</strong> = Multiple programs | <strong>Plans</strong> = Single program</li>
+                        <li>Click programs to add | Drag to reorder</li>
+                        <li>Generate → Print → Save as PDF</li>
                     </ul>
                 </div>
                 
@@ -2131,19 +2128,19 @@
                 </div>
 
                 
-                <div class="client-info">
-                    <h3>Client Information</h3>
-                    <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 8px 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;">
-                        <span style="color: #f59e0b; font-size: 16px;">⚠️</span>
-                        <span style="color: #92400e;"><strong>PHI Warning:</strong> Use first name only to protect patient confidentiality</span>
+                <div class="client-info" style="margin-bottom: 15px;">
+                    <h3 style="font-size: 16px; margin-bottom: 10px;">Client Information</h3>
+                    <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; padding: 6px 10px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; font-size: 12px;">
+                        <span style="color: #f59e0b; font-size: 14px;">⚠️</span>
+                        <span style="color: #92400e;"><strong>PHI:</strong> First name only</span>
                     </div>
-                    <input type="text" id="clientName" placeholder="First Name Only (Required)">
-                    <label style="display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 14px; cursor: pointer; position: relative; z-index: 10;">
-                        <input type="checkbox" id="includeAtHome" style="width: 18px; height: 18px; cursor: pointer;" onchange="toggleAtHomeSection()">
+                    <input type="text" id="clientName" placeholder="First Name Only (Required)" style="margin-bottom: 8px;">
+                    <label style="display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 14px; cursor: pointer; position: relative; z-index: 10;">
+                        <input type="checkbox" id="includeAtHome" style="width: 16px; height: 16px; cursor: pointer;" onchange="toggleAtHomeSection()">
                         <span>Include AT HOME Recommendations</span>
                     </label>
-                    <label style="display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 14px; cursor: pointer;">
-                        <input type="checkbox" id="includeAlumni" style="width: 18px; height: 18px; cursor: pointer;">
+                    <label style="display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 14px; cursor: pointer;">
+                        <input type="checkbox" id="includeAlumni" style="width: 16px; height: 16px; cursor: pointer;">
                         <span>Include Alumni Services</span>
                     </label>
                 </div>
@@ -2152,11 +2149,11 @@
                     <div class="section-title" id="selectedTitle">Selected Programs (Drag to reorder)</div>
                     <div id="selectedList">
                         <div class="empty-state">Click programs to add to selection</div>
+                        </div>
                     </div>
-                </div>
                     
                 <!-- Original AT HOME Providers Section -->
-                <div id="atHomeSection" style="display: none; margin-top: 25px; padding: 0; border: 1px solid #e0e7ff; border-radius: 8px; background: #f8fafc; width: 100%; box-sizing: border-box; overflow: hidden;">
+                <div id="atHomeSection" style="display: none; margin-top: 15px; padding: 0; border: 1px solid #e0e7ff; border-radius: 8px; background: #f8fafc; width: 100%; box-sizing: border-box; position: relative;">
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); cursor: pointer; border-bottom: 2px solid #0099cc; transition: all 0.2s ease;" 
                          onmouseover="this.style.background='linear-gradient(135deg, #e0f2fe, #bae6fd)'" 
                          onmouseout="this.style.background='linear-gradient(135deg, #f0f9ff, #e0f2fe)'" 
@@ -2168,11 +2165,11 @@
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span id="atHomeToggleText" style="color: #0099cc; font-size: 12px; font-weight: 600; text-transform: uppercase;">Expand</span>
                             <button type="button" id="atHomeToggleBtn" style="background: #0099cc; color: white; border: none; border-radius: 4px; font-size: 20px; cursor: pointer; padding: 2px 8px; line-height: 1; font-weight: bold; box-shadow: 0 2px 4px rgba(0,153,204,0.3);">▶</button>
-                        </div>
                     </div>
-                    <div id="atHomeContent" style="padding: 15px; display: block; transition: all 0.3s ease;">
-                        <div id="atHomeProviders"></div>
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                </div>
+                    <div id="atHomeContent" style="padding: 15px; display: none; transition: all 0.3s ease; max-height: 350px; overflow-y: auto; border-top: 1px solid #e0e7ff; position: relative;">
+                        <div id="atHomeProviders" style="margin-bottom: 10px;"></div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; padding-bottom: 5px; border-top: 1px solid #f0f0f0; padding-top: 10px;">
                             <button type="button" onclick="addAtHomeProvider()" style="padding: 8px 16px; background: #0099cc; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
                                 + Add Provider
                             </button>
@@ -2180,8 +2177,9 @@
                     </div>
                 </div>
                 
-                <div style="margin-top: 16px;">
-                    <button class="generate-btn" id="generateBtn" onclick="generateDocument()">
+                <!-- Generate button at bottom -->
+                <div style="margin-top: auto; padding-top: 20px;">
+                    <button class="generate-btn" id="generateBtn" onclick="generateDocument()" style="width: 100%;">
                         📄 GENERATE DOCUMENT
                     </button>
                 </div>
@@ -2479,7 +2477,7 @@
             </div>
             
             <!-- Document Preview Container -->
-            <div id="documentPreviewContainer" class="document-preview-container"></div>
+                <div id="documentPreviewContainer" class="document-preview-container"></div>
             </div>
             
             <div class="modal-actions" style="justify-content: space-between;">
@@ -6462,6 +6460,8 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             
             if (content.style.display === 'none') {
                 content.style.display = 'block';
+                content.style.maxHeight = '400px';
+                content.style.overflowY = 'auto';
                 toggleBtn.textContent = '▼';
                 toggleBtn.style.transform = 'rotate(0deg)';
                 if (toggleText) toggleText.textContent = 'COLLAPSE';
@@ -6486,6 +6486,18 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             
             atHomeProviders.push(provider);
             renderAtHomeProviders();
+            
+            // Show the AT HOME section if it's hidden
+            const atHomeSection = document.getElementById('atHomeSection');
+            if (atHomeSection && atHomeSection.style.display === 'none') {
+                atHomeSection.style.display = 'block';
+            }
+            
+            // Expand the content if it's collapsed
+            const content = document.getElementById('atHomeContent');
+            if (content && content.style.display === 'none') {
+                toggleAtHomeContent();
+            }
         }
 
         // REMOVED: loadAtHomeSuggestions function
@@ -7906,7 +7918,7 @@ Set Confidence to "low" since this is URL-based inference.`;
                     documentContent = outputContainer.innerHTML;
                 } else {
                     alert('Please generate a document first before downloading.');
-                    return;
+                return;
                 }
             }
 
@@ -8057,20 +8069,20 @@ Set Confidence to "low" since this is URL-based inference.`;
                     remainingHeight -= pageHeight - headerSpace;
                 }
 
-                // Get client name for filename
-                const clientNameInput = document.getElementById('clientName');
-                const clientName = clientNameInput ? 
-                    (clientNameInput.value || 'Client').trim().replace(/[^a-zA-Z0-9]/g, '-') : 
-                    'Client';
-                
-                const date = new Date().toISOString().split('T')[0];
-                const filename = `${clientName}_Aftercare_${date}.pdf`;
-                
-                // Save the PDF
+                        // Get client name for filename
+                        const clientNameInput = document.getElementById('clientName');
+                        const clientName = clientNameInput ? 
+                            (clientNameInput.value || 'Client').trim().replace(/[^a-zA-Z0-9]/g, '-') : 
+                            'Client';
+                        
+                        const date = new Date().toISOString().split('T')[0];
+                        const filename = `${clientName}_Aftercare_${date}.pdf`;
+                        
+                        // Save the PDF
                 pdf.save(filename);
-                
-                // Show success message
-                showSuccessMessage('PDF downloaded successfully!');
+                        
+                        // Show success message
+                        showSuccessMessage('PDF downloaded successfully!');
 
             } catch (error) {
                 console.error('PDF generation error:', error);
@@ -8653,19 +8665,19 @@ Set Confidence to "low" since this is URL-based inference.`;
         // Initialize on load
         window.addEventListener('DOMContentLoaded', function() {
             try {
-                // Load theme
-                const savedTheme = localStorage.getItem(STORAGE_KEYS.theme);
-                if (savedTheme === 'dark') {
-                    document.body.classList.add('dark-mode');
-                    document.getElementById('themeIcon').textContent = '☀️';
-                    document.getElementById('themeText').textContent = 'Light Mode';
-                }
-                
-                // Update history
-                updateHistoryPanel();
-                
-                // Update compare count
-                document.getElementById('compareCount').textContent = '0';
+            // Load theme
+            const savedTheme = localStorage.getItem(STORAGE_KEYS.theme);
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('themeIcon').textContent = '☀️';
+                document.getElementById('themeText').textContent = 'Light Mode';
+            }
+            
+            // Update history
+            updateHistoryPanel();
+            
+            // Update compare count
+            document.getElementById('compareCount').textContent = '0';
                 
                 // Initialize programs and other features
                 renderPrograms();
