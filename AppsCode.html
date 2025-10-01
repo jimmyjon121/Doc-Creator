@@ -7831,42 +7831,42 @@ Set Confidence to "low" since this is URL-based inference.`;
                 const titleBase = titleParts.join(' – ');
                 const titleDemo = (demographics || ageRange) ? ` (${[demographics, ageRange].filter(Boolean).join(', ')})` : '';
                 
-                // Handle custom programs differently
+                // Handle custom programs - MUST follow exact Calibri format
                 if (program.isCustom) {
-                    const data = program.extractedData || {};
-                    const location = data['Location'] && data['Location'] !== 'Not specified' ? data['Location'] : '';
+                    const details = program.clinicalDetails || {};
+                    const contact = program.contact || {};
+                    const location = program.location || '';
+                    
                     html += `
                         <div class="doc-program">
                             <div class="doc-program-title">${program.name}${location ? ` – ${location}` : ''}</div>
                             
                             <div class="doc-program-descriptor">
                                 <strong>Level of Care & Services Provided:</strong><br>
-                                ${data['Level of Care'] || program.type || 'Treatment program'} for ${data['Population Served'] || 'adolescents and young adults'}.
+                                ${program.levelOfCare || program.type || 'Treatment program'}${details.ageRange ? ` for adolescents ages ${details.ageRange}` : ' for adolescents and young adults'}${details.primaryIssues ? `. Specializes in ${details.primaryIssues.toLowerCase()}.` : '.'}
                             </div>
                             
                             <div class="doc-program-details-heading">Program Details / Differentiating Features:</div>
                             <ul class="doc-program-bullets">
-                                ${program.features.map(feature => {
+                                ${program.features && program.features.length > 0 ? program.features.map(feature => {
                                     // Format features with bold concept introductions
-                                    if (feature.includes(':')) {
+                                    if (feature && feature.includes(':')) {
                                         const [concept, description] = feature.split(':');
-                                        return `<li><strong>${concept}:</strong>${description}</li>`;
+                                        return `<li><strong>${concept.trim()}:</strong>${description.trim()}</li>`;
                                     }
-                                    return `<li>${feature}</li>`;
-                                }).join('')}
-                                ${data['Insurance Accepted'] && data['Insurance Accepted'] !== 'Not specified' ? `<li><strong>Insurance Accepted:</strong> ${data['Insurance Accepted']}</li>` : ''}
-                                ${data['Accreditations'] && data['Accreditations'] !== 'Not specified' ? `<li><strong>Accreditations:</strong> ${data['Accreditations']}</li>` : ''}
+                                    return feature ? `<li>${feature}</li>` : '';
+                                }).filter(Boolean).join('') : '<li>Treatment program with comprehensive therapeutic services</li>'}
+                                ${details.specializedTherapies ? `<li><strong>Therapeutic Modalities:</strong> ${details.specializedTherapies}</li>` : ''}
+                                ${details.academicProgram ? `<li><strong>Academic Program:</strong> ${details.academicProgram}</li>` : ''}
+                                ${details.staffRatio ? `<li><strong>Staff-to-Client Ratio:</strong> ${details.staffRatio}</li>` : ''}
+                                ${details.insurance ? `<li><strong>Insurance:</strong> ${details.insurance}</li>` : ''}
                             </ul>
-                            
-                            ${data['Additional Features'] && data['Additional Features'] !== 'Not specified' ? `
-                                <div style="margin-top: 12pt; font-family: Calibri, Arial, sans-serif; font-size: 9pt; line-height: 1.4;">${data['Additional Features']}</div>
-                            ` : ''}
                             
                             <div class="doc-program-details-heading">Contact Information:</div>
                             <div class="doc-contact-section">
-                                ${data['Phone Number'] && data['Phone Number'] !== 'Not specified' ? `Phone: ${data['Phone Number']}<br>` : ''}
-                                ${data['Email'] && data['Email'] !== 'Not specified' ? `Email: ${data['Email']}<br>` : ''}
-                                ${data['Website'] && data['Website'] !== 'Not specified' ? `Website: ${data['Website']}<br>` : ''}
+                                ${contact.phone ? `Phone: ${contact.phone}<br>` : ''}
+                                ${contact.email ? `Email: ${contact.email}<br>` : ''}
+                                ${contact.website ? `Website: ${contact.website}<br>` : ''}
                                 ${location ? `Address: ${location}` : ''}
                             </div>
                         </div>
