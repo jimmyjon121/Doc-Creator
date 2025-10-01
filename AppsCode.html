@@ -1500,9 +1500,10 @@
             border-radius: 10px;
             width: 80%;
             max-width: 700px;
-            max-height: 80vh;
+            max-height: 85vh;
             display: flex;
             flex-direction: column;
+            position: relative;
             box-shadow: 0 5px 30px rgba(0,0,0,0.3);
         }
         
@@ -1543,7 +1544,7 @@
             padding: 20px;
             flex: 1;
             overflow-y: auto;
-            max-height: calc(80vh - 180px); /* Account for header and actions */
+            min-height: 0; /* Important for flex children */
         }
         
         .preview-section {
@@ -1593,6 +1594,9 @@
             align-items: center;
             gap: 10px;
             flex-shrink: 0;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
         }
         
         .add-from-preview {
@@ -2266,7 +2270,7 @@
     
     <!-- Add Custom Program Modal -->
     <div id="addProgramModal" class="modal">
-        <div class="modal-content" style="max-width: 750px;">
+        <div class="modal-content" style="max-width: 750px; max-height: 85vh;">
             <div class="modal-header">
                 <h2>Add Custom Program</h2>
                 <button class="modal-close" onclick="closeAddProgramModal()">&times;</button>
