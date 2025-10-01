@@ -612,35 +612,9 @@ function formatComprehensiveInfo(info, url) {
         formatted += s.accreditations.join(', ') + '\n';
     }
     
-    // Add key content from specific pages
-    formatted += `\n**ADDITIONAL DETAILS FROM WEBSITE:**\n`;
-    
-    // Look for about page content
-    Object.entries(info.pages).forEach(([pageName, pageData]) => {
-        if (pageName.includes('about') && pageData.paragraphs.length > 0) {
-            formatted += `\nFrom About Page:\n`;
-            const aboutContent = pageData.paragraphs
-                .filter(p => p.length > 50)
-                .slice(0, 2)
-                .join('\n');
-            formatted += aboutContent + '\n';
-        }
-    });
-    
-    // Look for clinical/treatment content
-    Object.entries(info.pages).forEach(([pageName, pageData]) => {
-        if ((pageName.includes('treatment') || pageName.includes('clinical') || pageName.includes('program')) 
-            && pageData.paragraphs.length > 0) {
-            formatted += `\nFrom ${pageName.charAt(0).toUpperCase() + pageName.slice(1)} Page:\n`;
-            const clinicalContent = pageData.paragraphs
-                .filter(p => p.length > 50)
-                .slice(0, 2)
-                .join('\n');
-            formatted += clinicalContent + '\n';
-        }
-    });
-    
-    // Remove the technical extraction summary - not appropriate for parent-facing documents
+    // Removed: ADDITIONAL DETAILS FROM WEBSITE section
+    // This was cluttering the output with redundant information
+    // All relevant details are already in the structured sections above
     
     return formatted.trim();
 }
