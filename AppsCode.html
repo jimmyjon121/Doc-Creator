@@ -5996,12 +5996,18 @@ ${formattedData.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
         
         // Smart Format - Pattern-based extraction without AI
         async function smartFormatProgram() {
-            const programInfo = document.getElementById('customProgramInfo').value.trim();
+            let programInfo = document.getElementById('customProgramInfo').value.trim();
             
             if (!programInfo) {
                 alert('Please paste program information!');
                 return;
             }
+            
+            // Strip out any "ADDITIONAL DETAILS FROM WEBSITE" sections
+            programInfo = programInfo.replace(/\*\*ADDITIONAL DETAILS FROM WEBSITE:\*\*[\s\S]*$/i, '');
+            programInfo = programInfo.replace(/ADDITIONAL DETAILS FROM WEBSITE:[\s\S]*$/i, '');
+            programInfo = programInfo.replace(/From [A-Z].*? Page:[\s\S]*?(?=\n\n|$)/gi, '');
+            programInfo = programInfo.trim();
             
             // Show processing status
             const statusDiv = document.getElementById('customProgramStatus');
