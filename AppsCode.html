@@ -9,8 +9,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="encryption-utils.js"></script>
-    <script src="security-utils.js"></script>
     
     <!-- PWA Meta Tags -->
     <meta name="description" content="Family First Adolescent Services - Document Creation Tool">
@@ -2564,7 +2562,161 @@
     </div> <!-- End of mainApp -->
     
     <script>
-        // Login System
+        // ========================================
+        // EMBEDDED ENCRYPTION UTILITIES
+        // ========================================
+        
+        // Simple but effective encryption for local storage
+        class DataEncryption {
+            constructor() {
+                this.key = this.getOrCreateKey();
+            }
+
+            getOrCreateKey() {
+                let key = localStorage.getItem('_eck');
+                if (!key) {
+                    const fingerprint = navigator.userAgent + navigator.language + 
+                                       screen.width + screen.height + 
+                                       new Date().getTime() + 
+                                       Math.random().toString(36);
+                    key = this.generateKey(fingerprint);
+                    localStorage.setItem('_eck', key);
+                }
+                return key;
+            }
+
+            generateKey(seed) {
+                let hash = 0;
+                for (let i = 0; i < seed.length; i++) {
+                    const char = seed.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash;
+                }
+                return btoa(hash.toString(36) + seed.substring(0, 32));
+            }
+
+            encrypt(data) {
+                if (!data) return data;
+                try {
+                    const str = typeof data === 'string' ? data : JSON.stringify(data);
+                    let encrypted = '';
+                    const keyLength = this.key.length;
+                    
+                    for (let i = 0; i < str.length; i++) {
+                        const charCode = str.charCodeAt(i);
+                        const keyChar = this.key.charCodeAt(i % keyLength);
+                        const encryptedChar = charCode ^ keyChar;
+                        encrypted += String.fromCharCode(encryptedChar);
+                    }
+                    
+                    return btoa(encrypted);
+                } catch (e) {
+                    console.error('Encryption failed:', e);
+                    return data;
+                }
+            }
+
+            decrypt(encryptedData) {
+                if (!encryptedData) return encryptedData;
+                try {
+                    const encrypted = atob(encryptedData);
+                    let decrypted = '';
+                    const keyLength = this.key.length;
+                    
+                    for (let i = 0; i < encrypted.length; i++) {
+                        const charCode = encrypted.charCodeAt(i);
+                        const keyChar = this.key.charCodeAt(i % keyLength);
+                        const decryptedChar = charCode ^ keyChar;
+                        decrypted += String.fromCharCode(decryptedChar);
+                    }
+                    
+                    if (decrypted.startsWith('{') || decrypted.startsWith('[')) {
+                        try {
+                            return JSON.parse(decrypted);
+                        } catch (e) {
+                            return decrypted;
+                        }
+                    }
+                    
+                    return decrypted;
+                } catch (e) {
+                    console.error('Decryption failed:', e);
+                    return encryptedData;
+                }
+            }
+
+            secureStore(key, value) {
+                try {
+                    const encrypted = this.encrypt(value);
+                    localStorage.setItem(key, encrypted);
+                    return true;
+                } catch (e) {
+                    console.error('Secure storage failed:', e);
+                    return false;
+                }
+            }
+
+            secureRetrieve(key) {
+                try {
+                    const encrypted = localStorage.getItem(key);
+                    if (!encrypted) return null;
+                    return this.decrypt(encrypted);
+                } catch (e) {
+                    console.error('Secure retrieval failed:', e);
+                    return null;
+                }
+            }
+
+            secureSessionStore(key, value) {
+                try {
+                    const encrypted = this.encrypt(value);
+                    sessionStorage.setItem(key, encrypted);
+                    return true;
+                } catch (e) {
+                    console.error('Secure session storage failed:', e);
+                    return false;
+                }
+            }
+
+            secureSessionRetrieve(key) {
+                try {
+                    const encrypted = sessionStorage.getItem(key);
+                    if (!encrypted) return null;
+                    return this.decrypt(encrypted);
+                } catch (e) {
+                    console.error('Secure session retrieval failed:', e);
+                    return null;
+                }
+            }
+        }
+
+        // Create singleton instance
+        const encryption = new DataEncryption();
+
+        // Helper functions for easy use
+        function secureLocalStorage(key, value) {
+            if (value === undefined) {
+                return encryption.secureRetrieve(key);
+            } else if (value === null) {
+                localStorage.removeItem(key);
+            } else {
+                encryption.secureStore(key, value);
+            }
+        }
+
+        function secureSessionStorage(key, value) {
+            if (value === undefined) {
+                return encryption.secureSessionRetrieve(key);
+            } else if (value === null) {
+                sessionStorage.removeItem(key);
+            } else {
+                encryption.secureSessionStore(key, value);
+            }
+        }
+
+        // ========================================
+        // LOGIN SYSTEM
+        // ========================================
         
         // Check if user is logged in (with encryption support)
         function isUserLoggedIn() {
