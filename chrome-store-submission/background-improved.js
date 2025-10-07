@@ -417,7 +417,7 @@ async function scoreAndSortLinks(links) {
     return scoredLinks.sort((a, b) => b.score - a.score);
 }
 
-// Keep original context menu and handlers
+// Context menu setup
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({
         id: 'extractProgramInfo',
