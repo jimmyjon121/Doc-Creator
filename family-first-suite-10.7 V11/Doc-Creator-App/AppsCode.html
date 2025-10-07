@@ -1468,21 +1468,6 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
-        
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-                transform: scale(1);
-            }
-            50% {
-                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
-                transform: scale(1.05);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-                transform: scale(1);
-            }
-        }
 
         /* Modal Styles */
         .modal {
@@ -2577,176 +2562,7 @@
     </div> <!-- End of mainApp -->
     
     <script>
-        // ========================================
-        // EMBEDDED ENCRYPTION UTILITIES
-        // ========================================
-        
-        // Simple but effective encryption for local storage
-        class DataEncryption {
-            constructor() {
-                this.key = this.getOrCreateKey();
-            }
-
-            getOrCreateKey() {
-                let key = localStorage.getItem('_eck');
-                if (!key) {
-                    const fingerprint = navigator.userAgent + navigator.language + 
-                                       screen.width + screen.height + 
-                                       new Date().getTime() + 
-                                       Math.random().toString(36);
-                    key = this.generateKey(fingerprint);
-                    localStorage.setItem('_eck', key);
-                }
-                return key;
-            }
-
-            generateKey(seed) {
-                let hash = 0;
-                for (let i = 0; i < seed.length; i++) {
-                    const char = seed.charCodeAt(i);
-                    hash = ((hash << 5) - hash) + char;
-                    hash = hash & hash;
-                }
-                return btoa(hash.toString(36) + seed.substring(0, 32));
-            }
-
-            encrypt(data) {
-                if (!data) return data;
-                try {
-                    const str = typeof data === 'string' ? data : JSON.stringify(data);
-                    let encrypted = '';
-                    const keyLength = this.key.length;
-                    
-                    for (let i = 0; i < str.length; i++) {
-                        const charCode = str.charCodeAt(i);
-                        const keyChar = this.key.charCodeAt(i % keyLength);
-                        const encryptedChar = charCode ^ keyChar;
-                        encrypted += String.fromCharCode(encryptedChar);
-                    }
-                    
-                    return btoa(encrypted);
-                } catch (e) {
-                    console.error('Encryption failed:', e);
-                    return data;
-                }
-            }
-
-            decrypt(encryptedData) {
-                if (!encryptedData) return encryptedData;
-                try {
-                    const encrypted = atob(encryptedData);
-                    let decrypted = '';
-                    const keyLength = this.key.length;
-                    
-                    for (let i = 0; i < encrypted.length; i++) {
-                        const charCode = encrypted.charCodeAt(i);
-                        const keyChar = this.key.charCodeAt(i % keyLength);
-                        const decryptedChar = charCode ^ keyChar;
-                        decrypted += String.fromCharCode(decryptedChar);
-                    }
-                    
-                    if (decrypted.startsWith('{') || decrypted.startsWith('[')) {
-                        try {
-                            return JSON.parse(decrypted);
-                        } catch (e) {
-                            return decrypted;
-                        }
-                    }
-                    
-                    return decrypted;
-                } catch (e) {
-                    console.error('Decryption failed:', e);
-                    return encryptedData;
-                }
-            }
-
-            secureStore(key, value) {
-                try {
-                    const encrypted = this.encrypt(value);
-                    localStorage.setItem(key, encrypted);
-                    return true;
-                } catch (e) {
-                    console.error('Secure storage failed:', e);
-                    return false;
-                }
-            }
-
-            secureRetrieve(key) {
-                try {
-                    const encrypted = localStorage.getItem(key);
-                    if (!encrypted) return null;
-                    return this.decrypt(encrypted);
-                } catch (e) {
-                    console.error('Secure retrieval failed:', e);
-                    return null;
-                }
-            }
-
-            secureSessionStore(key, value) {
-                try {
-                    const encrypted = this.encrypt(value);
-                    sessionStorage.setItem(key, encrypted);
-                    return true;
-                } catch (e) {
-                    console.error('Secure session storage failed:', e);
-                    return false;
-                }
-            }
-
-            secureSessionRetrieve(key) {
-                try {
-                    const encrypted = sessionStorage.getItem(key);
-                    if (!encrypted) return null;
-                    return this.decrypt(encrypted);
-                } catch (e) {
-                    console.error('Secure session retrieval failed:', e);
-                    return null;
-                }
-            }
-        }
-
-        // Create singleton instance
-        const encryption = new DataEncryption();
-
-        // Helper functions for easy use
-        function secureLocalStorage(key, value) {
-            if (value === undefined) {
-                return encryption.secureRetrieve(key);
-            } else if (value === null) {
-                localStorage.removeItem(key);
-            } else {
-                encryption.secureStore(key, value);
-            }
-        }
-
-        function secureSessionStorage(key, value) {
-            if (value === undefined) {
-                return encryption.secureSessionRetrieve(key);
-            } else if (value === null) {
-                sessionStorage.removeItem(key);
-            } else {
-                encryption.secureSessionStore(key, value);
-            }
-        }
-
-        // ========================================
-        // LOGIN SYSTEM
-        // ========================================
-        
-        // Check if user is logged in (with encryption support)
-        function isUserLoggedIn() {
-            try {
-                if (typeof secureSessionStorage !== 'undefined') {
-                    const session = secureSessionStorage('isLoggedIn');
-                    return session && session.value === true;
-                } else {
-                    return sessionStorage.getItem('isLoggedIn') === 'true';
-                }
-            } catch (e) {
-                return sessionStorage.getItem('isLoggedIn') === 'true';
-            }
-        }
-        
+        // Login System
         function handleLogin(event) {
             event.preventDefault();
             const username = document.getElementById('loginUsername').value;
@@ -2759,17 +2575,8 @@
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
                 
-                // Store encrypted login state in session
-                try {
-                    if (typeof secureSessionStorage !== 'undefined') {
-                        secureSessionStorage('isLoggedIn', { value: true, timestamp: Date.now() });
-                    } else {
-                        sessionStorage.setItem('isLoggedIn', 'true');
-                    }
-                } catch (e) {
-                    console.error('Failed to save session:', e);
-                    sessionStorage.setItem('isLoggedIn', 'true');
-                }
+                // Store login state in session
+                sessionStorage.setItem('isLoggedIn', 'true');
             } else {
                 // Failed login
                 errorDiv.textContent = 'Invalid username or password. Please try again.';
@@ -2787,7 +2594,7 @@
         
         // Check if already logged in on page load
         window.addEventListener('DOMContentLoaded', function() {
-            if (isUserLoggedIn()) {
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
             }
@@ -2829,7 +2636,7 @@
         
         // Check for timeout every minute
         setInterval(() => {
-            if (isUserLoggedIn()) {
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
                 if (Date.now() - lastActivity > SESSION_TIMEOUT) {
                     sessionStorage.clear();
                     alert('Your session has expired. Please log in again.');
@@ -4236,58 +4043,33 @@
         // Save custom programs to localStorage
         function saveCustomPrograms() {
             const customPrograms = programs.filter(p => p.isCustom);
-            try {
-                if (typeof secureLocalStorage !== 'undefined') {
-                    secureLocalStorage('customPrograms', customPrograms);
-                } else {
-                    localStorage.setItem('customPrograms', JSON.stringify(customPrograms));
-                }
-                console.log('Saved', customPrograms.length, 'custom programs (encrypted)');
-            } catch (e) {
-                console.error('Failed to save custom programs:', e);
-            }
+            localStorage.setItem('customPrograms', JSON.stringify(customPrograms));
+            console.log('Saved', customPrograms.length, 'custom programs');
         }
         
-        // Load custom programs from encrypted localStorage
+        // Load custom programs from localStorage
         function loadCustomPrograms() {
-            try {
-                let customPrograms = null;
-                if (typeof secureLocalStorage !== 'undefined') {
-                    customPrograms = secureLocalStorage('customPrograms');
-                } else {
-                    const saved = localStorage.getItem('customPrograms');
-                    if (saved) {
-                        customPrograms = JSON.parse(saved);
-                    }
-                }
-                if (customPrograms && Array.isArray(customPrograms)) {
+            const saved = localStorage.getItem('customPrograms');
+            if (saved) {
+                try {
+                    const customPrograms = JSON.parse(saved);
                     customPrograms.forEach(p => {
                         // Check if this program isn't already in the array
                         if (!programs.find(existing => existing.id === p.id)) {
                             programs.push(p);
                         }
                     });
-                    console.log('Loaded', customPrograms.length, 'custom programs (encrypted)');
+                    console.log('Loaded', customPrograms.length, 'custom programs from storage');
+                } catch (e) {
+                    console.error('Error loading custom programs:', e);
                 }
-            } catch (e) {
-                console.error('Failed to load custom programs:', e);
             }
         }
         
         // Initialize
         // Document Vault Functions
         function openDocumentVault() {
-            let vault = [];
-            try {
-                if (typeof secureLocalStorage !== 'undefined') {
-                    vault = secureLocalStorage(STORAGE_KEYS.documentVault) || [];
-                } else {
-                    vault = JSON.parse(localStorage.getItem(STORAGE_KEYS.documentVault) || '[]');
-                }
-            } catch (e) {
-                console.error('Failed to load document vault:', e);
-                vault = [];
-            }
+            const vault = JSON.parse(localStorage.getItem(STORAGE_KEYS.documentVault) || '[]');
             const modal = document.createElement('div');
             modal.className = 'modal show';
             modal.innerHTML = `
@@ -4384,27 +4166,9 @@
         // Delete document from vault
         function deleteDocument(index) {
             if (confirm('Are you sure you want to delete this document?')) {
-                let vault = [];
-                try {
-                    if (typeof secureLocalStorage !== 'undefined') {
-                        vault = secureLocalStorage(STORAGE_KEYS.documentVault) || [];
-                    } else {
-                        vault = JSON.parse(localStorage.getItem(STORAGE_KEYS.documentVault) || '[]');
-                    }
-                } catch (e) {
-                    console.error('Failed to load vault:', e);
-                    vault = [];
-                }
+                const vault = JSON.parse(localStorage.getItem(STORAGE_KEYS.documentVault) || '[]');
                 vault.splice(index, 1);
-                try {
-                    if (typeof secureLocalStorage !== 'undefined') {
-                        secureLocalStorage(STORAGE_KEYS.documentVault, vault);
-                    } else {
-                        localStorage.setItem(STORAGE_KEYS.documentVault, JSON.stringify(vault));
-                    }
-                } catch (e) {
-                    console.error('Failed to save vault:', e);
-                }
+                localStorage.setItem(STORAGE_KEYS.documentVault, JSON.stringify(vault));
                 openDocumentVault(); // Refresh the modal
             }
         }
@@ -4412,15 +4176,7 @@
         // Clear entire vault
         function clearVault() {
             if (confirm('Are you sure you want to clear the entire document vault? This cannot be undone.')) {
-                try {
-                    if (typeof secureLocalStorage !== 'undefined') {
-                        secureLocalStorage(STORAGE_KEYS.documentVault, []);
-                    } else {
-                        localStorage.setItem(STORAGE_KEYS.documentVault, '[]');
-                    }
-                } catch (e) {
-                    console.error('Failed to clear vault:', e);
-                }
+                localStorage.setItem(STORAGE_KEYS.documentVault, '[]');
                 openDocumentVault(); // Refresh the modal
             }
         }
@@ -6890,45 +6646,24 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
         // Listen for messages from Chrome extension
         window.addEventListener('message', function(event) {
             if (event.data && event.data.type === 'PROGRAM_INFO_EXTRACTED') {
-                // Show the modal
-                const modal = document.getElementById('addProgramModal');
-                if (modal) {
-                    modal.style.display = 'block';
-                    modal.classList.add('show');
-                    
-                    // Set to manual mode (for Chrome extension data)
-                    setAddProgramMode('manual');
-                    
-                    // Populate the textarea with extracted content
-                    const textarea = document.getElementById('customProgramInfo');
-                    if (textarea) {
-                        textarea.value = event.data.content;
-                        // Focus on the textarea
-                        textarea.focus();
-                    }
-                    
-                    // Make sure the smart format button is visible
-                    const smartBtn = document.getElementById('smartFormatBtn');
-                    if (smartBtn) {
-                        smartBtn.style.display = 'inline-block';
-                        // Add a glow effect to draw attention
-                        smartBtn.style.animation = 'pulse 2s infinite';
-                    }
-                    
-                    // Clear any existing status messages
-                    const statusDiv = document.getElementById('customProgramStatus');
-                    if (statusDiv) {
-                        statusDiv.innerHTML = `
-                            <div style="padding: 15px; background: #d4f4dd; border: 2px solid #28a745; border-radius: 8px; margin-bottom: 15px;">
-                                <h4 style="margin: 0 0 10px 0; color: #28a745;">✅ Chrome Extension Data Received!</h4>
-                                <p style="margin: 0; color: #333;">Program information has been extracted and pasted. Click <strong>"Smart Format & Add Program"</strong> below to process and add it to your database.</p>
-                            </div>
-                        `;
-                    }
-                    
-                    // Show a temporary notification
-                    showNotification('📥 Program data received from Chrome extension! Click "Smart Format & Add Program" to add it.', 'success');
-                }
+                // Use the proper function to show the modal
+                showAddProgramDialog();
+                
+                // Populate the textarea with extracted content
+                document.getElementById('customProgramInfo').value = event.data.content;
+                
+                // Clear any existing status messages
+                document.getElementById('customProgramStatus').innerHTML = '';
+                
+                // Show success message
+                const statusDiv = document.createElement('div');
+                statusDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #d4f4dd; color: #28a745; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 10000;';
+                statusDiv.innerHTML = '✅ Content received from Chrome extension! Click "Smart Format & Add Program" to process it.';
+                document.body.appendChild(statusDiv);
+                
+                setTimeout(() => {
+                    statusDiv.remove();
+                }, 4000);
             }
         });
         
@@ -8443,27 +8178,9 @@ Set Confidence to "low" since this is URL-based inference.`;
                 atHomeProviders: atHomeProviders.length > 0 ? atHomeProviders : null,
                 htmlContent: html  // Store the full HTML for PDF generation
             };
-            let vault = [];
-            try {
-                if (typeof secureLocalStorage !== 'undefined') {
-                    vault = secureLocalStorage(STORAGE_KEYS.documentVault) || [];
-                } else {
-                    vault = JSON.parse(localStorage.getItem(STORAGE_KEYS.documentVault) || '[]');
-                }
-            } catch (e) {
-                console.error('Failed to load vault:', e);
-                vault = [];
-            }
+            const vault = JSON.parse(localStorage.getItem(STORAGE_KEYS.documentVault) || '[]');
             vault.push(vaultDoc);
-            try {
-                if (typeof secureLocalStorage !== 'undefined') {
-                    secureLocalStorage(STORAGE_KEYS.documentVault, vault);
-                } else {
-                    localStorage.setItem(STORAGE_KEYS.documentVault, JSON.stringify(vault));
-                }
-            } catch (e) {
-                console.error('Failed to save to vault:', e);
-            }
+            localStorage.setItem(STORAGE_KEYS.documentVault, JSON.stringify(vault));
             
             // Save to history
             saveToHistory({
@@ -8773,18 +8490,8 @@ Set Confidence to "low" since this is URL-based inference.`;
                 return;
             }
             
-            // Save to encrypted document vault
-            let vault = [];
-            try {
-                if (typeof secureLocalStorage !== 'undefined') {
-                    vault = secureLocalStorage(STORAGE_KEYS.documentVault) || [];
-                } else {
-                    vault = JSON.parse(localStorage.getItem(STORAGE_KEYS.documentVault) || '[]');
-                }
-            } catch (e) {
-                console.error('Failed to load vault:', e);
-                vault = [];
-            }
+            // Save to document vault
+            const vault = JSON.parse(localStorage.getItem(STORAGE_KEYS.documentVault) || '[]');
             const documentData = {
                 id: Date.now(),
                 clientName: clientName,
@@ -8796,15 +8503,7 @@ Set Confidence to "low" since this is URL-based inference.`;
             };
             
             vault.push(documentData);
-            try {
-                if (typeof secureLocalStorage !== 'undefined') {
-                    secureLocalStorage(STORAGE_KEYS.documentVault, vault);
-                } else {
-                    localStorage.setItem(STORAGE_KEYS.documentVault, JSON.stringify(vault));
-                }
-            } catch (e) {
-                console.error('Failed to save to vault:', e);
-            }
+            localStorage.setItem(STORAGE_KEYS.documentVault, JSON.stringify(vault));
             
             showSuccessMessage('Document saved to vault successfully');
         }
@@ -9354,13 +9053,13 @@ Set Confidence to "low" since this is URL-based inference.`;
                 loadCustomPrograms();
                 
                 // Restore auto-saved work
-                if (isUserLoggedIn()) {
+                if (sessionStorage.getItem('isLoggedIn') === 'true') {
                     restoreAutoSave();
                 }
                 
                 // Show keyboard shortcuts hint
                 setTimeout(() => {
-                    if (isUserLoggedIn()) {
+                    if (sessionStorage.getItem('isLoggedIn') === 'true') {
                         showSuccessMessage('Tip: Use Ctrl+G to generate, Ctrl+S to save, Ctrl+P to print', 5000);
                     }
                 }, 3000);

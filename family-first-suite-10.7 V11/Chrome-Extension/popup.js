@@ -306,36 +306,29 @@ document.addEventListener('DOMContentLoaded', function() {
             );
             
             if (docCreatorTab) {
-                // Doc Creator is open - switch to that tab first
-                chrome.tabs.update(docCreatorTab.id, { active: true }, () => {
-                    // Small delay to ensure tab is focused
-                    setTimeout(() => {
-                        // Now inject script to send data
-                        chrome.scripting.executeScript({
-                            target: { tabId: docCreatorTab.id },
-                            func: (programData) => {
-                                // This runs in the context of the Doc Creator page
-                                if (window.postMessage) {
-                                    window.postMessage({
-                                        type: 'PROGRAM_INFO_EXTRACTED',
-                                        content: programData
-                                    }, '*');
-                                    
-                                    // Scroll to top to see the modal
-                                    window.scrollTo(0, 0);
-                                }
-                            },
-                            args: [textToCopy]
-                        }, () => {
-                            if (chrome.runtime.lastError) {
-                                // Fallback to clipboard
-                                navigator.clipboard.writeText(textToCopy);
-                                showStatus('✓ Copied to clipboard! Check Doc Creator...', 'success');
-                            } else {
-                                showStatus('✓ Sent to Doc Creator! Modal should be open with "Smart Format" button ready.', 'success');
-                            }
-                        });
-                    }, 200);
+                // Doc Creator is open - inject script to send data
+                chrome.scripting.executeScript({
+                    target: { tabId: docCreatorTab.id },
+                    func: (programData) => {
+                        // This runs in the context of the Doc Creator page
+                        // Just send the message - let the message handler do all the work
+                        if (window.postMessage) {
+                            window.postMessage({
+                                type: 'PROGRAM_INFO_EXTRACTED',
+                                content: programData
+                            }, '*');
+                        }
+                    },
+                    args: [textToCopy]
+                }, () => {
+                    if (chrome.runtime.lastError) {
+                        // Fallback to clipboard
+                        navigator.clipboard.writeText(textToCopy);
+                        showStatus('✓ Copied to clipboard! Switching to Doc Creator...', 'success');
+                    } else {
+                        showStatus('✓ Sent to Doc Creator! Check the Manual Entry tab.', 'success');
+                    }
+                    chrome.tabs.update(docCreatorTab.id, { active: true });
                 });
             } else {
                 // No Doc Creator tab open - copy to clipboard and offer to open
