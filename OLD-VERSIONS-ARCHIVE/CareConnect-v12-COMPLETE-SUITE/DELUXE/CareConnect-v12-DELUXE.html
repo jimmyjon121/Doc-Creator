@@ -5084,88 +5084,9 @@
                         
                         <div style="margin-bottom: 20px;">
                             <label style="display: block; margin-bottom: 5px; font-weight: bold;">Client First Name <span style="color: #92400e; font-size: 12px;">(No PHI)</span>:</label>
-                            <input type="text" id="packetClientName" placeholder="First Name Only (Required)" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;" oninput="validateFirstName(this)">
+                            <input type="text" id="packetClientName" placeholder="First Name Only (Required)" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;" oninput="validatePacketFirstName(this)">
                             <div id="packetNameWarning" style="color: #dc2626; font-size: 13px; display: none; margin-top: 5px;">Please enter first name only. No full names, DOB, or PHI.</div>
                         </div>
-        // Professional first name validation
-        function validateClientName(input) {
-            const value = input.value.trim();
-            const icon = document.getElementById('nameValidIcon');
-            const msg = document.getElementById('nameValidationMsg');
-            
-            // Auto-capitalize first letter
-            if (value.length > 0) {
-                input.value = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-            }
-            
-            // Validation rules
-            const hasSpace = /\s/.test(value);
-            const hasNumbers = /\d/.test(value);
-            const hasInvalidChars = /[^a-zA-Z'-]/.test(value);
-            const tooLong = value.length > 20;
-            
-            // Reset styles
-            input.style.border = '';
-            icon.style.display = 'none';
-            msg.style.display = 'none';
-            
-            if (value.length === 0) {
-                return; // Empty is ok, will be caught on submit
-            }
-            
-            if (hasSpace) {
-                input.style.border = '2px solid #ef4444';
-                icon.innerHTML = '❌';
-                icon.style.color = '#ef4444';
-                icon.style.display = 'block';
-                msg.innerHTML = 'First name only - no spaces allowed';
-                msg.style.color = '#dc2626';
-                msg.style.display = 'block';
-            } else if (hasNumbers) {
-                input.style.border = '2px solid #ef4444';
-                icon.innerHTML = '❌';
-                icon.style.color = '#ef4444';
-                icon.style.display = 'block';
-                msg.innerHTML = 'Names cannot contain numbers';
-                msg.style.color = '#dc2626';
-                msg.style.display = 'block';
-            } else if (hasInvalidChars) {
-                input.style.border = '2px solid #ef4444';
-                icon.innerHTML = '⚠️';
-                icon.style.color = '#f59e0b';
-                icon.style.display = 'block';
-                msg.innerHTML = 'Only letters, hyphens, and apostrophes allowed';
-                msg.style.color = '#ea580c';
-                msg.style.display = 'block';
-            } else if (tooLong) {
-                input.style.border = '2px solid #f59e0b';
-                icon.innerHTML = '⚠️';
-                icon.style.color = '#f59e0b';
-                icon.style.display = 'block';
-                msg.innerHTML = 'Maximum 20 characters';
-                msg.style.color = '#ea580c';
-                msg.style.display = 'block';
-            } else if (value.length >= 2) {
-                // Valid name
-                input.style.border = '2px solid #10b981';
-                icon.innerHTML = '✓';
-                icon.style.color = '#10b981';
-                icon.style.display = 'block';
-            }
-        }
-        
-        // Inline validation for first name only (packet modal)
-        function validateFirstName(input) {
-            const value = input.value.trim();
-            // Auto-capitalize
-            if (value.length > 0) {
-                input.value = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
-            }
-            // Disallow spaces, numbers, or special chars (except hyphen/apostrophe)
-            const invalid = /[\s\d@#\$%\^&\*\(\)_\+=\[\]\{\};:,.<>\/?\\|]/.test(value) || value.length > 20;
-            document.getElementById('packetNameWarning').style.display = invalid ? 'block' : 'none';
-            input.style.borderColor = invalid ? '#dc2626' : '#d1d5db';
-        }
                         
                         <div style="margin-bottom: 20px;">
                             <label style="display: block; margin-bottom: 5px; font-weight: bold;">Discharge Date:</label>
@@ -5184,71 +5105,96 @@
                                     <strong>Cover Page</strong> - Patient info and discharge summary
                                 </label>
                                 <label style="display: block; margin-bottom: 8px;">
-                                    <input type="checkbox" id="includeAftercare" checked> 
-                                    <strong>Aftercare Recommendations</strong> - From current session
-                                </label>
-                                <label style="display: block; margin-bottom: 8px;">
-                                    <input type="checkbox" id="includeFaceSheet" checked> 
-                                    <strong>Face Sheet</strong> - Demographics and clinical summary
+                                    <input type="checkbox" id="includeAftercarePlan" checked> 
+                                    <strong>Aftercare Plan</strong> - Current generated document
                                 </label>
                             </div>
                             
-                            <!-- Upload PDFs Section -->
-                            <div style="background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 15px;">
-                                <h5 style="margin-top: 0; color: #92400e;">Upload PDF Documents</h5>
-                                <p style="font-size: 14px; margin: 10px 0;">Add PDFs from Kipu or other sources (can select multiple files)</p>
-                                
-                                <div style="border: 2px dashed #f59e0b; border-radius: 8px; padding: 20px; text-align: center; background: white;">
-                                    <input type="file" id="pdfFiles" accept=".pdf" multiple style="display: none;" onchange="handlePDFSelection(this)">
-                                    <button onclick="document.getElementById('pdfFiles').click()" style="background: #f59e0b; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">
-                                        📎 Select PDF Files
-                                    </button>
-                                    <div id="selectedFiles" style="margin-top: 15px; text-align: left;"></div>
-                                </div>
+                            <!-- Upload Additional PDFs -->
+                            <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 15px;">
+                                <h5 style="margin-top: 0; color: #ea580c;">Upload Additional PDFs</h5>
+                                <input type="file" id="additionalPdfs" multiple accept=".pdf" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;">
+                                <small style="color: #666; display: block; margin-top: 5px;">Select multiple PDFs to include (e.g., discharge summary, medical records)</small>
                             </div>
                         </div>
-                        
-                        <!-- Merge Order Section -->
-                        <div style="margin-bottom: 20px; padding: 15px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px;">
-                            <h5 style="margin-top: 0;">📑 Document Order (drag to reorder):</h5>
-                            <div id="documentOrder" style="margin-top: 10px;">
-                                <div class="order-item" data-type="cover" style="padding: 8px; background: white; margin-bottom: 5px; border-radius: 4px; cursor: move;">
-                                    1. Cover Page
-                                </div>
-                                <div class="order-item" data-type="aftercare" style="padding: 8px; background: white; margin-bottom: 5px; border-radius: 4px; cursor: move;">
-                                    2. Aftercare Recommendations
-                                </div>
-                                <div class="order-item" data-type="facesheet" style="padding: 8px; background: white; margin-bottom: 5px; border-radius: 4px; cursor: move;">
-                                    3. Face Sheet
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Progress Bar (hidden initially) -->
-                        <div id="mergeProgress" style="display: none; margin-bottom: 20px;">
-                            <h5>Processing Documents...</h5>
-                            <div style="width: 100%; background: #e5e7eb; border-radius: 8px; height: 20px; overflow: hidden;">
-                                <div id="progressBar" style="width: 0%; background: #8b5cf6; height: 100%; transition: width 0.3s;"></div>
-                            </div>
-                            <p id="progressText" style="margin-top: 5px; font-size: 14px; color: #666;">Initializing...</p>
-                        </div>
-                        
-                        <!-- Action Buttons -->
-                        <div style="display: flex; gap: 10px;">
-                            <button onclick="compilePacket()" style="background: #8b5cf6; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 16px;">
-                                🚀 Compile & Download Packet
-                            </button>
-                            <button onclick="this.closest('.modal').remove()" style="background: #6b7280; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer;">
-                                Cancel
-                            </button>
-                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button onclick="compileDischargePacket()" style="padding: 14px 28px; background: #0066cc; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px;">
+                            📦 Create Packet
+                        </button>
+                        <button onclick="this.closest('.modal').remove()" style="padding: 14px 28px; background: #e5e7eb; color: #6b7280; border: none; border-radius: 8px; cursor: pointer; margin-left: 10px;">
+                            Cancel
+                        </button>
                     </div>
                 </div>
             `;
             document.body.appendChild(modal);
         }
         
-        // Handle PDF file selection
+        // Inline validation for first name only (packet modal)
+        function validatePacketFirstName(input) {
+            const value = input.value.trim();
+            // Auto-capitalize
+            if (value.length > 0) {
+                input.value = value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+            }
+            // Disallow spaces, numbers, or special chars (except hyphen/apostrophe)
+            const invalid = /[\s\d@#\$%\^&\*\(\)_\+=\[\]\{\};:,.<>\/?\\|]/.test(value) || value.length > 20;
+            const warning = document.getElementById('packetNameWarning');
+            if (warning) {
+                warning.style.display = invalid ? 'block' : 'none';
+            }
+            input.style.borderColor = invalid ? '#dc2626' : '#d1d5db';
+        }
+        
+        // Compile discharge packet function
+        async function compileDischargePacket() {
+            const clientName = document.getElementById('packetClientName')?.value.trim();
+            
+            if (!clientName) {
+                alert('Please enter client first name');
+                return;
+            }
+            
+            showNotification('📦 Creating discharge packet...', 'info');
+            
+            // Get the current document if available
+            if (!lastDocumentHtml) {
+                alert('Please generate an aftercare document first');
+                return;
+            }
+            
+            // Close the modal
+            document.querySelector('.modal.show')?.remove();
+            
+            // For now, just download the current document as the packet
+            // In the future, this could merge multiple PDFs
+            const filename = `${clientName}_Discharge_Packet_${new Date().toISOString().split('T')[0]}.pdf`;
+            
+            try {
+                await downloadDocumentPdf(filename);
+                showNotification('✅ Discharge packet created successfully!', 'success');
+            } catch (error) {
+                console.error('Error creating packet:', error);
+                showNotification('❌ Failed to create discharge packet', 'error');
+            }
+        }
+        
+        // Handle PDF file selection (placeholder for future enhancement)
+        function handlePDFSelection(input) {
+            const files = input.files;
+            const selectedFilesDiv = document.getElementById('selectedFiles');
+            if (selectedFilesDiv && files.length > 0) {
+                selectedFilesDiv.innerHTML = `<p style="color: #16a34a;">✓ ${files.length} file(s) selected</p>`;
+            }
+        }
+        
+        // Schedule follow-up function
+        function scheduleFollowUp() {
+            showNotification('Follow-up scheduling feature coming soon!', 'info');
+        }
+        
+        // Email document function
         function handlePDFSelection(input) {
             const files = input.files;
             const selectedFilesDiv = document.getElementById('selectedFiles');

@@ -1,0 +1,104 @@
+========================================
+CARECONNECT PRO v3.0 - ENHANCED EDITION
+========================================
+Version: 3.0-ENHANCED
+Date: October 8, 2025
+Status: PRODUCTION READY
+
+========================================
+WHAT'S IN THIS FOLDER:
+========================================
+
+1. CareConnect-Pro-v3.0-ENHANCED.html
+   - The main application (single HTML file)
+   - Beautiful enhanced UI with gradient loading screens
+   - Detailed progress indicators
+   - Chrome extension integration
+   - All features included (Deluxe version)
+
+2. Chrome-Extension-v3.0-ENHANCED/
+   - Enhanced Chrome extension with beautiful UI
+   - Detailed progress tracking
+   - Live activity log
+   - Real-time statistics
+   - Auto-opens and sends data to main app
+
+========================================
+KEY FEATURES IN v3.0:
+========================================
+
+✅ MAIN APP ENHANCEMENTS:
+- Beautiful gradient loading animations
+- Detailed progress bars with status messages
+- Modern notification system
+- Enhanced UI throughout
+- Chrome extension data receiver
+- Auto-add programs from extension
+- Delete programs from database
+- Session tracking
+- Discharge packet compiler with PDF merging
+
+✅ CHROME EXTENSION ENHANCEMENTS:
+- Beautiful purple gradient UI
+- Live activity log (terminal-style)
+- Real-time extraction statistics
+- Detailed progress messages
+- 4-step visual progress indicator
+- Auto-opens Doc Creator app
+- Sends data automatically (no manual paste)
+
+========================================
+HOW TO USE:
+========================================
+
+STEP 1: INSTALL CHROME EXTENSION
+1. Open Chrome
+2. Go to: chrome://extensions/
+3. Enable "Developer mode" (top right)
+4. Click "Load unpacked"
+5. Select: Chrome-Extension-v3.0-ENHANCED folder
+
+STEP 2: RUN THE APP
+Option A - With Dev Server (Recommended):
+1. Open Terminal in this folder
+2. Run: python3 -m http.server 8000
+3. Open: http://localhost:8000/CareConnect-Pro-v3.0-ENHANCED.html
+
+Option B - Direct File:
+1. Double-click: CareConnect-Pro-v3.0-ENHANCED.html
+2. Opens directly in browser
+
+STEP 3: USE THE EXTENSION
+1. Navigate to any treatment program website
+2. Click the extension icon
+3. Click "Extract Program Info"
+4. Watch the detailed progress
+5. Click "Copy to Tool" when done
+6. Program automatically adds to your app!
+
+========================================
+LOGIN CREDENTIALS:
+========================================
+Username: Doc121
+Password: FFA121
+
+========================================
+WHAT'S NEW IN THIS VERSION:
+========================================
+- Beautiful loading animations with progress rings
+- Detailed extraction progress (0-100%)
+- Live activity log showing every action
+- Statistics display (pages, data points, time)
+- Auto-transfer from extension to app
+- Enhanced notifications
+- Smooth animations throughout
+- Professional gradient UI
+- Better error handling
+- Clear version labeling
+
+========================================
+SUPPORT:
+========================================
+Created for: Family First Adolescent Services
+By: ClearHive Health LLC
+HIPAA Compliant: Yes (all data stored locally)
