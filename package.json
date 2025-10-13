@@ -1,0 +1,23 @@
+{
+  "name": "careconnect-pro",
+  "version": "4.0.0",
+  "description": "Professional Aftercare Document Builder - Modular Build System",
+  "scripts": {
+    "build": "node build-simple.js",
+    "build:advanced": "node build.js",
+    "build:prod": "node build.js --production",
+    "extract": "node extract-enhanced.js",
+    "watch": "node build.js --watch",
+    "clean": "node build.js --clean",
+    "package": "npm run build && node build.js --package",
+    "dev": "node build-simple.js && echo 'Open dist/CareConnect-Pro.html in your browser'",
+    "dist": "npm run build && cd dist && echo 'Distribution ready in dist/ folder'"
+  },
+  "keywords": ["healthcare", "documentation", "HIPAA", "aftercare", "clinical"],
+  "author": "Family First Adolescent Services",
+  "license": "PROPRIETARY",
+  "private": true,
+  "devDependencies": {
+    "chokidar": "^3.5.3"
+  }
+}
