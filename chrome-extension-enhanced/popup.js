@@ -1,23 +1,40 @@
-// popup.js - Professional Extension Interface v4.0
+// popup.js - Clinical Grade Extension Interface v5.0
+
+// UX REQUIREMENTS FOR CASE MANAGEMENT:
+// - Show live progress (pages analyzed, current/total) and a running activity log.
+// - Display data-points found (therapies + specializations + contacts) count before completion.
+// - Provide two actions on success: [Copy to Clipboard] and [Send to Doc Creator].
+// - If postMessage injection fails, show "Data copied—paste in Doc Creator (Ctrl+V)" and re-enable Copy.
+// - Auto-open/activate an existing Doc Creator tab if found; else open localhost fallback URLs.
+// - Close popup ~2s after successful send to reduce click churn.
 
 let extractedData = null;
+let clinicalWriteUp = '';
+let activityLog = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     const extractBtn = document.getElementById('extractBtn');
     const statusDiv = document.getElementById('status');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const progressPercent = document.getElementById('progressPercent');
+    const activityLogDiv = document.getElementById('activityLog');
+    const logEntries = document.getElementById('logEntries');
     const statsDiv = document.getElementById('stats');
-    const resultsDiv = document.getElementById('results');
+    const actionButtons = document.getElementById('actionButtons');
     const copyBtn = document.getElementById('copyBtn');
+    const sendBtn = document.getElementById('sendBtn');
+    const writeupPreview = document.getElementById('writeupPreview');
+    const writeupText = document.getElementById('writeupText');
     
-    // Tab handling
-    document.querySelectorAll('.tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-            
-            tab.classList.add('active');
-            document.getElementById(tab.dataset.tab).classList.add('active');
-        });
+    // Listen for progress updates from content script
+    chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        if (request.action === 'progress') {
+            const percent = Math.round((request.current / request.total) * 100);
+            updateProgress(percent, request.message || `Analyzing page ${request.current}/${request.total}`);
+            addLogEntry(`Page ${request.current}/${request.total}: ${request.message}`, 'info');
+        }
     });
     
     // Extract button handler
@@ -26,9 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Reset UI
         extractBtn.disabled = true;
-        statsDiv.style.display = 'none';
-        resultsDiv.style.display = 'none';
-        updateStatus('<span class="loading-spinner"></span>Extracting comprehensive data...', 'loading');
+        resetUI();
+        showProgress();
+        addLogEntry('Starting extraction...', 'info');
         
         try {
             // Get current tab
@@ -38,81 +55,252 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('No active tab found');
             }
             
-            console.log('Active tab:', tab.url);
+            addLogEntry(`Analyzing: ${new URL(tab.url).hostname}`, 'info');
+            updateProgress(10, 'Injecting extraction script...');
             
-            // Send extraction message to content script
+            // Try to send message, if it fails, inject the script manually
             console.log('Sending extraction request...');
-            const response = await chrome.tabs.sendMessage(tab.id, { action: 'extract' });
+            let response;
+            
+            try {
+                response = await chrome.tabs.sendMessage(tab.id, { action: 'extract' });
+            } catch (messageError) {
+                // Content script not loaded, inject it manually
+                console.log('Content script not loaded, injecting...');
+                addLogEntry('Loading extraction engine...', 'info');
+                
+                try {
+                    await chrome.scripting.executeScript({
+                        target: { tabId: tab.id },
+                        files: ['production-extractor.js']
+                    });
+                    
+                    // Wait a moment for script to initialize
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // Try again
+                    response = await chrome.tabs.sendMessage(tab.id, { action: 'extract' });
+                } catch (injectError) {
+                    throw new Error('Failed to inject extraction script. Please refresh the page and try again.');
+                }
+            }
             
             console.log('Received response:', response);
             
             if (response && response.success && response.data) {
                 extractedData = response.data;
+                
+                // Update progress
+                updateProgress(50, 'Processing data...');
+                addLogEntry(`Found ${calculateDataPoints(extractedData)} data points`, 'success');
+                
+                // Generate aftercare recommendation write-up
+                updateProgress(75, 'Generating aftercare recommendation...');
+                clinicalWriteUp = formatAfterCareRecommendation(extractedData);
+                
+                // Display results
+                updateProgress(100, 'Complete!');
+                addLogEntry(`Extraction complete! Analyzed ${extractedData.meta?.sourcesAnalyzed || 1} page(s)`, 'success');
                 displayResults(extractedData);
-                updateStatus('✅ Extraction complete! Data automatically copied to clipboard.', 'success');
                 
                 // Auto-copy to clipboard
-                const formatted = formatForClipboard(extractedData);
-                await navigator.clipboard.writeText(formatted);
+                await navigator.clipboard.writeText(clinicalWriteUp);
+                addLogEntry('Clinical write-up copied to clipboard', 'success');
+                
+                updateStatus('Extraction complete! Clinical write-up ready.', 'success');
+                showActions();
+                
             } else {
                 throw new Error(response?.error || 'No data received from extraction');
             }
             
         } catch (error) {
             console.error('Extraction error:', error);
-            
-            // Check if content script needs to be injected
-            if (error.message.includes('Receiving end does not exist')) {
-                updateStatus('⚠️ Refreshing page and retrying...', 'loading');
-                
-                try {
-                    // Reload the tab and retry
-                    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-                    await chrome.tabs.reload(tab.id);
-                    
-                    // Wait for page to load
-                    setTimeout(async () => {
-                        try {
-                            const response = await chrome.tabs.sendMessage(tab.id, { action: 'extract' });
-                            if (response && response.success && response.data) {
-                                extractedData = response.data;
-                                displayResults(extractedData);
-                                updateStatus('✅ Extraction complete after refresh!', 'success');
-                                
-                                const formatted = formatForClipboard(extractedData);
-                                await navigator.clipboard.writeText(formatted);
-                            }
-                        } catch (retryError) {
-                            updateStatus('❌ Please refresh the page and try again.', 'error');
-                        }
-                        extractBtn.disabled = false;
-                    }, 3000);
-                    
-                    return;
-                } catch (reloadError) {
-                    updateStatus('❌ Unable to refresh page. Please refresh manually.', 'error');
-                }
-            } else {
-                updateStatus(`❌ Error: ${error.message}`, 'error');
-            }
-        } finally {
+            addLogEntry(`Error: ${error.message}`, 'error');
+            updateStatus(`Error: ${error.message}`, 'error');
             extractBtn.disabled = false;
         }
     });
     
     // Copy button handler
     copyBtn.addEventListener('click', async () => {
-        if (extractedData) {
-            const formatted = formatForClipboard(extractedData);
-            await navigator.clipboard.writeText(formatted);
+        if (clinicalWriteUp) {
+            await navigator.clipboard.writeText(clinicalWriteUp);
             
             const originalText = copyBtn.textContent;
-            copyBtn.textContent = '✅ Copied!';
-            setTimeout(() => {
+            copyBtn.textContent = 'Copied!';
+            addLogEntry('Write-up copied to clipboard', 'success');
+            updateStatus('Clinical write-up copied to clipboard!', 'success');
+                    
+                    setTimeout(() => {
                 copyBtn.textContent = originalText;
-            }, 2000);
+                        }, 2000);
         }
     });
+    
+    // Send to Doc Creator button handler
+    sendBtn.addEventListener('click', async () => {
+        if (!clinicalWriteUp) return;
+        
+        sendBtn.disabled = true;
+        addLogEntry('Looking for Doc Creator tab...', 'info');
+        
+        try {
+            // Look for existing Doc Creator tabs
+            const docCreatorUrls = [
+                'http://localhost:3000',
+                'http://localhost:3001',
+                'http://127.0.0.1:3000',
+                'file://',
+                'AppsCode-DeluxeCMS.html'
+            ];
+            
+            let docCreatorTab = null;
+            const tabs = await chrome.tabs.query({});
+            
+                    for (const tab of tabs) {
+                for (const urlPattern of docCreatorUrls) {
+                    if (tab.url && tab.url.includes(urlPattern)) {
+                    docCreatorTab = tab;
+                break;
+                    }
+                }
+                if (docCreatorTab) break;
+            }
+            
+            if (docCreatorTab) {
+                // Focus existing tab
+                await chrome.tabs.update(docCreatorTab.id, { active: true });
+                await chrome.windows.update(docCreatorTab.windowId, { focused: true });
+                addLogEntry('Found Doc Creator tab, sending data...', 'success');
+                
+                // Try to inject data via postMessage
+                try {
+                    await chrome.scripting.executeScript({
+                                target: { tabId: docCreatorTab.id },
+                        func: (writeUp) => {
+                            // Try to inject into Doc Creator's text area
+                            const textAreas = document.querySelectorAll('textarea');
+                            if (textAreas.length > 0) {
+                                textAreas[0].value = writeUp;
+                                textAreas[0].dispatchEvent(new Event('input', { bubbles: true }));
+                                return true;
+                            }
+                            // Try postMessage
+                                        window.postMessage({
+                                type: 'FAMILY_FIRST_DATA', 
+                                data: writeUp 
+                                        }, '*');
+                            return false;
+                        },
+                        args: [clinicalWriteUp]
+                    });
+                    
+                    updateStatus('Data sent to Doc Creator!', 'success');
+                    addLogEntry('Data successfully sent to Doc Creator', 'success');
+                    
+                    // Close popup after 2 seconds
+                            setTimeout(() => {
+                                window.close();
+                    }, 2000);
+                    
+                } catch (injectError) {
+                    // Fallback to clipboard
+                    await navigator.clipboard.writeText(clinicalWriteUp);
+                    updateStatus('Data copied - paste in Doc Creator (Ctrl+V)', 'warning');
+                    addLogEntry('Auto-inject failed, data copied to clipboard', 'warning');
+                    copyBtn.disabled = false;
+                }
+                
+            } else {
+                // Open new Doc Creator tab
+                addLogEntry('Opening new Doc Creator tab...', 'info');
+                const newTab = await chrome.tabs.create({ 
+                    url: 'http://localhost:3000',
+                    active: true 
+                });
+                
+                // Copy to clipboard as fallback
+                await navigator.clipboard.writeText(clinicalWriteUp);
+                updateStatus('Doc Creator opened - paste data (Ctrl+V)', 'success');
+                addLogEntry('New tab opened, data in clipboard', 'success');
+            }
+            
+        } catch (error) {
+            console.error('Send error:', error);
+            // Fallback to clipboard
+            await navigator.clipboard.writeText(clinicalWriteUp);
+            updateStatus('Data copied - paste in Doc Creator (Ctrl+V)', 'warning');
+            addLogEntry('Send failed, data copied to clipboard', 'warning');
+            copyBtn.disabled = false;
+        } finally {
+            sendBtn.disabled = false;
+        }
+    });
+    
+    // Helper functions
+    function resetUI() {
+        progressContainer.style.display = 'none';
+        activityLogDiv.style.display = 'none';
+        statsDiv.style.display = 'none';
+        actionButtons.style.display = 'none';
+        writeupPreview.style.display = 'none';
+        statusDiv.style.display = 'none';
+        activityLog = [];
+        logEntries.innerHTML = '';
+    }
+    
+    function showProgress() {
+        progressContainer.style.display = 'block';
+        activityLogDiv.style.display = 'block';
+    }
+    
+    function showActions() {
+        actionButtons.style.display = 'flex';
+        writeupPreview.style.display = 'block';
+        writeupText.textContent = clinicalWriteUp;
+        
+        // Show quick summary if we have good data
+        if (extractedData) {
+            const summaryDiv = document.getElementById('extractedInfo');
+            const quickSummary = document.getElementById('quickSummary');
+            
+            let summary = [];
+            if (extractedData.clinical?.evidenceBased?.length > 0) {
+                summary.push(`Therapies: ${extractedData.clinical.evidenceBased.slice(0, 3).join(', ')}`);
+            }
+            if (extractedData.clinical?.specializations?.length > 0) {
+                summary.push(`Specializes: ${extractedData.clinical.specializations.slice(0, 3).join(', ')}`);
+            }
+            if (extractedData.structure?.los) {
+                summary.push(`LOS: ${extractedData.structure.los}`);
+            }
+            if (extractedData.admissions?.insurance?.length > 0) {
+                summary.push(`Insurance: ${extractedData.admissions.insurance.slice(0, 3).join(', ')}`);
+            }
+            
+            if (summary.length > 0) {
+                summaryDiv.style.display = 'block';
+                quickSummary.innerHTML = summary.join(' • ');
+            }
+        }
+    }
+    
+    function updateProgress(percent, text) {
+        progressFill.style.width = `${percent}%`;
+        progressPercent.textContent = `${percent}%`;
+        progressText.textContent = text;
+    }
+    
+    function addLogEntry(message, type = 'info') {
+        const entry = document.createElement('div');
+        entry.className = `log-entry ${type}`;
+        entry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+        logEntries.appendChild(entry);
+        logEntries.scrollTop = logEntries.scrollHeight;
+        
+        activityLog.push({ time: Date.now(), message, type });
+    }
     
     function updateStatus(message, type) {
         statusDiv.innerHTML = message;
@@ -128,211 +316,533 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function displayResults(data) {
         // Update stats
-        document.getElementById('dataPoints').textContent = data.metadata.dataPoints;
-        document.getElementById('confidence').textContent = data.metadata.confidence + '%';
-        document.getElementById('sections').textContent = Object.keys(data.content.sections).length;
-        document.getElementById('extractTime').textContent = (data.metadata.extractionTime / 1000).toFixed(1) + 's';
+        const dataPoints = calculateDataPoints(data);
+        document.getElementById('dataPoints').textContent = dataPoints;
+        document.getElementById('confidence').textContent = (data.meta?.confidence || 0) + '%';
+        document.getElementById('pagesAnalyzed').textContent = data.meta?.sourcesAnalyzed || 1;
         
         // Show stats
         statsDiv.style.display = 'block';
-        
-        // Build overview tab
-        const overviewHtml = `
-            <div class="data-section">
-                <h4>📋 Program Information</h4>
-                <ul class="data-list">
-                    <li><strong>Name:</strong> ${data.programName}</li>
-                    <li><strong>Website:</strong> ${data.url}</li>
-                    ${data.contact.location ? `<li><strong>Location:</strong> ${data.contact.location}</li>` : ''}
-                    ${data.demographics.agesServed.length > 0 ? `<li><strong>Ages:</strong> ${data.demographics.agesServed.join(', ')}</li>` : ''}
-                    ${data.demographics.genders.length > 0 ? `<li><strong>Genders:</strong> ${data.demographics.genders.join(', ')}</li>` : ''}
-                </ul>
-            </div>
-            
-            <div class="data-section">
-                <h4>📞 Contact Information</h4>
-                <ul class="data-list">
-                    ${data.contact.phones.length > 0 ? `<li><strong>Phones:</strong> ${data.contact.phones.join(', ')}</li>` : '<li>No phones found</li>'}
-                    ${data.contact.emails.length > 0 ? `<li><strong>Emails:</strong> ${data.contact.emails.join(', ')}</li>` : '<li>No emails found</li>'}
-                </ul>
-            </div>
-            
-            ${data.payment.insurance.length > 0 ? `
-            <div class="data-section">
-                <h4>💳 Insurance Accepted</h4>
-                <ul class="data-list">
-                    ${data.payment.insurance.map(ins => `<li>${ins}</li>`).join('')}
-                </ul>
-            </div>
-            ` : ''}
-        `;
-        document.getElementById('overview').innerHTML = overviewHtml;
-        
-        // Build clinical tab
-        let clinicalHtml = '';
-        
-        if (Object.values(data.clinical.therapies).some(arr => arr.length > 0)) {
-            clinicalHtml += '<div class="data-section"><h4>🧠 Therapies & Modalities</h4><ul class="data-list">';
-            Object.entries(data.clinical.therapies).forEach(([category, therapies]) => {
-                if (therapies.length > 0) {
-                    clinicalHtml += `<li><strong>${category}:</strong> ${therapies.join(', ')}</li>`;
-                }
-            });
-            clinicalHtml += '</ul></div>';
-        }
-        
-        if (data.clinical.specializations.length > 0) {
-            clinicalHtml += `
-            <div class="data-section">
-                <h4>🎯 Specializations</h4>
-                <ul class="data-list">
-                    ${data.clinical.specializations.map(spec => `<li>${spec}</li>`).join('')}
-                </ul>
-            </div>
-            `;
-        }
-        
-        if (data.clinical.levelOfCare.length > 0) {
-            clinicalHtml += `
-            <div class="data-section">
-                <h4>🏥 Level of Care</h4>
-                <ul class="data-list">
-                    ${data.clinical.levelOfCare.map(level => `<li>${level}</li>`).join('')}
-                </ul>
-            </div>
-            `;
-        }
-        
-        document.getElementById('clinical').innerHTML = clinicalHtml || '<p>No clinical information found.</p>';
-        
-        // Build details tab
-        let detailsHtml = '';
-        
-        if (data.staff.credentials.length > 0 || data.staff.leadership.length > 0) {
-            detailsHtml += '<div class="data-section"><h4>👥 Staff & Credentials</h4><ul class="data-list">';
-            if (data.staff.credentials.length > 0) {
-                detailsHtml += `<li><strong>Credentials:</strong> ${data.staff.credentials.join(', ')}</li>`;
-            }
-            if (data.staff.leadership.length > 0) {
-                detailsHtml += `<li><strong>Leadership:</strong> ${data.staff.leadership.join(', ')}</li>`;
-            }
-            detailsHtml += '</ul></div>';
-        }
-        
-        if (data.accreditations.length > 0) {
-            detailsHtml += `
-            <div class="data-section">
-                <h4>🏆 Accreditations</h4>
-                <ul class="data-list">
-                    ${data.accreditations.map(acc => `<li>${acc}</li>`).join('')}
-                </ul>
-            </div>
-            `;
-        }
-        
-        if (data.facilities.amenities.length > 0) {
-            detailsHtml += `
-            <div class="data-section">
-                <h4>🏢 Facilities & Amenities</h4>
-                <ul class="data-list">
-                    ${data.facilities.setting ? `<li><strong>Setting:</strong> ${data.facilities.setting}</li>` : ''}
-                    ${data.facilities.amenities.length > 0 ? `<li><strong>Amenities:</strong> ${data.facilities.amenities.join(', ')}</li>` : ''}
-                </ul>
-            </div>
-            `;
-        }
-        
-        document.getElementById('details').innerHTML = detailsHtml || '<p>No additional details found.</p>';
-        
-        // Build raw data tab
-        const rawHtml = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
-        document.getElementById('raw').innerHTML = rawHtml;
-        
-        // Show results
-        resultsDiv.style.display = 'block';
     }
     
-    function formatForClipboard(data) {
-        let text = `${data.programName}\n`;
-        text += `${data.url}\n\n`;
+    function calculateDataPoints(data) {
+        let count = 0;
         
-        // Contact Information
-        if (data.contact.phones.length > 0 || data.contact.emails.length > 0) {
-            text += '=== CONTACT INFORMATION ===\n';
-            if (data.contact.phones.length > 0) {
-                text += `Phone: ${data.contact.phones[0]}\n`;
-            }
-            if (data.contact.emails.length > 0) {
-                text += `Email: ${data.contact.emails[0]}\n`;
-            }
-            if (data.contact.location) {
-                text += `Location: ${data.contact.location}\n`;
-            }
-            text += '\n';
+        // Count all non-empty fields
+        if (data.name) count++;
+        if (data.city) count++;
+        if (data.state) count++;
+        count += data.levelsOfCare?.length || 0;
+        if (data.population?.ages) count++;
+        if (data.population?.gender) count++;
+        count += data.overviewBullets?.length || 0;
+        if (data.structure?.los) count++;
+        if (data.structure?.ratio) count++;
+        if (data.structure?.academics?.hasProgram) count++;
+        count += data.clinical?.evidenceBased?.length || 0;
+        count += data.clinical?.experiential?.length || 0;
+        count += data.clinical?.specializations?.length || 0;
+        if (data.family?.weeklyTherapy) count++;
+        if (data.family?.workshops) count++;
+        count += data.family?.notes?.length || 0;
+        count += data.admissions?.insurance?.length || 0;
+        if (data.admissions?.email) count++;
+        if (data.admissions?.phone) count++;
+        count += data.quality?.accreditations?.length || 0;
+        
+        return count;
+    }
+    
+    // Aftercare recommendation formatter function
+    function formatAfterCareRecommendation(data) {
+        const lines = [];
+        
+        // Program Header with full name and location (ASCII-only to avoid encoding issues)
+        const header = `${data.name || 'Treatment Program'}${data.city && data.state ? ` - ${data.city}, ${data.state.toUpperCase()}` : ''}`;
+        lines.push(header.toUpperCase());
+        lines.push('');
+        
+        // Levels of Care
+        if (data.levelsOfCare && data.levelsOfCare.length > 0) {
+            lines.push(`Level of Care: ${data.levelsOfCare.join(' | ')}`);
+            lines.push('');
         }
         
-        // Demographics
-        if (data.demographics.agesServed.length > 0 || data.demographics.genders.length > 0) {
-            text += '=== DEMOGRAPHICS ===\n';
-            if (data.demographics.agesServed.length > 0) {
-                text += `Ages: ${data.demographics.agesServed.join(', ')}\n`;
+        // PROGRAM OVERVIEW
+        lines.push('PROGRAM OVERVIEW');
+        if (data.philosophy || data.approach || data.overviewBullets?.length > 0) {
+            let overview = '';
+            
+            if (data.philosophy) {
+                overview = data.philosophy;
+            } else if (data.approach) {
+                overview = data.approach;
+            } else if (data.overviewBullets && data.overviewBullets.length > 0) {
+                overview = data.overviewBullets
+                    .slice(0, 3)
+                    .map(b => b.replace(/^[•\-\*]\s*/, ''))
+                    .join('. ') + '.';
             }
-            if (data.demographics.genders.length > 0) {
-                text += `Genders: ${data.demographics.genders.join(', ')}\n`;
-            }
-            text += '\n';
-        }
-        
-        // Clinical Services
-        if (Object.values(data.clinical.therapies).some(arr => arr.length > 0)) {
-            text += '=== CLINICAL SERVICES ===\n';
-            Object.entries(data.clinical.therapies).forEach(([category, therapies]) => {
-                if (therapies.length > 0) {
-                    text += `${category}: ${therapies.join(', ')}\n`;
+            
+            if (data.population?.ages || data.clinical?.specializations?.length > 0) {
+                const context = [];
+                if (data.population.ages) {
+                    context.push(`serves ${data.population.ages}${data.population.gender ? ` ${data.population.gender.toLowerCase()}` : ''}`);
                 }
+                if (data.clinical?.specializations?.length > 0) {
+                    const topSpecs = data.clinical.specializations.slice(0, 3).join(', ').toLowerCase();
+                    context.push(`specializing in ${topSpecs}`);
+                }
+                if (context.length > 0) {
+                    overview += ` The program ${context.join(' and ')}.`;
+                }
+            }
+            
+            lines.push(wrapText(overview, 80));
+        } else {
+            // Construct a concise, informative overview from available signals
+            const overviewParts = [];
+            if (data.levelsOfCare && data.levelsOfCare.length > 0) {
+                overviewParts.push(`Offers ${data.levelsOfCare.join(', ').toLowerCase()} treatment`);
+            }
+            if (data.population?.ages) {
+                const gender = data.population.gender ? ` ${data.population.gender.toLowerCase()}` : '';
+                overviewParts.push(`serving ${data.population.ages}${gender}`);
+            }
+            if (data.clinical?.specializations && data.clinical.specializations.length > 0) {
+                overviewParts.push(`with specialization in ${data.clinical.specializations.slice(0, 3).join(', ').toLowerCase()}`);
+            }
+            if (data.clinical?.evidenceBased && data.clinical.evidenceBased.length > 0) {
+                overviewParts.push(`using evidence-based modalities such as ${data.clinical.evidenceBased.slice(0, 3).join(', ')}`);
+            }
+            if (data.structure?.los) {
+                overviewParts.push(`typical length of stay ${data.structure.los}`);
+            }
+            if (overviewParts.length === 0) {
+                overviewParts.push('Provides structured clinical treatment with licensed staff');
+            }
+            const overviewText = overviewParts.join('. ') + '.';
+            lines.push(wrapText(overviewText, 80));
+        }
+        
+        if (data.differentiators && data.differentiators.length > 0) {
+            lines.push(`Key features include: ${data.differentiators.slice(0, 3).join(', ').toLowerCase()}.`);
+        }
+        lines.push('');
+        
+        // WHY THIS PROGRAM (top differentiators)
+        if (Array.isArray(data.differentiators) && data.differentiators.length > 0) {
+            lines.push('WHY THIS PROGRAM');
+            data.differentiators.slice(0, 5).forEach(d => {
+                lines.push(`- ${d}`);
             });
-            text += '\n';
+            lines.push('');
         }
         
-        // Specializations
-        if (data.clinical.specializations.length > 0) {
-            text += '=== SPECIALIZATIONS ===\n';
-            text += data.clinical.specializations.join(', ') + '\n\n';
+        // CLINICAL PROGRAMMING
+        lines.push('CLINICAL PROGRAMMING');
+        
+        if (data.clinical?.evidenceBased && data.clinical.evidenceBased.length > 0) {
+            const ebList = data.clinical.evidenceBased.join(', ');
+            lines.push(`- Evidence-Based Modalities: ${wrapList(ebList, 80, '  ')}`);
         }
         
-        // Level of Care
-        if (data.clinical.levelOfCare.length > 0) {
-            text += '=== LEVEL OF CARE ===\n';
-            text += data.clinical.levelOfCare.join(', ') + '\n\n';
+        if (data.clinical?.experiential && data.clinical.experiential.length > 0) {
+            const expList = data.clinical.experiential.join(', ');
+            lines.push(`- Experiential Therapies: ${wrapList(expList, 80, '  ')}`);
         }
         
-        // Insurance
-        if (data.payment.insurance.length > 0) {
-            text += '=== INSURANCE ACCEPTED ===\n';
-            text += data.payment.insurance.join(', ') + '\n\n';
+        if (data.clinical?.specializations && data.clinical.specializations.length > 0) {
+            const specList = data.clinical.specializations.join(', ');
+            lines.push(`- Clinical Specializations: ${wrapList(specList, 80, '  ')}`);
         }
         
-        // Accreditations
-        if (data.accreditations.length > 0) {
-            text += '=== ACCREDITATIONS ===\n';
-            text += data.accreditations.join(', ') + '\n\n';
+        if (data.clinical?.individualTherapyHours || data.clinical?.groupTherapyHours) {
+            const intensity = [];
+            if (data.clinical.individualTherapyHours) {
+                intensity.push(`${data.clinical.individualTherapyHours} individual therapy`);
+            }
+            if (data.clinical.groupTherapyHours) {
+                intensity.push(`${data.clinical.groupTherapyHours} group therapy`);
+            }
+            lines.push(`- Therapy Intensity: ${intensity.join(', ')} weekly`);
         }
         
-        // Key Content Sections
-        if (Object.keys(data.content.sections).length > 0) {
-            text += '=== KEY INFORMATION ===\n';
-            Object.entries(data.content.sections).forEach(([section, content]) => {
-                text += `\n[${section.toUpperCase()}]\n`;
-                text += content + '\n';
-            });
+        if (data.clinical?.psychiatricServices || data.clinical?.medicationManagement) {
+            const psych = [];
+            if (data.clinical.psychiatricServices) psych.push('psychiatric evaluation');
+            if (data.clinical.medicationManagement) psych.push('medication management');
+            if (psych.length > 0) {
+                lines.push(`- Psychiatric Services: ${psych.join(' and ')}`);
+            }
         }
         
-        // Metadata
-        text += '\n=== EXTRACTION METADATA ===\n';
-        text += `Data Points: ${data.metadata.dataPoints}\n`;
-        text += `Confidence: ${data.metadata.confidence}%\n`;
-        text += `Extracted: ${new Date(data.extractedAt).toLocaleString()}\n`;
+        if (data.clinical?.traumaInformed) {
+            lines.push('- Trauma-Informed Care approach');
+        }
+        lines.push('');
         
-        return text;
+        // PROGRAM STRUCTURE
+        if (data.structure?.los || data.structure?.ratio || data.structure?.phases?.length > 0) {
+            lines.push('PROGRAM STRUCTURE');
+            
+            if (data.structure?.los) {
+                lines.push(`- Length of Stay: ${data.structure.los}`);
+            }
+            
+            if (data.structure?.phases && data.structure.phases.length > 0) {
+                lines.push(`- Treatment Phases: ${data.structure.phases.length} phase model`);
+            }
+            
+            if (data.structure?.ratio) {
+                lines.push(`- Staff-to-Client Ratio: ${data.structure.ratio}`);
+            }
+            
+            if (data.structure?.groupSize) {
+                lines.push(`- Group Size: ${data.structure.groupSize}`);
+            }
+            lines.push('');
+        }
+        
+        // FAMILY INVOLVEMENT
+        const hasFamilyProgram = data.family?.weeklyTherapy || data.family?.workshops || 
+                                data.family?.familyWeekend || data.family?.parentSupport;
+        
+        if (hasFamilyProgram) {
+            lines.push('FAMILY INVOLVEMENT');
+            
+            if (data.family.weeklyTherapy) {
+                lines.push('- Weekly family therapy sessions');
+            }
+            
+            if (data.family.workshops) {
+                lines.push('- Parent education workshops');
+            }
+            
+            if (data.family.familyWeekend) {
+                lines.push('- Structured family weekends');
+            }
+            
+            if (data.family.parentSupport) {
+                lines.push('- Parent support groups');
+            }
+            
+            if (data.family.visitationPolicy) {
+                lines.push(`- Visitation: ${data.family.visitationPolicy}`);
+            }
+            
+            if (data.family.notes && data.family.notes.length > 0) {
+                data.family.notes.forEach(note => {
+                    lines.push(`- ${note}`);
+                });
+            }
+            lines.push('');
+        }
+        
+        // FIT CONSIDERATIONS (who this serves best; any exclusions)
+        const fitLines = [];
+        const fitParts = [];
+        if (data.population?.ages) {
+            fitParts.push(`${data.population.ages}${data.population?.gender ? ` ${data.population.gender.toLowerCase()}` : ''}`);
+        }
+        if (data.clinical?.specializations && data.clinical.specializations.length > 0) {
+            fitParts.push(`needs focused on ${data.clinical.specializations.slice(0, 3).join(', ').toLowerCase()}`);
+        }
+        if (fitParts.length > 0) {
+            fitLines.push(`- Best Fit: ${fitParts.join('; ')}`);
+        }
+        if (Array.isArray(data.admissions?.exclusions) && data.admissions.exclusions.length > 0) {
+            fitLines.push(`- Contraindications: ${data.admissions.exclusions.slice(0, 3).join('; ')}`);
+        }
+        if (data.structure?.groupSize) {
+            fitLines.push(`- Milieu: ${data.structure.groupSize}`);
+        }
+        if (data.structure?.academics?.hasProgram) {
+            const acadBits = [];
+            if (data.structure.academics.grades) acadBits.push(`grades ${data.structure.academics.grades}`);
+            if (data.structure.academics.accreditation) acadBits.push(`${data.structure.academics.accreditation} accredited`);
+            if (data.structure.academics.iep504) acadBits.push('IEP/504 supports');
+            if (data.structure.academics.creditSupport) acadBits.push('credit recovery/transfer');
+            if (acadBits.length > 0) fitLines.push(`- Academic Fit: ${acadBits.join(', ')}`);
+        }
+        if (fitLines.length > 0) {
+            lines.push('FIT CONSIDERATIONS');
+            fitLines.forEach(l => lines.push(l));
+            lines.push('');
+        }
+        
+        // CONTINUUM / STEP-DOWN
+        const continuum = buildContinuumPath(data.levelsOfCare || []);
+        if (continuum) {
+            lines.push('CONTINUUM / STEP-DOWN');
+            lines.push(`- Likely Path: ${continuum}`);
+            lines.push('');
+        }
+        
+        // ACADEMIC SUPPORT
+        if (data.structure?.academics?.hasProgram) {
+            lines.push('ACADEMIC SUPPORT');
+            if (data.structure.academics.accreditation) {
+                lines.push(`- ${data.structure.academics.accreditation} accredited on-site school`);
+            } else {
+                lines.push('- On-site academic program');
+            }
+            lines.push('- Individualized academic support');
+            lines.push('- Credit recovery and transfer assistance');
+            lines.push('');
+        }
+        
+        // ADMISSIONS & PAYMENT (omit if nothing substantive)
+        const admissionsLines = [];
+        if (data.admissions?.insurance && data.admissions.insurance.length > 0) {
+            const insuranceList = data.admissions.insurance.join(', ');
+            admissionsLines.push(`- Insurance Accepted: ${wrapList(insuranceList, 80, '  ')}`);
+        }
+        if (data.admissions?.financing) {
+            admissionsLines.push('- Financing options available');
+        }
+        if (admissionsLines.length > 0) {
+            lines.push('ADMISSIONS & PAYMENT');
+            admissionsLines.forEach(l => lines.push(l));
+            lines.push('');
+        }
+        
+        // ACCREDITATIONS
+        if (data.quality?.accreditations && data.quality.accreditations.length > 0) {
+            lines.push('ACCREDITATIONS & MEMBERSHIPS');
+            const accredList = data.quality.accreditations.join(', ');
+            lines.push(`- ${wrapList(accredList, 80, '  ')}`);
+            lines.push('');
+        }
+        
+        // CONTACT
+        lines.push('CONTACT INFORMATION');
+        const contactParts = [];
+        
+        if (data.admissions?.phone) {
+            contactParts.push(`Phone: ${data.admissions.phone}`);
+        }
+        
+        if (data.admissions?.email) {
+            contactParts.push(`Email: ${data.admissions.email}`);
+        }
+        
+        if (contactParts.length > 0) {
+            lines.push(contactParts.join(' | '));
+        }
+        
+        if (data.admissions?.website) {
+            lines.push(`Website: ${data.admissions.website}`);
+        }
+        
+        if (data.meta?.confidence !== undefined) {
+            lines.push('');
+            lines.push(`[Assessment Quality: ${data.meta.confidence}% | Pages Reviewed: ${data.meta.sourcesAnalyzed || 1}]`);
+        }
+        
+        return lines.join('\n');
+    }
+
+    function buildContinuumPath(levels) {
+        if (!Array.isArray(levels) || levels.length === 0) return '';
+        const L = levels.map(l => l.toUpperCase());
+        const has = (x) => L.includes(x);
+        if (has('RESIDENTIAL') && has('PHP') && has('IOP')) return 'Residential -> PHP -> IOP -> Outpatient/Aftercare';
+        if (has('RESIDENTIAL') && has('IOP')) return 'Residential -> IOP -> Outpatient/Aftercare';
+        if (has('PHP') && has('IOP')) return 'PHP -> IOP -> Outpatient/Aftercare';
+        if (has('RESIDENTIAL')) return 'Residential -> Aftercare';
+        if (has('PHP')) return 'PHP -> Outpatient/Aftercare';
+        if (has('IOP')) return 'IOP -> Outpatient/Aftercare';
+        if (has('OUTPATIENT')) return 'Outpatient -> Aftercare';
+        return '';
+    }
+    
+    // Clinical formatter function (backup)
+    function formatClinicalWriteUp(data) {
+        const lines = [];
+        
+        // 1) Program Header: "{Program Name} — {City, ST}"
+        const header = `${data.name || 'Treatment Program'}${data.city && data.state ? ` — ${data.city}, ${data.state}` : ''}`;
+        lines.push(header);
+        lines.push('');
+        
+        // 2) Levels of Care: pipe-separated
+        if (data.levelsOfCare && data.levelsOfCare.length > 0) {
+            lines.push(data.levelsOfCare.join(' | '));
+            lines.push('');
+        }
+        
+        // 3) OVERVIEW section
+        lines.push('OVERVIEW');
+        if (data.overviewBullets && data.overviewBullets.length > 0) {
+            const overview = data.overviewBullets
+                .slice(0, 5)
+                .map(bullet => bullet.replace(/^[•\-\*]\s*/, ''))
+                .join('. ')
+                .replace(/\.+/g, '.') + '.';
+            lines.push(wrapText(overview, 80));
+        } else {
+            let overview = [];
+            if (data.population?.ages) {
+                overview.push(`Serves ${data.population.ages}${data.population.gender ? ` ${data.population.gender}` : ''}`);
+            }
+            if (data.levelsOfCare && data.levelsOfCare.length > 0) {
+                overview.push(`Offers ${data.levelsOfCare.join(', ').toLowerCase()} treatment`);
+            }
+            if (data.clinical?.specializations && data.clinical.specializations.length > 0) {
+                overview.push(`Specializes in ${data.clinical.specializations.slice(0, 3).join(', ').toLowerCase()}`);
+            }
+            if (overview.length > 0) {
+                lines.push(wrapText(overview.join('. ') + '.', 80));
+            }
+        }
+        lines.push('');
+        
+        // 4) PROGRAM STRUCTURE
+        if (data.structure?.los || data.structure?.ratio || data.structure?.academics?.hasProgram) {
+            lines.push('PROGRAM STRUCTURE');
+            if (data.structure?.los) {
+                lines.push(`• Length of Stay: ${data.structure.los}`);
+            }
+            if (data.structure?.ratio) {
+                lines.push(`• Staff Ratio: ${data.structure.ratio}`);
+            }
+            if (data.structure?.academics?.hasProgram) {
+                const academicLine = data.structure.academics.accreditation 
+                    ? `• Academics: On-site program (${data.structure.academics.accreditation})`
+                    : '• Academics: On-site program available';
+                lines.push(academicLine);
+            }
+            lines.push('');
+        }
+        
+        // 5) CLINICAL SERVICES
+        if (data.clinical?.evidenceBased?.length > 0 || data.clinical?.experiential?.length > 0 || data.clinical?.specializations?.length > 0) {
+            lines.push('CLINICAL SERVICES');
+            if (data.clinical?.evidenceBased && data.clinical.evidenceBased.length > 0) {
+                const ebList = data.clinical.evidenceBased.join(', ');
+                lines.push(`• Evidence-Based: ${wrapList(ebList, 80, '  ')}`);
+            }
+            if (data.clinical?.experiential && data.clinical.experiential.length > 0) {
+                const expList = data.clinical.experiential.join(', ');
+                lines.push(`• Experiential: ${wrapList(expList, 80, '  ')}`);
+            }
+            if (data.clinical?.specializations && data.clinical.specializations.length > 0) {
+                const specList = data.clinical.specializations.join(', ');
+                lines.push(`• Specializations: ${wrapList(specList, 80, '  ')}`);
+            }
+            lines.push('');
+        }
+        
+        // 6) FAMILY & ACADEMICS
+        const hasFamilyProgram = data.family?.weeklyTherapy || data.family?.workshops || data.family?.notes?.length > 0;
+        const hasAcademics = data.structure?.academics?.hasProgram;
+        
+        if (hasFamilyProgram || hasAcademics) {
+            lines.push('FAMILY & ACADEMICS');
+            if (data.family?.weeklyTherapy) {
+                lines.push('• Weekly family therapy');
+            }
+            if (data.family?.workshops) {
+                lines.push('• Parent workshops/education');
+            }
+            if (data.family?.notes && data.family.notes.length > 0) {
+                data.family.notes.forEach(note => {
+                    lines.push(`• ${note}`);
+                });
+            }
+            if (hasAcademics) {
+                const academicDetail = data.structure.academics.accreditation
+                    ? `• Academic Support: ${data.structure.academics.accreditation} accredited`
+                    : '• Academic Support: On-site educational program';
+                lines.push(academicDetail);
+            }
+            lines.push('');
+        }
+        
+        // 7) ADMISSIONS & LOGISTICS
+        if (data.admissions?.insurance?.length > 0) {
+            lines.push('ADMISSIONS & LOGISTICS');
+            const insuranceList = data.admissions.insurance.join(', ');
+            lines.push(`• Insurance: ${wrapList(insuranceList, 80, '  ')}`);
+            lines.push('');
+        }
+        
+        // 8) ACCREDITATIONS / QUALITY
+        if (data.quality?.accreditations && data.quality.accreditations.length > 0) {
+            lines.push('ACCREDITATIONS / QUALITY');
+            const accredList = data.quality.accreditations.join(', ');
+            lines.push(`• ${wrapList(accredList, 80, '  ')}`);
+            lines.push('');
+        }
+        
+        // 9) CONTACT
+        lines.push('CONTACT');
+        const contactParts = [];
+        if (data.admissions?.phone) {
+            contactParts.push(data.admissions.phone);
+        }
+        if (data.admissions?.email) {
+            contactParts.push(data.admissions.email);
+        }
+        if (data.admissions?.website) {
+            contactParts.push(data.admissions.website);
+        }
+        if (contactParts.length > 0) {
+            lines.push(contactParts.join(' | '));
+        } else {
+            lines.push('Contact information not available');
+        }
+        
+        // Add metadata footer if confidence score available
+        if (data.meta?.confidence !== undefined) {
+            lines.push('');
+            lines.push(`[Data Quality: ${data.meta.confidence}% | Sources: ${data.meta.sourcesAnalyzed || 1}]`);
+        }
+        
+        return lines.join('\n');
+    }
+    
+    // Helper function to wrap text to specified width
+    function wrapText(text, maxWidth) {
+        if (!text || text.length <= maxWidth) return text;
+        
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = '';
+        
+        words.forEach(word => {
+            if ((currentLine + ' ' + word).length <= maxWidth) {
+                currentLine = currentLine ? currentLine + ' ' + word : word;
+            } else {
+                if (currentLine) lines.push(currentLine);
+                currentLine = word;
+            }
+        });
+        
+        if (currentLine) lines.push(currentLine);
+        return lines.join('\n');
+    }
+    
+    // Helper function to wrap lists with proper indentation
+    function wrapList(text, maxWidth, indent = '') {
+        if (!text || text.length <= maxWidth - indent.length) return text;
+        
+        const items = text.split(', ');
+        const lines = [];
+        let currentLine = '';
+        
+        items.forEach((item, index) => {
+            const separator = index === 0 ? '' : ', ';
+            if ((currentLine + separator + item).length <= maxWidth - indent.length) {
+                currentLine = currentLine ? currentLine + separator + item : item;
+            } else {
+                if (currentLine) lines.push(currentLine);
+                currentLine = item;
+            }
+        });
+        
+        if (currentLine) lines.push(currentLine);
+        return lines.join('\n' + indent);
     }
 });

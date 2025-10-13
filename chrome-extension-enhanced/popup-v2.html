@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CareConnect Clinical Intel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 520px;
+            min-height: 600px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0A0B0F;
+            color: #E0E6ED;
+            overflow-x: hidden;
+        }
+        
+        /* Modern Dark Theme Header */
+        .header {
+            background: linear-gradient(135deg, #1E1F26 0%, #2D2E3A 100%);
+            padding: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+        }
+        
+        .header-text h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-bottom: 2px;
+        }
+        
+        .header-text p {
+            font-size: 12px;
+            color: #9CA3AF;
+        }
+        
+        .settings-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #9CA3AF;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .settings-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            padding: 24px;
+        }
+        
+        /* Extract Button - More Prominent */
+        .extract-section {
+            margin-bottom: 24px;
+        }
+        
+        .extract-button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .extract-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .extract-button:hover::before {
+            left: 100%;
+        }
+        
+        .extract-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+        
+        .extract-button:disabled {
+            background: #2D2E3A;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .extract-button.extracting {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        }
+        
+        /* Live Metrics Dashboard */
+        .metrics-dashboard {
+            display: none;
+            background: #1E1F26;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .metric-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+        
+        .metric-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6B7280;
+        }
+        
+        /* Enhanced Progress Bar */
+        .progress-section {
+            margin-top: 16px;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        
+        .progress-status {
+            color: #9CA3AF;
+        }
+        
+        .progress-percentage {
+            color: #6366F1;
+            font-weight: 600;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366F1, #8B5CF6);
+            transition: width 0.3s ease;
+            position: relative;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Activity Feed - More Informative */
+        .activity-feed {
+            display: none;
+            background: #1E1F26;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .activity-header {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9CA3AF;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #D1D5DB;
+            padding: 8px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 6px;
+            border-left: 2px solid #6366F1;
+        }
+        
+        .activity-item.success {
+            border-left-color: #10B981;
+        }
+        
+        .activity-item.warning {
+            border-left-color: #F59E0B;
+        }
+        
+        .activity-item.error {
+            border-left-color: #EF4444;
+        }
+        
+        .activity-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+        
+        .activity-text {
+            flex: 1;
+            line-height: 1.4;
+        }
+        
+        .activity-time {
+            font-size: 10px;
+            color: #6B7280;
+        }
+        
+        /* Data Preview Section */
+        .data-preview {
+            display: none;
+            background: #1E1F26;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .preview-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #FFFFFF;
+        }
+        
+        .quality-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 16px;
+            font-size: 11px;
+            color: #10B981;
+        }
+        
+        .preview-content {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.6;
+            color: #D1D5DB;
+        }
+        
+        /* Action Buttons - Modern Split Design */
+        .actions-section {
+            display: none;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #E0E6ED;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        /* AI Model Selector */
+        .ai-selector {
+            display: none;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 12px;
+        }
+        
+        .ai-selector-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .ai-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10B981;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .ai-model-name {
+            color: #6366F1;
+            font-weight: 600;
+        }
+        
+        /* Status Messages */
+        .status-message {
+            display: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #10B981;
+        }
+        
+        .status-error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #EF4444;
+        }
+        
+        .status-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            color: #F59E0B;
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.02);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo">CC</div>
+                <div class="header-text">
+                    <h1>CareConnect Clinical Intel</h1>
+                    <p>Advanced Program Analysis Engine</p>
+                </div>
+            </div>
+            <a href="settings-v2.html" target="_blank" class="settings-btn">Settings</a>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <!-- Main Extract Button -->
+        <div class="extract-section">
+            <button id="extractBtn" class="extract-button">
+                <span id="btnText">Analyze Treatment Program</span>
+            </button>
+        </div>
+        
+        <!-- AI Model Indicator -->
+        <div id="aiSelector" class="ai-selector">
+            <div class="ai-selector-header">
+                <div class="ai-indicator"></div>
+                <span>AI Enhancement: <span class="ai-model-name" id="aiModelName">Not Configured</span></span>
+            </div>
+            <div id="aiStatus" style="color: #9CA3AF; font-size: 11px;"></div>
+        </div>
+        
+        <!-- Live Metrics Dashboard -->
+        <div id="metricsDashboard" class="metrics-dashboard">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-value" id="fieldsFound">0</div>
+                    <div class="metric-label">Fields Found</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="pagesScanned">0</div>
+                    <div class="metric-label">Pages Scanned</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="uniqueData">0</div>
+                    <div class="metric-label">Unique Data</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="confidence">0%</div>
+                    <div class="metric-label">Confidence</div>
+                </div>
+            </div>
+            
+            <div class="progress-section">
+                <div class="progress-header">
+                    <span class="progress-status" id="progressStatus">Initializing...</span>
+                    <span class="progress-percentage" id="progressPercent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Activity Feed -->
+        <div id="activityFeed" class="activity-feed">
+            <div class="activity-header">Live Activity</div>
+            <div id="activityItems"></div>
+        </div>
+        
+        <!-- Data Preview -->
+        <div id="dataPreview" class="data-preview">
+            <div class="preview-header">
+                <span class="preview-title">Clinical Documentation Preview</span>
+                <div class="quality-badge">
+                    <span>Quality Score: </span>
+                    <span id="qualityScore">0%</span>
+                </div>
+            </div>
+            <div class="preview-content" id="previewContent"></div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div id="actionsSection" class="actions-section" style="display: flex;">
+            <button id="copyBtn" class="action-btn btn-secondary">
+                <span>📋</span>
+                <span>Copy to Clipboard</span>
+            </button>
+            <button id="sendBtn" class="action-btn btn-primary">
+                <span>🚀</span>
+                <span>Send to Doc Creator</span>
+            </button>
+        </div>
+        
+        <!-- Status Messages -->
+        <div id="statusMessage" class="status-message"></div>
+    </div>
+    
+    <script src="popup-v2.js"></script>
+</body>
+</html>

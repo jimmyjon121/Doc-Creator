@@ -1,104 +1,126 @@
-# Family First Program Extractor - Chrome Extension
+# Family First Clinical Extractor v5.0
 
-> ✅ **Cross-Platform Compatible** - Works on Windows, Mac, and Linux!
+## Professional Clinical-Grade Data Extraction
 
-This Chrome extension makes it easy to extract treatment program information from websites and paste it directly into the Family First Doc Creator tool.
+This Chrome extension provides HIPAA-safe, clinical-grade extraction of treatment program data formatted for professional documentation.
 
-## Installation Instructions
+## Key Features
 
-### For Your Team (Easy Method):
+### 🏥 Clinical-Grade Output Format
+- **Structured Write-Ups**: Professional format ready for Doc Creator
+- **HIPAA-Safe**: No PHI, clinical tone, factual reporting
+- **Standardized Sections**: Consistent 9-section format
+- **80-Character Lines**: Optimized for Calibri font and professional documents
 
-1. **Download the Extension**
-   - Download this entire `chrome-extension` folder to your computer
-   - Or get it from your team lead
+### 📊 Comprehensive Extraction
+- **50+ Data Fields**: From basic contact to clinical specializations
+- **Smart Strategies**: Multiple fallback methods for each field
+- **Evidence-Based vs Experiential**: Precise therapy categorization
+- **Controlled Vocabularies**: 15+ specialization categories, 20+ insurance providers
 
-2. **Open Chrome Extensions**
-   - Open Chrome browser
-   - Go to `chrome://extensions/`
-   - Turn on "Developer mode" (toggle in top right)
+### 🎯 Professional Data Structure
 
-3. **Load the Extension**
-   - Click "Load unpacked"
-   - Select the `chrome-extension` folder
-   - The extension will appear in your toolbar!
+#### Output Sections (Exact Order):
+1. **Program Header**: Name — City, ST
+2. **Levels of Care**: Residential | PHP | IOP | Outpatient
+3. **OVERVIEW**: 3-5 concise sentences, no marketing fluff
+4. **PROGRAM STRUCTURE**: Length of stay, staff ratio, academics
+5. **CLINICAL SERVICES**: Evidence-based, experiential, specializations
+6. **FAMILY & ACADEMICS**: Family touchpoints, school supports
+7. **ADMISSIONS & LOGISTICS**: Insurance, payment options
+8. **ACCREDITATIONS / QUALITY**: Clinical and educational certifications
+9. **CONTACT**: Phone | Email | Website
 
-## How to Use
+## Installation
 
-1. **Navigate to a Program Website**
-   - Go to any treatment program's website
-   - Click the Family First extension icon (blue "F" icon)
+1. Go to `chrome://extensions/`
+2. Enable **Developer mode**
+3. Click **Load unpacked**
+4. Select the `chrome-extension-enhanced` folder
+5. Look for **Family First Clinical Extractor** v5.0.0
 
-2. **Extract Information**
-   - Click "Extract Page Info"
-   - The extension will automatically grab:
-     - Program name and location
-     - Contact information (phone, email, address)
-     - Services and features
-     - Clinical approaches mentioned
-     - Any other relevant details
+## Usage
 
-3. **Copy to Doc Creator**
-   - Review the extracted information
-   - Click "Copy to Clipboard"
-   - Click "Open Doc Creator" (or go to your Doc Creator tool)
-   - Paste the information into the Quick Mode text area
-   - Click "Generate Write-up"
+1. Navigate to any treatment center website
+2. Click the extension icon
+3. Click **Extract Program Information**
+4. Clinical write-up is automatically copied to clipboard
+5. Paste directly into Doc Creator
 
-## Features
+## Test Sites
 
-- ✅ **Auto-Detection**: No configuration needed! Automatically finds Doc Creator on localhost
-- ✅ **Multi-Page Extraction**: Analyzes up to 5 pages for comprehensive data
-- ✅ Works on ANY treatment center website
-- ✅ Automatically finds contact information
-- ✅ Detects therapy modalities (DBT, CBT, EMDR, etc.)
-- ✅ Identifies specializations and age ranges
-- ✅ Direct integration with Doc Creator (no copy/paste needed)
-- ✅ Manual editing before sending
-- ✅ **Cross-Platform**: Works identically on Windows, Mac, and Linux
+- https://www.newportacademy.com/
+- https://www.paradigmtreatment.com/
+- https://elevationsrtc.com/
+- https://www.discoveryranch.net/
 
-## No Configuration Needed!
+## Data Extraction Strategies
 
-The extension automatically detects your Doc Creator tool:
-- Checks common localhost ports (8000, 8080)
-- Remembers the URL once found
-- No file paths to configure
-- Works the same on all platforms
+### Program Name Detection
+1. JSON-LD structured data
+2. Open Graph meta tags
+3. Logo alt text
+4. H1 heading
+5. Domain heuristics
 
-## Troubleshooting
+### Location Parsing
+- Full address extraction
+- City, State parsing
+- State abbreviation normalization
+- Never includes street address in header
 
-**Extension not appearing?**
-- Make sure Developer Mode is ON
-- Try reloading the extension
-- Check that all files are in the folder
+### Clinical Services Categorization
+- **Evidence-Based**: CBT, DBT, EMDR, ACT, MI, TF-CBT, etc.
+- **Experiential**: Art, Music, Equine, Adventure, Wilderness, etc.
+- **Specializations**: Trauma/PTSD, Anxiety, Depression, ADHD, etc.
 
-**Not extracting information?**
-- After installing, reload the extension by clicking the refresh icon
-- Reload the webpage you're trying to extract from
-- Some websites block content extraction
-- If you see "Cannot read properties of undefined", reload both the extension and the webpage
-- Try selecting specific text and right-clicking
-- Manually copy/paste if needed
+### Insurance Detection
+- 20+ major providers
+- Automatic normalization (e.g., BCBS variations)
+- Explicit mention requirement
 
-**Can't find contact info?**
-- The extension looks for common patterns
-- Some sites hide contact info behind forms
-- Check the website's "Contact" or "Admissions" page
+### Quality Scoring
+- 0-100% confidence based on:
+  - Data field coverage
+  - Cross-signal agreement
+  - Source reliability
 
-## Privacy & Security
+## Technical Architecture
 
-- This extension only reads page content when you click "Extract"
-- No data is sent to any servers
-- All processing happens locally in your browser
-- Information is only stored temporarily for copying
+### Files
+- `manifest.json`: Extension configuration (v5.0.0)
+- `enhanced-extractor.js`: Clinical-grade extraction engine
+- `clinical-formatter.js`: Professional write-up formatter
+- `popup.js`: User interface controller
+- `popup.html`: Extension popup UI
+- `background.js`: Service worker
 
-## For Developers
+### Data Flow
+1. Content script extracts structured data
+2. Formatter generates clinical write-up
+3. Popup displays stats and preview
+4. Auto-copy to clipboard for Doc Creator
 
-To modify the extraction logic, edit:
-- `popup.js` - Main extension logic
-- `extractPageInfo()` function - Extraction patterns
-- `formatExtractedInfo()` function - Output formatting
+## Version History
 
-The extension uses:
-- Chrome Manifest V3
-- No external dependencies
-- Pure JavaScript
+### v5.0.0 (Current)
+- Clinical-grade formatter with exact specifications
+- Enhanced extraction with field map strategies
+- Clean workspace, removed duplicate files
+- Professional 9-section output format
+- HIPAA-safe, clinical tone
+
+### v4.0.0
+- Complete rewrite for reliability
+- 50+ data fields
+- Professional UI
+
+## Support
+
+For issues or questions about the clinical extraction format, refer to the inline documentation in:
+- `clinical-formatter.js`: Output format contract
+- `enhanced-extractor.js`: Extraction strategies
+
+## License
+
+Property of Family First Adolescent Services
