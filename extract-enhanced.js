@@ -20,7 +20,7 @@ class EnhancedExtractor {
         
         this.jsContent = this.lines.slice(this.scriptStart, this.scriptEnd).join('\n');
         
-        console.log(`📊 Found JavaScript: ${this.scriptEnd - this.scriptStart} lines`);
+        console.log(`[INFO] Found JavaScript: ${this.scriptEnd - this.scriptStart} lines`);
     }
     
     extract() {
@@ -35,11 +35,11 @@ class EnhancedExtractor {
         this.extractUtils();
         this.extractMain();
         this.extractProgramsData();
-        console.log('✅ Enhanced extraction complete!');
+        console.log('[SUCCESS] Enhanced extraction complete!');
     }
     
     extractConfig() {
-        console.log('📦 Extracting config module...');
+        console.log('[MODULE] Extracting config module...');
         
         // Extract all configuration constants
         const configPatterns = [
@@ -66,7 +66,7 @@ class EnhancedExtractor {
     }
     
     extractAuth() {
-        console.log('🔐 Extracting auth module...');
+        console.log('[MODULE] Extracting auth module...');
         
         // Find all auth-related functions
         const authFunctions = [
@@ -99,7 +99,7 @@ class EnhancedExtractor {
     }
     
     extractEncryption() {
-        console.log('🔒 Extracting encryption module...');
+        console.log('[MODULE] Extracting encryption module...');
         
         const encryptionFunctions = [
             'generateEncryptionKey',
@@ -126,7 +126,7 @@ class EnhancedExtractor {
     }
     
     extractStorage() {
-        console.log('💾 Extracting storage module...');
+        console.log('[MODULE] Extracting storage module...');
         
         const storageFunctions = [
             'saveToLocalStorage',
@@ -154,7 +154,7 @@ class EnhancedExtractor {
     }
     
     extractPrograms() {
-        console.log('🏥 Extracting programs module...');
+        console.log('[MODULE] Extracting programs module...');
         
         const programsFunctions = [
             'loadPrograms',
@@ -188,7 +188,7 @@ class EnhancedExtractor {
     }
     
     extractDocument() {
-        console.log('📄 Extracting document module...');
+        console.log('[MODULE] Extracting document module...');
         
         const documentFunctions = [
             'generateDocument',
@@ -221,7 +221,7 @@ class EnhancedExtractor {
     }
     
     extractVault() {
-        console.log('🗄️ Extracting vault module...');
+        console.log('[MODULE] Extracting vault module...');
         
         const vaultFunctions = [
             'saveToVault',
@@ -252,7 +252,7 @@ class EnhancedExtractor {
     }
     
     extractUI() {
-        console.log('🎨 Extracting UI module...');
+        console.log('[MODULE] Extracting UI module...');
         
         const uiFunctions = [
             'showModal',
@@ -287,7 +287,7 @@ class EnhancedExtractor {
     }
     
     extractUtils() {
-        console.log('🔧 Extracting utils module...');
+        console.log('[MODULE] Extracting utils module...');
         
         const utilsFunctions = [
             'formatDate',
@@ -321,7 +321,7 @@ class EnhancedExtractor {
     }
     
     extractMain() {
-        console.log('🚀 Extracting main module...');
+        console.log('[MODULE] Extracting main module...');
         
         // Extract initialization and event listeners
         const mainPatterns = [
@@ -355,7 +355,7 @@ if (document.readyState === 'loading') {
     }
     
     extractProgramsData() {
-        console.log('📊 Extracting programs data...');
+        console.log('[DATA] Extracting programs data...');
         
         // Extract the PROGRAMS_LIST array
         const programsMatch = this.jsContent.match(/const PROGRAMS_LIST = \[([\s\S]*?)\];/);
@@ -374,9 +374,9 @@ if (document.readyState === 'loading') {
                 
                 // Write as JSON
                 fs.writeFileSync('src/data/programs.json', JSON.stringify(parsed, null, 2));
-                console.log('  ✓ programs.json created');
+                console.log('  [OK] programs.json created');
             } catch (error) {
-                console.log('  ⚠ Could not parse programs data, creating empty file');
+                console.log('  [WARNING] Could not parse programs data, creating empty file');
                 fs.writeFileSync('src/data/programs.json', '[]');
             }
         }
@@ -395,9 +395,9 @@ if (document.readyState === 'loading') {
                 const parsed = eval('(' + alumniData + ')');
                 
                 fs.writeFileSync('src/data/alumni-services.json', JSON.stringify(parsed, null, 2));
-                console.log('  ✓ alumni-services.json created');
+                console.log('  [OK] alumni-services.json created');
             } catch (error) {
-                console.log('  ⚠ Could not parse alumni data');
+                console.log('  [WARNING] Could not parse alumni data');
             }
         }
     }
@@ -426,7 +426,7 @@ ${content}
 `;
         
         fs.writeFileSync(filepath, moduleContent);
-        console.log(`  ✓ ${name}.js extracted`);
+        console.log(`  [OK] ${name}.js extracted`);
     }
     
     ensureDirectories() {

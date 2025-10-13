@@ -19,7 +19,7 @@ const CONFIG = {
 
 class SimpleBuilder {
     constructor() {
-        console.log('🏗️  CareConnect Pro Builder v4.0');
+        console.log('[BUILD] CareConnect Pro Builder v4.0');
         console.log('─'.repeat(50));
     }
     
@@ -28,7 +28,7 @@ class SimpleBuilder {
         this.ensureDirectories();
         
         // Step 2: Copy original file
-        console.log('📄 Copying original application...');
+        console.log('[COPY] Copying original application...');
         const content = fs.readFileSync(CONFIG.originalFile, 'utf8');
         
         // Step 3: Apply enhancements if they exist
@@ -50,9 +50,9 @@ class SimpleBuilder {
         const sizeMB = (stats.size / 1024 / 1024).toFixed(2);
         
         console.log('─'.repeat(50));
-        console.log(`✅ Build complete!`);
-        console.log(`📦 Output: ${CONFIG.outputFile} (${sizeMB} MB)`);
-        console.log(`🎯 Ready for distribution to clinicians!`);
+        console.log('[SUCCESS] Build complete!');
+        console.log(`[OUTPUT] ${CONFIG.outputFile} (${sizeMB} MB)`);
+        console.log('[READY] Ready for distribution to clinicians!');
     }
     
     ensureDirectories() {
@@ -64,7 +64,7 @@ class SimpleBuilder {
     }
     
     applyEnhancements(content) {
-        console.log('✨ Applying enhancements...');
+        console.log('[ENHANCE] Applying enhancements...');
         
         // Look for enhancement files
         const enhancementFiles = [
@@ -83,7 +83,7 @@ class SimpleBuilder {
                     // Inject CSS before the FIRST closing </style>
                     const injection = `\n/* Enhancement: ${filename} */\n${enhancement}\n`;
                     content = content.replace('</style>', injection + '</style>');
-                    console.log(`  ✓ Applied ${filename}`);
+                    console.log(`  [OK] Applied ${filename}`);
                 } else if (filename.endsWith('.js')) {
                     // Find the main script block and inject before its closing tag
                     const scriptRegex = /<script>\s*\/\/ Enhanced Login System[\s\S]*?<\/script>/;
@@ -92,7 +92,7 @@ class SimpleBuilder {
                         content = content.replace(scriptRegex, (match) => {
                             return match.replace('</script>', injection + '</script>');
                         });
-                        console.log(`  ✓ Applied ${filename}`);
+                        console.log(`  [OK] Applied ${filename}`);
                     }
                 }
             }
@@ -102,7 +102,7 @@ class SimpleBuilder {
     }
     
     updateBuildInfo(content) {
-        console.log('📝 Updating build information...');
+        console.log('[INFO] Updating build information...');
         
         const buildDate = new Date().toISOString();
         const buildHash = crypto.createHash('sha256')
@@ -131,7 +131,7 @@ class SimpleBuilder {
     }
     
     createPackage() {
-        console.log('📦 Creating distribution package...');
+        console.log('[PACKAGE] Creating distribution package...');
         
         // Copy Chrome extension
         const extensionSource = 'chrome-extension-enhanced';
@@ -139,7 +139,7 @@ class SimpleBuilder {
         
         if (fs.existsSync(extensionSource)) {
             this.copyDirectory(extensionSource, extensionDest);
-            console.log('  ✓ Chrome extension included');
+            console.log('  [OK] Chrome extension included');
         }
         
         // Create README
@@ -153,14 +153,14 @@ INSTALLATION FOR CLINICIANS
 
 Step 1: Open the Application
 -----------------------------
-• Double-click "CareConnect-Pro.html"
-• It opens in your browser automatically
-• No installation needed!
+- Double-click "CareConnect-Pro.html"
+- It opens in your browser automatically
+- No installation needed!
 
 Step 2: Login
 -------------
-• Username: Doc121
-• Password: FFA121
+- Username: Doc121
+- Password: FFA121
 
 Step 3: Chrome Extension (Optional)
 ------------------------------------
@@ -176,19 +176,19 @@ THAT'S IT! You're ready to create documents.
 
 FEATURES
 ========
-✓ Create aftercare documents
-✓ Generate PDF discharge packets  
-✓ Extract data from program websites
-✓ HIPAA compliant (local storage only)
-✓ Auto-save every 30 seconds
-✓ Dark mode available
-✓ Works offline
+- Create aftercare documents
+- Generate PDF discharge packets  
+- Extract data from program websites
+- HIPAA compliant (local storage only)
+- Auto-save every 30 seconds
+- Dark mode available
+- Works offline
 
 TROUBLESHOOTING
 ==============
-• Can't login? Check CAPS LOCK is off
-• Extension not working? Refresh the page
-• Need help? Contact your IT support
+- Can't login? Check CAPS LOCK is off
+- Extension not working? Refresh the page
+- Need help? Contact your IT support
 
 ================================================================================
 Build Date: ${new Date().toISOString()}
@@ -196,7 +196,7 @@ Build Date: ${new Date().toISOString()}
 `;
         
         fs.writeFileSync(path.join(CONFIG.distDir, 'README.txt'), readme);
-        console.log('  ✓ README created');
+        console.log('  [OK] README created');
         
         // Create a simple batch file for Windows users
         const batchFile = `@echo off
@@ -205,7 +205,7 @@ start CareConnect-Pro.html
 exit`;
         
         fs.writeFileSync(path.join(CONFIG.distDir, 'Start-CareConnect.bat'), batchFile);
-        console.log('  ✓ Windows launcher created');
+        console.log('  [OK] Windows launcher created');
         
         // Create a simple shell script for Mac/Linux users
         const shellScript = `#!/bin/bash
@@ -214,7 +214,7 @@ open CareConnect-Pro.html 2>/dev/null || xdg-open CareConnect-Pro.html 2>/dev/nu
         
         fs.writeFileSync(path.join(CONFIG.distDir, 'Start-CareConnect.sh'), shellScript);
         fs.chmodSync(path.join(CONFIG.distDir, 'Start-CareConnect.sh'), '755');
-        console.log('  ✓ Mac/Linux launcher created');
+        console.log('  [OK] Mac/Linux launcher created');
     }
     
     copyDirectory(source, destination) {
@@ -292,7 +292,7 @@ if (window.chrome && chrome.runtime) {
 */
 `);
         
-        console.log('📝 Created enhancement examples in enhancements/ folder');
+        console.log('[INFO] Created enhancement examples in enhancements/ folder');
     }
 }
 
