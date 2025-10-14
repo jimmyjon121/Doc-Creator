@@ -37,17 +37,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": [
-        "pattern-engine.js",
-        "universal-structures.js",
-        "anti-patterns.js",
-        "smart-crawler.js",
-        "multi-strategy-extractor.js",
-        "confidence-scorer.js",
-        "self-improvement.js",
-        "dynamic-templates.js",
-        "universal-extractor.js"
-      ],
+      "js": ["bundle-v12.js"],
       "run_at": "document_idle"
     }
   ]
