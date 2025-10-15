@@ -221,8 +221,20 @@
         function switchView(view) {
             currentView = view;
             document.querySelectorAll('.workflow-step').forEach(step => step.classList.remove('active'));
+            
+            // Mark active step
+            const steps = document.querySelectorAll('.workflow-step');
+            steps.forEach((step, index) => {
+                const stepViews = ['learn', 'explore', 'compare', 'document'];
+                if (stepViews[index] === view) {
+                    step.classList.add('active');
+                }
+            });
+            
             const views = { learn: showLearningCenter, explore: showExplorer, compare: showCompare, document: showDocuments };
-            views[view]();
+            if (views[view]) {
+                views[view]();
+            }
         }
         
         // Learning Center
