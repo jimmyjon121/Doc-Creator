@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConnect Pro - Clinical Aftercare Planning Suite</title>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/clinical-suite.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+</head>
+<body>
+    <!-- Session Header (Always Visible) -->
+    <div id="session-header" class="session-header" style="display: none;">
+        <!-- Populated by SessionManager -->
+    </div>
+    
+    <!-- Main Application Container -->
+    <div class="app-container">
+        <!-- Application Header -->
+        <header class="app-header">
+            <h1>CareConnect Pro</h1>
+            <p class="app-subtitle">Clinical Aftercare Planning Suite</p>
+        </header>
+        
+        <!-- Start Session Screen -->
+        <div id="start-screen" class="start-screen">
+            <div class="start-card">
+                <h2>Begin Clinical Session</h2>
+                <p>This tool assists with aftercare planning and documentation. All session data is temporary and will be cleared when you close this browser tab.</p>
+                
+                <div class="start-form">
+                    <div class="form-group">
+                        <label for="clinician-name">Clinician Name (Optional)</label>
+                        <input type="text" id="clinician-name" class="form-input" placeholder="Enter your name and credentials">
+                    </div>
+                    
+                    <button class="btn btn-primary btn-large" onclick="startNewSession()">
+                        Start New Session
+                    </button>
+                </div>
+                
+                <div class="start-info">
+                    <h3>Session Information</h3>
+                    <ul>
+                        <li>A unique session ID will be generated for tracking</li>
+                        <li>No patient PHI will be stored on this device</li>
+                        <li>Session automatically expires after 30 minutes of inactivity</li>
+                        <li>All documents must be exported before closing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Application (Hidden Initially) -->
+        <div id="main-app" style="display: none;">
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="programs" onclick="switchTab('programs')">
+                    <span class="nav-tab-icon">📋</span>
+                    Programs
+                    <span class="nav-tab-badge" id="programs-count">0</span>
+                </button>
+                <button class="nav-tab" data-tab="compare" onclick="switchTab('compare')">
+                    <span class="nav-tab-icon">⚖️</span>
+                    Compare
+                    <span class="nav-tab-badge" id="compare-count">0</span>
+                </button>
+                <button class="nav-tab" data-tab="documents" onclick="switchTab('documents')">
+                    <span class="nav-tab-icon">📄</span>
+                    Documents
+                    <span class="nav-tab-badge" id="documents-count">0</span>
+                </button>
+            </div>
+            
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Programs Tab -->
+                <div id="programs-tab" class="tab-panel active">
+                    <!-- Search and Filters -->
+                    <div class="filters-section">
+                        <div class="search-bar">
+                            <input type="text" class="search-input" id="program-search" 
+                                   placeholder="Search programs by name, location, or specialty...">
+                            <button class="btn btn-primary" onclick="searchPrograms()">Search</button>
+                            <button class="btn btn-secondary" onclick="clearSearch()">Clear</button>
+                        </div>
+                        
+                        <div class="filter-groups">
+                            <div class="filter-group">
+                                <div class="filter-group-title">Level of Care</div>
+                                <div class="filter-options">
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="residential" onchange="applyFilters()">
+                                        Residential
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="php" onchange="applyFilters()">
+                                        PHP
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="iop" onchange="applyFilters()">
+                                        IOP
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="outpatient" onchange="applyFilters()">
+                                        Outpatient
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <div class="filter-group-title">Population</div>
+                                <div class="filter-options">
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="adolescent" onchange="applyFilters()">
+                                        Adolescent
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="young-adult" onchange="applyFilters()">
+                                        Young Adult
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="adult" onchange="applyFilters()">
+                                        Adult
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="male" onchange="applyFilters()">
+                                        Male Only
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="female" onchange="applyFilters()">
+                                        Female Only
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <div class="filter-group-title">Specialization</div>
+                                <div class="filter-options">
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="sud" onchange="applyFilters()">
+                                        Substance Use
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="mental-health" onchange="applyFilters()">
+                                        Mental Health
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="dual-diagnosis" onchange="applyFilters()">
+                                        Dual Diagnosis
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="trauma" onchange="applyFilters()">
+                                        Trauma/PTSD
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="eating-disorders" onchange="applyFilters()">
+                                        Eating Disorders
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <div class="filter-group-title">Insurance</div>
+                                <div class="filter-options">
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="bcbs" onchange="applyFilters()">
+                                        BCBS
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="aetna" onchange="applyFilters()">
+                                        Aetna
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="cigna" onchange="applyFilters()">
+                                        Cigna
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="united" onchange="applyFilters()">
+                                        United
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="medicaid" onchange="applyFilters()">
+                                        Medicaid
+                                    </label>
+                                    <label class="filter-checkbox">
+                                        <input type="checkbox" value="medicare" onchange="applyFilters()">
+                                        Medicare
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Programs Grid -->
+                    <div id="programs-grid" class="programs-grid">
+                        <!-- Program cards will be populated here -->
+                    </div>
+                </div>
+                
+                <!-- Compare Tab -->
+                <div id="compare-tab" class="tab-panel" style="display: none;">
+                    <div id="comparison-container">
+                        <div class="comparison-empty">
+                            <p>Select 2-4 programs from the Programs tab to compare</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Documents Tab -->
+                <div id="documents-tab" class="tab-panel" style="display: none;">
+                    <div class="documents-section">
+                        <div class="document-actions">
+                            <button class="btn btn-primary" onclick="showDocumentWizard('aftercareOptions')">
+                                Create Aftercare Options
+                            </button>
+                            <button class="btn btn-primary" onclick="showDocumentWizard('aftercarePlan')">
+                                Create Aftercare Plan
+                            </button>
+                            <button class="btn btn-primary" onclick="showDocumentWizard('dischargePacket')">
+                                Compile Discharge Packet
+                            </button>
+                        </div>
+                        
+                        <div id="documents-list" class="documents-list">
+                            <!-- Generated documents will appear here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Document Preview Modal -->
+    <div id="document-preview-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 class="modal-title">Document Preview</h2>
+                <button class="modal-close" onclick="closeDocumentPreview()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="document-preview-content">
+                    <!-- Document content will be inserted here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDocumentPreview()">Close</button>
+                <button class="btn btn-primary" onclick="exportDocument('pdf')">Export as PDF</button>
+                <button class="btn btn-primary" onclick="exportDocument('word')">Export as Word</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="js/session-manager.js"></script>
+    <script src="js/comparison-matrix.js"></script>
+    <script src="js/document-generator.js"></script>
+    <script src="js/programs-data.js"></script>
+    
+    <script>
+        // Global state
+        let currentTab = 'programs';
+        let filteredPrograms = [];
+        let selectedPrograms = [];
+        
+        // Initialize application
+        function initApp() {
+            // Check for existing session
+            if (sessionStorage.getItem('clinical_session')) {
+                const session = JSON.parse(sessionStorage.getItem('clinical_session'));
+                if (sessionManager.resumeSession()) {
+                    showMainApp();
+                } else {
+                    showStartScreen();
+                }
+            } else {
+                showStartScreen();
+            }
+            
+            // Load programs data
+            loadPrograms();
+        }
+        
+        // Start new session
+        function startNewSession() {
+            const clinicianName = document.getElementById('clinician-name').value;
+            sessionManager.createNewSession(clinicianName);
+            showMainApp();
+        }
+        
+        // Show/hide screens
+        function showStartScreen() {
+            document.getElementById('start-screen').style.display = 'block';
+            document.getElementById('main-app').style.display = 'none';
+            document.getElementById('session-header').style.display = 'none';
+        }
+        
+        function showMainApp() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            document.getElementById('session-header').style.display = 'block';
+            sessionManager.displaySessionHeader();
+            loadPrograms();
+        }
+        
+        // Tab switching
+        function switchTab(tabName) {
+            currentTab = tabName;
+            
+            // Update tab buttons
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.tab === tabName);
+            });
+            
+            // Update tab panels
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.style.display = 'none';
+            });
+            document.getElementById(`${tabName}-tab`).style.display = 'block';
+            
+            // Update comparison view if switching to compare tab
+            if (tabName === 'compare') {
+                comparisonMatrix.updateComparisonView();
+            }
+        }
+        
+        // Load programs
+        function loadPrograms() {
+            // This would load from your programs database
+            // For now, using sample data
+            const programs = window.programsData || getSamplePrograms();
+            filteredPrograms = programs;
+            displayPrograms(programs);
+        }
+        
+        // Display programs
+        function displayPrograms(programs) {
+            const grid = document.getElementById('programs-grid');
+            grid.innerHTML = '';
+            
+            programs.forEach(program => {
+                const card = createProgramCard(program);
+                grid.appendChild(card);
+            });
+            
+            // Update count
+            document.getElementById('programs-count').textContent = programs.length;
+        }
+        
+        // Create program card
+        function createProgramCard(program) {
+            const card = document.createElement('div');
+            card.className = 'program-card';
+            card.dataset.programId = program.id;
+            
+            card.innerHTML = `
+                <div class="program-header">
+                    <div>
+                        <h3 class="program-name">${program.name}</h3>
+                        <div class="program-location">${program.location?.city || ''}, ${program.location?.state || ''}</div>
+                    </div>
+                    <div class="program-actions">
+                        <button class="btn-program-action btn-compare" onclick="toggleCompare('${program.id}')">
+                            Compare
+                        </button>
+                        <button class="btn-program-action" onclick="viewProgram('${program.id}')">
+                            View
+                        </button>
+                    </div>
+                </div>
+                <div class="program-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Levels of Care:</span>
+                        <span class="detail-value">${(program.clinical?.levelsOfCare || []).join(', ')}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Population:</span>
+                        <span class="detail-value">${program.population?.ages || 'All'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Specialties:</span>
+                        <span class="detail-value">${(program.clinical?.specializations || []).slice(0, 3).join(', ')}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Insurance:</span>
+                        <span class="detail-value">${(program.admissions?.insurance || []).slice(0, 3).join(', ')}</span>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        // Toggle program comparison
+        function toggleCompare(programId) {
+            const button = document.querySelector(`[data-program-id="${programId}"] .btn-compare`);
+            
+            if (button.classList.contains('active')) {
+                comparisonMatrix.removeProgram(programId);
+                button.classList.remove('active');
+            } else {
+                if (comparisonMatrix.addProgram(programId)) {
+                    button.classList.add('active');
+                }
+            }
+            
+            // Update compare count
+            document.getElementById('compare-count').textContent = comparisonMatrix.selectedPrograms.length;
+        }
+        
+        // View program details
+        function viewProgram(programId) {
+            // Track view in session
+            sessionManager.addProgramViewed(programId);
+            
+            // Open program details (implement as needed)
+            console.log('Viewing program:', programId);
+        }
+        
+        // Apply filters
+        function applyFilters() {
+            // Get selected filters
+            const filters = {
+                levelOfCare: [],
+                population: [],
+                specialization: [],
+                insurance: []
+            };
+            
+            // Collect checked filters
+            document.querySelectorAll('.filter-checkbox input:checked').forEach(checkbox => {
+                const value = checkbox.value;
+                const group = checkbox.closest('.filter-group').querySelector('.filter-group-title').textContent;
+                
+                // Map to filter categories
+                if (group.includes('Level')) filters.levelOfCare.push(value);
+                if (group.includes('Population')) filters.population.push(value);
+                if (group.includes('Specialization')) filters.specialization.push(value);
+                if (group.includes('Insurance')) filters.insurance.push(value);
+            });
+            
+            // Filter programs
+            const programs = window.programsData || getSamplePrograms();
+            filteredPrograms = programs.filter(program => {
+                // Apply filter logic
+                return true; // Implement actual filtering
+            });
+            
+            displayPrograms(filteredPrograms);
+        }
+        
+        // Search programs
+        function searchPrograms() {
+            const searchTerm = document.getElementById('program-search').value.toLowerCase();
+            
+            if (!searchTerm) {
+                displayPrograms(filteredPrograms);
+                return;
+            }
+            
+            const results = filteredPrograms.filter(program => {
+                return program.name.toLowerCase().includes(searchTerm) ||
+                       (program.location?.city || '').toLowerCase().includes(searchTerm) ||
+                       (program.location?.state || '').toLowerCase().includes(searchTerm);
+            });
+            
+            displayPrograms(results);
+        }
+        
+        // Clear search
+        function clearSearch() {
+            document.getElementById('program-search').value = '';
+            displayPrograms(filteredPrograms);
+        }
+        
+        // Document functions
+        function showDocumentWizard(documentType) {
+            // Implement document wizard
+            console.log('Creating document:', documentType);
+        }
+        
+        function closeDocumentPreview() {
+            document.getElementById('document-preview-modal').style.display = 'none';
+        }
+        
+        function exportDocument(format) {
+            // Implement export
+            console.log('Exporting as:', format);
+        }
+        
+        // Sample programs data (replace with actual data)
+        function getSamplePrograms() {
+            return [
+                {
+                    id: 'prog_001',
+                    name: 'Serenity Springs Recovery',
+                    location: { city: 'Austin', state: 'TX' },
+                    clinical: {
+                        levelsOfCare: ['Residential', 'PHP', 'IOP'],
+                        primaryFocus: 'Substance Use Disorders',
+                        specializations: ['Dual Diagnosis', 'Trauma', 'Young Adults']
+                    },
+                    population: { ages: '18-30' },
+                    admissions: { insurance: ['BCBS', 'Aetna', 'Cigna'] }
+                },
+                // Add more sample programs
+            ];
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
