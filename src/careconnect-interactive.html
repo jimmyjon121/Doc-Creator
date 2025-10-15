@@ -606,6 +606,140 @@
         .hidden {
             display: none !important;
         }
+        
+        /* Module Demo Styles */
+        .module-demo {
+            padding: 32px;
+        }
+        
+        .module-demo h2 {
+            font-size: 32px;
+            color: var(--primary-teal);
+            margin-bottom: 8px;
+        }
+        
+        .module-intro {
+            font-size: 16px;
+            color: var(--warm-gray);
+            margin-bottom: 32px;
+        }
+        
+        .lesson-content {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+        
+        .lesson-content h3 {
+            font-size: 24px;
+            margin-bottom: 24px;
+            color: var(--warm-gray);
+        }
+        
+        .treatment-ladder {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .level-card {
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid rgba(0,0,0,0.2);
+        }
+        
+        .level-card h4 {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        
+        .level-card p {
+            font-size: 14px;
+            margin: 6px 0;
+        }
+        
+        .flags-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .red-flags, .green-flags {
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .red-flags {
+            background: #fee2e2;
+            border-left: 4px solid #dc2626;
+        }
+        
+        .green-flags {
+            background: #d1fae5;
+            border-left: 4px solid #16a34a;
+        }
+        
+        .red-flags ul, .green-flags ul {
+            margin-top: 12px;
+            margin-left: 20px;
+        }
+        
+        .red-flags li, .green-flags li {
+            margin-bottom: 8px;
+        }
+        
+        .pro-tip {
+            background: #fff9e6;
+            padding: 16px;
+            border-radius: 12px;
+            border-left: 4px solid #ffd43b;
+            margin: 24px 0;
+        }
+        
+        .communication-example {
+            margin-bottom: 24px;
+        }
+        
+        .sample-script {
+            background: var(--warm-cream);
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 15px;
+            line-height: 1.8;
+            border-left: 4px solid var(--primary-teal);
+            margin-top: 12px;
+        }
+        
+        .communication-tips {
+            background: #dbeafe;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+        
+        .communication-tips h4 {
+            margin-bottom: 12px;
+            color: var(--primary-teal);
+        }
+        
+        .communication-tips ul {
+            margin-left: 20px;
+        }
+        
+        .communication-tips li {
+            margin-bottom: 10px;
+        }
+        
+        .lesson-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 2px solid var(--border-color);
+        }
     </style>
 </head>
 <body>
@@ -958,13 +1092,172 @@
         function startModule(moduleId) {
             console.log('Starting module:', moduleId);
             
-            // Initialize module viewer if not exists
-            if (!window.moduleViewer) {
-                window.moduleViewer = new ModuleViewer();
-            }
+            // For now, show a demo of the module content
+            showModuleDemo(moduleId);
+        }
+        
+        function showModuleDemo(moduleId) {
+            const container = document.querySelector('.main-content');
             
-            // Open the module
-            window.moduleViewer.openModule(moduleId);
+            const moduleContent = {
+                'levels-of-care': {
+                    title: 'Understanding Levels of Care',
+                    content: `
+                        <div class="module-demo">
+                            <h2>🏥 Understanding Levels of Care</h2>
+                            <p class="module-intro">Master when to recommend each level of treatment</p>
+                            
+                            <div class="lesson-content">
+                                <h3>Lesson 1: The Treatment Intensity Ladder</h3>
+                                
+                                <div class="treatment-ladder">
+                                    <div class="level-card" style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);">
+                                        <h4>Medical Detox</h4>
+                                        <p><strong>Intensity:</strong> 100% | <strong>Duration:</strong> 3-7 days</p>
+                                        <p><strong>When to use:</strong> Active substance use with physical dependence, risk of dangerous withdrawal</p>
+                                        <p><strong>Setting:</strong> 24/7 medical supervision</p>
+                                    </div>
+                                    
+                                    <div class="level-card" style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);">
+                                        <h4>Residential Treatment</h4>
+                                        <p><strong>Intensity:</strong> 90% | <strong>Duration:</strong> 30-90 days</p>
+                                        <p><strong>When to use:</strong> Severe symptoms, unsafe home environment, need 24/7 support</p>
+                                        <p><strong>Setting:</strong> 24/7 therapeutic environment</p>
+                                    </div>
+                                    
+                                    <div class="level-card" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);">
+                                        <h4>Partial Hospitalization (PHP)</h4>
+                                        <p><strong>Intensity:</strong> 70% | <strong>Duration:</strong> 2-4 weeks</p>
+                                        <p><strong>When to use:</strong> High clinical needs but stable living situation</p>
+                                        <p><strong>Setting:</strong> 6+ hours/day, 5 days/week</p>
+                                    </div>
+                                    
+                                    <div class="level-card" style="background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);">
+                                        <h4>Intensive Outpatient (IOP)</h4>
+                                        <p><strong>Intensity:</strong> 50% | <strong>Duration:</strong> 6-12 weeks</p>
+                                        <p><strong>When to use:</strong> Moderate symptoms, can maintain daily responsibilities</p>
+                                        <p><strong>Setting:</strong> 3-4 hours/day, 3-5 days/week</p>
+                                    </div>
+                                    
+                                    <div class="level-card" style="background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);">
+                                        <h4>Outpatient</h4>
+                                        <p><strong>Intensity:</strong> 20% | <strong>Duration:</strong> Ongoing</p>
+                                        <p><strong>When to use:</strong> Mild symptoms, strong support system available</p>
+                                        <p><strong>Setting:</strong> Weekly individual/group therapy</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="lesson-actions">
+                                    <button class="btn btn-secondary" onclick="switchView('learn')">← Back to Modules</button>
+                                    <button class="btn btn-primary" onclick="completeLesson('levels-of-care', 1)">Complete Lesson 1 →</button>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                },
+                'reading-profiles': {
+                    title: 'Reading Program Profiles',
+                    content: `
+                        <div class="module-demo">
+                            <h2>📋 Reading Program Profiles</h2>
+                            <p class="module-intro">Master the art of analyzing treatment programs</p>
+                            
+                            <div class="lesson-content">
+                                <h3>Red Flags 🚩 vs Green Flags ✅</h3>
+                                
+                                <div class="flags-grid">
+                                    <div class="red-flags">
+                                        <h4 style="color: #dc2626;">Red Flags - Watch Out For:</h4>
+                                        <ul>
+                                            <li>No accreditation (CARF, Joint Commission, etc.)</li>
+                                            <li>"Guaranteed results" - impossible to promise</li>
+                                            <li>Vague clinical descriptions</li>
+                                            <li>No licensed staff listed</li>
+                                            <li>No exclusion criteria (accept everyone)</li>
+                                            <li>Excessive isolation from family (>30 days)</li>
+                                            <li>Proprietary untested methods</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="green-flags">
+                                        <h4 style="color: #16a34a;">Green Flags - Look For:</h4>
+                                        <ul>
+                                            <li>CARF or Joint Commission accredited</li>
+                                            <li>Licensed clinical director with experience</li>
+                                            <li>Evidence-based practices (CBT, DBT, etc.)</li>
+                                            <li>Published outcomes or success data</li>
+                                            <li>Strong family involvement program</li>
+                                            <li>Clear admission and exclusion criteria</li>
+                                            <li>Transparent about costs and insurance</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="pro-tip">
+                                    <strong>💡 Pro Tip:</strong> The best programs are transparent about what they do well AND what they don't treat. Be wary of programs that claim to help everyone with everything.
+                                </div>
+                                
+                                <div class="lesson-actions">
+                                    <button class="btn btn-secondary" onclick="switchView('learn')">← Back to Modules</button>
+                                    <button class="btn btn-primary" onclick="alert('📚 Great! Next lesson covers Insurance Decoder')">Next Lesson →</button>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                },
+                'family-communication': {
+                    title: 'Family Communication',
+                    content: `
+                        <div class="module-demo">
+                            <h2>👨‍👩‍👧‍👦 Family Communication</h2>
+                            <p class="module-intro">Build confidence in family conversations</p>
+                            
+                            <div class="lesson-content">
+                                <h3>Presenting Options to Families</h3>
+                                
+                                <div class="communication-example">
+                                    <h4>Sample Opening:</h4>
+                                    <div class="sample-script">
+                                        "Thank you for taking the time to meet with me today. I know this has been a difficult journey for your family, and I want you to know that what you're doing - seeking help - is incredibly brave and important.
+                                        
+                                        <br><br>
+                                        
+                                        Based on my assessment and the clinical needs we've discussed, I've identified three programs that could be excellent fits for [patient name]. Each has unique strengths, and I'd like to walk through them together so you can make the best decision for your family.
+                                        
+                                        <br><br>
+                                        
+                                        Please ask questions at any time - there are no silly questions, and I want you to feel fully informed and comfortable with whatever path we choose together."
+                                    </div>
+                                </div>
+                                
+                                <div class="communication-tips">
+                                    <h4>Key Communication Principles:</h4>
+                                    <ul>
+                                        <li><strong>Start with validation</strong> - Acknowledge the difficulty and their bravery</li>
+                                        <li><strong>Use "we" language</strong> - You're a team together</li>
+                                        <li><strong>Speak plainly</strong> - Avoid jargon unless you explain it</li>
+                                        <li><strong>Invite questions</strong> - Make it conversational</li>
+                                        <li><strong>Provide written summaries</strong> - Families can't remember everything</li>
+                                        <li><strong>Show empathy</strong> - This is one of the hardest days of their lives</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="lesson-actions">
+                                    <button class="btn btn-secondary" onclick="switchView('learn')">← Back to Modules</button>
+                                    <button class="btn btn-primary" onclick="alert('💬 Excellent! Next: Handling Difficult Conversations')">Next Lesson →</button>
+                                </div>
+                            </div>
+                        </div>
+                    `
+                }
+            };
+            
+            const demo = moduleContent[moduleId] || {
+                title: 'Module Coming Soon',
+                content: '<p>This module content is being finalized. Check back soon!</p>'
+            };
+            
+            container.innerHTML = demo.content;
         }
         
         function initializeWorkflow() {
