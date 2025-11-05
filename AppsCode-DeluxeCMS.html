@@ -8078,17 +8078,55 @@
                                     console.log('✅ Forced dashboard tab visibility');
                                 }
                                 
+                                // Ensure dashboard container exists and is visible before rendering
+                                const dashboardContainer = document.querySelector('.dashboard-container');
+                                if (dashboardContainer) {
+                                    dashboardContainer.style.display = 'block';
+                                    dashboardContainer.style.visibility = 'visible';
+                                    dashboardContainer.style.opacity = '1';
+                                }
+                                
                                 // Initialize dashboard if not already done
                                 setTimeout(() => {
+                                    // Double-check tab is visible
+                                    if (tabElement) {
+                                        tabElement.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; background: white !important; position: relative !important; z-index: 9999 !important;';
+                                    }
+                                    
                                     if (window.dashboardManager) {
                                         if (!window.dashboardManager.initialized) {
                                             initializeDashboard();
                                         } else {
-                                            // Re-render widgets if already initialized
-                                            if (window.dashboardWidgets && window.dashboardWidgets.renderAll) {
+                                            // Re-render widgets if already initialized - ensure containers exist first
+                                            const widgetContainers = [
+                                                'flightPlanWidget',
+                                                'houseWeatherWidget',
+                                                'journeyRadarWidget',
+                                                'missionsWidget',
+                                                'metricsWidget',
+                                                'quickActionsWidget'
+                                            ];
+                                            
+                                            const allContainersExist = widgetContainers.every(id => {
+                                                const container = document.getElementById(id);
+                                                return container !== null;
+                                            });
+                                            
+                                            if (allContainersExist && window.dashboardWidgets && window.dashboardWidgets.renderAll) {
                                                 window.dashboardWidgets.renderAll().then(() => {
                                                     console.log('✅ Dashboard widgets re-rendered');
+                                                }).catch(error => {
+                                                    console.error('❌ Failed to re-render widgets:', error);
+                                                    // Re-initialize if render fails
+                                                    if (window.dashboardWidgets && window.dashboardWidgets.initialize) {
+                                                        window.dashboardWidgets.initialize().then(() => {
+                                                            return window.dashboardWidgets.renderAll();
+                                                        }).catch(console.error);
+                                                    }
                                                 });
+                                            } else {
+                                                console.warn('⚠️ Widget containers missing, re-initializing...');
+                                                initializeDashboard();
                                             }
                                         }
                                     } else {
@@ -8099,7 +8137,7 @@
                                             }
                                         }, 1000);
                                     }
-                                }, 100);
+                                }, 200);
                                 
                                 // IMPORTANT: Hide the document generation panel for Dashboard tab
                                 const selectionPanel = document.querySelector('.selection-panel');
@@ -8186,63 +8224,21 @@
                     }
                     
                     // Function to hide selection panel (document generation UI)
+                    // IMPORTANT: Only target the actual .selection-panel element to avoid affecting dashboard
                     function hideSelectionPanel() {
-                        // Find all possible selection panel elements
-                        const allElements = document.querySelectorAll('*');
-                        allElements.forEach(el => {
-                            const text = el.textContent || '';
-                            // Check if element contains document generation UI indicators
-                            if (text.includes('GENERATE DOCUMENT') || 
-                                text.includes('Document Type') ||
-                                (text.includes('OPTIONS') && text.includes('Multiple')) ||
-                                (text.includes('PLANS') && text.includes('Single')) ||
-                                text.includes('First Name Only') ||
-                                text.includes('Selected Programs')) {
-                                
-                                // Check if it's a significant container (not just a button or small element)
-                                const computedStyle = window.getComputedStyle(el);
-                                const isContainer = computedStyle.width && 
-                                    (parseInt(computedStyle.width) > 300 || 
-                                     el.offsetWidth > 300 ||
-                                     el.classList.contains('selection-panel') ||
-                                     el.id.includes('selection'));
-                                
-                                if (isContainer) {
-                                    el.style.display = 'none';
-                                    el.style.visibility = 'hidden';
-                                    el.setAttribute('data-dashboard-hidden', 'true');
-                                    console.log('✅ Hidden selection panel element');
-                                }
+                        // ONLY target the specific selection panel element
+                        const selectionPanel = document.querySelector('.selection-panel');
+                        if (selectionPanel) {
+                            // Double-check it's not inside dashboard tab
+                            if (!selectionPanel.closest('#dashboardTab') && !selectionPanel.closest('.dashboard-container')) {
+                                selectionPanel.style.display = 'none';
+                                selectionPanel.style.visibility = 'hidden';
+                                selectionPanel.setAttribute('data-dashboard-hidden', 'true');
+                                console.log('✅ Hidden selection panel (document generation UI)');
+                            } else {
+                                console.log('⚠️ Selection panel is inside dashboard - skipping hide');
                             }
-                        });
-                        
-                        // Also hide by common class/id patterns
-                        const patterns = [
-                            '.selection-panel',
-                            '#selectionPanel',
-                            '[class*="selection"]',
-                            '[id*="selection"]',
-                            'aside',
-                            '.sidebar'
-                        ];
-                        
-                        patterns.forEach(pattern => {
-                            try {
-                                const elements = document.querySelectorAll(pattern);
-                                elements.forEach(el => {
-                                    if (el.textContent && (
-                                        el.textContent.includes('GENERATE') ||
-                                        el.textContent.includes('Document Type')
-                                    )) {
-                                        el.style.display = 'none';
-                                        el.style.visibility = 'hidden';
-                                        el.setAttribute('data-dashboard-hidden', 'true');
-                                    }
-                                });
-                            } catch (e) {
-                                // Invalid selector, skip
-                            }
-                        });
+                        }
                     }
                     
                     // EMERGENCY: Simple dashboard fallback
@@ -8354,13 +8350,49 @@
                             // Update coach indicator
                             document.getElementById('coachIndicator').textContent = `Coach: ${dashboardManager.currentCoach.initials}`;
                             
+                            // Ensure dashboard tab is visible before rendering
+                            const dashboardTab = document.getElementById('dashboardTab');
+                            if (dashboardTab) {
+                                dashboardTab.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; background: white !important; position: relative !important; z-index: 9999 !important;';
+                            }
+                            
+                            // Ensure dashboard container exists
+                            const dashboardContainer = document.querySelector('.dashboard-container');
+                            if (!dashboardContainer) {
+                                console.error('❌ Dashboard container not found!');
+                                throw new Error('Dashboard container missing');
+                            }
+                            dashboardContainer.style.display = 'block';
+                            dashboardContainer.style.visibility = 'visible';
+                            
                             // Initialize and render widgets
                             await window.dashboardWidgets.initialize();
                             await dashboardManager.loadDashboardData();
+                            
+                            // Verify widget containers exist before rendering
+                            const requiredContainers = [
+                                'flightPlanWidget',
+                                'houseWeatherWidget',
+                                'journeyRadarWidget',
+                                'missionsWidget',
+                                'metricsWidget',
+                                'quickActionsWidget'
+                            ];
+                            
+                            const missingContainers = requiredContainers.filter(id => !document.getElementById(id));
+                            if (missingContainers.length > 0) {
+                                console.error('❌ Missing widget containers:', missingContainers);
+                                throw new Error(`Missing widget containers: ${missingContainers.join(', ')}`);
+                            }
+                            
                             await window.dashboardWidgets.renderAll();
                             
-                            // Ensure selection panel is hidden on dashboard
-                            hideSelectionPanel();
+                            // Ensure selection panel is hidden on dashboard (but don't affect dashboard)
+                            const selectionPanel = document.querySelector('.selection-panel');
+                            if (selectionPanel && !selectionPanel.closest('#dashboardTab')) {
+                                selectionPanel.style.display = 'none';
+                                selectionPanel.style.visibility = 'hidden';
+                            }
                             
                             // Update last updated time
                             const updateTime = () => {
