@@ -54,6 +54,41 @@ class ClientManager {
             familyAmbassadorPrimaryInitials: clientData.familyAmbassadorPrimaryInitials || '',
             familyAmbassadorSecondaryInitials: clientData.familyAmbassadorSecondaryInitials || '',
             
+            // 48-hour Admission Requirements
+            needsAssessment: clientData.needsAssessment || false,
+            needsAssessmentDate: clientData.needsAssessmentDate || null,
+            healthPhysical: clientData.healthPhysical || false,
+            healthPhysicalDate: clientData.healthPhysicalDate || null,
+            
+            // Aftercare Planning (all in one section)
+            aftercareThreadSent: clientData.aftercareThreadSent || false,
+            aftercareThreadDate: clientData.aftercareThreadDate || null,
+            optionsDocUploaded: clientData.optionsDocUploaded || false,
+            optionsDocUploadedDate: clientData.optionsDocUploadedDate || null,
+            dischargePacketUploaded: clientData.dischargePacketUploaded || false,
+            dischargePacketDate: clientData.dischargePacketDate || null,
+            referralClosureCorrespondence: clientData.referralClosureCorrespondence || false,
+            referralClosureDate: clientData.referralClosureDate || null,
+            
+            // Detailed aftercare options with progress tracking
+            aftercareOptions: clientData.aftercareOptions || [],
+            
+            // Clinical Assessments (remain as checkboxes)
+            gadCompleted: clientData.gadCompleted || false,
+            gadCompletedDate: clientData.gadCompletedDate || null,
+            phqCompleted: clientData.phqCompleted || false,
+            phqCompletedDate: clientData.phqCompletedDate || null,
+            satisfactionSurvey: clientData.satisfactionSurvey || false,
+            satisfactionSurveyDate: clientData.satisfactionSurveyDate || null,
+            
+            // Documentation
+            dischargeSummary: clientData.dischargeSummary || false,
+            dischargeSummaryDate: clientData.dischargeSummaryDate || null,
+            dischargePlanningNote: clientData.dischargePlanningNote || false,
+            dischargePlanningNoteDate: clientData.dischargePlanningNoteDate || null,
+            dischargeASAM: clientData.dischargeASAM || false,
+            dischargeASAMDate: clientData.dischargeASAMDate || null,
+            
             // Additional tracking fields (NEW)
             dateOptionsProvided: clientData.dateOptionsProvided || null,
             isArchived: false, // New clients are never archived
@@ -388,12 +423,19 @@ class ClientManager {
      * Calculate days in care for a client
      */
     calculateDaysInCare(client) {
-        if (!client.admissionDate) return 0;
+        if (!client || !client.admissionDate) return 0;
         
         const admission = new Date(client.admissionDate);
         const endDate = client.dischargeDate ? new Date(client.dischargeDate) : new Date();
+        
+        // Check for invalid dates
+        if (isNaN(admission.getTime())) {
+            console.warn('Invalid admission date:', client.admissionDate);
+            return 0;
+        }
+        
         const diffTime = Math.abs(endDate - admission);
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1; // Adding 1 to include the admission day
         
         return diffDays;
     }
@@ -588,6 +630,114 @@ class ClientManager {
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         
         return diffDays;
+    }
+    
+    /**
+     * Calculate hours elapsed since admission (for 48-hour tracking)
+     * @param {Object} client - Client object
+     * @returns {number} Hours since admission
+     */
+    calculateHoursElapsed(client) {
+        if (!client.admissionDate) return 0;
+        
+        const admission = new Date(client.admissionDate);
+        const now = new Date();
+        
+        const diffTime = Math.abs(now - admission);
+        const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+        
+        return diffHours;
+    }
+    
+    /**
+     * Add or update an aftercare option for a client
+     * @param {string} clientId - Client ID
+     * @param {Object} aftercareOption - Aftercare option data
+     */
+    async addAftercareOption(clientId, aftercareOption) {
+        const client = await this.getClient(clientId);
+        if (!client) throw new Error('Client not found');
+        
+        if (!client.aftercareOptions) {
+            client.aftercareOptions = [];
+        }
+        
+        // Check if this option already exists
+        const existingIndex = client.aftercareOptions.findIndex(
+            opt => opt.programId === aftercareOption.programId
+        );
+        
+        const optionWithDefaults = {
+            programId: aftercareOption.programId,
+            programName: aftercareOption.programName,
+            programType: aftercareOption.programType || 'Unknown',
+            status: aftercareOption.status || 'exploring',
+            
+            // Family engagement tracking
+            familyContacted: aftercareOption.familyContacted || false,
+            familyContactDate: aftercareOption.familyContactDate || null,
+            contactNotes: aftercareOption.contactNotes || '',
+            
+            // Records tracking
+            recordsRequested: aftercareOption.recordsRequested || false,
+            recordsRequestDate: aftercareOption.recordsRequestDate || null,
+            recordsSent: aftercareOption.recordsSent || false,
+            recordsSentDate: aftercareOption.recordsSentDate || null,
+            
+            // Assessment tracking
+            assessmentScheduled: aftercareOption.assessmentScheduled || false,
+            assessmentDate: aftercareOption.assessmentDate || null,
+            assessmentCompleted: aftercareOption.assessmentCompleted || false,
+            
+            // Final status
+            accepted: aftercareOption.accepted || false,
+            acceptanceDate: aftercareOption.acceptanceDate || null,
+            declinedReason: aftercareOption.declinedReason || '',
+            
+            // Additional tracking
+            lastUpdated: new Date().toISOString(),
+            dateAdded: aftercareOption.dateAdded || new Date().toISOString()
+        };
+        
+        if (existingIndex >= 0) {
+            // Update existing option
+            client.aftercareOptions[existingIndex] = {
+                ...client.aftercareOptions[existingIndex],
+                ...optionWithDefaults
+            };
+        } else {
+            // Add new option
+            client.aftercareOptions.push(optionWithDefaults);
+        }
+        
+        return await this.updateClient(clientId, { aftercareOptions: client.aftercareOptions });
+    }
+    
+    /**
+     * Update aftercare option progress
+     * @param {string} clientId - Client ID
+     * @param {string} programId - Program ID of the aftercare option
+     * @param {Object} progressUpdate - Progress update data
+     */
+    async updateAftercareProgress(clientId, programId, progressUpdate) {
+        const client = await this.getClient(clientId);
+        if (!client) throw new Error('Client not found');
+        
+        const optionIndex = client.aftercareOptions?.findIndex(
+            opt => opt.programId === programId
+        );
+        
+        if (optionIndex === -1 || optionIndex === undefined) {
+            throw new Error('Aftercare option not found');
+        }
+        
+        // Update the specific fields
+        const option = client.aftercareOptions[optionIndex];
+        Object.assign(option, progressUpdate, {
+            lastUpdated: new Date().toISOString()
+        });
+        
+        return await this.updateClient(clientId, { aftercareOptions: client.aftercareOptions });
     }
     
     /**

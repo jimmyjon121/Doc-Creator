@@ -225,8 +225,12 @@ class HouseWeatherWidget extends DashboardWidget {
         const trendClass = houseData.trend === 'improving' ? 'trend-up' : 
                           houseData.trend === 'declining' ? 'trend-down' : 'trend-stable';
         
+        const scoreClass = houseData.score >= 90 ? 'excellent' :
+                          houseData.score >= 75 ? 'good' :
+                          houseData.score >= 60 ? 'fair' : 'critical';
+        
         return `
-            <div class="house-card" onclick="dashboardWidgets.navigateToHouse('${houseData.house.id}')">
+            <div class="house-card score-${scoreClass}" onclick="dashboardWidgets.navigateToHouse('${houseData.house.id}')">
                 <div class="house-header">
                     <span class="weather-icon" title="${this.getWeatherDescription(houseData.weather)}">
                         ${houseData.weather}
@@ -234,9 +238,11 @@ class HouseWeatherWidget extends DashboardWidget {
                     <span class="house-name">${houseData.house.name}</span>
                     <span class="trend ${trendClass}">${trendIcon}</span>
                 </div>
-                <div class="house-score">
-                    <div class="score-value">${Math.round(houseData.score)}</div>
-                    <div class="score-label">Health Score</div>
+                <div class="health-bar-container">
+                    <div class="health-bar">
+                        <div class="health-bar-fill" style="width: ${houseData.score}%"></div>
+                    </div>
+                    <div class="score-text">${Math.round(houseData.score)}%</div>
                 </div>
                 <div class="house-stats">
                     <span class="client-count">${houseData.clientCount} clients</span>
@@ -349,6 +355,38 @@ class JourneyRadarWidget extends DashboardWidget {
 class MissionsWidget extends DashboardWidget {
     constructor(container) {
         super('missions', container);
+        this.completedMissions = new Set(this.loadCompletedMissions());
+    }
+    
+    loadCompletedMissions() {
+        const today = new Date().toDateString();
+        const saved = localStorage.getItem('completedMissions');
+        if (saved) {
+            const data = JSON.parse(saved);
+            // Reset if it's a new day
+            if (data.date !== today) {
+                localStorage.removeItem('completedMissions');
+                return [];
+            }
+            return data.missions || [];
+        }
+        return [];
+    }
+    
+    saveCompletedMissions() {
+        const today = new Date().toDateString();
+        localStorage.setItem('completedMissions', JSON.stringify({
+            date: today,
+            missions: Array.from(this.completedMissions)
+        }));
+    }
+    
+    getMissionId(mission) {
+        return `${mission.client.id}-${mission.type || mission.action || 'mission'}`;
+    }
+    
+    isMissionComplete(mission) {
+        return this.completedMissions.has(this.getMissionId(mission));
     }
 
     async render() {
@@ -368,16 +406,22 @@ class MissionsWidget extends DashboardWidget {
                 ...(priorities.yellow?.slice(0, 2) || [])
             ].slice(0, 3);
             
-            const totalMissions = 1 + secondaryMissions.length + Math.min(quickWins.length, 3);
-            const completedMissions = 0; // Would track from state
+            // Count missions
+            const allMissions = [];
+            if (primaryMission && !this.isMissionComplete(primaryMission)) allMissions.push(primaryMission);
+            secondaryMissions.forEach(m => { if (!this.isMissionComplete(m)) allMissions.push(m); });
+            quickWins.slice(0, 3).forEach(w => { if (!this.isMissionComplete(w)) allMissions.push(w); });
+            
+            const totalMissions = (primaryMission ? 1 : 0) + secondaryMissions.length + Math.min(quickWins.length, 3);
+            const completedCount = this.completedMissions.size;
             
             let html = `
                 <div class="missions-widget">
                     <div class="widget-header">
                         <h3>🎯 Today's Missions</h3>
                         <div class="mission-progress">
-                            ${this.renderProgress(completedMissions, totalMissions)}
-                            <span class="progress-text">${completedMissions}/${totalMissions} Complete</span>
+                            ${this.renderProgress(completedCount, totalMissions)}
+                            <span class="progress-text">${completedCount}/${totalMissions} Complete</span>
                         </div>
                     </div>
                     <div class="missions-content">
@@ -385,19 +429,31 @@ class MissionsWidget extends DashboardWidget {
             
             // Primary Mission
             if (primaryMission) {
+                const isComplete = this.isMissionComplete(primaryMission);
+                const missionId = this.getMissionId(primaryMission);
+                
                 html += `
-                    <div class="mission-section primary-mission">
+                    <div class="mission-section primary-mission ${isComplete ? 'completed' : ''}">
                         <div class="mission-header">
                             <span class="mission-icon">🎯</span>
                             <span class="mission-type">Primary Objective</span>
                             <span class="mission-time">Est. 15 min</span>
                         </div>
-                        <div class="mission-item">
-                            <div class="mission-client">${primaryMission.client.initials}</div>
-                            <div class="mission-task">${primaryMission.message}</div>
-                            <button class="btn-mission-action" onclick="dashboardWidgets.takeAction('primary', '${primaryMission.type}', '${primaryMission.client.id}')">
-                                Take Action
-                            </button>
+                        <div class="mission-item" id="mission-${missionId}">
+                            <input type="checkbox" 
+                                   class="mission-checkbox" 
+                                   id="check-${missionId}"
+                                   ${isComplete ? 'checked' : ''}
+                                   onchange="dashboardWidgets.toggleMission('${missionId}', this.checked)">
+                            <label for="check-${missionId}" class="mission-content">
+                                <div class="mission-client">${primaryMission.client.initials}</div>
+                                <div class="mission-task ${isComplete ? 'task-complete' : ''}">${primaryMission.message}</div>
+                            </label>
+                            ${!isComplete ? `
+                                <button class="btn-mission-action" onclick="dashboardWidgets.takeAction('primary', '${primaryMission.type}', '${primaryMission.client.id}')">
+                                    Take Action
+                                </button>
+                            ` : ''}
                         </div>
                     </div>
                 `;
@@ -415,13 +471,20 @@ class MissionsWidget extends DashboardWidget {
                 `;
                 
                 for (const mission of secondaryMissions) {
+                    const isComplete = this.isMissionComplete(mission);
+                    const missionId = this.getMissionId(mission);
+                    
                     html += `
-                        <div class="mission-item">
-                            <div class="mission-client">${mission.client.initials}</div>
-                            <div class="mission-task">${mission.message}</div>
-                            <button class="btn-mission-mark" onclick="dashboardWidgets.markMissionComplete('${mission.client.id}', '${mission.type}')">
-                                Mark Done
-                            </button>
+                        <div class="mission-item ${isComplete ? 'completed' : ''}" id="mission-${missionId}">
+                            <input type="checkbox" 
+                                   class="mission-checkbox" 
+                                   id="check-${missionId}"
+                                   ${isComplete ? 'checked' : ''}
+                                   onchange="dashboardWidgets.toggleMission('${missionId}', this.checked)">
+                            <label for="check-${missionId}" class="mission-content">
+                                <div class="mission-client">${mission.client.initials}</div>
+                                <div class="mission-task ${isComplete ? 'task-complete' : ''}">${mission.message}</div>
+                            </label>
                         </div>
                     `;
                 }
@@ -444,11 +507,21 @@ class MissionsWidget extends DashboardWidget {
                 `;
                 
                 for (const win of displayWins) {
+                    const isComplete = this.isMissionComplete(win);
+                    const missionId = this.getMissionId(win);
+                    
                     html += `
-                        <div class="mission-item quick-win">
-                            <div class="mission-client">${win.client.initials}</div>
-                            <div class="mission-task">${win.action}</div>
-                            <span class="quick-time">${win.estimatedTime}m</span>
+                        <div class="mission-item quick-win ${isComplete ? 'completed' : ''}" id="mission-${missionId}">
+                            <input type="checkbox" 
+                                   class="mission-checkbox" 
+                                   id="check-${missionId}"
+                                   ${isComplete ? 'checked' : ''}
+                                   onchange="dashboardWidgets.toggleMission('${missionId}', this.checked)">
+                            <label for="check-${missionId}" class="mission-content">
+                                <div class="mission-client">${win.client.initials}</div>
+                                <div class="mission-task ${isComplete ? 'task-complete' : ''}">${win.action}</div>
+                                <span class="quick-time">${win.estimatedTime}m</span>
+                            </label>
                         </div>
                     `;
                 }
@@ -472,9 +545,40 @@ class MissionsWidget extends DashboardWidget {
     renderProgress(completed, total) {
         const circles = [];
         for (let i = 0; i < total; i++) {
-            circles.push(`<span class="progress-circle ${i < completed ? 'completed' : ''}">⭕</span>`);
+            const isCompleted = i < completed;
+            circles.push(`<span class="progress-circle ${isCompleted ? 'completed' : ''}">${isCompleted ? '✓' : '○'}</span>`);
         }
         return circles.join('');
+    }
+    
+    toggleMission(missionId, isChecked) {
+        if (isChecked) {
+            this.completedMissions.add(missionId);
+        } else {
+            this.completedMissions.delete(missionId);
+        }
+        this.saveCompletedMissions();
+        
+        // Update visual state with animation
+        const missionElement = document.getElementById(`mission-${missionId}`);
+        if (missionElement) {
+            if (isChecked) {
+                missionElement.classList.add('completed');
+                // Add completion animation
+                missionElement.style.animation = 'missionComplete 0.5s ease';
+            } else {
+                missionElement.classList.remove('completed');
+            }
+            
+            // Update task text styling
+            const taskElement = missionElement.querySelector('.mission-task');
+            if (taskElement) {
+                taskElement.classList.toggle('task-complete', isChecked);
+            }
+        }
+        
+        // Re-render to update progress
+        setTimeout(() => this.render(), 600);
     }
 }
 
@@ -688,6 +792,11 @@ class DashboardWidgets {
     toggleZone(zone) {
         const widget = this.widgets.get('flightPlan');
         if (widget) widget.toggleZone(zone);
+    }
+    
+    toggleMission(missionId, isChecked) {
+        const widget = this.widgets.get('missions');
+        if (widget) widget.toggleMission(missionId, isChecked);
     }
 
     async takeAction(actionId, type, clientId) {
