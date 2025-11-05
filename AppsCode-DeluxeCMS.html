@@ -53,40 +53,41 @@
             const dashboardObserver = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
                     if (mutation.type === 'childList' && mutation.removedNodes.length > 0) {
-                        console.error('🚨 DASHBOARD CONTENT REMOVED!', {
-                            removed: mutation.removedNodes,
-                            target: mutation.target.id || mutation.target.className,
-                            stack: new Error().stack
-                        });
-                        
-                        // Check if dashboard tab was cleared
+                        // Only worry about content removal if dashboard tab is active
                         const dashboardTab = document.getElementById('dashboardTab');
-                        if (dashboardTab && !dashboardTab.querySelector('.dashboard-container')) {
-                            console.error('🔥 Dashboard container missing - re-injecting!');
-                            window.injectSimpleDashboard();
+                        if (dashboardTab && dashboardTab.classList.contains('active')) {
+                            // Check if dashboard container was actually removed
+                            if (!dashboardTab.querySelector('.dashboard-container')) {
+                                console.error('🚨 DASHBOARD CONTENT REMOVED while active!', {
+                                    removed: mutation.removedNodes,
+                                    target: mutation.target.id || mutation.target.className
+                                });
+                                // Try to re-inject
+                                if (window.injectSimpleDashboard) {
+                                    window.injectSimpleDashboard();
+                                }
+                                // Re-initialize dashboard
+                                if (window.dashboardManager && window.dashboardWidgets) {
+                                    setTimeout(() => {
+                                        window.dashboardWidgets.renderAll().catch(console.error);
+                                    }, 500);
+                                }
+                            }
                         }
                     }
                     
                     if (mutation.type === 'attributes') {
                         if (mutation.attributeName === 'style' || mutation.attributeName === 'class') {
                             const target = mutation.target;
-                            if (target.id === 'dashboardTab' || target.classList.contains('dashboard-container')) {
-                                console.warn('⚠️ Dashboard style/class changed:', {
-                                    element: target.id || target.className,
-                                    attribute: mutation.attributeName,
-                                    oldValue: mutation.oldValue,
-                                    newValue: target.getAttribute(mutation.attributeName)
-                                });
+                            if (target.id === 'dashboardTab') {
+                                // Only take action if dashboard tab is supposed to be active
+                                const isActive = target.classList.contains('active');
+                                const style = window.getComputedStyle(target);
                                 
-                                // Force dashboard visible if it was hidden
-                                if (target.id === 'dashboardTab') {
-                                    const style = window.getComputedStyle(target);
-                                    if (style.display === 'none') {
-                                        console.error('🔥 Dashboard was hidden - forcing visible!');
-                                        target.style.display = 'block !important';
-                                        target.style.visibility = 'visible !important';
-                                        target.style.opacity = '1 !important';
-                                    }
+                                // Only log/act if dashboard is being hidden while it should be visible
+                                if (isActive && style.display === 'none') {
+                                    console.warn('⚠️ Dashboard was hidden while active - forcing visible!');
+                                    target.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; background: white !important; position: relative !important; z-index: 9999 !important;';
                                 }
                             }
                         }
@@ -8030,18 +8031,28 @@
                             //     return;
                             // }
                             
-                            // Remove active class from all tabs and buttons
+                            // Remove active class from all tabs and buttons, and hide them
                             document.querySelectorAll('.tab-content').forEach(t => {
-                                if (t) t.classList.remove('active');
+                                if (t) {
+                                    t.classList.remove('active');
+                                    // Explicitly hide inactive tabs
+                                    if (t.id !== tab + 'Tab') {
+                                        t.style.display = 'none';
+                                    }
+                                }
                             });
                             document.querySelectorAll('.tab-btn').forEach(b => {
                                 if (b) b.classList.remove('active');
                             });
                             
-                            // Add active class to selected tab
+                            // Add active class to selected tab and ensure it's visible
                             const tabElement = document.getElementById(tab + 'Tab');
                             if (tabElement) {
                                 tabElement.classList.add('active');
+                                // Explicitly show the active tab
+                                tabElement.style.display = 'block';
+                                tabElement.style.visibility = 'visible';
+                                tabElement.style.opacity = '1';
                                 console.log('Activated tab:', tab + 'Tab');
                             } else {
                                 console.warn('Tab element not found:', tab + 'Tab');
@@ -8061,11 +8072,24 @@
                                 // Add class to body for dashboard-specific styles
                                 document.body.classList.add('dashboard-active');
                                 
+                                // Force dashboard tab to be visible
+                                if (tabElement) {
+                                    tabElement.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; background: white !important; position: relative !important; z-index: 9999 !important;';
+                                    console.log('✅ Forced dashboard tab visibility');
+                                }
+                                
                                 // Initialize dashboard if not already done
                                 setTimeout(() => {
                                     if (window.dashboardManager) {
                                         if (!window.dashboardManager.initialized) {
                                             initializeDashboard();
+                                        } else {
+                                            // Re-render widgets if already initialized
+                                            if (window.dashboardWidgets && window.dashboardWidgets.renderAll) {
+                                                window.dashboardWidgets.renderAll().then(() => {
+                                                    console.log('✅ Dashboard widgets re-rendered');
+                                                });
+                                            }
                                         }
                                     } else {
                                         console.log('Dashboard manager not available, will retry...');
@@ -8095,10 +8119,17 @@
                                 // Remove dashboard mode
                                 document.body.classList.remove('dashboard-active');
                                 
+                                // Ensure programs tab is visible
+                                if (tabElement) {
+                                    tabElement.style.display = 'block';
+                                    tabElement.style.visibility = 'visible';
+                                    tabElement.style.opacity = '1';
+                                }
+                                
                                 // Show selection panel for Programs tab ONLY
                                 const selectionPanel = document.querySelector('.selection-panel');
                                 if (selectionPanel) {
-                                    selectionPanel.style.display = 'block';
+                                    selectionPanel.style.display = 'flex';
                                     selectionPanel.style.visibility = 'visible';
                                     console.log('✅ Showing selection panel for Programs tab');
                                 }
@@ -8112,6 +8143,13 @@
                             } else if (tab === 'clients') {
                                 // For clients tab, keep full width but HIDE selection panel
                                 document.body.classList.remove('dashboard-active');
+                                
+                                // Ensure clients tab is visible
+                                if (tabElement) {
+                                    tabElement.style.display = 'block';
+                                    tabElement.style.visibility = 'visible';
+                                    tabElement.style.opacity = '1';
+                                }
                                 
                                 // IMPORTANT: Hide the document generation panel for Clients tab
                                 const selectionPanel = document.querySelector('.selection-panel');
