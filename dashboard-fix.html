@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        button {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,255,0,0.2);
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Dashboard Quick Fix</h1>
+        <p>The dashboard was disappearing because the app was switching to a previously saved tab.</p>
+        
+        <h2>Choose a fix:</h2>
+        
+        <button onclick="fixDashboard()">
+            ✨ Set Dashboard as Default
+        </button>
+        
+        <button onclick="clearAndReload()">
+            🔄 Clear Everything & Reload
+        </button>
+        
+        <button onclick="justGoToDashboard()">
+            🎯 Just Open Dashboard Now
+        </button>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        function fixDashboard() {
+            // Set dashboard as the default tab
+            localStorage.setItem('lastActiveTab', 'dashboard');
+            
+            // Show success message
+            const status = document.getElementById('status');
+            status.style.display = 'block';
+            status.innerHTML = '✅ Dashboard set as default! Redirecting...';
+            
+            // Redirect to main app
+            setTimeout(() => {
+                window.location.href = 'AppsCode-DeluxeCMS.html';
+            }, 1500);
+        }
+        
+        function clearAndReload() {
+            // Clear all localStorage
+            localStorage.clear();
+            
+            // Set dashboard as default
+            localStorage.setItem('lastActiveTab', 'dashboard');
+            
+            // Show success message
+            const status = document.getElementById('status');
+            status.style.display = 'block';
+            status.innerHTML = '✅ Cleared all settings! Redirecting...';
+            
+            // Redirect
+            setTimeout(() => {
+                window.location.href = 'AppsCode-DeluxeCMS.html';
+            }, 1500);
+        }
+        
+        function justGoToDashboard() {
+            // Set dashboard and go directly
+            localStorage.setItem('lastActiveTab', 'dashboard');
+            window.location.href = 'AppsCode-DeluxeCMS.html#dashboard';
+        }
+    </script>
+</body>
+</html>
+

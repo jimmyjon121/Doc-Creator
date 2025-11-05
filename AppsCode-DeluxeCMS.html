@@ -1462,14 +1462,14 @@
                 if (programsPanel) {
                     const tabNavHTML = `
                         <div class="tab-navigation" style="display: flex !important; gap: 8px; margin-bottom: 20px; visibility: visible !important; z-index: 10; position: relative;">
-                            <button class="tab-btn active" onclick="switchTab('dashboard')">
+                            <button class="tab-btn" onclick="switchTab('dashboard')">
                                 <span>🎯 Dashboard</span>
                             </button>
-                            <button class="tab-btn" onclick="switchTab('programs')">
+                            <button class="tab-btn active" onclick="switchTab('programs')">
                                 <span>📋 Programs</span>
                             </button>
                             <button class="tab-btn" onclick="switchTab('clients')">
-                                <span>👤 Clients</span>
+                                <span>👥 Clients</span>
                             </button>
                         </div>
                     `;
@@ -7958,16 +7958,19 @@
                 
                 <!-- Tab Navigation -->
                 <div class="tab-navigation" style="display: flex !important; gap: 8px; margin-bottom: 20px; visibility: visible !important;">
-                    <button class="tab-btn" onclick="switchTab('programs')">
+                    <button class="tab-btn" onclick="switchTab('dashboard')">
+                        <span>🎯 Dashboard</span>
+                    </button>
+                    <button class="tab-btn active" onclick="switchTab('programs')">
                         <span>📋 Programs</span>
                     </button>
-                    <button class="tab-btn active" onclick="switchTab('clients')">
-                        <span>🎯 Dashboard & Clients</span>
+                    <button class="tab-btn" onclick="switchTab('clients')">
+                        <span>👥 Clients</span>
                     </button>
                 </div>
                 
                 <!-- Dashboard Tab Content -->
-                <div id="dashboardTab" class="tab-content active">
+                <div id="dashboardTab" class="tab-content">
                     <div class="dashboard-container">
                         <div class="dashboard-header">
                             <div>
@@ -8360,12 +8363,12 @@
                         }
                     }
                     
-                    // Set dashboard as default on page load
+                    // Set programs as default on page load
                     document.addEventListener('DOMContentLoaded', function() {
-                        // Start with Clients tab (which includes dashboard features)
-                        const defaultTab = 'clients';
+                        // Start with Programs tab as default
+                        const defaultTab = 'programs';
                         
-                        // Load clients tab by default
+                        // Load programs tab by default
                         setTimeout(() => {
                             switchTab(defaultTab);
                         }, 100);
@@ -8468,7 +8471,7 @@
                 </script>
                 
                 <!-- Programs Tab Content -->
-                <div id="programsTab" class="tab-content">
+                <div id="programsTab" class="tab-content active">
                 
                 <div class="quick-actions" style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
                     <button class="quick-action-btn" onclick="selectAllPrograms()">Select All</button>
@@ -8901,167 +8904,6 @@
                 <!-- Clients Tab Content -->
                 <div id="clientsTab" class="tab-content">
                     <div class="cm-tracker-container">
-                        
-                        <!-- Dashboard Overview Widget -->
-                        <div id="dashboardOverview" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 12px; margin-bottom: 30px; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-                            <h2 style="margin: 0 0 20px 0; font-size: 28px; display: flex; align-items: center; gap: 12px;">
-                                <span>🎯</span>
-                                <span>Coach Mission Control</span>
-                            </h2>
-                            
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 20px; border-radius: 10px;">
-                                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Active Clients</div>
-                                    <div id="dashMetricClients" style="font-size: 36px; font-weight: bold;">--</div>
-                                </div>
-                                
-                                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 20px; border-radius: 10px;">
-                                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Day 14+ Alerts</div>
-                                    <div id="dashMetricDay14" style="font-size: 36px; font-weight: bold; color: #fbbf24;">--</div>
-                                </div>
-                                
-                                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 20px; border-radius: 10px;">
-                                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Upcoming Discharges</div>
-                                    <div id="dashMetricDischarges" style="font-size: 36px; font-weight: bold; color: #a78bfa;">--</div>
-                                </div>
-                                
-                                <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); padding: 20px; border-radius: 10px;">
-                                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Houses</div>
-                                    <div id="dashMetricHouses" style="font-size: 36px; font-weight: bold; color: #34d399;">6</div>
-                                </div>
-                            </div>
-                            
-                            <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: 14px;">
-                                <strong>💡 Quick Tip:</strong> Click on any house tab below to manage clients and view detailed milestones.
-                            </div>
-                        </div>
-                        
-                        <!-- Full Dashboard Widgets -->
-                        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px;">
-                            <!-- Left Column -->
-                            <div style="display: flex; flex-direction: column; gap: 20px;">
-                                <!-- Daily Flight Plan -->
-                                <div id="flightPlanWidget" class="dashboard-widget" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>
-                                
-                                <!-- Today's Missions -->
-                                <div id="missionsWidget" class="dashboard-widget" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>
-                            </div>
-                            
-                            <!-- Right Column -->
-                            <div style="display: flex; flex-direction: column; gap: 20px;">
-                                <!-- House Weather -->
-                                <div id="houseWeatherWidget" class="dashboard-widget" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>
-                                
-                                <!-- Client Journey Radar -->
-                                <div id="journeyRadarWidget" class="dashboard-widget" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></div>
-                            </div>
-                        </div>
-                        
-                        <!-- Quick Actions Widget -->
-                        <div id="quickActionsWidget" class="dashboard-widget" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 30px;"></div>
-                        
-                        <script>
-                            // Update dashboard metrics when clients load
-                            async function updateDashboardMetrics() {
-                                try {
-                                    if (window.clientManager && window.housesManager) {
-                                        const clients = await window.clientManager.getAllClients();
-                                        const activeClients = clients.filter(c => !c.isArchived);
-                                        
-                                        // Count Day 14+ clients without aftercare
-                                        let day14Count = 0;
-                                        let upcomingDischarges = 0;
-                                        
-                                        for (const client of activeClients) {
-                                            const daysInCare = window.clientManager.calculateDaysInCare(client);
-                                            
-                                            if (daysInCare >= 14) {
-                                                if (window.milestonesManager) {
-                                                    const milestones = await window.milestonesManager.getClientMilestones(client.id);
-                                                    const aftercare = milestones.find(m => m.milestone === 'aftercare_options_sent' && m.status === 'complete');
-                                                    if (!aftercare) day14Count++;
-                                                }
-                                            }
-                                            
-                                            if (client.dischargeDate) {
-                                                const daysUntil = Math.ceil((new Date(client.dischargeDate) - new Date()) / (1000 * 60 * 60 * 24));
-                                                if (daysUntil >= 0 && daysUntil <= 7) upcomingDischarges++;
-                                            }
-                                        }
-                                        
-                                        // Update metrics
-                                        document.getElementById('dashMetricClients').textContent = activeClients.length;
-                                        document.getElementById('dashMetricDay14').textContent = day14Count;
-                                        document.getElementById('dashMetricDischarges').textContent = upcomingDischarges;
-                                        
-                                        console.log('✅ Dashboard metrics updated');
-                                    }
-                                } catch (error) {
-                                    console.error('Failed to update dashboard metrics:', error);
-                                }
-                            }
-                            
-                            // Initialize dashboard widgets when switching to clients tab
-                            const originalSwitchTab = window.switchTab || switchTab;
-                            window.switchTab = function(tab) {
-                                if (typeof originalSwitchTab === 'function') {
-                                    originalSwitchTab(tab);
-                                }
-                                
-                                if (tab === 'clients') {
-                                    setTimeout(() => {
-                                        updateDashboardMetrics();
-                                        
-                                        // Initialize dashboard widgets if available
-                                        if (window.dashboardManager && window.dashboardWidgets) {
-                                            if (!window.dashboardManager.initialized) {
-                                                window.dashboardManager.initialize().then(() => {
-                                                    window.dashboardWidgets.initialize().then(() => {
-                                                        window.dashboardWidgets.renderAll();
-                                                    });
-                                                });
-                                            } else {
-                                                // Just render if already initialized
-                                                if (!window.dashboardWidgetsRendered) {
-                                                    window.dashboardWidgets.renderAll().then(() => {
-                                                        window.dashboardWidgetsRendered = true;
-                                                    });
-                                                }
-                                            }
-                                        }
-                                    }, 500);
-                                }
-                            };
-                            
-                            // Auto-initialize dashboard widgets when they become available
-                            let dashboardCheckInterval = setInterval(() => {
-                                const clientsTab = document.getElementById('clientsTab');
-                                if (clientsTab && clientsTab.classList.contains('active') && 
-                                    window.dashboardManager && window.dashboardWidgets && 
-                                    !window.dashboardWidgetsRendered) {
-                                    
-                                    console.log('🎯 Auto-initializing dashboard widgets in Clients tab');
-                                    window.dashboardManager.initialize().then(() => {
-                                        return window.dashboardWidgets.initialize();
-                                    }).then(() => {
-                                        return window.dashboardWidgets.renderAll();
-                                    }).then(() => {
-                                        window.dashboardWidgetsRendered = true;
-                                        clearInterval(dashboardCheckInterval);
-                                        console.log('✅ Dashboard widgets rendered in Clients tab');
-                                    }).catch(error => {
-                                        console.error('Failed to render dashboard widgets:', error);
-                                    });
-                                }
-                            }, 1000);
-                            
-                            // Stop checking after 30 seconds
-                            setTimeout(() => clearInterval(dashboardCheckInterval), 30000);
-                            
-                            // Update metrics periodically
-                            setInterval(updateDashboardMetrics, 30000); // Every 30 seconds
-                        </script>
-                        
                         <!-- House Navigation -->
                         <div class="house-navigation">
                             <div class="house-tabs" id="houseTabs">

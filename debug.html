@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Page</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+            font-size: 14px;
+        }
+        .error { color: #f00; }
+        .success { color: #0f0; }
+        .warning { color: #ff0; }
+    </style>
+</head>
+<body>
+    <h1>⚡ LIVE DIAGNOSTIC ⚡</h1>
+    <div id="output"></div>
+    
+    <script>
+        const output = document.getElementById('output');
+        
+        function log(msg, type = 'success') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            output.appendChild(div);
+            console.log(msg);
+        }
+        
+        log('✅ Page loaded successfully', 'success');
+        log(`✅ Time: ${new Date().toLocaleString()}`, 'success');
+        
+        // Test localStorage
+        try {
+            localStorage.setItem('test', '123');
+            log('✅ localStorage works', 'success');
+        } catch (e) {
+            log('❌ localStorage failed: ' + e.message, 'error');
+        }
+        
+        // Test sessionStorage
+        try {
+            sessionStorage.setItem('test', '123');
+            log('✅ sessionStorage works', 'success');
+        } catch (e) {
+            log('❌ sessionStorage failed: ' + e.message, 'error');
+        }
+        
+        // Now try to load the main app scripts
+        log('🔍 Testing script loading...', 'warning');
+        
+        const testScripts = [
+            'feature-flags.js',
+            'performance-monitor.js',
+            'indexed-db-manager.js',
+            'client-manager.js',
+            'houses-manager.js',
+            'milestones-manager.js',
+            'dashboard-manager.js',
+            'dashboard-widgets.js'
+        ];
+        
+        let loaded = 0;
+        let failed = 0;
+        
+        testScripts.forEach(scriptName => {
+            fetch(scriptName, { cache: 'no-cache' })
+                .then(response => {
+                    if (response.ok) {
+                        log(`✅ ${scriptName} - Available (${response.status})`, 'success');
+                        loaded++;
+                    } else {
+                        log(`❌ ${scriptName} - Error ${response.status}`, 'error');
+                        failed++;
+                    }
+                })
+                .catch(err => {
+                    log(`❌ ${scriptName} - Failed: ${err.message}`, 'error');
+                    failed++;
+                })
+                .finally(() => {
+                    if (loaded + failed === testScripts.length) {
+                        log('', 'success');
+                        log(`========== SUMMARY ==========`, 'warning');
+                        log(`✅ Loaded: ${loaded}`, 'success');
+                        log(`❌ Failed: ${failed}`, 'error');
+                        log(`=============================`, 'warning');
+                        
+                        if (failed === 0) {
+                            log('', 'success');
+                            log('🎉 ALL SCRIPTS ARE AVAILABLE!', 'success');
+                            log('', 'success');
+                            log('The problem is likely:', 'warning');
+                            log('1. Browser cache is serving old HTML', 'warning');
+                            log('2. JavaScript error in the main app', 'warning');
+                            log('3. CSS hiding everything', 'warning');
+                            log('', 'success');
+                            log('TRY THIS:', 'warning');
+                            log('Press Ctrl+Shift+R to hard reload', 'warning');
+                            log('Or clear browser cache completely', 'warning');
+                        } else {
+                            log('', 'success');
+                            log('⚠️ SOME SCRIPTS ARE MISSING!', 'error');
+                            log('Server issue or cache problem', 'error');
+                        }
+                    }
+                });
+        });
+        
+        // Also test the main HTML file
+        fetch('AppsCode-DeluxeCMS.html', { cache: 'no-cache' })
+            .then(response => response.text())
+            .then(html => {
+                log(`✅ Main HTML file loaded (${html.length} bytes)`, 'success');
+                
+                // Check if it has the dashboard tab
+                if (html.includes('switchTab(\'dashboard\')')) {
+                    log('✅ Dashboard tab found in HTML', 'success');
+                } else {
+                    log('❌ Dashboard tab NOT found in HTML - OLD FILE!', 'error');
+                    log('⚠️ Browser is serving cached HTML!', 'error');
+                }
+                
+                // Check for error handlers
+                if (html.includes('Global error handler')) {
+                    log('✅ Error handler found in HTML', 'success');
+                } else {
+                    log('❌ Error handler NOT found - OLD FILE!', 'error');
+                }
+            })
+            .catch(err => {
+                log(`❌ Failed to load main HTML: ${err.message}`, 'error');
+            });
+            
+        // Add a button to open the main app
+        setTimeout(() => {
+            const btn = document.createElement('button');
+            btn.textContent = '🚀 OPEN MAIN APP (with fresh cache)';
+            btn.style.cssText = 'background:#0f0;color:#000;padding:20px;font-size:20px;border:none;cursor:pointer;margin-top:20px;font-weight:bold;';
+            btn.onclick = () => {
+                sessionStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('lastActiveTab', 'dashboard');
+                window.location.href = 'AppsCode-DeluxeCMS.html?' + Date.now();
+            };
+            output.appendChild(btn);
+        }, 3000);
+    </script>
+</body>
+</html>
+
