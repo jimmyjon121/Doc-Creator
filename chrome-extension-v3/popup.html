@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 450px;
+            min-height: 550px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+        
+        .container {
+            background: white;
+            margin: 8px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header p {
+            font-size: 13px;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        /* Beautiful Status Messages */
+        .status {
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            display: none;
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .status.success {
+            background: linear-gradient(135deg, #d4f4dd 0%, #e8f5e9 100%);
+            border: 1px solid #4caf50;
+            color: #1b5e20;
+        }
+        
+        .status.error {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            border: 1px solid #f44336;
+            color: #b71c1c;
+        }
+        
+        .status.info {
+            background: linear-gradient(135deg, #e3f2fd 0%, #e1f5fe 100%);
+            border: 1px solid #2196f3;
+            color: #0d47a1;
+        }
+        
+        .status.processing {
+            background: linear-gradient(135deg, #f3e5f5 0%, #ede7f6 100%);
+            border: 1px solid #9c27b0;
+            color: #4a148c;
+        }
+        
+        .status-icon {
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        /* Enhanced Progress Indicator */
+        .progress-container {
+            display: none;
+            margin-bottom: 16px;
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .progress-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .progress-percentage {
+            font-size: 18px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background: #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 6px;
+            width: 0%;
+            transition: width 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .progress-text {
+            font-size: 13px;
+            color: #4b5563;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        
+        .progress-detail {
+            font-size: 11px;
+            color: #9ca3af;
+            font-style: italic;
+        }
+        
+        /* Live Activity Log */
+        .activity-log {
+            display: none;
+            background: #1f2937;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+        
+        .activity-log-title {
+            color: #10b981;
+            font-size: 11px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .activity-line {
+            font-size: 10px;
+            color: #9ca3af;
+            margin-bottom: 4px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .activity-time {
+            color: #6b7280;
+            min-width: 60px;
+        }
+        
+        .activity-message {
+            color: #e5e7eb;
+        }
+        
+        .activity-success {
+            color: #10b981;
+        }
+        
+        .activity-error {
+            color: #ef4444;
+        }
+        
+        .activity-warning {
+            color: #f59e0b;
+        }
+        
+        /* Scrollbar styling for activity log */
+        .activity-log::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .activity-log::-webkit-scrollbar-track {
+            background: #374151;
+            border-radius: 3px;
+        }
+        
+        .activity-log::-webkit-scrollbar-thumb {
+            background: #6b7280;
+            border-radius: 3px;
+        }
+        
+        /* Stats Display */
+        .extraction-stats {
+            display: none;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 1px solid #86efac;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 12px;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .stat-label {
+            color: #166534;
+            font-weight: 500;
+        }
+        
+        .stat-value {
+            color: #15803d;
+            font-weight: 600;
+        }
+        
+        /* Beautiful Buttons */
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .btn-primary:active::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Instructions Section */
+        .instructions {
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 16px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .instructions h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .instructions ol {
+            margin: 0;
+            padding-left: 20px;
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        /* Step Indicators */
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: #e5e7eb;
+            z-index: -1;
+        }
+        
+        .step:last-child::after {
+            display: none;
+        }
+        
+        .step-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #9ca3af;
+            transition: all 0.3s ease;
+        }
+        
+        .step.active .step-circle {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
+        }
+        
+        .step.completed .step-circle {
+            background: #10b981;
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+        
+        .step.active .step-label {
+            color: #4f46e5;
+            font-weight: 500;
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 15px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        /* Settings Icon */
+        .settings-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+        
+        .settings-icon:hover {
+            opacity: 1;
+            transform: rotate(90deg);
+        }
+        
+        /* Footer */
+        .footer {
+            padding: 12px;
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            font-size: 11px;
+            color: #9ca3af;
+        }
+        
+        .version-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <svg class="settings-icon" fill="white" viewBox="0 0 24 24">
+                <path d="M12 15.5A3.5 3.5 0 0 1 8.5 12A3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5a3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.03-.32.07-.64.07-.97c0-.33-.04-.65-.07-.97l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65A.488.488 0 0 0 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.03.32-.07.65-.07.97c0 .33.04.65.07.97l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.13-.22.07-.49-.12-.64l-2.11-1.65Z"/>
+            </svg>
+            <h1>🏥 Family First Program Extractor</h1>
+            <p>Extract & Format Program Information</p>
+        </div>
+        
+        <div class="content">
+            <!-- Status Messages -->
+            <div id="status" class="status"></div>
+            
+            <!-- Enhanced Progress Indicator -->
+            <div id="progressContainer" class="progress-container">
+                <div class="progress-header">
+                    <div class="progress-title">Extraction Progress</div>
+                    <div id="progressPercentage" class="progress-percentage">0%</div>
+                </div>
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+                <div id="progressText" class="progress-text">Initializing extraction engine...</div>
+                <div id="progressDetail" class="progress-detail">Preparing to analyze page...</div>
+            </div>
+            
+            <!-- Live Activity Log -->
+            <div id="activityLog" class="activity-log">
+                <div class="activity-log-title">▶ LIVE EXTRACTION LOG</div>
+                <div id="activityLines"></div>
+            </div>
+            
+            <!-- Extraction Stats -->
+            <div id="extractionStats" class="extraction-stats">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Pages Scanned:</span>
+                        <span id="statPages" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Data Points:</span>
+                        <span id="statDataPoints" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Sections Found:</span>
+                        <span id="statSections" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Time Elapsed:</span>
+                        <span id="statTime" class="stat-value">0s</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step Indicators -->
+            <div id="stepIndicator" class="step-indicator" style="display: none;">
+                <div class="step" id="step1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Navigate</div>
+                </div>
+                <div class="step" id="step2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Extract</div>
+                </div>
+                <div class="step" id="step3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Format</div>
+                </div>
+                <div class="step" id="step4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Complete</div>
+                </div>
+            </div>
+            
+            <!-- Loading Animation -->
+            <div id="loading" class="loading">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">Processing...</div>
+            </div>
+            
+            <!-- Main Actions -->
+            <div id="mainActions">
+                <button id="extractBtn" class="btn btn-primary">
+                    <span>📋</span>
+                    <span>Extract Program Info</span>
+                </button>
+                
+                <button id="copyBtn" class="btn btn-secondary" style="display: none;">
+                    <span>📝</span>
+                    <span>Copy to Tool</span>
+                </button>
+            </div>
+            
+            <!-- Instructions -->
+            <div class="instructions">
+                <h3>
+                    <span>📖</span>
+                    <span>How to Use:</span>
+                </h3>
+                <ol>
+                    <li>Navigate to a treatment program's website</li>
+                    <li>Click "Extract Program Info" to capture details</li>
+                    <li>Review the extracted information</li>
+                    <li>Click "Copy to Tool" to send to Doc Creator</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <span class="version-badge">v2.0 Enhanced</span>
+        </div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

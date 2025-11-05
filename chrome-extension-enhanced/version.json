@@ -1,0 +1,198 @@
+{
+  "version": "1.6.2",
+  "lastUpdated": "2025-10-09",
+  "releaseNotes": "Deep Extraction Update - Multi-page analysis with site-specific extractors for comprehensive program data",
+  "changes": {
+    "1.6.2": {
+      "date": "2025-10-09",
+      "type": "patch",
+      "description": "Fix connection error on extraction",
+      "fixes": [
+        "Fixed 'Could not establish connection' error",
+        "Improved content script injection with fallback",
+        "Added delay to ensure script readiness",
+        "Better error handling for script injection failures",
+        "Inject all required scripts in correct order"
+      ]
+    },
+    "1.6.1": {
+      "date": "2025-10-09",
+      "type": "patch",
+      "description": "Bug fixes for extraction and integration",
+      "fixes": [
+        "Fixed duplicate content script injection error",
+        "Fixed 'Cannot read properties of undefined' error in processPageData",
+        "Fixed handleChromeExtensionData not being accessible globally",
+        "Fixed Copy to Tool button not opening program modal",
+        "Improved error handling for array processing",
+        "Better compatibility with Chrome extension message passing"
+      ]
+    },
+    "1.6.0": {
+      "date": "2025-10-09",
+      "type": "major",
+      "description": "Deep extraction overhaul for comprehensive analysis",
+      "features": [
+        "Multi-page extraction analyzing up to 30 pages",
+        "Site-specific extractors (starting with Voyage Recovery)",
+        "Enhanced clinical description generation",
+        "Improved therapy and specialization detection",
+        "Better program name extraction with 6+ strategies",
+        "Smarter link scoring and prioritization",
+        "Clinical-grade writeup formatting"
+      ],
+      "technical": [
+        "Added clinical-extractor.js to content scripts",
+        "Enhanced content.js with multi-page navigation",
+        "Improved description generation to avoid generic text",
+        "Added site-specific extraction patterns",
+        "Better integration between extractors"
+      ],
+      "fixes": [
+        "No more generic 'comprehensive treatment services'",
+        "Proper extraction from sites like Voyage Recovery",
+        "More thorough data extraction across pages",
+        "Better handling of autism/ASD and other specializations"
+      ]
+    },
+    "1.5.5": {
+      "date": "2025-10-09",
+      "type": "patch",
+      "description": "Fixed Copy to Tool functionality",
+      "features": [
+        "Direct script injection for reliable data transfer",
+        "Removed complex message passing that was failing",
+        "Automatic Doc Creator tab detection and focusing",
+        "Fallback to open new tab with data if needed",
+        "Clear status messages throughout the process"
+      ],
+      "fixes": [
+        "Copy to Tool button now properly sends data",
+        "Extract button no longer re-runs extraction",
+        "Fixed data not appearing in Doc Creator modal",
+        "Improved error handling and recovery"
+      ]
+    },
+    "1.5.4": {
+      "date": "2025-10-09",
+      "type": "patch",
+      "description": "Enhanced Chrome Extension integration",
+      "features": [
+        "Automatic login bypass for Chrome Extension users",
+        "Encryption initialization for extension data",
+        "Improved message passing with retry logic",
+        "Visual confirmation when data is received"
+      ],
+      "fixes": [
+        "Fixed encryption errors for Chrome Extension users",
+        "Fixed data not being transmitted to Doc Creator",
+        "Fixed login screen appearing for extension users"
+      ]
+    },
+    "1.5.3": {
+      "date": "2025-10-09",
+      "type": "patch",
+      "description": "Chrome Extension auto-login improvements",
+      "fixes": [
+        "Enhanced auto-login for Chrome Extension users",
+        "Fixed session storage initialization"
+      ]
+    },
+    "1.5.2": {
+      "date": "2025-10-09",
+      "type": "patch",
+      "description": "Content injector improvements",
+      "fixes": [
+        "Fixed content-injector.js initialization",
+        "Improved data handling for Chrome Extension"
+      ]
+    },
+    "1.5.1": {
+      "date": "2025-10-09",
+      "type": "patch",
+      "description": "Bug fixes for Chrome Extension integration",
+      "fixes": [
+        "Fixed orphaned else statement syntax error",
+        "Improved error handling"
+      ]
+    },
+    "1.5.0": {
+      "date": "2025-10-09",
+      "type": "major",
+      "description": "Complete extraction engine overhaul",
+      "features": [
+        "Clinical-grade extraction system with multi-strategy detection",
+        "40+ therapy types and 15+ specialization categories",
+        "Professional clinical writeup formatting",
+        "Real-time extraction progress with detailed statistics",
+        "Context-aware contact information extraction",
+        "Staff credentials and accreditation detection",
+        "Program length and family involvement extraction",
+        "Academic support and insurance information capture"
+      ],
+      "technical": [
+        "Created clinical-extractor.js for sophisticated extraction",
+        "Rewrote popup.js with clinical data processing",
+        "Enhanced content.js with better data compilation",
+        "Optimized regex patterns for accuracy",
+        "Improved error handling and recovery"
+      ]
+    },
+    "1.4.0": {
+      "date": "2025-10-09",
+      "type": "patch",
+      "features": [
+        "Critical extraction improvements",
+        "Better program name detection",
+        "Enhanced location and contact extraction"
+      ],
+      "fixes": [
+        "Fixed extraction for sites like Voyage Recovery",
+        "Improved phone number pattern matching",
+        "Better email validation and filtering"
+      ]
+    },
+    "1.3.0": {
+      "date": "2025-10-09",
+      "type": "minor",
+      "features": [
+        "Editable fields for all extracted data",
+        "Direct contact number support",
+        "Email field addition",
+        "Hover effects on buttons"
+      ],
+      "fixes": [
+        "Button click handlers not working",
+        "ID collision issues",
+        "Template literal syntax errors"
+      ]
+    },
+    "1.2.0": {
+      "date": "2025-10-09",
+      "type": "minor",
+      "features": [
+        "Clinical writeup formatting",
+        "Program-specific content extraction",
+        "Enhanced data patterns"
+      ]
+    },
+    "1.1.0": {
+      "date": "2025-10-08",
+      "type": "minor",
+      "features": [
+        "Initial enhanced version",
+        "Chrome Manifest V3",
+        "Doc Creator integration"
+      ]
+    },
+    "1.0.0": {
+      "date": "2025-10-08",
+      "type": "major",
+      "features": [
+        "Initial release",
+        "Basic extraction functionality",
+        "Copy to clipboard"
+      ]
+    }
+  }
+}

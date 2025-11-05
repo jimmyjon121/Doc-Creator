@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Extension Settings</title>
+    <style>
+        body {
+            width: 500px;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f7;
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .option {
+            margin-bottom: 20px;
+        }
+        
+        .option h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #444;
+        }
+        
+        .option p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #666;
+        }
+        
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #357abd;
+        }
+        
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+            display: block;
+        }
+        
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+            display: block;
+        }
+        
+        .status.warning {
+            background: #fff3e0;
+            color: #f57c00;
+            border: 1px solid #ffe0b2;
+            display: block;
+        }
+        
+        .status.info {
+            background: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #bbdefb;
+            display: block;
+        }
+        
+        .free-badge {
+            display: inline-block;
+            background: #4caf50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+        
+        .recommended {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        
+        .recommended strong {
+            color: #1976d2;
+        }
+        
+        a {
+            color: #4a90e2;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h2>AI Extraction Settings</h2>
+    
+    <div class="section">
+        <div class="recommended">
+            <strong>Recommended:</strong> Use Google Gemini for free AI-powered extraction (60 requests/minute)
+        </div>
+        
+        <div class="option">
+            <h3>Google Gemini API <span class="free-badge">FREE</span></h3>
+            <p>Get your free API key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></p>
+            <p>No credit card required • 60 requests per minute</p>
+            <input type="password" id="geminiKey" placeholder="Enter your Gemini API key">
+            <button id="saveGemini">Save Gemini Key</button>
+            <div id="geminiStatus" class="status"></div>
+        </div>
+        
+        <div class="option">
+            <h3>OpenAI GPT-3.5 (Alternative)</h3>
+            <p>Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a></p>
+            <p>Requires payment • More powerful but costs ~$0.002 per extraction</p>
+            <input type="password" id="openaiKey" placeholder="Enter your OpenAI API key (optional)">
+            <button id="saveOpenAI">Save OpenAI Key</button>
+            <div id="openaiStatus" class="status"></div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h3>How to Get Started</h3>
+        <ol style="font-size: 14px; color: #555; line-height: 1.6;">
+            <li>Click the Google AI Studio link above</li>
+            <li>Sign in with your Google account</li>
+            <li>Click "Get API key" → "Create API key"</li>
+            <li>Copy the key and paste it above</li>
+            <li>Click "Save Gemini Key"</li>
+            <li>Start extracting with AI intelligence!</li>
+        </ol>
+    </div>
+    
+    <div class="section">
+        <h3>Chrome Built-in AI (Experimental)</h3>
+        <p style="font-size: 13px; color: #666;">
+            Chrome is testing built-in Gemini Nano. If available, the extension will use it automatically (no API key needed).
+            <br><br>
+            To enable: Go to <code>chrome://flags</code> and search for "Gemini Nano"
+        </p>
+    </div>
+    
+    <script src="settings.js"></script>
+</body>
+</html>

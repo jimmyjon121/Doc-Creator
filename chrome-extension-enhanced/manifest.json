@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "CareConnect Clinical Intel",
+  "version": "13.1.0",
+  "description": "Universal dynamic extraction system - extracts comprehensive data from ANY treatment website",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "clipboardWrite",
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.openai.com/*",
+    "https://api.anthropic.com/*",
+    "http://localhost:11434/*"
+  ],
+  "options_page": "settings-v3.html",
+  "action": {
+    "default_popup": "popup-v3.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "background": {
+    "service_worker": "background-v13.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content-simple-v13.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

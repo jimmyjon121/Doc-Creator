@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chrome Extension Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .status {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #d4f4dd;
+            border: 1px solid #28a745;
+        }
+        h1 {
+            color: #333;
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        ol {
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Chrome Extension Test Page</h1>
+    
+    <div class="instructions">
+        <h2>Test Instructions:</h2>
+        <ol>
+            <li><strong>Reload the Chrome Extension</strong>
+                <ul>
+                    <li>Go to chrome://extensions/</li>
+                    <li>Find "Family First Program Extractor v3.0"</li>
+                    <li>Click the reload icon</li>
+                </ul>
+            </li>
+            <li><strong>Click the extension icon</strong> (in the toolbar)</li>
+            <li><strong>Click "Extract Program Info"</strong></li>
+            <li><strong>Watch the activity log</strong> - what does it say?</li>
+            <li><strong>Click "Copy to Tool"</strong></li>
+            <li><strong>Check the activity log again</strong> - what happens?</li>
+        </ol>
+    </div>
+    
+    <div class="status">
+        <h3>Expected Results:</h3>
+        <p>When you click "Copy to Tool", you should see in the activity log:</p>
+        <ul>
+            <li>✅ Data copied to clipboard</li>
+            <li>Opening Doc Creator app...</li>
+            <li>✅ Tab opened successfully OR ❌ Failed to open: [error message]</li>
+        </ul>
+    </div>
+    
+    <div class="status success">
+        <h3>Server Status:</h3>
+        <p>✅ Server is running on http://localhost:8000</p>
+        <p>✅ AppsCode-DeluxeCMS.html is accessible</p>
+    </div>
+    
+    <div class="status">
+        <h3>URLs the Extension Will Try:</h3>
+        <ol>
+            <li>http://localhost:8000/AppsCode-DeluxeCMS.html</li>
+            <li>file:///Users/christophermolina/Cursor%20DOCCREATION%20Tool%20/Doc-Creator/Doc-Creator/AppsCode-DeluxeCMS.html</li>
+        </ol>
+    </div>
+</body>
+</html>

@@ -1,0 +1,106 @@
+@media print {
+            body {
+                background: white !important;
+            }
+            
+            .theme-toggle, .modal, button {
+                display: none !important;
+            }
+            
+            .container {
+                box-shadow: none !important;
+                max-width: 100% !important;
+            }
+        }
+
+@media print {
+            @page {
+                size: letter;
+                margin: 1in 0.75in 1in 0.75in; /* Top, Right, Bottom, Left - content width ~6.5" */
+            }
+            
+            /* Hide ALL UI elements during print */
+            .theme-toggle,
+            .history-panel,
+            .comparison-view,
+            .analytics-dashboard,
+            .container,
+            .modal,
+            .quick-actions,
+            #historyPanel,
+            #comparisonView,
+            #analyticsDashboard {
+                display: none !important;
+            }
+            
+            body {
+                margin: 0;
+                padding: 0;
+                background: white;
+            }
+            
+            .container {
+                display: none !important;
+            }
+            
+            .document-output {
+                display: block !important;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                background: white;
+                color: black;
+                font-family: Helvetica, Arial, "Segoe UI", sans-serif;
+                font-size: 11pt;
+                line-height: 1.6;
+            }
+            
+            .doc-page {
+                position: relative;
+                width: 100%;
+                padding: 0;
+                page-break-inside: avoid;
+                overflow: visible; /* ensure header image not clipped */
+            }
+            
+            /* Hide web elements completely */
+            .modal, .program-info-btn, .program-badge {
+                display: none !important;
+            }
+        }
+
+@media print {
+            .doc-mini-title, .doc-mini-blurb, .doc-mini-contact {
+                min-height: 1.2em;
+            }
+            
+            .doc-footer {
+                position: fixed;
+                bottom: 0.5in;
+                left: 0;
+                right: 0;
+                text-align: center;
+                font-size: 10pt;
+                color: #333;
+                background: white;
+                padding: 10px 0;
+                z-index: 100;
+            }
+            
+            .doc-content {
+                padding-bottom: 80px; /* More space for fixed footer */
+            }
+        }
+
+@media print {
+                            body { margin: 20px; }
+                        }
+
+@media print {
+                            body { margin: 0; }
+                            .no-print { display: none; }
+                            @page { 
+                                size: letter;
+                                margin: 0.5in;
+                            }
+                        }

@@ -1,0 +1,22 @@
+{
+  "name": "careconnect-clinical-intel",
+  "version": "13.0.0",
+  "description": "Hybrid AI-Enhanced Clinical Data Extraction Engine",
+  "main": "build-extension.js",
+  "scripts": {
+    "build": "node build-extension.js",
+    "build:extension": "node build-extension.js",
+    "watch": "node build-extension.js --watch"
+  },
+  "keywords": [
+    "chrome-extension",
+    "clinical",
+    "extraction",
+    "ai",
+    "healthcare"
+  ],
+  "author": "CareConnect Team",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
