@@ -5301,7 +5301,7 @@
             background: white;
             border: 1px solid #e5e7eb;
             padding: 20px;
-            display: flex !important;
+            display: none; /* Hidden by default - only show for Programs tab */
             flex-direction: column;
             box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             border-radius: 12px;
@@ -8077,32 +8077,13 @@
                                     }
                                 }, 100);
                                 
-                                // Hide the selection panel for dashboard - try multiple selectors
-                                const selectors = [
-                                    '.selection-panel',
-                                    '[class*="selection"]',
-                                    '[id*="selection"]',
-                                    'aside',
-                                    '.sidebar'
-                                ];
-                                
-                                selectors.forEach(selector => {
-                                    const elements = document.querySelectorAll(selector);
-                                    elements.forEach(el => {
-                                        // Check if it contains document generation UI
-                                        const hasDocGen = el.textContent && (
-                                            el.textContent.includes('GENERATE DOCUMENT') ||
-                                            el.textContent.includes('Document Type') ||
-                                            el.textContent.includes('First Name Only') ||
-                                            el.textContent.includes('Selected Programs')
-                                        );
-                                        if (hasDocGen) {
-                                            el.style.display = 'none';
-                                            el.style.visibility = 'hidden';
-                                            el.setAttribute('data-dashboard-hidden', 'true');
-                                        }
-                                    });
-                                });
+                                // IMPORTANT: Hide the document generation panel for Dashboard tab
+                                const selectionPanel = document.querySelector('.selection-panel');
+                                if (selectionPanel) {
+                                    selectionPanel.style.display = 'none';
+                                    selectionPanel.style.visibility = 'hidden';
+                                    console.log('✅ Hidden selection panel for Dashboard tab');
+                                }
                                 
                                 // Adjust main content layout to full width
                                 const mainContent = document.querySelector('.main-content');
@@ -8110,37 +8091,37 @@
                                     mainContent.style.gridTemplateColumns = '1fr';
                                     mainContent.style.maxWidth = '100%';
                                 }
-                                
-                                // Also hide any right sidebar
-                                const rightSidebar = document.querySelector('[style*="grid-column: 2"]');
-                                if (rightSidebar) {
-                                    rightSidebar.style.display = 'none';
-                                }
-                                
-                                // Hide selection panel using dedicated function
-                                hideSelectionPanel();
                             } else if (tab === 'programs') {
                                 // Remove dashboard mode
                                 document.body.classList.remove('dashboard-active');
                                 
-                                // Show selection panel for Programs tab
-                                showSelectionPanel();
+                                // Show selection panel for Programs tab ONLY
+                                const selectionPanel = document.querySelector('.selection-panel');
+                                if (selectionPanel) {
+                                    selectionPanel.style.display = 'block';
+                                    selectionPanel.style.visibility = 'visible';
+                                    console.log('✅ Showing selection panel for Programs tab');
+                                }
                                 
-                                // Restore main content layout
+                                // Restore main content layout with side panel
                                 const mainContent = document.querySelector('.main-content');
                                 if (mainContent) {
                                     mainContent.style.gridTemplateColumns = '1fr 440px';
                                     mainContent.style.maxWidth = '';
                                 }
                             } else if (tab === 'clients') {
-                                // For clients tab, keep full width but hide selection panel
+                                // For clients tab, keep full width but HIDE selection panel
                                 document.body.classList.remove('dashboard-active');
                                 
+                                // IMPORTANT: Hide the document generation panel for Clients tab
                                 const selectionPanel = document.querySelector('.selection-panel');
                                 if (selectionPanel) {
                                     selectionPanel.style.display = 'none';
+                                    selectionPanel.style.visibility = 'hidden';
+                                    console.log('✅ Hidden selection panel for Clients tab');
                                 }
                                 
+                                // Full width layout for clients
                                 const mainContent = document.querySelector('.main-content');
                                 if (mainContent) {
                                     mainContent.style.gridTemplateColumns = '1fr';
@@ -8367,6 +8348,13 @@
                     document.addEventListener('DOMContentLoaded', function() {
                         // Start with Programs tab as default
                         const defaultTab = 'programs';
+                        
+                        // Initially hide the selection panel
+                        const selectionPanel = document.querySelector('.selection-panel');
+                        if (selectionPanel) {
+                            selectionPanel.style.display = 'none';
+                            selectionPanel.style.visibility = 'hidden';
+                        }
                         
                         // Load programs tab by default
                         setTimeout(() => {
