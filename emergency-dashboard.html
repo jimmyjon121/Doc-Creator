@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Dashboard Access</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .status {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .status h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .check-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .check-item .icon {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        #log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #333;
+        }
+        
+        .log-error { color: #ff6b6b; }
+        .log-success { color: #51cf66; }
+        .log-info { color: #74c0fc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 Emergency Dashboard Diagnostic</h1>
+        <p class="subtitle">Checking system health and providing recovery options...</p>
+        
+        <div class="status">
+            <h3>System Status</h3>
+            <div id="checks"></div>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-primary" onclick="fixAndReload()">
+                🔧 Fix & Reload Main App
+            </button>
+            <button class="btn-secondary" onclick="clearAllData()">
+                🗑️ Clear All Data & Reset
+            </button>
+            <button class="btn-secondary" onclick="openMainApp()">
+                🚀 Try Opening Main App
+            </button>
+            <button class="btn-danger" onclick="nuclearReset()">
+                ☢️ Nuclear Reset (Last Resort)
+            </button>
+        </div>
+        
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const log = document.getElementById('log');
+        const checksDiv = document.getElementById('checks');
+        
+        function addLog(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function addCheck(name, status, message) {
+            const check = document.createElement('div');
+            check.className = 'check-item';
+            
+            const icon = document.createElement('span');
+            icon.className = `icon ${status}`;
+            icon.textContent = status === 'success' ? '✅' : status === 'error' ? '❌' : '⚠️';
+            
+            const text = document.createElement('span');
+            text.textContent = `${name}: ${message}`;
+            
+            check.appendChild(icon);
+            check.appendChild(text);
+            checksDiv.appendChild(check);
+        }
+        
+        // Run diagnostics
+        addLog('Starting diagnostics...', 'info');
+        
+        // Check server connection
+        fetch('feature-flags.js')
+            .then(() => {
+                addCheck('Server Connection', 'success', 'Server is responding');
+                addLog('✅ Server connection OK', 'success');
+            })
+            .catch(() => {
+                addCheck('Server Connection', 'error', 'Cannot reach server');
+                addLog('❌ Server connection failed', 'error');
+            });
+        
+        // Check localStorage
+        try {
+            const lastTab = localStorage.getItem('lastActiveTab');
+            addCheck('LocalStorage', 'success', `Last tab: ${lastTab || 'none'}`);
+            addLog(`LocalStorage OK - Last tab: ${lastTab}`, 'info');
+        } catch (e) {
+            addCheck('LocalStorage', 'error', 'Cannot access localStorage');
+            addLog('❌ localStorage error: ' + e.message, 'error');
+        }
+        
+        // Check session
+        const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+        addCheck('Session', isLoggedIn ? 'success' : 'warning', `Logged in: ${isLoggedIn || 'false'}`);
+        
+        // Check IndexedDB
+        if ('indexedDB' in window) {
+            addCheck('IndexedDB', 'success', 'Available');
+            indexedDB.databases().then(dbs => {
+                addLog(`Found ${dbs.length} IndexedDB databases`, 'info');
+                dbs.forEach(db => addLog(`  - ${db.name} (v${db.version})`, 'info'));
+            });
+        } else {
+            addCheck('IndexedDB', 'error', 'Not available');
+        }
+        
+        function fixAndReload() {
+            addLog('Applying fixes...', 'info');
+            
+            // Set dashboard as default
+            localStorage.setItem('lastActiveTab', 'dashboard');
+            addLog('✅ Set dashboard as default tab', 'success');
+            
+            // Ensure logged in
+            sessionStorage.setItem('isLoggedIn', 'true');
+            addLog('✅ Set login session', 'success');
+            
+            // Clear any error states
+            localStorage.removeItem('dashboardError');
+            addLog('✅ Cleared error states', 'success');
+            
+            addLog('Reloading main app in 2 seconds...', 'info');
+            setTimeout(() => {
+                window.location.href = 'AppsCode-DeluxeCMS.html';
+            }, 2000);
+        }
+        
+        function clearAllData() {
+            if (!confirm('This will clear all stored data including clients and settings. Continue?')) {
+                return;
+            }
+            
+            addLog('Clearing all data...', 'info');
+            
+            // Clear storage
+            localStorage.clear();
+            sessionStorage.clear();
+            addLog('✅ Cleared localStorage and sessionStorage', 'success');
+            
+            // Set defaults
+            localStorage.setItem('lastActiveTab', 'dashboard');
+            sessionStorage.setItem('isLoggedIn', 'true');
+            
+            // Clear IndexedDB
+            indexedDB.databases().then(databases => {
+                databases.forEach(db => {
+                    indexedDB.deleteDatabase(db.name);
+                    addLog(`✅ Deleted database: ${db.name}`, 'success');
+                });
+                
+                addLog('All data cleared. Reloading...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'AppsCode-DeluxeCMS.html';
+                }, 2000);
+            });
+        }
+        
+        function openMainApp() {
+            sessionStorage.setItem('isLoggedIn', 'true');
+            window.location.href = 'AppsCode-DeluxeCMS.html';
+        }
+        
+        function nuclearReset() {
+            if (!confirm('NUCLEAR RESET: This will:\n- Clear ALL browser data\n- Delete ALL databases\n- Force hard reload\n\nAre you absolutely sure?')) {
+                return;
+            }
+            
+            addLog('🔥 Initiating nuclear reset...', 'info');
+            
+            // Clear everything
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Clear IndexedDB
+            if ('indexedDB' in window) {
+                indexedDB.databases().then(databases => {
+                    databases.forEach(db => indexedDB.deleteDatabase(db.name));
+                });
+            }
+            
+            // Unregister service workers
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(registration => registration.unregister());
+                });
+            }
+            
+            // Clear caches
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => caches.delete(name));
+                });
+            }
+            
+            addLog('☢️ Nuclear reset complete. Reloading in 3 seconds...', 'success');
+            
+            setTimeout(() => {
+                sessionStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('lastActiveTab', 'dashboard');
+                window.location.href = 'AppsCode-DeluxeCMS.html?' + Date.now();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+
