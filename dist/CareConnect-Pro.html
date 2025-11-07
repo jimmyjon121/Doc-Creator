@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!-- 
     CareConnect Pro v4.0.0
-    Build Date: 2025-11-07T15:07:53.166Z
-    Build Hash: 914d0364
+    Build Date: 2025-11-07T15:14:27.786Z
+    Build Hash: 4f03b00c
     Copyright (c) Family First Adolescent Services
 -->
 
@@ -1162,11 +1162,11 @@ console.log('✅ Programs fix initialized');
     
     // Add tracker tasks to flight plan
     const enhanceFlightPlan = () => {
-        const originalLoadPriorities = window.dashboardManager.loadPriorities;
+        const originalLoadCriticalAlerts = window.dashboardManager.loadCriticalAlerts;
         
-        window.dashboardManager.loadPriorities = async function() {
+        window.dashboardManager.loadCriticalAlerts = async function() {
             // Call original
-            const priorities = await originalLoadPriorities.call(this);
+            const priorities = await originalLoadCriticalAlerts.call(this);
             
             // Add tracker-generated tasks
             try {

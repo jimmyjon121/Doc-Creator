@@ -171,11 +171,11 @@
     
     // Add tracker tasks to flight plan
     const enhanceFlightPlan = () => {
-        const originalLoadPriorities = window.dashboardManager.loadPriorities;
+        const originalLoadCriticalAlerts = window.dashboardManager.loadCriticalAlerts;
         
-        window.dashboardManager.loadPriorities = async function() {
+        window.dashboardManager.loadCriticalAlerts = async function() {
             // Call original
-            const priorities = await originalLoadPriorities.call(this);
+            const priorities = await originalLoadCriticalAlerts.call(this);
             
             // Add tracker-generated tasks
             try {
