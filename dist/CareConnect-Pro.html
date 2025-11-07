@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!-- 
     CareConnect Pro v4.0.0
-    Build Date: 2025-11-07T18:16:37.328Z
-    Build Hash: 7b7e96e2
+    Build Date: 2025-11-07T18:37:53.739Z
+    Build Hash: ad24e176
     Copyright (c) Family First Adolescent Services
 -->
 
@@ -306,6 +306,7 @@
             'tracker-timeline.js',
             'tracker-bulk-update.js',
             'tracker-aftercare-cascade.js',
+            'discharge-checklist.js',
             'houses-manager.js',
             'milestones-manager.js',
             'aftercare-manager.js'
@@ -2066,6 +2067,90 @@ console.log('✅ Programs fix initialized');
         }
     }, 100);
     
+})();
+
+
+// Enhancement: discharge-checklist.js
+/**
+ * Discharge Checklist UI Enhancement
+ * Adds discharge checklist button to client cards and integrates with dashboard
+ */
+
+(function() {
+    'use strict';
+    
+    // Wait for dashboard to be ready
+    function waitForDashboard() {
+        if (!window.dashboardWidgets || !window.dischargeChecklistManager) {
+            setTimeout(waitForDashboard, 100);
+            return;
+        }
+        
+        enhanceClientCards();
+    }
+    
+    /**
+     * Add discharge checklist button to client cards
+     */
+    function enhanceClientCards() {
+        // Override the renderClientCard method to add discharge checklist button
+        const originalRenderCard = window.dashboardWidgets.renderClientCard;
+        
+        window.dashboardWidgets.renderClientCard = function(client) {
+            const cardHtml = originalRenderCard.call(this, client);
+            
+            // Calculate days to discharge
+            const daysToDischarge = client.dischargeDate ? 
+                Math.ceil((new Date(client.dischargeDate) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+            
+            // Only show discharge checklist button if discharge is within 7 days or past
+            if (daysToDischarge !== null && daysToDischarge <= 7) {
+                // Insert discharge checklist button before the closing client-actions div
+                const insertPoint = '</div>\n            </div>';
+                const dischargeButton = `
+                    <button class="btn-discharge-checklist" 
+                            onclick="dischargeChecklistManager.renderChecklistModal('${client.id}')"
+                            title="Open FFAS Discharge Checklist">
+                        📋 Discharge Checklist
+                    </button>
+                `;
+                
+                return cardHtml.replace(insertPoint, dischargeButton + insertPoint);
+            }
+            
+            return cardHtml;
+        };
+        
+        // Also add to the discharge prep alerts
+        const originalRenderPriority = window.dashboardWidgets.renderPriorityItem;
+        
+        window.dashboardWidgets.renderPriorityItem = function(item, zoneColor) {
+            const html = originalRenderPriority.call(this, item, zoneColor);
+            
+            // If this is a discharge prep item, add a link to the checklist
+            if (item.type === 'discharge_prep') {
+                const checklistLink = `
+                    <button class="btn-link" 
+                            onclick="dischargeChecklistManager.renderChecklistModal('${item.client.id}')"
+                            style="margin-left: 8px; color: #7c3aed; text-decoration: underline; background: none; border: none; cursor: pointer;">
+                        📋 Open Full Checklist
+                    </button>
+                `;
+                
+                // Insert after the action button
+                return html.replace('</div>\n                </div>', checklistLink + '</div>\n                </div>');
+            }
+            
+            return html;
+        };
+    }
+    
+    // Initialize when ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', waitForDashboard);
+    } else {
+        waitForDashboard();
+    }
 })();
 
 </script>
@@ -5528,6 +5613,220 @@ console.log('✅ Programs fix initialized');
     .cascade-actions button {
         width: 100%;
     }
+}
+
+
+/* Enhancement: discharge-checklist.css */
+/* Discharge Checklist Styles */
+
+.discharge-checklist-modal .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.discharge-checklist-modal .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.discharge-checklist-modal h2 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 24px;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-close:hover {
+    color: #1f2937;
+}
+
+/* Progress Bar */
+.checklist-progress {
+    padding: 20px;
+    background: #f9fafb;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 24px;
+    background: #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+/* Checklist Sections */
+.checklist-sections {
+    padding: 20px;
+}
+
+.checklist-section {
+    margin-bottom: 30px;
+}
+
+.checklist-section h3 {
+    color: #374151;
+    font-size: 18px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Checklist Items */
+.checklist-items {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.checklist-item {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: all 0.2s ease;
+}
+
+.checklist-item:hover {
+    border-color: #9ca3af;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.checklist-item.completed {
+    background: #f0fdf4;
+    border-color: #86efac;
+}
+
+.checklist-label {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    gap: 12px;
+}
+
+.checklist-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.item-label {
+    flex: 1;
+    font-size: 15px;
+    color: #1f2937;
+    line-height: 1.5;
+}
+
+.checklist-item.completed .item-label {
+    color: #059669;
+    text-decoration: line-through;
+}
+
+.required {
+    color: #ef4444;
+    font-weight: bold;
+    margin-left: 4px;
+}
+
+.item-description {
+    margin-left: 32px;
+    margin-top: 6px;
+    font-size: 13px;
+    color: #6b7280;
+    font-style: italic;
+}
+
+.item-meta {
+    margin-left: 32px;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #10b981;
+    font-weight: 500;
+}
+
+/* Modal Footer */
+.discharge-checklist-modal .modal-footer {
+    padding: 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Print Styles */
+@media print {
+    .discharge-checklist-modal {
+        position: static;
+        background: white;
+    }
+    
+    .discharge-checklist-modal .modal-content {
+        box-shadow: none;
+        max-width: 100%;
+    }
+    
+    .btn-close,
+    .modal-footer button {
+        display: none;
+    }
+    
+    .checklist-item {
+        break-inside: avoid;
+    }
+    
+    .checklist-section {
+        page-break-inside: avoid;
+    }
+}
+
+/* Add discharge button to client cards */
+.btn-discharge-checklist {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.2s;
+}
+
+.btn-discharge-checklist:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
 </style>

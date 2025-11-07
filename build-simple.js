@@ -90,6 +90,7 @@ class SimpleBuilder {
             'task-manager.js',
             'notes-manager.js',
             'cm-tracker-export.js',
+            'discharge-checklist.js',
             'service-worker.js'
         ];
         
@@ -135,7 +136,9 @@ class SimpleBuilder {
             'tracker-compliance-widget.css',
             'tracker-document-hub.js',
             'tracker-document-hub.css',
-            'tracker-aftercare-cascade.css'
+            'tracker-aftercare-cascade.css',
+            'discharge-checklist.css',
+            'discharge-checklist.js'
         ].map(f => path.join(CONFIG.enhancementsDir, f));
         
         enhancementFiles.forEach(file => {

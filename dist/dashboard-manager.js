@@ -239,25 +239,8 @@ class DashboardManager {
                         }
                     }
                     
-                    // 48-hour discharge tasks
-                    if (daysUntilDischarge <= 2 && daysUntilDischarge >= 0) {
-                        // Check if discharge packet sent
-                        const dischargePacketSent = milestones.find(m => 
-                            m.milestone === 'discharge_packet_sent' && m.status === 'complete'
-                        );
-                        
-                        if (!dischargePacketSent) {
-                            alerts.push({
-                                type: 'discharge_packet',
-                                priority: 'yellow',
-                                client: client,
-                                message: 'Send discharge packet (48hr requirement)',
-                                action: 'Send packet & complete assessments',
-                                dueDate: 'Within 48 hours',
-                                sortOrder: 5
-                            });
-                        }
-                    }
+                    // 48-hour discharge tasks - REMOVED
+                    // User has discharge packet compiler in Program Database tab
                 }
             }
             
