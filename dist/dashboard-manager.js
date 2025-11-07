@@ -467,14 +467,40 @@ class DashboardManager {
         if (this.currentView === 'myClients' && !this.currentCoach.isAdmin) {
             // Filter by coach assignment
             const allClients = await clientManager.getAllClients();
-            return allClients.filter(client => 
+            const myClients = allClients.filter(client => 
                 client.caseManagerInitials === this.currentCoach.initials ||
                 client.familyAmbassadorPrimaryInitials === this.currentCoach.initials ||
                 client.familyAmbassadorSecondaryInitials === this.currentCoach.initials
             );
+            // Fallback: if none assigned, show All Clients to avoid empty dashboard
+            if (myClients.length === 0) {
+                this.currentView = 'allClients';
+                this.savePreferences();
+                this.updateViewToggleUI();
+                return allClients;
+            }
+            return myClients;
         } else {
             // All clients
             return await clientManager.getAllClients();
+        }
+    }
+
+    updateViewToggleUI() {
+        try {
+            const container = document.querySelector('.view-toggle');
+            if (!container) return;
+            const [btnMy, btnAll] = container.querySelectorAll('button');
+            if (!btnMy || !btnAll) return;
+            if (this.currentView === 'myClients') {
+                btnMy.classList.add('active');
+                btnAll.classList.remove('active');
+            } else {
+                btnAll.classList.add('active');
+                btnMy.classList.remove('active');
+            }
+        } catch (_) {
+            // no-op if structure changes
         }
     }
 
