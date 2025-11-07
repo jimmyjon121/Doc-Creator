@@ -124,8 +124,8 @@ class FlightPlanWidget extends DashboardWidget {
                     </div>
                     <div class="item-actions">
                         ${isTrackerTask ? 
-                            `<button class="btn-action btn-complete" onclick="dashboardWidgets.completeTrackerItem('${item.client.id}', '${item.trackerId}')">
-                                ✓ ${item.action || 'Mark Complete'}
+                            `<button class="btn-quick-complete" onclick="dashboardWidgets.completeTrackerItem('${item.client.id}', '${item.trackerId}')" title="Mark Complete">
+                                ✓
                             </button>` :
                             `<button class="btn-action" onclick="dashboardWidgets.takeAction('${actionId}', '${item.type}', '${item.client.id}')">
                                 ${item.action}

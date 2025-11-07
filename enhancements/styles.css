@@ -147,3 +147,8 @@
         opacity: 1;
     }
 }
+
+/* Hide dashboard subtitle - user requested removal */
+.dashboard-subtitle {
+    display: none !important;
+}
