@@ -138,7 +138,9 @@ class SimpleBuilder {
             'tracker-document-hub.css',
             'tracker-aftercare-cascade.css',
             'discharge-checklist.css',
-            'discharge-checklist.js'
+            'discharge-checklist.js',
+            'missions-redesign.css',
+            'missions-redesign.js'
         ].map(f => path.join(CONFIG.enhancementsDir, f));
         
         enhancementFiles.forEach(file => {

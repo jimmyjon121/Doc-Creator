@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!-- 
     CareConnect Pro v4.0.0
-    Build Date: 2025-11-07T18:37:53.739Z
-    Build Hash: ad24e176
+    Build Date: 2025-11-07T18:45:42.426Z
+    Build Hash: 9cf3303a
     Copyright (c) Family First Adolescent Services
 -->
 
@@ -2146,6 +2146,357 @@ console.log('✅ Programs fix initialized');
     }
     
     // Initialize when ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', waitForDashboard);
+    } else {
+        waitForDashboard();
+    }
+})();
+
+
+// Enhancement: missions-redesign.js
+/**
+ * Missions Widget Redesign
+ * Modern, beautiful redesign of the Today's Missions widget
+ */
+
+(function() {
+    'use strict';
+    
+    // Wait for dashboard to be ready
+    function waitForDashboard() {
+        if (!window.dashboardWidgets || !window.dashboardManager) {
+            setTimeout(waitForDashboard, 100);
+            return;
+        }
+        
+        enhanceMissionsWidget();
+    }
+    
+    /**
+     * Enhance the missions widget with modern design
+     */
+    function enhanceMissionsWidget() {
+        // Wait for MissionsWidget to be available
+        const checkForWidget = setInterval(() => {
+            // Find the missions widget instance
+            const widgetsManager = window.dashboardWidgets;
+            if (widgetsManager && widgetsManager.widgets) {
+                const missionsWidget = widgetsManager.widgets.get('missions');
+                if (missionsWidget) {
+                    clearInterval(checkForWidget);
+                    
+                    // Override the render method
+                    const originalRender = missionsWidget.render.bind(missionsWidget);
+                    missionsWidget.render = async function() {
+                        try {
+                            // Get the data first
+                            const alerts = await window.dashboardManager.loadCriticalAlerts();
+                            
+                            // Use our modern rendering
+                            const modernHtml = renderModernMissions(alerts);
+                            
+                            // Update the container
+                            if (this.container) {
+                                this.container.innerHTML = modernHtml;
+                            }
+                        } catch (error) {
+                            console.error('Error rendering modern missions:', error);
+                            // Fallback to original
+                            return originalRender();
+                        }
+                    };
+                    
+                    // Trigger a re-render
+                    missionsWidget.render();
+                }
+            }
+        }, 100);
+        
+        // Also create the widget if it doesn't exist
+        setTimeout(() => {
+            clearInterval(checkForWidget);
+            createMissionsWidgetIfMissing();
+        }, 5000);
+    }
+    
+    function createMissionsWidgetIfMissing() {
+        // Check if there's a container for missions but no widget
+        const container = document.querySelector('[data-widget="missions"], .missions-container');
+        if (container && window.dashboardWidgets && !window.dashboardWidgets.widgets.get('missions')) {
+            // Create a custom missions widget
+            const missionsWidget = {
+                id: 'missions',
+                container: container,
+                render: async function() {
+                    const alerts = await window.dashboardManager.loadCriticalAlerts();
+                    container.innerHTML = renderModernMissions(alerts);
+                }
+            };
+            
+            window.dashboardWidgets.widgets.set('missions', missionsWidget);
+            missionsWidget.render();
+        }
+    }
+    
+    /**
+     * Render modern missions widget
+     */
+    function renderModernMissions(data) {
+        // Get missions from red and yellow zones
+        const primaryMissions = data.red || [];
+        const secondaryMissions = data.yellow || [];
+        const totalMissions = primaryMissions.length + secondaryMissions.length;
+        const completedCount = 0; // Would need to track this in actual implementation
+        
+        let html = `
+            <div class="missions-widget">
+                <!-- Header -->
+                <div class="missions-header">
+                    <div class="missions-title">
+                        Today's Missions
+                    </div>
+                    <div class="missions-progress">
+                        <div class="progress-circles">
+                            ${Array(Math.max(2, totalMissions)).fill().map((_, i) => 
+                                `<div class="progress-circle ${i < completedCount ? 'completed' : ''}"></div>`
+                            ).join('')}
+                        </div>
+                        <span>${completedCount}/${totalMissions} Complete</span>
+                    </div>
+                </div>
+        `;
+        
+        if (totalMissions === 0) {
+            html += `
+                <div class="missions-empty">
+                    <div class="missions-empty-icon">🎉</div>
+                    <div class="missions-empty-text">All missions complete! Great work!</div>
+                </div>
+            `;
+        } else {
+            // Primary Objectives
+            if (primaryMissions.length > 0) {
+                html += `
+                    <div class="mission-section primary">
+                        <div class="mission-section-header">
+                            <div class="mission-label">
+                                <div class="icon">🎯</div>
+                                Primary Objective
+                            </div>
+                            <div class="mission-time">Est. ${primaryMissions.length * 5} min</div>
+                        </div>
+                        <div class="mission-items">
+                `;
+                
+                primaryMissions.forEach(mission => {
+                    const clientInfo = mission.client ? 
+                        `<span class="mission-client">${mission.client.initials || 'Client'}</span>` : '';
+                    
+                    html += `
+                        <div class="mission-item critical">
+                            <div class="mission-checkbox">
+                                <input type="checkbox" 
+                                       id="mission-${mission.type}-${mission.client?.id}"
+                                       ${mission.isTrackerTask ? 
+                                         `onclick="dashboardWidgets.completeTrackerItem('${mission.client?.id}', '${mission.trackerId}')"` :
+                                         `onclick="dashboardWidgets.completeMission('${mission.type}', '${mission.client?.id}')"` 
+                                       }>
+                            </div>
+                            <div class="mission-content">
+                                ${clientInfo}
+                                <span class="mission-text">${mission.message}</span>
+                                ${mission.priority === 'red' ? '<span class="mission-critical">CRITICAL</span>' : ''}
+                            </div>
+                            ${mission.action && mission.action !== 'Mark Complete' ? 
+                                `<button class="mission-action" onclick="dashboardWidgets.takeAction('${mission.type}', '${mission.client?.id}')">
+                                    ${mission.action}
+                                </button>` : ''
+                            }
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Secondary Objectives
+            if (secondaryMissions.length > 0) {
+                html += `
+                    <div class="mission-section secondary">
+                        <div class="mission-section-header">
+                            <div class="mission-label">
+                                <div class="icon">🎪</div>
+                                Secondary Objectives
+                            </div>
+                            <div class="mission-time">Est. ${secondaryMissions.length * 5} min</div>
+                        </div>
+                        <div class="mission-items">
+                `;
+                
+                secondaryMissions.forEach(mission => {
+                    const clientInfo = mission.client ? 
+                        `<span class="mission-client">${mission.client.initials || 'Client'}</span>` : '';
+                    
+                    html += `
+                        <div class="mission-item">
+                            <div class="mission-checkbox">
+                                <input type="checkbox" 
+                                       id="mission-${mission.type}-${mission.client?.id}"
+                                       ${mission.isTrackerTask ? 
+                                         `onclick="dashboardWidgets.completeTrackerItem('${mission.client?.id}', '${mission.trackerId}')"` :
+                                         `onclick="dashboardWidgets.completeMission('${mission.type}', '${mission.client?.id}')"` 
+                                       }>
+                            </div>
+                            <div class="mission-content">
+                                ${clientInfo}
+                                <span class="mission-text">${mission.message}</span>
+                            </div>
+                            ${mission.action && mission.action !== 'Mark Complete' ? 
+                                `<button class="mission-action" onclick="dashboardWidgets.takeAction('${mission.type}', '${mission.client?.id}')">
+                                    ${mission.action}
+                                </button>` : ''
+                            }
+                        </div>
+                    `;
+                });
+                
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        html += `
+            </div>
+            
+            <!-- Quick Actions Bar -->
+            <div class="quick-actions">
+                <button class="quick-action-btn" onclick="dashboardWidgets.openAddClient()">
+                    <div class="quick-action-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        ➕
+                    </div>
+                    <span class="quick-action-label">Add Client</span>
+                </button>
+                
+                <button class="quick-action-btn" onclick="dashboardWidgets.openGenerateDoc()">
+                    <div class="quick-action-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+                        📄
+                    </div>
+                    <span class="quick-action-label">Generate Doc</span>
+                </button>
+                
+                <button class="quick-action-btn" onclick="dashboardWidgets.showAllAlerts()">
+                    <div class="quick-action-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                        🔔
+                    </div>
+                    <span class="quick-action-label">All Alerts</span>
+                </button>
+                
+                <button class="quick-action-btn" onclick="dashboardWidgets.exportReport()">
+                    <div class="quick-action-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                        📊
+                    </div>
+                    <span class="quick-action-label">Export Report</span>
+                </button>
+                
+                <button class="quick-action-btn" onclick="dashboardWidgets.toggleFocusMode()">
+                    <div class="quick-action-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                        🎯
+                    </div>
+                    <span class="quick-action-label">Focus Mode</span>
+                </button>
+                
+                <button class="quick-action-btn" onclick="location.reload()">
+                    <div class="quick-action-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+                        🔄
+                    </div>
+                    <span class="quick-action-label">Refresh</span>
+                </button>
+            </div>
+        `;
+        
+        return html;
+    }
+    
+    // Add mission completion handler if it doesn't exist
+    if (window.dashboardWidgets && !window.dashboardWidgets.completeMission) {
+        window.dashboardWidgets.completeMission = async function(missionType, clientId) {
+            // Mark mission as complete
+            console.log('Completing mission:', missionType, clientId);
+            
+            // Add completion animation
+            const checkbox = document.querySelector(`#mission-${missionType}-${clientId}`);
+            if (checkbox) {
+                checkbox.checked = true;
+                const missionItem = checkbox.closest('.mission-item');
+                if (missionItem) {
+                    missionItem.style.opacity = '0.5';
+                    missionItem.style.textDecoration = 'line-through';
+                }
+            }
+            
+            // Update progress
+            setTimeout(() => {
+                window.dashboardManager.refreshDashboard();
+            }, 500);
+        };
+    }
+    
+    // Add placeholder methods for quick actions if they don't exist
+    const placeholderMethods = {
+        openAddClient: () => console.log('Open Add Client modal'),
+        openGenerateDoc: () => {
+            // Try to open document creator if available
+            const docBtn = document.querySelector('[onclick*="showDocumentCreator"]');
+            if (docBtn) docBtn.click();
+            else console.log('Open Generate Doc');
+        },
+        showAllAlerts: () => {
+            // Show all zones if collapsed
+            document.querySelectorAll('.zone-content.collapsed').forEach(zone => {
+                zone.classList.remove('collapsed');
+            });
+        },
+        exportReport: () => {
+            // Try to trigger export if available
+            if (window.exportDashboardData) {
+                window.exportDashboardData();
+            } else {
+                console.log('Export Report');
+            }
+        },
+        toggleFocusMode: () => {
+            // Hide all except missions widget
+            document.body.classList.toggle('focus-mode');
+            if (document.body.classList.contains('focus-mode')) {
+                // Hide other widgets
+                document.querySelectorAll('.widget-card').forEach(widget => {
+                    if (!widget.querySelector('.missions-widget')) {
+                        widget.style.display = 'none';
+                    }
+                });
+            } else {
+                // Show all widgets
+                document.querySelectorAll('.widget-card').forEach(widget => {
+                    widget.style.display = '';
+                });
+            }
+        }
+    };
+    
+    // Add methods if they don't exist
+    Object.keys(placeholderMethods).forEach(method => {
+        if (window.dashboardWidgets && !window.dashboardWidgets[method]) {
+            window.dashboardWidgets[method] = placeholderMethods[method];
+        }
+    });
+    
+    // Initialize
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', waitForDashboard);
     } else {
@@ -5827,6 +6178,388 @@ console.log('✅ Programs fix initialized');
 .btn-discharge-checklist:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+
+/* Enhancement: missions-redesign.css */
+/* Modern Missions Widget Redesign */
+
+.missions-widget {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.25);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.missions-widget::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 60%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* Header Section */
+.missions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+}
+
+.missions-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.missions-title::before {
+    content: '🎯';
+    font-size: 28px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.missions-progress {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 8px 16px;
+    border-radius: 100px;
+    color: white;
+    font-weight: 600;
+}
+
+.progress-circles {
+    display: flex;
+    gap: 8px;
+}
+
+.progress-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    background: transparent;
+    transition: all 0.3s ease;
+}
+
+.progress-circle.completed {
+    background: white;
+    border-color: white;
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.4);
+}
+
+/* Mission Sections */
+.mission-section {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.mission-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.mission-section.primary {
+    border-left: 4px solid #ef4444;
+}
+
+.mission-section.secondary {
+    border-left: 4px solid #f59e0b;
+}
+
+.mission-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.mission-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 16px;
+}
+
+.mission-label .icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.mission-section.primary .icon {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+.mission-section.secondary .icon {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.mission-time {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Mission Items */
+.mission-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fafafa 0%, #f9fafb 100%);
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.mission-item:hover {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    transform: translateX(4px);
+}
+
+.mission-item.critical {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+}
+
+.mission-checkbox {
+    position: relative;
+}
+
+.mission-checkbox input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    appearance: none;
+    border: 2px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.mission-checkbox input[type="checkbox"]:checked {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: #059669;
+}
+
+.mission-checkbox input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.mission-content {
+    flex: 1;
+}
+
+.mission-client {
+    display: inline-block;
+    background: #1f2937;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+.mission-text {
+    color: #4b5563;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.mission-critical {
+    display: inline-block;
+    background: #ef4444;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 8px;
+}
+
+.mission-action {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.mission-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Quick Actions Bar */
+.quick-actions {
+    display: flex;
+    gap: 12px;
+    padding: 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.quick-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 100px;
+}
+
+.quick-action-btn:hover {
+    background: linear-gradient(135deg, white 0%, #f9fafb 100%);
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.quick-action-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.quick-action-label {
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Animations */
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.missions-widget {
+    animation: slideInFromTop 0.5s ease;
+}
+
+.mission-section {
+    animation: slideInFromTop 0.5s ease;
+    animation-fill-mode: both;
+}
+
+.mission-section:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.mission-section:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+/* Empty State */
+.missions-empty {
+    text-align: center;
+    padding: 40px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.missions-empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.missions-empty-text {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .missions-widget {
+        padding: 20px;
+    }
+    
+    .missions-title {
+        font-size: 20px;
+    }
+    
+    .quick-actions {
+        padding: 12px;
+    }
+    
+    .quick-action-btn {
+        min-width: 80px;
+        padding: 12px 8px;
+    }
 }
 
 </style>
