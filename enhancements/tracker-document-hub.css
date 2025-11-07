@@ -1,0 +1,397 @@
+/**
+ * Tracker Document Hub Styles
+ * Visual status indicators for document tracking
+ */
+
+/* Document Hub Overlay */
+.document-hub-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Document Hub Modal */
+.document-hub-modal {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 900px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideUp 0.3s ease;
+}
+
+/* Header */
+.document-hub-header {
+    background: linear-gradient(135deg, #0099cc 0%, #006699 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.document-hub-header h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+/* Content */
+.document-hub-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+/* Document Summary */
+.document-summary {
+    margin-bottom: 25px;
+    padding-bottom: 25px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+}
+
+.summary-stat {
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.summary-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.summary-stat.danger {
+    background: #ffebee;
+    border: 1px solid #ffcdd2;
+}
+
+.summary-stat.warning {
+    background: #fff8e1;
+    border: 1px solid #ffe0b2;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #0099cc;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.summary-stat.danger .stat-value {
+    color: #dc3545;
+}
+
+.summary-stat.warning .stat-value {
+    color: #ffc107;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Document Categories */
+.document-categories {
+    margin-bottom: 20px;
+}
+
+.document-category {
+    margin-bottom: 25px;
+}
+
+.document-category h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 15px 0;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+/* Document List */
+.document-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Document Item */
+.document-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.document-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.document-item.complete {
+    background: #e8f5e9;
+    border-color: #4caf50;
+}
+
+.document-item.overdue {
+    background: #ffebee;
+    border-color: #f44336;
+}
+
+.document-item.urgent {
+    background: #fff8e1;
+    border-color: #ff9800;
+}
+
+/* Document Icon */
+.document-icon {
+    font-size: 24px;
+    width: 40px;
+    text-align: center;
+}
+
+/* Document Info */
+.document-info {
+    flex: 1;
+}
+
+.document-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.required-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    background: #dc3545;
+    color: white;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.signature-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    background: #6c757d;
+    color: white;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.document-status {
+    font-size: 12px;
+    color: #666;
+}
+
+.document-item.overdue .document-status {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.document-item.urgent .document-status {
+    color: #ff9800;
+    font-weight: 600;
+}
+
+/* Document Actions */
+.document-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-icon {
+    background: none;
+    border: 1px solid #dee2e6;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+    background: #f8f9fa;
+    transform: scale(1.1);
+}
+
+.btn-small {
+    padding: 6px 12px;
+    border: 1px solid #dee2e6;
+    background: white;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-small:hover {
+    background: #f8f9fa;
+}
+
+.btn-small.primary {
+    background: #0099cc;
+    color: white;
+    border-color: #0099cc;
+}
+
+.btn-small.primary:hover {
+    background: #0088bb;
+    transform: translateY(-1px);
+}
+
+/* Document Actions Footer */
+.document-hub-content .document-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.document-hub-content .document-actions button {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* Document Hub Button on Cards */
+.document-hub-btn {
+    margin-top: 8px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #333;
+}
+
+.document-hub-btn:hover {
+    background: #e9ecef;
+    border-color: #0099cc;
+    color: #0099cc;
+}
+
+/* Notifications */
+.document-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+    z-index: 10001;
+}
+
+.document-notification.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.document-notification.success {
+    background: #28a745;
+}
+
+.document-notification.error {
+    background: #dc3545;
+}
+
+.document-notification.info {
+    background: #0099cc;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .document-hub-modal {
+        width: 95%;
+        max-height: 95vh;
+    }
+    
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .document-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    
+    .document-info {
+        width: 100%;
+    }
+    
+    .document-actions {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .document-hub-content .document-actions {
+        flex-direction: column;
+    }
+    
+    .document-hub-content .document-actions button {
+        width: 100%;
+    }
+}

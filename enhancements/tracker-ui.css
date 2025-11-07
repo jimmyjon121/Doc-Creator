@@ -1,0 +1,372 @@
+/**
+ * Tracker UI Styles
+ * Visual enhancements for tracker completion indicators
+ */
+
+/* Tracker Status in Client Cards */
+.tracker-status {
+    margin: 10px 0;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tracker-status:hover {
+    background: #e9ecef;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Risk Level Indicators */
+.tracker-status.risk-red {
+    border-left: 4px solid #dc3545;
+    background: #fff5f5;
+}
+
+.tracker-status.risk-yellow {
+    border-left: 4px solid #ffc107;
+    background: #fffdf5;
+}
+
+.tracker-status.risk-green {
+    border-left: 4px solid #28a745;
+    background: #f5fff7;
+}
+
+/* Completion Bar */
+.completion-bar {
+    width: 100%;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.completion-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0099cc 0%, #006699 100%);
+    transition: width 0.5s ease;
+    position: relative;
+}
+
+.completion-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255,255,255,0.3) 50%,
+        transparent 100%
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Completion Text */
+.completion-text {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.completion-percentage {
+    font-weight: 600;
+    color: #333;
+}
+
+.critical-missing {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+/* Missing Items */
+.missing-items {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+    font-style: italic;
+}
+
+/* Tracker Modal */
+.tracker-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.tracker-modal {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tracker-modal-header {
+    background: linear-gradient(135deg, #0099cc 0%, #006699 100%);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tracker-modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.tracker-modal-content {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(80vh - 70px);
+}
+
+/* Summary Stats */
+.tracker-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.summary-stat {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    color: #0099cc;
+}
+
+/* Missing & Upcoming Sections */
+.missing-critical-section,
+.upcoming-section {
+    margin-bottom: 20px;
+}
+
+.missing-critical-section h4,
+.upcoming-section h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.missing-list,
+.upcoming-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.missing-item,
+.upcoming-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+}
+
+.missing-item:hover,
+.upcoming-item:hover {
+    border-color: #0099cc;
+    box-shadow: 0 2px 8px rgba(0,153,204,0.1);
+}
+
+.missing-item {
+    border-left: 3px solid #dc3545;
+}
+
+.upcoming-item {
+    border-left: 3px solid #ffc107;
+}
+
+.item-label {
+    font-weight: 500;
+    color: #333;
+}
+
+.item-due {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Tracker Actions */
+.tracker-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.tracker-actions button {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #0099cc 0%, #006699 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,153,204,0.3);
+}
+
+.btn-secondary {
+    background: #f8f9fa;
+    color: #333;
+    border: 1px solid #dee2e6;
+}
+
+.btn-secondary:hover {
+    background: #e9ecef;
+}
+
+/* Dashboard Integration */
+.client-card {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.client-card:has(.tracker-status.risk-red) {
+    border-color: #dc3545;
+}
+
+.client-card:has(.tracker-status.risk-yellow) {
+    border-color: #ffc107;
+}
+
+/* Flight Plan Integration */
+.priority-item[data-tracker-generated="true"] {
+    position: relative;
+}
+
+.priority-item[data-tracker-generated="true"]::before {
+    content: '🤖';
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    opacity: 0.5;
+    title: 'Auto-generated from tracker gaps';
+}
+
+/* Timeline Modal Specific */
+.timeline-modal-large {
+    width: 95%;
+    max-width: 1200px;
+}
+
+.timeline-modal-large .tracker-modal-content {
+    max-height: calc(90vh - 70px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .tracker-modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .tracker-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .completion-text {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .tracker-actions {
+        flex-direction: column;
+    }
+}

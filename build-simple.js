@@ -74,7 +74,16 @@ class SimpleBuilder {
             'features.js',
             'coach-profiles.js',
             'login-fix.js',
-            'programs-fix.js'
+            'programs-fix.js',
+            'tracker-ui.css',
+            'tracker-ui.js',
+            'tracker-timeline.css',
+            'tracker-bulk-update.css',
+            'tracker-compliance-widget.js',
+            'tracker-compliance-widget.css',
+            'tracker-document-hub.js',
+            'tracker-document-hub.css',
+            'tracker-aftercare-cascade.css'
         ].map(f => path.join(CONFIG.enhancementsDir, f));
         
         enhancementFiles.forEach(file => {
