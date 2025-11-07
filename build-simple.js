@@ -80,6 +80,8 @@ class SimpleBuilder {
             'client-manager.js',
             'tracker-engine.js',
             'tracker-predictive-engine.js',
+            'morning-review-dashboard.js',
+            'heat-map-visualization.js',
             'tracker-timeline.js',
             'tracker-bulk-update.js',
             'tracker-aftercare-cascade.js',
@@ -143,7 +145,11 @@ class SimpleBuilder {
             'missions-redesign.css',
             'missions-redesign.js',
             'predictive-insights.css',
-            'predictive-insights.js'
+            'predictive-insights.js',
+            'morning-review.css',
+            'morning-review.js',
+            'heat-map.css',
+            'heat-map.js'
         ].map(f => path.join(CONFIG.enhancementsDir, f));
         
         enhancementFiles.forEach(file => {
