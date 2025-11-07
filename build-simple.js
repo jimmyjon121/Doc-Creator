@@ -71,7 +71,10 @@ class SimpleBuilder {
             'styles.css',
             'scripts.js',
             'bugfixes.js',
-            'features.js'
+            'features.js',
+            'coach-profiles.js',
+            'login-fix.js',
+            'programs-fix.js'
         ].map(f => path.join(CONFIG.enhancementsDir, f));
         
         enhancementFiles.forEach(file => {
@@ -85,13 +88,37 @@ class SimpleBuilder {
                     content = content.replace('</style>', injection + '</style>');
                     console.log(`  [OK] Applied ${filename}`);
                 } else if (filename.endsWith('.js')) {
-                    // Find the main script block and inject before its closing tag
-                    const scriptRegex = /<script>\s*\/\/ Enhanced Login System[\s\S]*?<\/script>/;
+                    // Find a script block to inject into (preferably one with login-related code)
+                    const scriptRegex = /<script>[\s\S]*?\/\/ Enhanced Login System[\s\S]*?<\/script>/;
+                    const fallbackRegex = /<script>[\s\S]*?sessionStorage[\s\S]*?<\/script>/;
+                    const anyScriptRegex = /<script>[\s\S]+?<\/script>/;
+                    
+                    let matched = false;
+                    const injection = `\n// Enhancement: ${filename}\n${enhancement}\n`;
+                    
+                    // Try to find the enhanced login script block
                     if (scriptRegex.test(content)) {
-                        const injection = `\n// Enhancement: ${filename}\n${enhancement}\n`;
                         content = content.replace(scriptRegex, (match) => {
                             return match.replace('</script>', injection + '</script>');
                         });
+                        matched = true;
+                    }
+                    // Fallback to any script with sessionStorage
+                    else if (fallbackRegex.test(content)) {
+                        content = content.replace(fallbackRegex, (match) => {
+                            return match.replace('</script>', injection + '</script>');
+                        });
+                        matched = true;
+                    }
+                    // Last resort: inject into the first script block
+                    else if (anyScriptRegex.test(content)) {
+                        content = content.replace(anyScriptRegex, (match) => {
+                            return match.replace('</script>', injection + '</script>');
+                        });
+                        matched = true;
+                    }
+                    
+                    if (matched) {
                         console.log(`  [OK] Applied ${filename}`);
                     }
                 }

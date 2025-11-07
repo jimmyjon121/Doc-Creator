@@ -144,14 +144,19 @@
             console.log('💡 TIP: Press the "D" key at any time to force the dashboard to appear!');
         });
         
-        // NUCLEAR OPTION: Force dashboard to stay visible
+        // NUCLEAR OPTION: Force dashboard to stay visible (GUARDED - only when logged in)
         setInterval(function() {
+            // Exit immediately if not logged in - don't interfere with login screen
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+            if (!isLoggedIn) return;
+            
             const loginScreen = document.getElementById('loginScreen');
             const mainApp = document.getElementById('mainApp');
             const dashboardTab = document.getElementById('dashboardTab');
             const dashboardContainer = document.querySelector('.dashboard-container');
             
-            if (loginScreen) {
+            // Only manipulate when logged in
+            if (loginScreen && isLoggedIn) {
                 loginScreen.style.display = 'none';
                 loginScreen.style.visibility = 'hidden';
                 loginScreen.style.opacity = '0';
@@ -160,7 +165,7 @@
                 loginScreen.style.left = '-9999px';
             }
             
-            if (mainApp) {
+            if (mainApp && isLoggedIn) {
                 mainApp.style.display = 'block';
                 mainApp.style.visibility = 'visible';
                 mainApp.style.opacity = '1';
@@ -4382,13 +4387,13 @@
             }
         }
 
-        // Auto-set login if not set
-        if (!sessionStorage.getItem('isLoggedIn')) {
-            console.log('Auto-setting login credentials...');
-            sessionStorage.setItem('isLoggedIn', 'true');
-            sessionStorage.setItem('username', 'MasterAdmin');
-            sessionStorage.setItem('userRole', 'admin');
-        }
+        // Auto-login DISABLED - Show login screen
+        // if (!sessionStorage.getItem('isLoggedIn')) {
+        //     console.log('Auto-setting login credentials...');
+        //     sessionStorage.setItem('isLoggedIn', 'true');
+        //     sessionStorage.setItem('username', 'MasterAdmin');
+        //     sessionStorage.setItem('userRole', 'admin');
+        // }
 
 
 
@@ -4409,14 +4414,22 @@
                             const username = hasUsername.value;
                             const password = hasPassword.value;
                             
-                            // Validate credentials
-                            if ((username === 'MasterAdmin' || username === 'Doc121') && password === 'FFA121') {
-                                sessionStorage.setItem('isLoggedIn', 'true');
-                                sessionStorage.setItem('username', username);
-                                sessionStorage.setItem('userRole', username === 'MasterAdmin' ? 'admin' : 'user');
-                                location.reload();
+                            // Validate credentials - DISABLED (use proper handleLogin function)
+                            // if ((username === 'MasterAdmin' || username === 'Doc121') && password === 'FFA121') {
+                            //     sessionStorage.setItem('isLoggedIn', 'true');
+                            //     sessionStorage.setItem('username', username);
+                            //     sessionStorage.setItem('userRole', username === 'MasterAdmin' ? 'admin' : 'user');
+                            //     location.reload();
+                            // } else {
+                            //     alert('Invalid username or password');
+                            // }
+                            
+                            // Use the proper handleLogin function instead
+                            if (typeof handleLogin === 'function') {
+                                const event = { preventDefault: () => {}, target: form };
+                                handleLogin(event);
                             } else {
-                                alert('Invalid username or password');
+                                alert('Login system not loaded. Please refresh the page.');
                             }
                             
                             return false;
@@ -4464,18 +4477,8 @@
                     if (typeof handleLogin === 'function') {
                         handleLogin(username, password);
                     } else {
-                        // Fallback login handling
-                        if (username === 'MasterAdmin' && password === 'FFA121') {
-                            sessionStorage.setItem('isLoggedIn', 'true');
-                            sessionStorage.setItem('username', username);
-                            window.location.reload();
-                        } else if (username === 'Doc121' && password === 'FFA121') {
-                            sessionStorage.setItem('isLoggedIn', 'true');
-                            sessionStorage.setItem('username', username);
-                            window.location.reload();
-                        } else {
-                            alert('Invalid credentials. Please try again.');
-                        }
+                        // Fallback login handling - DISABLED (use proper handleLogin function)
+                        alert('Login system not loaded. Please refresh the page and try again.');
                     }
                     
                     return false;
@@ -8641,60 +8644,56 @@
             font-size: 13px;
             color: #718096;
         }
+        
+        /* Landing Page Responsive Styles */
+        @media (min-width: 768px) {
+            .landing-left {
+                display: block !important;
+            }
+            .mobile-branding {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 767px) {
+            .landing-left {
+                display: none !important;
+            }
+            .mobile-branding {
+                display: block !important;
+            }
+            #loginScreen > div > div:last-child {
+                flex: 1 1 100% !important;
+                max-width: 100% !important;
+            }
+        }
+        
+        /* Enhanced input focus styles for ClearHive branding */
+        #loginUsername:focus, #loginPassword:focus {
+            outline: none;
+            border-color: #0891b2 !important;
+            box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1) !important;
+        }
+        
+        /* Login button hover effect */
+        .login-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(8, 145, 178, 0.4) !important;
+        }
+        
+        .login-btn:active {
+            transform: translateY(-1px) !important;
+        }
     </style>
 </head>
 <body>
     
-    <!-- AUTO-LOGIN FOR TESTING - REMOVE IN PRODUCTION -->
+    <!-- AUTO-LOGIN DISABLED FOR PRODUCTION -->
     <script>
-        // Check if we're on the login page
-        (function() {
-            // Check for login form presence
-            setTimeout(function() {
-                const hasLoginForm = document.querySelector('input[type="password"]');
-                const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-                
-                if (hasLoginForm && isLoggedIn !== 'true') {
-                    console.log('Login page detected, auto-logging in...');
-                    
-                    // Set session storage
-                    sessionStorage.setItem('isLoggedIn', 'true');
-                    sessionStorage.setItem('username', 'MasterAdmin');
-                    sessionStorage.setItem('userRole', 'admin');
-                    
-                    // Force reload to show main interface
-                    setTimeout(function() {
-                        location.reload();
-                    }, 500);
-                }
-            }, 100);
-            
-            // Also check on DOMContentLoaded
-            document.addEventListener('DOMContentLoaded', function() {
-                const hasLoginForm = document.querySelector('input[type="password"]');
-                const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-                
-                if (hasLoginForm && isLoggedIn !== 'true') {
-                    console.log('Setting auto-login...');
-                    sessionStorage.setItem('isLoggedIn', 'true');
-                    sessionStorage.setItem('username', 'MasterAdmin');
-                    sessionStorage.setItem('userRole', 'admin');
-                    
-                    // Try to hide login and show main interface
-                    const loginContainer = hasLoginForm.closest('.login-container, .login-form, form');
-                    if (loginContainer) {
-                        loginContainer.style.display = 'none';
-                    }
-                    
-                    // Force reload
-                    setTimeout(function() {
-                        location.reload();
-                    }, 500);
-                }
-            });
-        })();
+        // Disabled: do not auto-login in production
+        (function(){ /* intentionally empty */ })();
     </script>
-    <!-- END AUTO-LOGIN -->
+    <!-- END AUTO-LOGIN (DISABLED) -->
     
     
                 <!-- Prominent Map Toggle Button -->
@@ -8764,7 +8763,7 @@
     </div>
 
     <!-- Main App (Hidden until login) -->
-    <div id="mainApp" style="display: block;">
+    <div id="mainApp" style="display: none;">
     <!-- Theme Toggle Button -->
     <button class="theme-toggle" onclick="toggleTheme()">
         <span id="themeIcon">🌙</span>
@@ -11148,9 +11147,9 @@
     </div>
     
     <script>
-        // DEVELOPMENT AUTO-LOGIN BYPASS
+        // DEVELOPMENT AUTO-LOGIN BYPASS (disabled)
         (function() {
-            const DEV_MODE = true; // Set to false for production
+            const DEV_MODE = false; // Production: require login
             if (DEV_MODE) {
                 console.log('🚀 Setting up dev auto-login...');
                 sessionStorage.setItem('isLoggedIn', 'true');
@@ -12018,8 +12017,8 @@
         window.addEventListener('DOMContentLoaded', function() {
             // Check for extension flag first
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('fromExtension')) {
-                // Skip login for extension integration
+            if (urlParams.has('fromExtension') && sessionStorage.getItem('allowExtensionAutoLogin') === 'true') {
+                // Skip login for extension integration (only when explicitly allowed)
                 sessionStorage.setItem('isLoggedIn', 'true');
                 sessionStorage.setItem('username', 'ChromeExtension');
                 document.getElementById('loginScreen').style.display = 'none';
@@ -26632,7 +26631,7 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
                 console.log('Received data from Chrome extension via postMessage:', event.data);
                 
                 // Make sure we're logged in first
-                if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+                if (sessionStorage.getItem('isLoggedIn') !== 'true' && sessionStorage.getItem('allowExtensionAutoLogin') === 'true') {
                     sessionStorage.setItem('isLoggedIn', 'true');
                     sessionStorage.setItem('username', 'ChromeExtension');
                     // Hide login modal if visible
@@ -26921,8 +26920,8 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
         if (urlParams.has('extensionData')) {
             try {
                 const data = JSON.parse(decodeURIComponent(urlParams.get('extensionData')));
-                if (data.source === 'FFAS_EXTENSION') {
-                    // Auto-login when coming from extension
+                if (data.source === 'FFAS_EXTENSION' && sessionStorage.getItem('allowExtensionAutoLogin') === 'true') {
+                    // Auto-login when coming from extension (only when explicitly allowed)
                     sessionStorage.setItem('isLoggedIn', 'true');
                     sessionStorage.setItem('username', 'ChromeExtension');
                     
@@ -26947,8 +26946,8 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
         }
         
         // Check for simple extension flag to bypass login
-        if (urlParams.has('fromExtension')) {
-            // Auto-login when coming from extension
+        if (urlParams.has('fromExtension') && sessionStorage.getItem('allowExtensionAutoLogin') === 'true') {
+            // Auto-login when coming from extension (only when explicitly allowed)
             sessionStorage.setItem('isLoggedIn', 'true');
             sessionStorage.setItem('username', 'ChromeExtension');
             
@@ -27117,8 +27116,8 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
         
         // Initialize systems after all core scripts are loaded
         async function initializeEnhancedFeatures() {
-            // DEVELOPMENT BYPASS - Auto-login for dev mode
-            const DEV_MODE = true; // Set to false for production
+            // DEVELOPMENT BYPASS (disabled)
+            const DEV_MODE = false; // Production: require login
             if (DEV_MODE && !sessionStorage.getItem('isLoggedIn')) {
                 console.log('🚀 Development mode: Setting auto-login');
                 sessionStorage.setItem('isLoggedIn', 'true');

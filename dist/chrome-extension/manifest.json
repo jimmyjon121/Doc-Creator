@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CareConnect Clinical Intel",
-  "version": "12.0.0",
+  "version": "13.1.0",
   "description": "Universal dynamic extraction system - extracts comprehensive data from ANY treatment website",
   "permissions": [
     "activeTab",
@@ -17,9 +17,9 @@
     "https://api.anthropic.com/*",
     "http://localhost:11434/*"
   ],
-  "options_page": "settings-v2.html",
+  "options_page": "settings-v3.html",
   "action": {
-    "default_popup": "popup-v2.html",
+    "default_popup": "popup-v3.html",
     "default_icon": {
       "16": "icon16.png",
       "48": "icon48.png",
@@ -32,12 +32,12 @@
     "128": "icon128.png"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background-v13.js"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["bundle-v12.js"],
+      "js": ["content-simple-v13.js"],
       "run_at": "document_idle"
     }
   ]
