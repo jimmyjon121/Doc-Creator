@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!-- 
     CareConnect Pro v4.0.0
-    Build Date: 2025-11-07T18:45:42.426Z
-    Build Hash: 9cf3303a
+    Build Date: 2025-11-07T19:07:15.181Z
+    Build Hash: 4b52fbad
     Copyright (c) Family First Adolescent Services
 -->
 
@@ -307,6 +307,9 @@
             'tracker-bulk-update.js',
             'tracker-aftercare-cascade.js',
             'discharge-checklist.js',
+            'predictive-completion-engine.js',
+            'morning-review-dashboard.js',
+            'heat-map-visualization.js',
             'houses-manager.js',
             'milestones-manager.js',
             'aftercare-manager.js'
@@ -2501,6 +2504,171 @@ console.log('✅ Programs fix initialized');
         document.addEventListener('DOMContentLoaded', waitForDashboard);
     } else {
         waitForDashboard();
+    }
+})();
+
+
+// Enhancement: intelligence-features.js
+/**
+ * Intelligence Features Integration
+ * Integrates Predictive Engine, Morning Review, and Heat Map into dashboard
+ */
+
+(function() {
+    'use strict';
+    
+    async function initializeIntelligenceFeatures() {
+        // Wait for required managers
+        if (!window.dashboardManager || !window.trackerEngine || !window.clientManager) {
+            setTimeout(initializeIntelligenceFeatures, 100);
+            return;
+        }
+        
+        // Initialize predictive engine
+        if (window.predictiveCompletionEngine) {
+            await window.predictiveCompletionEngine.initialize();
+        }
+        
+        // Add morning review widget to dashboard
+        addMorningReviewWidget();
+        
+        // Add heat map toggle
+        addHeatMapToggle();
+        
+        // Add prediction cards to client cards
+        enhanceClientCardsWithPredictions();
+    }
+    
+    /**
+     * Add morning review widget
+     */
+    function addMorningReviewWidget() {
+        // Check if morning review container exists
+        const container = document.querySelector('[data-widget="morning-review"], .morning-review-container');
+        if (!container && window.dashboardWidgets) {
+            // Create container in dashboard
+            const dashboard = document.querySelector('.dashboard-content, #dashboardContent');
+            if (dashboard) {
+                const morningContainer = document.createElement('div');
+                morningContainer.className = 'morning-review-container';
+                morningContainer.setAttribute('data-widget', 'morning-review');
+                
+                // Insert at top of dashboard
+                dashboard.insertBefore(morningContainer, dashboard.firstChild);
+                
+                // Render morning review
+                renderMorningReview();
+            }
+        } else if (container) {
+            renderMorningReview();
+        }
+    }
+    
+    /**
+     * Render morning review
+     */
+    async function renderMorningReview() {
+        const container = document.querySelector('.morning-review-container, [data-widget="morning-review"]');
+        if (!container || !window.morningReviewDashboard) return;
+        
+        try {
+            const html = await window.morningReviewDashboard.renderMorningReview();
+            container.innerHTML = html;
+        } catch (error) {
+            console.error('Error rendering morning review:', error);
+        }
+    }
+    
+    /**
+     * Add heat map toggle button
+     */
+    function addHeatMapToggle() {
+        // Add button to dashboard controls
+        const controls = document.querySelector('.dashboard-controls, .view-toggle');
+        if (controls && !document.querySelector('.heat-map-toggle')) {
+            const toggle = document.createElement('button');
+            toggle.className = 'heat-map-toggle btn-action';
+            toggle.innerHTML = '🔥 Heat Map';
+            toggle.onclick = toggleHeatMap;
+            controls.appendChild(toggle);
+        }
+    }
+    
+    /**
+     * Toggle heat map view
+     */
+    async function toggleHeatMap() {
+        const container = document.getElementById('heat-map-container');
+        if (!container) {
+            // Create container
+            const dashboard = document.querySelector('.dashboard-content, #dashboardContent');
+            if (dashboard && window.heatMapVisualization) {
+                const heatMapContainer = document.createElement('div');
+                heatMapContainer.id = 'heat-map-container';
+                heatMapContainer.className = 'heat-map-container';
+                dashboard.appendChild(heatMapContainer);
+                
+                // Render heat map
+                await window.heatMapVisualization.renderHeatMap('items', 'heat-map-container');
+            }
+        } else {
+            // Toggle visibility
+            container.style.display = container.style.display === 'none' ? 'block' : 'none';
+            
+            // If showing, render
+            if (container.style.display !== 'none' && window.heatMapVisualization) {
+                await window.heatMapVisualization.renderHeatMap('items', 'heat-map-container');
+            }
+        }
+    }
+    
+    /**
+     * Enhance client cards with predictions
+     */
+    function enhanceClientCardsWithPredictions() {
+        // Override client card rendering if possible
+        if (window.dashboardWidgets && window.dashboardWidgets.renderClientCard) {
+            const originalRender = window.dashboardWidgets.renderClientCard;
+            
+            window.dashboardWidgets.renderClientCard = async function(client) {
+                const cardHtml = originalRender.call(this, client);
+                
+                // Add prediction if available
+                if (window.predictiveCompletionEngine && client.dischargeDate) {
+                    const prediction = window.predictiveCompletionEngine.predictCompletionAtDischarge(client);
+                    
+                    if (prediction && prediction.predictedCompletion < 95) {
+                        const predictionHtml = `
+                            <div class="prediction-badge ${prediction.riskLevel}">
+                                <span class="prediction-icon">📊</span>
+                                <span class="prediction-text">${prediction.predictedCompletion}% at discharge</span>
+                            </div>
+                        `;
+                        
+                        // Insert before closing card div
+                        return cardHtml.replace('</div>\n        </div>', predictionHtml + '</div>\n        </div>');
+                    }
+                }
+                
+                return cardHtml;
+            };
+        }
+    }
+    
+    // Initialize when ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeIntelligenceFeatures);
+    } else {
+        initializeIntelligenceFeatures();
+    }
+    
+    // Re-render morning review on dashboard refresh
+    if (window.dashboardManager) {
+        const originalRefresh = window.dashboardManager.refreshDashboard;
+        window.dashboardManager.refreshDashboard = async function() {
+            await originalRefresh.call(this);
+            setTimeout(renderMorningReview, 500);
+        };
     }
 })();
 
@@ -6559,6 +6727,772 @@ console.log('✅ Programs fix initialized');
     .quick-action-btn {
         min-width: 80px;
         padding: 12px 8px;
+    }
+}
+
+
+/* Enhancement: predictive-completion.css */
+/* Predictive Completion Engine Styles */
+
+.prediction-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-left: 4px solid #667eea;
+}
+
+.prediction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.prediction-client {
+    font-weight: 600;
+    font-size: 18px;
+    color: #1f2937;
+}
+
+.prediction-confidence {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.prediction-confidence.high {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.prediction-confidence.medium {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.prediction-confidence.low {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.prediction-progress {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.prediction-current,
+.prediction-predicted {
+    text-align: center;
+}
+
+.prediction-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.prediction-label {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.prediction-arrow {
+    font-size: 24px;
+    color: #9ca3af;
+}
+
+.prediction-message {
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    color: #4b5563;
+    font-size: 14px;
+}
+
+.prediction-recommendations {
+    margin-top: 16px;
+}
+
+.recommendation-item {
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border-left: 3px solid #667eea;
+}
+
+.recommendation-item.priority-critical {
+    border-left-color: #ef4444;
+    background: #fef2f2;
+}
+
+.recommendation-item.priority-high {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.recommendation-priority {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.recommendation-message {
+    font-size: 14px;
+    color: #1f2937;
+}
+
+.risk-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.risk-badge.high {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.risk-badge.medium {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.risk-badge.low {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+
+/* Enhancement: morning-review.css */
+/* Morning Review Dashboard Styles */
+
+.morning-review-widget {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.morning-review-header {
+    margin-bottom: 24px;
+}
+
+.morning-greeting h2 {
+    margin: 0 0 4px 0;
+    color: #1e40af;
+    font-size: 28px;
+}
+
+.review-date {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+}
+
+.morning-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-top: 3px solid;
+}
+
+.stat-card.critical {
+    border-top-color: #ef4444;
+}
+
+.stat-card.due-today {
+    border-top-color: #f59e0b;
+}
+
+.stat-card.at-risk {
+    border-top-color: #f97316;
+}
+
+.stat-card.total {
+    border-top-color: #667eea;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #6b7280;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.morning-recommendations {
+    margin-bottom: 24px;
+}
+
+.morning-recommendations h3 {
+    color: #1e40af;
+    margin-bottom: 16px;
+    font-size: 20px;
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+}
+
+.recommendation-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid;
+    transition: transform 0.2s;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation-card.priority-high {
+    border-left-color: #ef4444;
+}
+
+.recommendation-card.priority-medium {
+    border-left-color: #f59e0b;
+}
+
+.recommendation-card.priority-low {
+    border-left-color: #10b981;
+}
+
+.rec-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.rec-content {
+    flex: 1;
+}
+
+.rec-title {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.rec-message {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.rec-badge {
+    background: #f3f4f6;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.morning-section {
+    margin-bottom: 24px;
+}
+
+.morning-section h3 {
+    color: #1e40af;
+    margin-bottom: 16px;
+    font-size: 18px;
+}
+
+.task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.task-item {
+    background: white;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    border-left: 3px solid;
+}
+
+.task-item.critical {
+    border-left-color: #ef4444;
+    background: #fef2f2;
+}
+
+.task-item.due-today {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.task-client {
+    background: #1f2937;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 40px;
+    text-align: center;
+}
+
+.task-details {
+    flex: 1;
+}
+
+.task-name {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.task-meta {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.task-action {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.task-action:hover {
+    transform: translateY(-1px);
+}
+
+.task-more {
+    text-align: center;
+    padding: 12px;
+    color: #6b7280;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.client-risk-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.risk-client-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid #f59e0b;
+}
+
+.risk-client-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.risk-client-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.risk-initials {
+    background: #1f2937;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.risk-house {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.risk-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.risk-current,
+.risk-predicted {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.risk-current {
+    color: #6b7280;
+}
+
+.risk-predicted {
+    color: #f59e0b;
+}
+
+.risk-arrow {
+    color: #9ca3af;
+    font-size: 18px;
+}
+
+.risk-message {
+    font-size: 13px;
+    color: #4b5563;
+    margin-bottom: 4px;
+}
+
+.risk-missing {
+    font-size: 12px;
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.house-summary {
+    margin-top: 24px;
+}
+
+.house-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.house-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.house-name {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.house-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.house-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.house-stat-value {
+    font-weight: 700;
+    color: #1f2937;
+    font-size: 18px;
+}
+
+.house-stat-label {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+
+/* Enhancement: heat-map.css */
+/* Heat Map Visualization Styles */
+
+.heat-map-widget {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.heat-map-header {
+    margin-bottom: 20px;
+}
+
+.heat-map-header h3 {
+    margin: 0 0 4px 0;
+    color: #1f2937;
+    font-size: 22px;
+}
+
+.heat-map-subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.heat-map-legend {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #4b5563;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.heat-map-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.heat-map-cell {
+    background: #f3f4f6;
+    border-radius: 8px;
+    padding: 16px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 2px solid transparent;
+}
+
+.heat-map-cell:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.cell-label {
+    font-weight: 600;
+    color: white;
+    font-size: 14px;
+    margin-bottom: 8px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.cell-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cell-rate {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.cell-overdue {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    width: fit-content;
+}
+
+.heat-map-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.summary-stat {
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #6b7280;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* House Heat Map */
+.house-heat-map-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.house-heat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s;
+}
+
+.house-heat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.house-name {
+    font-weight: 600;
+    font-size: 18px;
+    color: #1f2937;
+    margin-bottom: 12px;
+}
+
+.house-completion {
+    margin-bottom: 12px;
+}
+
+.completion-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 8px;
+}
+
+.completion-bar {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.completion-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+    border-radius: 4px;
+}
+
+.house-stats {
+    display: flex;
+    gap: 8px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+/* Day Heat Map */
+.day-heat-map-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 8px;
+}
+
+.day-heat-cell {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.day-heat-cell:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+}
+
+.day-number {
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    margin-bottom: 4px;
+}
+
+.day-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.day-gaps {
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.day-completions {
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .heat-map-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+    
+    .day-heat-map-grid {
+        grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
     }
 }
 
@@ -14167,7 +15101,7 @@ console.log('✅ Programs fix initialized');
         
         .login-btn:active {
             transform: translateY(-1px) !important;
-        }
+                    }
     </style>
 </head>
 <body>
@@ -14549,7 +15483,7 @@ console.log('✅ Programs fix initialized');
             z-index: 999999 !important;
             background: white !important;
         }
-        
+
         .dashboard-header {
             display: flex;
             justify-content: space-between;

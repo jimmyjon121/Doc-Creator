@@ -1,0 +1,360 @@
+/* Morning Review Dashboard Styles */
+
+.morning-review-widget {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.morning-review-header {
+    margin-bottom: 24px;
+}
+
+.morning-greeting h2 {
+    margin: 0 0 4px 0;
+    color: #1e40af;
+    font-size: 28px;
+}
+
+.review-date {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+}
+
+.morning-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-top: 3px solid;
+}
+
+.stat-card.critical {
+    border-top-color: #ef4444;
+}
+
+.stat-card.due-today {
+    border-top-color: #f59e0b;
+}
+
+.stat-card.at-risk {
+    border-top-color: #f97316;
+}
+
+.stat-card.total {
+    border-top-color: #667eea;
+}
+
+.stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #6b7280;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.morning-recommendations {
+    margin-bottom: 24px;
+}
+
+.morning-recommendations h3 {
+    color: #1e40af;
+    margin-bottom: 16px;
+    font-size: 20px;
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+}
+
+.recommendation-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid;
+    transition: transform 0.2s;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation-card.priority-high {
+    border-left-color: #ef4444;
+}
+
+.recommendation-card.priority-medium {
+    border-left-color: #f59e0b;
+}
+
+.recommendation-card.priority-low {
+    border-left-color: #10b981;
+}
+
+.rec-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.rec-content {
+    flex: 1;
+}
+
+.rec-title {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.rec-message {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.rec-badge {
+    background: #f3f4f6;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.morning-section {
+    margin-bottom: 24px;
+}
+
+.morning-section h3 {
+    color: #1e40af;
+    margin-bottom: 16px;
+    font-size: 18px;
+}
+
+.task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.task-item {
+    background: white;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    border-left: 3px solid;
+}
+
+.task-item.critical {
+    border-left-color: #ef4444;
+    background: #fef2f2;
+}
+
+.task-item.due-today {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+}
+
+.task-client {
+    background: #1f2937;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 40px;
+    text-align: center;
+}
+
+.task-details {
+    flex: 1;
+}
+
+.task-name {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.task-meta {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.task-action {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.task-action:hover {
+    transform: translateY(-1px);
+}
+
+.task-more {
+    text-align: center;
+    padding: 12px;
+    color: #6b7280;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.client-risk-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.risk-client-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid #f59e0b;
+}
+
+.risk-client-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.risk-client-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.risk-initials {
+    background: #1f2937;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.risk-house {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.risk-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.risk-current,
+.risk-predicted {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.risk-current {
+    color: #6b7280;
+}
+
+.risk-predicted {
+    color: #f59e0b;
+}
+
+.risk-arrow {
+    color: #9ca3af;
+    font-size: 18px;
+}
+
+.risk-message {
+    font-size: 13px;
+    color: #4b5563;
+    margin-bottom: 4px;
+}
+
+.risk-missing {
+    font-size: 12px;
+    color: #ef4444;
+    font-weight: 600;
+}
+
+.house-summary {
+    margin-top: 24px;
+}
+
+.house-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.house-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.house-name {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.house-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.house-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.house-stat-value {
+    font-weight: 700;
+    color: #1f2937;
+    font-size: 18px;
+}
+
+.house-stat-label {
+    font-size: 12px;
+    color: #6b7280;
+}

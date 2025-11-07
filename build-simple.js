@@ -91,6 +91,9 @@ class SimpleBuilder {
             'notes-manager.js',
             'cm-tracker-export.js',
             'discharge-checklist.js',
+            'predictive-completion-engine.js',
+            'morning-review-dashboard.js',
+            'heat-map-visualization.js',
             'service-worker.js'
         ];
         
@@ -140,7 +143,11 @@ class SimpleBuilder {
             'discharge-checklist.css',
             'discharge-checklist.js',
             'missions-redesign.css',
-            'missions-redesign.js'
+            'missions-redesign.js',
+            'predictive-completion.css',
+            'morning-review.css',
+            'heat-map.css',
+            'intelligence-features.js'
         ].map(f => path.join(CONFIG.enhancementsDir, f));
         
         enhancementFiles.forEach(file => {
