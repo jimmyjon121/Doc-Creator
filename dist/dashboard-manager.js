@@ -157,24 +157,8 @@ class DashboardManager {
                     ? await window.milestonesManager.getClientMilestones(client.id)
                     : [];
                 
-                // Day 14 aftercare check
-                if (daysInCare === 14 || (daysInCare > 14 && daysInCare <= 16)) {
-                    const aftercareStarted = milestones.find(m => 
-                        m.milestone === 'aftercare_options_sent' && m.status === 'complete'
-                    );
-                    
-                    if (!aftercareStarted) {
-                        alerts.push({
-                            type: 'aftercare_urgent',
-                            priority: 'red',
-                            client: client,
-                            message: `Day ${daysInCare} - Aftercare thread needed`,
-                            action: 'Send aftercare options',
-                            dueDate: 'Immediate',
-                            sortOrder: 1
-                        });
-                    }
-                }
+                // Day 14 aftercare check - REMOVED
+                // User has aftercare doc builder built in, no need for these alerts
                 
                 // Day 16+ escalation
                 if (daysInCare >= 16) {
