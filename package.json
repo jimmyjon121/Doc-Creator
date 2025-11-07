@@ -4,13 +4,8 @@
   "description": "Professional Aftercare Document Builder - Modular Build System",
   "scripts": {
     "build": "node build-simple.js",
-    "build:advanced": "node build.js",
-    "build:prod": "node build.js --production",
-    "extract": "node extract-enhanced.js",
-    "watch": "node build.js --watch",
-    "clean": "node build.js --clean",
-    "package": "npm run build && node build.js --package",
-    "dev": "node build-simple.js && echo 'Open dist/CareConnect-Pro.html in your browser'",
+    "clean": "node -e \"const fs=require('fs'); try{fs.rmSync('dist',{recursive:true,force:true})}catch(e){}\"",
+    "dev": "npm run build && echo 'Open dist/CareConnect-Pro.html in your browser'",
     "dist": "npm run build && cd dist && echo 'Distribution ready in dist/ folder'"
   },
   "keywords": ["healthcare", "documentation", "HIPAA", "aftercare", "clinical"],
