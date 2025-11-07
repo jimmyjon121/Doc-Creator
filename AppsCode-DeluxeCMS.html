@@ -2366,27 +2366,11 @@
         
         // Close modal with cleanup
         function closeModal() {
-            // Find the most recent modal overlay (in case multiple exist)
-            const modals = document.querySelectorAll('.modal-overlay');
-            const modal = modals[modals.length - 1];
+            const modal = document.querySelector('.modal-overlay');
             if (modal) {
                 // Remove event listeners
                 document.removeEventListener('keydown', handleModalKeydown);
                 modal.remove();
-            }
-        }
-        
-        // Close client detail modal specifically
-        function closeClientDetailModal(button) {
-            // Find the modal overlay by traversing up from the button
-            const modal = button.closest('.modal-overlay');
-            if (modal) {
-                // Remove event listeners
-                document.removeEventListener('keydown', handleModalKeydown);
-                modal.remove();
-            } else {
-                // Fallback: use closeModal
-                closeModal();
             }
         }
         
@@ -2454,7 +2438,7 @@
                                         <div class="metric-label">House</div>
                                     </div>
                                 </div>
-                                <button class="modal-close" onclick="closeClientDetailModal(this)">
+                                <button class="modal-close" onclick="closeModal()">
                                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                                         <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
                                     </svg>
@@ -3688,13 +3672,12 @@
                 // Add keyboard listener for ESC key
                 document.addEventListener('keydown', handleModalKeydown);
                 
-                // Fix overlay click handling - use the most recently added modal
-                const overlays = document.querySelectorAll('.modal-overlay');
-                const overlay = overlays[overlays.length - 1];
+                // Fix overlay click handling
+                const overlay = document.querySelector('.modal-overlay');
                 if (overlay) {
                     overlay.addEventListener('click', function(event) {
                         if (event.target === this) {
-                            closeClientDetailModal(this.querySelector('.modal-close'));
+                            closeModal();
                         }
                     });
                     

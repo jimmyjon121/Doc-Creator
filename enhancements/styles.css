@@ -153,12 +153,7 @@
     display: none !important;
 }
 
-/* Improve zone header button spacing for better aesthetics */
-.zone-header {
-    padding-right: 20px !important;
-}
-
-.zone-toggle {
-    margin-left: 8px !important;
-    margin-right: 4px !important;
+/* Add spacing to quick-complete checkbox buttons for better aesthetics */
+.btn-quick-complete {
+    margin-left: 12px !important;
 }
