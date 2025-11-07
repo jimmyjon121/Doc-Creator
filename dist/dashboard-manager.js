@@ -49,9 +49,29 @@ class DashboardManager {
     }
 
     getCurrentCoach() {
-        // Get from session or default
+        // Prefer enhanced profile if available
+        try {
+            if (typeof window.getEnhancedCurrentCoach === 'function') {
+                const profile = window.getEnhancedCurrentCoach();
+                if (profile && profile.initials) {
+                    return {
+                        initials: profile.initials,
+                        role: (profile.role || 'Coach').toString().replace(/^./, c => c.toUpperCase()),
+                        isAdmin: !!profile.isAdmin
+                    };
+                }
+            }
+        } catch (_) {
+            // fall through to session-based logic
+        }
+        
+        // Session-based fallback
         const userRole = sessionStorage.getItem('userRole') || 'Coach';
-        const initials = userRole === 'Coach' ? 'JH' : userRole === 'Admin' ? 'AD' : 'UN';
+        const fullName = sessionStorage.getItem('fullName') || sessionStorage.getItem('username');
+        const initialsFromName = fullName
+            ? fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()
+            : null;
+        const initials = initialsFromName || (userRole === 'Admin' ? 'AD' : 'LU');
         return {
             initials,
             role: userRole,
@@ -172,7 +192,7 @@ class DashboardManager {
                     }
                 }
                 
-                // Day 16+ escalation
+                // Day 16+: treat as overdue milestone (no escalation UI)
                 if (daysInCare >= 16) {
                     const aftercareStarted = milestones.find(m => 
                         m.milestone === 'aftercare_options_sent' && m.status === 'complete'
@@ -180,11 +200,12 @@ class DashboardManager {
                     
                     if (!aftercareStarted) {
                         alerts.push({
-                            type: 'aftercare_critical',
+                            type: 'milestone_aftercare_critical',
                             priority: 'red',
                             client: client,
+                            milestone: { milestone: 'aftercare_options_sent', status: 'pending' },
                             message: `Day ${daysInCare} - CRITICAL: Aftercare overdue`,
-                            action: 'Escalate immediately',
+                            action: 'Mark Complete',
                             dueDate: 'Overdue',
                             sortOrder: 0
                         });
