@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!-- 
     CareConnect Pro v4.0.0
-    Build Date: 2025-11-07T19:18:39.696Z
-    Build Hash: 39b828d4
+    Build Date: 2025-11-07T19:29:42.946Z
+    Build Hash: 73624045
     Copyright (c) Family First Adolescent Services
 -->
 
@@ -303,13 +303,11 @@
             'advanced-filters.js',
             'client-manager.js',
             'tracker-engine.js',
+            'tracker-predictive-engine.js',
             'tracker-timeline.js',
             'tracker-bulk-update.js',
             'tracker-aftercare-cascade.js',
             'discharge-checklist.js',
-            'predictive-completion-engine.js',
-            'morning-review-dashboard.js',
-            'heat-map-visualization.js',
             'houses-manager.js',
             'milestones-manager.js',
             'aftercare-manager.js'
@@ -2508,275 +2506,455 @@ console.log('✅ Programs fix initialized');
 })();
 
 
-// Enhancement: intelligence-features.js
+// Enhancement: predictive-insights.js
 /**
- * Intelligence Features Integration
- * Integrates Predictive Engine, Morning Review, and Heat Map into dashboard
+ * Predictive Insights UI Enhancement
+ * Displays predictions on client cards and in dashboard
  */
 
 (function() {
     'use strict';
     
-    let initialized = false;
-    
-    async function initializeIntelligenceFeatures() {
-        if (initialized) return;
-        
-        // Wait for required managers with timeout
-        let attempts = 0;
-        const maxAttempts = 50; // 5 seconds max wait
-        
-        while (attempts < maxAttempts) {
-            if (window.dashboardManager && window.trackerEngine && window.clientManager) {
-                break;
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
-            attempts++;
-        }
-        
-        if (!window.dashboardManager || !window.trackerEngine || !window.clientManager) {
-            console.warn('Intelligence features: Required managers not available');
+    // Wait for dependencies
+    function waitForDependencies() {
+        if (!window.trackerPredictiveEngine || !window.dashboardWidgets || !window.dashboardManager) {
+            setTimeout(waitForDependencies, 100);
             return;
         }
         
-        try {
-            // Initialize predictive engine
-            if (window.predictiveCompletionEngine) {
-                await window.predictiveCompletionEngine.initialize();
-                console.log('✓ Predictive Completion Engine initialized');
-            }
-            
-            // Add morning review widget to dashboard
-            addMorningReviewWidget();
-            
-            // Add heat map toggle
-            addHeatMapToggle();
-            
-            // Add prediction cards to client cards
-            enhanceClientCardsWithPredictions();
-            
-            initialized = true;
-            console.log('✓ Intelligence features initialized');
-        } catch (error) {
-            console.error('Error initializing intelligence features:', error);
-        }
+        enhancePredictiveInsights();
     }
     
     /**
-     * Add morning review widget
+     * Add predictive insights to client cards
      */
-    function addMorningReviewWidget() {
-        // Try multiple selectors for dashboard
-        const dashboardSelectors = [
-            '.dashboard-content',
-            '#dashboardContent',
-            '.dashboard-main',
-            '[id*="dashboard"]',
-            '.main-content'
-        ];
+    function enhancePredictiveInsights() {
+        // Enhance client card rendering
+        const originalRenderCard = window.dashboardWidgets.renderClientCard;
         
-        let dashboard = null;
-        for (const selector of dashboardSelectors) {
-            dashboard = document.querySelector(selector);
-            if (dashboard) break;
-        }
-        
-        if (!dashboard) {
-            console.warn('Morning Review: Dashboard container not found');
-            // Try again after a delay
-            setTimeout(addMorningReviewWidget, 1000);
-            return;
-        }
-        
-        // Check if container already exists
-        let container = dashboard.querySelector('.morning-review-container, [data-widget="morning-review"]');
-        
-        if (!container) {
-            container = document.createElement('div');
-            container.className = 'morning-review-container';
-            container.setAttribute('data-widget', 'morning-review');
+        window.dashboardWidgets.renderClientCard = function(client) {
+            const baseHtml = originalRenderCard.call(this, client);
             
-            // Insert at top of dashboard
-            dashboard.insertBefore(container, dashboard.firstChild);
-        }
-        
-        // Render morning review
-        renderMorningReview();
-    }
-    
-    /**
-     * Render morning review
-     */
-    async function renderMorningReview() {
-        const container = document.querySelector('.morning-review-container, [data-widget="morning-review"]');
-        if (!container) {
-            console.warn('Morning Review: Container not found');
-            return;
-        }
-        
-        if (!window.morningReviewDashboard) {
-            console.warn('Morning Review: Dashboard class not available');
-            // Try again after a delay
-            setTimeout(renderMorningReview, 500);
-            return;
-        }
-        
-        try {
-            container.innerHTML = '<div style="padding: 20px; text-align: center; color: #6b7280;">Loading morning review...</div>';
-            const html = await window.morningReviewDashboard.renderMorningReview();
-            container.innerHTML = html;
-            console.log('✓ Morning Review rendered');
-        } catch (error) {
-            console.error('Error rendering morning review:', error);
-            container.innerHTML = `<div style="padding: 20px; color: #ef4444;">Error loading morning review: ${error.message}</div>`;
-        }
-    }
-    
-    /**
-     * Add heat map toggle button
-     */
-    function addHeatMapToggle() {
-        // Try multiple selectors for controls
-        const controlSelectors = [
-            '.dashboard-controls',
-            '.view-toggle',
-            '.dashboard-header',
-            '.header-controls',
-            '[class*="control"]'
-        ];
-        
-        let controls = null;
-        for (const selector of controlSelectors) {
-            controls = document.querySelector(selector);
-            if (controls) break;
-        }
-        
-        if (!controls) {
-            // Create controls if they don't exist
-            const header = document.querySelector('.dashboard-header, [class*="header"]');
-            if (header) {
-                controls = document.createElement('div');
-                controls.className = 'intelligence-controls';
-                header.appendChild(controls);
-            } else {
-                console.warn('Heat Map: Controls container not found');
-                setTimeout(addHeatMapToggle, 1000);
-                return;
-            }
-        }
-        
-        if (!document.querySelector('.heat-map-toggle')) {
-            const toggle = document.createElement('button');
-            toggle.className = 'heat-map-toggle btn-action';
-            toggle.style.cssText = 'margin-left: 8px; padding: 8px 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;';
-            toggle.innerHTML = '🔥 Heat Map';
-            toggle.onclick = toggleHeatMap;
-            controls.appendChild(toggle);
-            console.log('✓ Heat Map toggle added');
-        }
-    }
-    
-    /**
-     * Toggle heat map view
-     */
-    async function toggleHeatMap() {
-        const container = document.getElementById('heat-map-container');
-        if (!container) {
-            // Create container
-            const dashboard = document.querySelector('.dashboard-content, #dashboardContent');
-            if (dashboard && window.heatMapVisualization) {
-                const heatMapContainer = document.createElement('div');
-                heatMapContainer.id = 'heat-map-container';
-                heatMapContainer.className = 'heat-map-container';
-                dashboard.appendChild(heatMapContainer);
+            // Add prediction data asynchronously
+            setTimeout(async () => {
+                const cardElement = document.querySelector(`[data-client-id="${client.id}"]`);
+                if (!cardElement) return;
                 
-                // Render heat map
-                await window.heatMapVisualization.renderHeatMap('items', 'heat-map-container');
-            }
-        } else {
-            // Toggle visibility
-            container.style.display = container.style.display === 'none' ? 'block' : 'none';
-            
-            // If showing, render
-            if (container.style.display !== 'none' && window.heatMapVisualization) {
-                await window.heatMapVisualization.renderHeatMap('items', 'heat-map-container');
-            }
-        }
-    }
-    
-    /**
-     * Enhance client cards with predictions
-     */
-    function enhanceClientCardsWithPredictions() {
-        // Override client card rendering if possible
-        if (window.dashboardWidgets && window.dashboardWidgets.renderClientCard) {
-            const originalRender = window.dashboardWidgets.renderClientCard;
-            
-            window.dashboardWidgets.renderClientCard = async function(client) {
-                const cardHtml = originalRender.call(this, client);
+                // Get prediction
+                const prediction = await window.trackerPredictiveEngine.predictCompletionAtDischarge(client);
                 
-                // Add prediction if available
-                if (window.predictiveCompletionEngine && client.dischargeDate) {
-                    const prediction = window.predictiveCompletionEngine.predictCompletionAtDischarge(client);
+                // Find or create prediction container
+                let predictionContainer = cardElement.querySelector('.prediction-insights');
+                if (!predictionContainer) {
+                    predictionContainer = document.createElement('div');
+                    predictionContainer.className = 'prediction-insights';
                     
-                    if (prediction && prediction.predictedCompletion < 95) {
-                        const predictionHtml = `
-                            <div class="prediction-badge ${prediction.riskLevel}">
-                                <span class="prediction-icon">📊</span>
-                                <span class="prediction-text">${prediction.predictedCompletion}% at discharge</span>
-                            </div>
-                        `;
-                        
-                        // Insert before closing card div
-                        return cardHtml.replace('</div>\n        </div>', predictionHtml + '</div>\n        </div>');
+                    // Insert after client header
+                    const header = cardElement.querySelector('.client-header');
+                    if (header && header.parentNode) {
+                        header.parentNode.insertBefore(predictionContainer, header.nextSibling);
                     }
                 }
                 
-                return cardHtml;
-            };
+                // Render prediction UI
+                predictionContainer.innerHTML = renderPredictionInsights(client, prediction);
+            }, 100);
+            
+            return baseHtml;
+        };
+        
+        // Add prediction modal capability
+        window.showPredictionDetails = function(clientId) {
+            renderPredictionModal(clientId);
+        };
+        
+        // Add group analysis view
+        addGroupAnalysisButton();
+    }
+    
+    /**
+     * Render prediction insights for a client
+     */
+    function renderPredictionInsights(client, prediction) {
+        const riskColors = {
+            low: '#10b981',
+            medium: '#f59e0b', 
+            high: '#ef4444',
+            critical: '#dc2626'
+        };
+        
+        const confidenceStars = '★'.repeat(Math.round(prediction.confidence * 5)) + 
+                               '☆'.repeat(5 - Math.round(prediction.confidence * 5));
+        
+        let html = `
+            <div class="prediction-bar" onclick="showPredictionDetails('${client.id}')">
+                <div class="prediction-header">
+                    <span class="prediction-label">
+                        🔮 Predicted at discharge: 
+                        <strong style="color: ${riskColors[prediction.riskLevel]}">${prediction.predicted}%</strong>
+                    </span>
+                    <span class="confidence-indicator" title="Confidence: ${Math.round(prediction.confidence * 100)}%">
+                        ${confidenceStars}
+                    </span>
+                </div>
+        `;
+        
+        // Show trajectory indicator
+        if (prediction.trajectory > 0) {
+            const trendIcon = prediction.trajectory > prediction.pace ? '📈' : '📊';
+            html += `
+                <div class="trajectory-indicator">
+                    ${trendIcon} ${prediction.trajectory > prediction.pace ? 'Accelerating' : 'Steady'} progress
+                </div>
+            `;
         }
+        
+        // Show most important insight
+        if (prediction.insights.length > 0) {
+            const topInsight = prediction.insights.find(i => i.type === 'critical') || 
+                              prediction.insights.find(i => i.type === 'warning') ||
+                              prediction.insights[0];
+            
+            const insightIcons = {
+                critical: '🚨',
+                warning: '⚠️',
+                info: 'ℹ️',
+                success: '✅'
+            };
+            
+            html += `
+                <div class="top-insight ${topInsight.type}">
+                    ${insightIcons[topInsight.type]} ${topInsight.message}
+                </div>
+            `;
+        }
+        
+        // Show top recommendation if high risk
+        if (prediction.riskLevel === 'high' || prediction.riskLevel === 'critical') {
+            const topRec = prediction.recommendations[0];
+            if (topRec) {
+                html += `
+                    <div class="urgent-action">
+                        <strong>Action needed:</strong> ${topRec.action}
+                    </div>
+                `;
+            }
+        }
+        
+        html += `
+            </div>
+        `;
+        
+        return html;
     }
     
-    // Initialize when ready - multiple attempts
-    function startInitialization() {
-        initializeIntelligenceFeatures();
+    /**
+     * Render detailed prediction modal
+     */
+    async function renderPredictionModal(clientId) {
+        const client = await window.clientManager.getClient(clientId);
+        if (!client) return;
         
-        // Also try after dashboard loads
-        setTimeout(() => {
-            if (!initialized) {
-                initializeIntelligenceFeatures();
-            }
-        }, 2000);
+        const prediction = await window.trackerPredictiveEngine.predictCompletionAtDischarge(client);
+        const score = window.trackerEngine?.getCompletionScore(client);
         
-        // And after a longer delay
-        setTimeout(() => {
-            if (!initialized) {
-                initializeIntelligenceFeatures();
-            }
-        }, 5000);
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay prediction-modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 900px;">
+                <div class="modal-header">
+                    <h2>📊 Predictive Analysis - ${client.initials}</h2>
+                    <button class="btn-close" onclick="this.closest('.modal-overlay').remove()">×</button>
+                </div>
+                
+                <div class="prediction-content">
+                    <!-- Current vs Predicted -->
+                    <div class="prediction-comparison">
+                        <div class="metric-card current">
+                            <div class="metric-label">Current</div>
+                            <div class="metric-value">${prediction.current}%</div>
+                            <div class="metric-detail">${score.completedItems}/${score.totalItems} items</div>
+                        </div>
+                        
+                        <div class="prediction-arrow">
+                            ➜
+                            <div class="days-remaining">${prediction.daysToDischarge} days</div>
+                        </div>
+                        
+                        <div class="metric-card predicted ${prediction.riskLevel}">
+                            <div class="metric-label">Predicted</div>
+                            <div class="metric-value">${prediction.predicted}%</div>
+                            <div class="metric-detail">
+                                <div class="confidence-stars">
+                                    ${'★'.repeat(Math.round(prediction.confidence * 5))}${'☆'.repeat(5 - Math.round(prediction.confidence * 5))}
+                                </div>
+                                ${Math.round(prediction.confidence * 100)}% confidence
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Visual Progress Chart -->
+                    <div class="progress-visualization">
+                        <h3>Progress Trajectory</h3>
+                        <div class="trajectory-chart">
+                            <div class="current-progress" style="width: ${prediction.current}%">
+                                <span class="progress-label">Now</span>
+                            </div>
+                            <div class="predicted-progress" style="width: ${prediction.predicted}%">
+                                <span class="progress-label">At Discharge</span>
+                            </div>
+                            <div class="benchmark-line" style="left: ${prediction.expectedBenchmark}%">
+                                <span class="benchmark-label">Typical</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Insights -->
+                    <div class="insights-section">
+                        <h3>Key Insights</h3>
+                        <div class="insights-grid">
+                            ${prediction.insights.map(insight => `
+                                <div class="insight-card ${insight.type}">
+                                    <div class="insight-icon">${getInsightIcon(insight.type)}</div>
+                                    <div class="insight-text">${insight.message}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Recommendations -->
+                    <div class="recommendations-section">
+                        <h3>Recommended Actions</h3>
+                        <div class="recommendations-list">
+                            ${prediction.recommendations.map((rec, index) => `
+                                <div class="recommendation-item priority-${rec.priority}">
+                                    <div class="rec-number">${index + 1}</div>
+                                    <div class="rec-content">
+                                        <div class="rec-action">${rec.action}</div>
+                                        <div class="rec-impact">${rec.impact}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Risk Assessment -->
+                    <div class="risk-assessment">
+                        <h3>Risk Level: <span class="risk-badge ${prediction.riskLevel}">${prediction.riskLevel.toUpperCase()}</span></h3>
+                        <div class="risk-factors">
+                            ${generateRiskFactors(client, prediction, score)}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="printPrediction('${client.id}')">
+                        🖨️ Print Report
+                    </button>
+                    <button class="btn-primary" onclick="this.closest('.modal-overlay').remove()">
+                        Close
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
     }
     
+    /**
+     * Get icon for insight type
+     */
+    function getInsightIcon(type) {
+        const icons = {
+            critical: '🚨',
+            warning: '⚠️',
+            info: 'ℹ️',
+            success: '✅'
+        };
+        return icons[type] || '📌';
+    }
+    
+    /**
+     * Generate risk factors display
+     */
+    function generateRiskFactors(client, prediction, score) {
+        const factors = [];
+        
+        // Critical items overdue
+        const overdueCount = score.missingCritical.filter(item => {
+            const daysInCare = window.trackerEngine.calculateDaysInCare(client.admissionDate);
+            return daysInCare > item.dueByDay;
+        }).length;
+        
+        if (overdueCount > 0) {
+            factors.push(`🔴 ${overdueCount} critical items overdue`);
+        }
+        
+        // Below benchmark
+        if (prediction.current < prediction.expectedBenchmark * 0.8) {
+            factors.push(`📉 ${Math.round(prediction.expectedBenchmark - prediction.current)}% below typical progress`);
+        }
+        
+        // Insufficient pace
+        if (prediction.predicted < 85) {
+            factors.push(`⏱️ Current pace insufficient for complete discharge`);
+        }
+        
+        // No aftercare
+        if (!client.aftercareThreadSent && prediction.daysToDischarge <= 14) {
+            factors.push(`🏠 No aftercare planning initiated`);
+        }
+        
+        return factors.map(f => `<div class="risk-factor">${f}</div>`).join('');
+    }
+    
+    /**
+     * Add group analysis button to dashboard
+     */
+    function addGroupAnalysisButton() {
+        // Wait for dashboard header
+        const checkHeader = setInterval(() => {
+            const dashboardControls = document.querySelector('.dashboard-controls');
+            if (dashboardControls) {
+                clearInterval(checkHeader);
+                
+                const analysisBtn = document.createElement('button');
+                analysisBtn.className = 'btn-analysis';
+                analysisBtn.innerHTML = '📊 Predictive Analysis';
+                analysisBtn.onclick = showGroupAnalysis;
+                
+                dashboardControls.appendChild(analysisBtn);
+            }
+        }, 1000);
+    }
+    
+    /**
+     * Show group analysis modal
+     */
+    async function showGroupAnalysis() {
+        const clients = await window.dashboardManager.getRelevantClients();
+        const analysis = await window.trackerPredictiveEngine.analyzeGroupPatterns(clients);
+        
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay group-analysis-modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 1000px;">
+                <div class="modal-header">
+                    <h2>🔮 Predictive Analysis - ${window.dashboardManager.currentView === 'myClients' ? 'My Clients' : 'All Clients'}</h2>
+                    <button class="btn-close" onclick="this.closest('.modal-overlay').remove()">×</button>
+                </div>
+                
+                <div class="analysis-content">
+                    <!-- Overview Metrics -->
+                    <div class="metrics-overview">
+                        <div class="metric-box">
+                            <div class="metric-icon">📊</div>
+                            <div class="metric-data">
+                                <div class="metric-value">${analysis.averageCompletion}%</div>
+                                <div class="metric-label">Average Completion</div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-box risk">
+                            <div class="metric-icon">⚠️</div>
+                            <div class="metric-data">
+                                <div class="metric-value">${analysis.riskClients.length}</div>
+                                <div class="metric-label">At Risk Clients</div>
+                            </div>
+                        </div>
+                        
+                        <div class="metric-box success">
+                            <div class="metric-icon">🌟</div>
+                            <div class="metric-data">
+                                <div class="metric-value">${analysis.strongPerformers.length}</div>
+                                <div class="metric-label">On Track</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Risk Clients -->
+                    ${analysis.riskClients.length > 0 ? `
+                        <div class="risk-clients-section">
+                            <h3>🚨 Clients Requiring Immediate Attention</h3>
+                            <div class="risk-clients-grid">
+                                ${analysis.riskClients
+                                    .sort((a, b) => a.priority - b.priority)
+                                    .map(({ client, prediction }) => `
+                                        <div class="risk-client-card priority-${prediction.riskLevel}">
+                                            <div class="client-name">${client.initials} - ${client.houseId}</div>
+                                            <div class="risk-details">
+                                                <span class="current">Current: ${prediction.current}%</span>
+                                                <span class="arrow">→</span>
+                                                <span class="predicted">Predicted: ${prediction.predicted}%</span>
+                                            </div>
+                                            <div class="risk-action">
+                                                ${prediction.recommendations[0]?.action || 'Review tracker'}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Common Gaps -->
+                    ${Object.keys(analysis.commonGaps).length > 0 ? `
+                        <div class="common-gaps-section">
+                            <h3>📌 Common Missing Items</h3>
+                            <div class="gaps-chart">
+                                ${Object.values(analysis.commonGaps).map(gap => `
+                                    <div class="gap-item">
+                                        <div class="gap-label">${gap.item.label}</div>
+                                        <div class="gap-bar">
+                                            <div class="gap-fill" style="width: ${gap.percentage}%"></div>
+                                            <span class="gap-percent">${gap.percentage}% missing</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- Group Insights -->
+                    <div class="group-insights">
+                        <h3>💡 Key Insights</h3>
+                        ${analysis.insights.map(insight => `
+                            <div class="group-insight ${insight.type}">
+                                ${getInsightIcon(insight.type)} ${insight.message}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="exportPredictiveReport()">
+                        📊 Export Report
+                    </button>
+                    <button class="btn-primary" onclick="this.closest('.modal-overlay').remove()">
+                        Close
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+    
+    // Export functions
+    window.printPrediction = function(clientId) {
+        window.print();
+    };
+    
+    window.exportPredictiveReport = function() {
+        console.log('Export predictive report');
+        // Would implement CSV/PDF export
+    };
+    
+    // Initialize
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', startInitialization);
+        document.addEventListener('DOMContentLoaded', waitForDependencies);
     } else {
-        startInitialization();
+        waitForDependencies();
     }
-    
-    // Re-render morning review on dashboard refresh
-    const checkForDashboardManager = setInterval(() => {
-        if (window.dashboardManager) {
-            clearInterval(checkForDashboardManager);
-            const originalRefresh = window.dashboardManager.refreshDashboard;
-            window.dashboardManager.refreshDashboard = async function() {
-                await originalRefresh.call(this);
-                setTimeout(renderMorningReview, 500);
-            };
-        }
-    }, 500);
-    
-    // Make functions globally available for manual triggering
-    window.showMorningReview = renderMorningReview;
-    window.showHeatMap = toggleHeatMap;
 })();
 
 </script>
@@ -6838,271 +7016,339 @@ console.log('✅ Programs fix initialized');
 }
 
 
-/* Enhancement: predictive-completion.css */
-/* Predictive Completion Engine Styles */
+/* Enhancement: predictive-insights.css */
+/* Predictive Insights Styling */
 
-.prediction-card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border-left: 4px solid #667eea;
+/* Client Card Prediction Bar */
+.prediction-insights {
+    margin: 10px 0;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.prediction-insights:hover {
+    background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.prediction-bar {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .prediction-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
-}
-
-.prediction-client {
-    font-weight: 600;
-    font-size: 18px;
-    color: #1f2937;
-}
-
-.prediction-confidence {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.prediction-confidence.high {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.prediction-confidence.medium {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.prediction-confidence.low {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.prediction-progress {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-.prediction-current,
-.prediction-predicted {
-    text-align: center;
-}
-
-.prediction-value {
-    font-size: 32px;
-    font-weight: 700;
-    color: #1f2937;
 }
 
 .prediction-label {
+    font-size: 14px;
+    color: #4b5563;
+}
+
+.prediction-label strong {
+    font-size: 16px;
+    margin-left: 4px;
+}
+
+.confidence-indicator {
     font-size: 12px;
+    color: #f59e0b;
+    letter-spacing: 2px;
+}
+
+.trajectory-indicator {
+    font-size: 13px;
     color: #6b7280;
-    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.top-insight {
+    font-size: 13px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.top-insight.critical {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.top-insight.warning {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.top-insight.info {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.top-insight.success {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.urgent-action {
+    font-size: 12px;
+    background: #fef2f2;
+    color: #991b1b;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border-left: 3px solid #ef4444;
+}
+
+/* Prediction Modal */
+.prediction-modal .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.prediction-content {
+    padding: 20px;
+}
+
+/* Prediction Comparison */
+.prediction-comparison {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding: 30px;
+    background: #f9fafb;
+    border-radius: 12px;
+}
+
+.metric-card {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    min-width: 150px;
+}
+
+.metric-card.low {
+    border: 2px solid #10b981;
+}
+
+.metric-card.medium {
+    border: 2px solid #f59e0b;
+}
+
+.metric-card.high {
+    border: 2px solid #ef4444;
+}
+
+.metric-card.critical {
+    border: 2px solid #dc2626;
+    background: #fef2f2;
+}
+
+.metric-label {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.metric-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 8px;
+}
+
+.metric-detail {
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.confidence-stars {
+    color: #f59e0b;
+    margin-bottom: 4px;
 }
 
 .prediction-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     font-size: 24px;
     color: #9ca3af;
 }
 
-.prediction-message {
-    padding: 12px;
-    background: #f9fafb;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    color: #4b5563;
-    font-size: 14px;
-}
-
-.prediction-recommendations {
-    margin-top: 16px;
-}
-
-.recommendation-item {
-    padding: 12px;
-    background: #f9fafb;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    border-left: 3px solid #667eea;
-}
-
-.recommendation-item.priority-critical {
-    border-left-color: #ef4444;
-    background: #fef2f2;
-}
-
-.recommendation-item.priority-high {
-    border-left-color: #f59e0b;
-    background: #fffbeb;
-}
-
-.recommendation-priority {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: #6b7280;
-    margin-bottom: 4px;
-}
-
-.recommendation-message {
-    font-size: 14px;
-    color: #1f2937;
-}
-
-.risk-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.risk-badge.high {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.risk-badge.medium {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.risk-badge.low {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-
-/* Enhancement: morning-review.css */
-/* Morning Review Dashboard Styles */
-
-.morning-review-widget {
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    border-radius: 20px;
-    padding: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.morning-review-header {
-    margin-bottom: 24px;
-}
-
-.morning-greeting h2 {
-    margin: 0 0 4px 0;
-    color: #1e40af;
-    font-size: 28px;
-}
-
-.review-date {
-    color: #64748b;
-    font-size: 14px;
-    margin: 0;
-}
-
-.morning-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 16px;
-    margin-top: 20px;
-}
-
-.stat-card {
-    background: white;
-    border-radius: 12px;
-    padding: 16px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    border-top: 3px solid;
-}
-
-.stat-card.critical {
-    border-top-color: #ef4444;
-}
-
-.stat-card.due-today {
-    border-top-color: #f59e0b;
-}
-
-.stat-card.at-risk {
-    border-top-color: #f97316;
-}
-
-.stat-card.total {
-    border-top-color: #667eea;
-}
-
-.stat-value {
-    font-size: 32px;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 4px;
-}
-
-.stat-label {
+.days-remaining {
     font-size: 12px;
-    color: #6b7280;
-    text-transform: uppercase;
-    font-weight: 600;
+    margin-top: 4px;
+    background: #e5e7eb;
+    padding: 4px 8px;
+    border-radius: 4px;
 }
 
-.morning-recommendations {
-    margin-bottom: 24px;
+/* Progress Visualization */
+.progress-visualization {
+    margin-bottom: 30px;
 }
 
-.morning-recommendations h3 {
-    color: #1e40af;
+.progress-visualization h3 {
     margin-bottom: 16px;
-    font-size: 20px;
+    color: #374151;
 }
 
-.recommendations-grid {
+.trajectory-chart {
+    position: relative;
+    height: 60px;
+    background: #f3f4f6;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.current-progress,
+.predicted-progress {
+    position: absolute;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 12px;
+    transition: width 0.5s ease;
+}
+
+.current-progress {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    z-index: 2;
+}
+
+.predicted-progress {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(124, 58, 237, 0.3) 100%);
+    z-index: 1;
+}
+
+.progress-label {
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.predicted-progress .progress-label {
+    color: #4c1d95;
+}
+
+.benchmark-line {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: #ef4444;
+    z-index: 3;
+}
+
+.benchmark-line::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -4px;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    background: #ef4444;
+    border-radius: 50%;
+}
+
+.benchmark-label {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: #ef4444;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Insights Section */
+.insights-section {
+    margin-bottom: 30px;
+}
+
+.insights-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 12px;
 }
 
-.recommendation-card {
-    background: white;
-    border-radius: 12px;
+.insight-card {
     padding: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.insight-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.insight-text {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Recommendations Section */
+.recommendations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.recommendation-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    background: white;
+    border-radius: 8px;
+    border-left: 4px solid;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation-item.priority-critical {
+    border-color: #ef4444;
+}
+
+.recommendation-item.priority-high {
+    border-color: #f59e0b;
+}
+
+.recommendation-item.priority-medium {
+    border-color: #3b82f6;
+}
+
+.rec-number {
+    width: 32px;
+    height: 32px;
+    background: #f3f4f6;
+    border-radius: 50%;
     display: flex;
     align-items: center;
-    gap: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    border-left: 4px solid;
-    transition: transform 0.2s;
-}
-
-.recommendation-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.recommendation-card.priority-high {
-    border-left-color: #ef4444;
-}
-
-.recommendation-card.priority-medium {
-    border-left-color: #f59e0b;
-}
-
-.recommendation-card.priority-low {
-    border-left-color: #10b981;
-}
-
-.rec-icon {
-    font-size: 24px;
+    justify-content: center;
+    font-weight: 700;
+    color: #374151;
     flex-shrink: 0;
 }
 
@@ -7110,496 +7356,291 @@ console.log('✅ Programs fix initialized');
     flex: 1;
 }
 
-.rec-title {
+.rec-action {
     font-weight: 600;
     color: #1f2937;
-    font-size: 14px;
     margin-bottom: 4px;
 }
 
-.rec-message {
-    font-size: 12px;
+.rec-impact {
+    font-size: 13px;
     color: #6b7280;
 }
 
-.rec-badge {
-    background: #f3f4f6;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #1f2937;
+/* Risk Assessment */
+.risk-assessment {
+    background: #fafafa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
 }
 
-.morning-section {
-    margin-bottom: 24px;
+.risk-badge {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-left: 8px;
 }
 
-.morning-section h3 {
-    color: #1e40af;
-    margin-bottom: 16px;
-    font-size: 18px;
+.risk-badge.low {
+    background: #d1fae5;
+    color: #047857;
 }
 
-.task-list {
+.risk-badge.medium {
+    background: #fef3c7;
+    color: #d97706;
+}
+
+.risk-badge.high {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.risk-badge.critical {
+    background: #dc2626;
+    color: white;
+}
+
+.risk-factors {
+    margin-top: 12px;
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
 
-.task-item {
+.risk-factor {
+    padding: 8px 12px;
     background: white;
-    border-radius: 8px;
-    padding: 12px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    border-left: 3px solid #ef4444;
+}
+
+/* Group Analysis Modal */
+.group-analysis-modal .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.analysis-content {
+    padding: 20px;
+}
+
+.metrics-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.metric-box {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     display: flex;
     align-items: center;
-    gap: 12px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-    border-left: 3px solid;
+    gap: 16px;
 }
 
-.task-item.critical {
-    border-left-color: #ef4444;
-    background: #fef2f2;
+.metric-box.risk {
+    border-left: 4px solid #ef4444;
 }
 
-.task-item.due-today {
-    border-left-color: #f59e0b;
-    background: #fffbeb;
+.metric-box.success {
+    border-left: 4px solid #10b981;
 }
 
-.task-client {
-    background: #1f2937;
-    color: white;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    min-width: 40px;
-    text-align: center;
+.metric-icon {
+    font-size: 36px;
 }
 
-.task-details {
-    flex: 1;
-}
-
-.task-name {
-    font-weight: 600;
+.metric-data .metric-value {
+    font-size: 32px;
+    font-weight: 700;
     color: #1f2937;
+}
+
+.metric-data .metric-label {
     font-size: 14px;
-    margin-bottom: 2px;
-}
-
-.task-meta {
-    font-size: 12px;
     color: #6b7280;
 }
 
-.task-action {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 6px 16px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s;
+/* Risk Clients Grid */
+.risk-clients-section {
+    margin-bottom: 30px;
 }
 
-.task-action:hover {
-    transform: translateY(-1px);
-}
-
-.task-more {
-    text-align: center;
-    padding: 12px;
-    color: #6b7280;
-    font-size: 13px;
-    font-style: italic;
-}
-
-.client-risk-list {
+.risk-clients-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
 }
 
 .risk-client-card {
     background: white;
-    border-radius: 12px;
     padding: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    border-left: 4px solid #f59e0b;
+    border-radius: 8px;
+    border-left: 4px solid;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
-.risk-client-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
+.risk-client-card.priority-high {
+    border-color: #ef4444;
 }
 
-.risk-client-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.risk-client-card.priority-critical {
+    border-color: #dc2626;
+    background: #fef2f2;
 }
 
-.risk-initials {
-    background: #1f2937;
-    color: white;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 12px;
-}
-
-.risk-house {
-    color: #6b7280;
-    font-size: 12px;
-}
-
-.risk-progress {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.client-name {
+    font-weight: 700;
+    color: #1f2937;
     margin-bottom: 8px;
 }
 
-.risk-current,
-.risk-predicted {
-    font-size: 20px;
-    font-weight: 700;
-}
-
-.risk-current {
+.risk-details {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
     color: #6b7280;
+    margin-bottom: 8px;
 }
 
-.risk-predicted {
-    color: #f59e0b;
+.risk-details .current {
+    color: #6366f1;
 }
 
-.risk-arrow {
-    color: #9ca3af;
-    font-size: 18px;
-}
-
-.risk-message {
-    font-size: 13px;
-    color: #4b5563;
-    margin-bottom: 4px;
-}
-
-.risk-missing {
-    font-size: 12px;
+.risk-details .predicted {
     color: #ef4444;
     font-weight: 600;
 }
 
-.house-summary {
-    margin-top: 24px;
-}
-
-.house-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
-}
-
-.house-card {
-    background: white;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.house-name {
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 12px;
-    font-size: 16px;
-}
-
-.house-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.house-stat {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.house-stat-value {
-    font-weight: 700;
-    color: #1f2937;
-    font-size: 18px;
-}
-
-.house-stat-label {
-    font-size: 12px;
-    color: #6b7280;
-}
-
-
-/* Enhancement: heat-map.css */
-/* Heat Map Visualization Styles */
-
-.heat-map-widget {
-    background: white;
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.heat-map-header {
-    margin-bottom: 20px;
-}
-
-.heat-map-header h3 {
-    margin: 0 0 4px 0;
-    color: #1f2937;
-    font-size: 22px;
-}
-
-.heat-map-subtitle {
-    margin: 0;
-    color: #6b7280;
-    font-size: 14px;
-}
-
-.heat-map-legend {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
-    padding: 12px;
-    background: #f9fafb;
-    border-radius: 8px;
-    flex-wrap: wrap;
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.risk-action {
     font-size: 13px;
-    color: #4b5563;
-}
-
-.legend-color {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.heat-map-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.heat-map-cell {
+    color: #374151;
     background: #f3f4f6;
-    border-radius: 8px;
-    padding: 16px;
-    min-height: 100px;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+/* Common Gaps */
+.common-gaps-section {
+    margin-bottom: 30px;
+}
+
+.gaps-chart {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: 2px solid transparent;
+    gap: 12px;
+    margin-top: 16px;
 }
 
-.heat-map-cell:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border-color: rgba(0, 0, 0, 0.1);
+.gap-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }
 
-.cell-label {
-    font-weight: 600;
-    color: white;
+.gap-label {
+    flex: 0 0 200px;
     font-size: 14px;
-    margin-bottom: 8px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    color: #374151;
 }
 
-.cell-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.cell-rate {
-    font-size: 20px;
-    font-weight: 700;
-    color: white;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-.cell-overdue {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(0, 0, 0, 0.2);
-    padding: 2px 6px;
-    border-radius: 4px;
-    display: inline-block;
-    width: fit-content;
-}
-
-.heat-map-summary {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 16px;
-    padding-top: 20px;
-    border-top: 1px solid #e5e7eb;
-}
-
-.summary-stat {
-    text-align: center;
-}
-
-.stat-value {
-    font-size: 24px;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 4px;
-}
-
-.stat-label {
-    font-size: 12px;
-    color: #6b7280;
-    text-transform: uppercase;
-    font-weight: 600;
-}
-
-/* House Heat Map */
-.house-heat-map-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 16px;
-}
-
-.house-heat-card {
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: transform 0.2s;
-}
-
-.house-heat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-}
-
-.house-name {
-    font-weight: 600;
-    font-size: 18px;
-    color: #1f2937;
-    margin-bottom: 12px;
-}
-
-.house-completion {
-    margin-bottom: 12px;
-}
-
-.completion-value {
-    font-size: 28px;
-    font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 8px;
-}
-
-.completion-bar {
-    width: 100%;
-    height: 8px;
-    background: #e5e7eb;
-    border-radius: 4px;
+.gap-bar {
+    flex: 1;
+    height: 30px;
+    background: #f3f4f6;
+    border-radius: 15px;
+    position: relative;
     overflow: hidden;
 }
 
-.completion-fill {
+.gap-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
     height: 100%;
-    transition: width 0.3s ease;
-    border-radius: 4px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    transition: width 0.5s ease;
 }
 
-.house-stats {
-    display: flex;
-    gap: 8px;
-    font-size: 13px;
-    color: #6b7280;
-}
-
-/* Day Heat Map */
-.day-heat-map-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-    gap: 8px;
-}
-
-.day-heat-cell {
-    aspect-ratio: 1;
-    border-radius: 6px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    position: relative;
-}
-
-.day-heat-cell:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 10;
-}
-
-.day-number {
+.gap-percent {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     font-size: 12px;
+    color: #374151;
     font-weight: 600;
-    color: white;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-    margin-bottom: 4px;
 }
 
-.day-stats {
+/* Group Insights */
+.group-insights {
+    margin-top: 20px;
+}
+
+.group-insight {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
     display: flex;
-    flex-direction: column;
-    gap: 2px;
-    font-size: 10px;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Analysis Button */
+.btn-analysis {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
     font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
 }
 
-.day-gaps {
-    color: rgba(255, 255, 255, 0.95);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.day-completions {
-    color: rgba(255, 255, 255, 0.9);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+.btn-analysis:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .heat-map-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    .prediction-comparison {
+        flex-direction: column;
     }
     
-    .day-heat-map-grid {
-        grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    .metrics-overview {
+        grid-template-columns: 1fr;
+    }
+    
+    .gap-label {
+        flex: 0 0 120px;
+        font-size: 13px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .prediction-modal {
+        position: static;
+        background: white;
+    }
+    
+    .btn-close,
+    .modal-footer {
+        display: none;
     }
 }
 
