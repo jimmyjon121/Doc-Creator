@@ -17,14 +17,6 @@ Step 2: Login
 - Username: Doc121
 - Password: FFA121
 
-Step 3: Chrome Extension (Optional)
-------------------------------------
-1. Open Chrome
-2. Go to: chrome://extensions/
-3. Turn on "Developer mode"
-4. Click "Load unpacked"
-5. Select the "chrome-extension" folder
-
 THAT'S IT! You're ready to create documents.
 
 ================================================================================
@@ -33,7 +25,7 @@ FEATURES
 ========
 - Create aftercare documents
 - Generate PDF discharge packets  
-- Extract data from program websites
+- Curated program library with filters
 - HIPAA compliant (local storage only)
 - Auto-save every 30 seconds
 - Dark mode available
@@ -42,9 +34,9 @@ FEATURES
 TROUBLESHOOTING
 ==============
 - Can't login? Check CAPS LOCK is off
-- Extension not working? Refresh the page
-- Need help? Contact your IT support
+- Use Settings → Data Tools for export/import
+- Need help? Contact ClearHive Health support
 
 ================================================================================
-Build Date: 2025-11-07T02:53:43.791Z
+Build Date: 2025-11-07T03:05:34.186Z
 ================================================================================
