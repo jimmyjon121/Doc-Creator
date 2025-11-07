@@ -111,8 +111,11 @@ class FlightPlanWidget extends DashboardWidget {
         const clientInfo = `${item.client.initials} (${item.client.houseId})`;
         const actionId = `action-${item.type}-${item.client.id}-${Date.now()}`;
         
+        // For tracker tasks, show mark complete button
+        const isTrackerTask = item.isTrackerTask || item.type === 'tracker-gap' || item.type === 'tracker-upcoming';
+        
         return `
-            <div class="priority-item">
+            <div class="priority-item ${isTrackerTask ? 'tracker-task' : ''}">
                 <div class="item-main">
                     <div class="item-info">
                         <span class="client-badge">${clientInfo}</span>
@@ -120,10 +123,15 @@ class FlightPlanWidget extends DashboardWidget {
                         ${item.dueDate ? `<span class="due-date">${item.dueDate}</span>` : ''}
                     </div>
                     <div class="item-actions">
-                        <button class="btn-action" onclick="dashboardWidgets.takeAction('${actionId}', '${item.type}', '${item.client.id}')">
-                            ${item.action}
-                        </button>
-                        ${item.type.includes('milestone') ? 
+                        ${isTrackerTask ? 
+                            `<button class="btn-action btn-complete" onclick="dashboardWidgets.completeTrackerItem('${item.client.id}', '${item.trackerId}')">
+                                ✓ ${item.action || 'Mark Complete'}
+                            </button>` :
+                            `<button class="btn-action" onclick="dashboardWidgets.takeAction('${actionId}', '${item.type}', '${item.client.id}')">
+                                ${item.action}
+                            </button>`
+                        }
+                        ${item.type.includes('milestone') && !isTrackerTask ? 
                             `<button class="btn-quick-complete" onclick="dashboardWidgets.quickComplete('${item.client.id}', '${item.milestone?.milestone}')">
                                 ✓
                             </button>` : ''
@@ -841,6 +849,40 @@ class DashboardWidgets {
         } catch (error) {
             console.error('Failed to complete milestone:', error);
             showNotification('Failed to complete milestone', 'error');
+        }
+    }
+
+    async completeTrackerItem(clientId, trackerId) {
+        try {
+            if (!window.clientManager) {
+                showNotification('Client manager not available', 'warning');
+                return;
+            }
+            
+            // Get the client
+            const client = await window.clientManager.getClient(clientId);
+            if (!client) {
+                showNotification('Client not found', 'error');
+                return;
+            }
+            
+            // Update the tracker item
+            const updates = {
+                [trackerId]: true,
+                [trackerId + 'Date']: new Date().toISOString()
+            };
+            
+            await window.clientManager.updateClient(clientId, updates);
+            
+            // Refresh dashboard
+            if (dashboardManager.refreshDashboard) {
+                await dashboardManager.refreshDashboard();
+            }
+            
+            showNotification('Tracker item completed!', 'success');
+        } catch (error) {
+            console.error('Failed to complete tracker item:', error);
+            showNotification('Failed to complete tracker item', 'error');
         }
     }
 
