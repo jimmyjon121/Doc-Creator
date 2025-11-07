@@ -169,7 +169,7 @@
                 mainApp.style.display = 'block';
                 mainApp.style.visibility = 'visible';
                 mainApp.style.opacity = '1';
-                mainApp.style.background = 'white';
+                mainApp.style.background = 'transparent'; /* Changed from white to show purple gradient */
                 mainApp.style.position = 'relative';
                 mainApp.style.zIndex = '1';
             }
@@ -337,6 +337,16 @@
     
     <!-- Client Tracking Styles -->
     <style>
+        /* Base Styles */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        
         /* Client Tracking Styles */
         .tab-navigation {
             display: flex !important;
@@ -6684,19 +6694,32 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
+            margin: 0;
+            padding: 0;
+            background: #f5f6ff;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            opacity: 0.85;
+            z-index: -1;
         }
 
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 1320px;
+            margin: 40px auto 60px;
+            padding: 26px;
             background: white;
-            min-height: 100vh;
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
-            overflow-x: hidden;
+            min-height: calc(100vh - 100px);
+            border-radius: 28px;
+            box-shadow: 0 25px 60px rgba(102, 126, 234, 0.25);
+            overflow: hidden;
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
@@ -9066,20 +9089,6 @@
             background: white !important;
         }
         
-        /* Force main app to be visible when logged in */
-        #mainApp {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            background: white !important;
-        }
-        
-        /* Ensure body has white background */
-        body {
-            background: white !important;
-            color: #1a1a1a !important;
-        }
-
         .dashboard-header {
             display: flex;
             justify-content: space-between;
