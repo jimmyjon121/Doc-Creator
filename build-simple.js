@@ -43,7 +43,10 @@ class SimpleBuilder {
         // Step 5: Write output
         fs.writeFileSync(CONFIG.outputFile, enhanced);
         
-        // Step 6: Create package
+        // Step 6: Copy required JS files to dist
+        this.copyRequiredFiles();
+        
+        // Step 7: Create package
         this.createPackage();
         
         const stats = fs.statSync(CONFIG.outputFile);
@@ -61,6 +64,55 @@ class SimpleBuilder {
                 fs.mkdirSync(dir, { recursive: true });
             }
         });
+    }
+    
+    copyRequiredFiles() {
+        console.log('[COPY] Copying required JavaScript files...');
+        
+        // List of JS files that need to be in dist
+        const requiredFiles = [
+            'feature-flags.js',
+            'performance-monitor.js',
+            'indexed-db-manager.js',
+            'intelligent-matching.js',
+            'multi-client-workflow.js',
+            'advanced-filters.js',
+            'client-manager.js',
+            'tracker-engine.js',
+            'tracker-timeline.js',
+            'tracker-bulk-update.js',
+            'tracker-aftercare-cascade.js',
+            'houses-manager.js',
+            'milestones-manager.js',
+            'aftercare-manager.js',
+            'dashboard-manager.js',
+            'dashboard-widgets.js',
+            'task-manager.js',
+            'notes-manager.js',
+            'cm-tracker-export.js',
+            'service-worker.js'
+        ];
+        
+        // Copy each file if it exists
+        requiredFiles.forEach(file => {
+            const sourcePath = path.join('.', file);
+            const destPath = path.join(CONFIG.distDir, file);
+            
+            if (fs.existsSync(sourcePath)) {
+                fs.copyFileSync(sourcePath, destPath);
+                console.log(`  [OK] Copied ${file}`);
+            } else {
+                console.log(`  [SKIP] ${file} not found`);
+            }
+        });
+        
+        // Copy libs folder if it exists
+        const libsSource = './libs';
+        const libsDest = path.join(CONFIG.distDir, 'libs');
+        if (fs.existsSync(libsSource)) {
+            this.copyDirectory(libsSource, libsDest);
+            console.log('  [OK] Copied libs folder');
+        }
     }
     
     applyEnhancements(content) {
