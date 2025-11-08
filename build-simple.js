@@ -122,8 +122,6 @@ class SimpleBuilder {
         
         // Look for enhancement files
         const enhancementFiles = [
-            'unified-design.css',
-            'modal-fix.css',
             'styles.css',
             'scripts.js',
             'bugfixes.js',
