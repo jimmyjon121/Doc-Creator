@@ -11045,7 +11045,7 @@
 
 
     <!-- Document Preview Modal -->
-    <div id="documentPreviewModal" class="modal">
+    <div id="documentPreviewModal" class="modal" style="display: none;">
         <div class="modal-content document-preview-modal">
             <div class="modal-header">
                 <h2>Document Preview</h2>
@@ -25425,7 +25425,8 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             renderDocumentPreview(html);
             clearInterval(progressInterval); // Clear progress updates
             hideEnhancedLoading();
-            openDocumentPreview();
+            // Don't auto-open preview modal - user can open it manually if needed
+            // openDocumentPreview();
             showSuccessMessage('Document ready — review before printing.');
             
             // Save to vault and history with enhanced metadata

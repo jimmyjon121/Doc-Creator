@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!-- 
     CareConnect Pro v4.0.0
-    Build Date: 2025-11-08T01:10:05.546Z
-    Build Hash: fe50c5d7
+    Build Date: 2025-11-08T01:14:30.143Z
+    Build Hash: fe40f7ba
     Copyright (c) Family First Adolescent Services
 -->
 
@@ -4243,12 +4243,19 @@ if (!document.querySelector('#morning-review-badge-styles')) {
     bottom: 0 !important;
     background: rgba(0, 0, 0, 0.6) !important;
     backdrop-filter: blur(4px) !important;
-    display: flex !important;
+    display: none !important; /* Hidden by default */
     align-items: center !important;
     justify-content: center !important;
     z-index: 10000 !important;
-    animation: fadeIn 0.3s ease-out !important;
     padding: var(--space-lg) !important;
+}
+
+.modal.show,
+.modal[style*="display: block"],
+.modal-overlay.show,
+.modal-overlay[style*="display: block"] {
+    display: flex !important;
+    animation: fadeIn 0.3s ease-out !important;
 }
 
 .modal-content,
@@ -18285,7 +18292,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 
 
     <!-- Document Preview Modal -->
-    <div id="documentPreviewModal" class="modal">
+    <div id="documentPreviewModal" class="modal" style="display: none;">
         <div class="modal-content document-preview-modal">
             <div class="modal-header">
                 <h2>Document Preview</h2>
@@ -32665,7 +32672,8 @@ ${formattedOutput.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
             renderDocumentPreview(html);
             clearInterval(progressInterval); // Clear progress updates
             hideEnhancedLoading();
-            openDocumentPreview();
+            // Don't auto-open preview modal - user can open it manually if needed
+            // openDocumentPreview();
             showSuccessMessage('Document ready — review before printing.');
             
             // Save to vault and history with enhanced metadata
