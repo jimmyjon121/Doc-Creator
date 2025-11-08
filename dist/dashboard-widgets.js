@@ -128,7 +128,7 @@ class FlightPlanWidget extends DashboardWidget {
                                 ✓
                             </button>` :
                             `<button class="btn-action" onclick="dashboardWidgets.takeAction('${actionId}', '${item.type}', '${item.client.id}')">
-                                ${item.action}
+                            ${item.action}
                             </button>`
                         }
                         ${item.type.includes('milestone') && !isTrackerTask ? 
