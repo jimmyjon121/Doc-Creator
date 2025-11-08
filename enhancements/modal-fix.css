@@ -1,0 +1,279 @@
+/* =================================== */
+/* Modal System Fix - Remove Blue Overlays */
+/* =================================== */
+
+/* Completely reset all modal and client list elements */
+.modal *,
+.modal-content *,
+.modal-body *,
+.segment-clients-list *,
+.segment-client-item * {
+    position: relative !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Remove ALL pseudo-elements that might create overlays */
+.modal *::before,
+.modal *::after,
+.modal-content *::before,
+.modal-content *::after,
+.modal-body *::before,
+.modal-body *::after,
+.segment-clients-list *::before,
+.segment-clients-list *::after,
+.segment-client-item::before,
+.segment-client-item::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Remove all tooltips and title attributes */
+.modal [title],
+.segment-client-item [title],
+.segment-clients-list [title] {
+    pointer-events: auto !important;
+}
+
+/* Hide any absolutely positioned children */
+.segment-client-item > div:not(.client-initials):not(.client-house):not(.client-info),
+.segment-clients-list > div:not(.segment-client-item) {
+    display: none !important;
+}
+
+/* Ensure segment client items are properly styled */
+.segment-client-item {
+    background: white !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
+    margin-bottom: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+    position: relative !important;
+    overflow: visible !important;
+}
+
+.segment-client-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1) !important;
+    border-color: #8b9aff !important;
+}
+
+/* Client item children - ensure proper display */
+.segment-client-item .client-initials {
+    font-weight: 600 !important;
+    color: #667eea !important;
+    font-size: 1rem !important;
+    min-width: 50px !important;
+    text-align: center !important;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.05)) !important;
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+    position: relative !important;
+}
+
+.segment-client-item .client-house {
+    flex: 1 !important;
+    color: #1a1a2e !important;
+    font-size: 0.95rem !important;
+    text-transform: capitalize !important;
+    position: relative !important;
+    font-weight: 500 !important;
+}
+
+.segment-client-item .client-info {
+    color: #94a3b8 !important;
+    font-size: 0.85rem !important;
+    white-space: nowrap !important;
+    position: relative !important;
+}
+
+/* Segment clients list container */
+.segment-clients-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    position: relative !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Modal base styling */
+.modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.6) !important;
+    backdrop-filter: blur(4px) !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 10000 !important;
+    padding: 24px !important;
+}
+
+.modal[style*="display: block"] {
+    display: flex !important;
+}
+
+.modal-content {
+    background: white !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 50px rgba(102, 126, 234, 0.2) !important;
+    max-width: 600px !important;
+    width: 100% !important;
+    max-height: 80vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    animation: modalSlideIn 0.3s ease-out !important;
+    position: relative !important;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    padding: 24px !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    border-bottom: none !important;
+    position: relative !important;
+}
+
+.modal-header h2 {
+    font-size: 1.3rem !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+    color: white !important;
+    position: relative !important;
+}
+
+.modal-close {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: none !important;
+    color: white !important;
+    font-size: 1.5rem !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.15s ease !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    position: relative !important;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: rotate(90deg) scale(1.1);
+}
+
+.modal-body {
+    padding: 24px !important;
+    overflow-y: auto !important;
+    flex: 1 !important;
+    position: relative !important;
+    background: white !important;
+}
+
+.modal-actions {
+    padding: 16px 24px !important;
+    border-top: 1px solid #e2e8f0 !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 16px !important;
+    background: #f8f9ff !important;
+    position: relative !important;
+}
+
+.modal-actions button {
+    padding: 8px 24px !important;
+    border-radius: 12px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+    border: 1px solid #e2e8f0 !important;
+    background: white !important;
+    color: #1a1a2e !important;
+    position: relative !important;
+}
+
+.modal-actions button:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    border-color: transparent !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Remove all number badges and counters */
+.segment-client-item .badge,
+.segment-client-item .counter,
+.segment-client-item .number,
+.segment-client-item span[style*="position: absolute"],
+.segment-client-item div[style*="position: absolute"] {
+    display: none !important;
+}
+
+/* Ensure no floating elements */
+.segment-clients-list * {
+    float: none !important;
+    position: relative !important;
+}
+
+/* Remove any blue backgrounds */
+.segment-client-item *[style*="background: blue"],
+.segment-client-item *[style*="background: lightblue"],
+.segment-client-item *[style*="background: rgb"],
+.segment-client-item *[style*="background: rgba"],
+.segment-client-item *[style*="background-color"] {
+    background: transparent !important;
+}
+
+/* Force clean slate for all spans */
+.segment-client-item span {
+    display: inline-block !important;
+    position: relative !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    z-index: 1 !important;
+}
+
+/* Override any inline styles */
+.segment-client-item[style] * {
+    background: transparent !important;
+    position: relative !important;
+}
+
+/* Remove all absolute children */
+.segment-client-item > *:not(span) {
+    display: none !important;
+}
+
+/* Ensure only the 3 expected spans exist */
+.segment-client-item > span:nth-child(n+4) {
+    display: none !important;
+}
+
