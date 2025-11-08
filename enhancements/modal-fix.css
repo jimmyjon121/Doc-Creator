@@ -1,108 +1,8 @@
 /* =================================== */
-/* Modal System Fix - Remove Blue Overlays */
+/* Modal System Fix - Targeted for Blue Overlays Only */
 /* =================================== */
 
-/* Completely reset all modal and client list elements */
-.modal *,
-.modal-content *,
-.modal-body *,
-.segment-clients-list *,
-.segment-client-item * {
-    position: relative !important;
-    background: transparent !important;
-    box-shadow: none !important;
-}
-
-/* Remove ALL pseudo-elements that might create overlays */
-.modal *::before,
-.modal *::after,
-.modal-content *::before,
-.modal-content *::after,
-.modal-body *::before,
-.modal-body *::after,
-.segment-clients-list *::before,
-.segment-clients-list *::after,
-.segment-client-item::before,
-.segment-client-item::after {
-    display: none !important;
-    content: none !important;
-}
-
-/* Remove all tooltips and title attributes */
-.modal [title],
-.segment-client-item [title],
-.segment-clients-list [title] {
-    pointer-events: auto !important;
-}
-
-/* Hide any absolutely positioned children */
-.segment-client-item > div:not(.client-initials):not(.client-house):not(.client-info),
-.segment-clients-list > div:not(.segment-client-item) {
-    display: none !important;
-}
-
-/* Ensure segment client items are properly styled */
-.segment-client-item {
-    background: white !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 12px !important;
-    padding: 16px !important;
-    margin-bottom: 8px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 16px !important;
-    cursor: pointer !important;
-    transition: all 0.25s ease !important;
-    position: relative !important;
-    overflow: visible !important;
-}
-
-.segment-client-item:hover {
-    transform: translateX(4px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1) !important;
-    border-color: #8b9aff !important;
-}
-
-/* Client item children - ensure proper display */
-.segment-client-item .client-initials {
-    font-weight: 600 !important;
-    color: #667eea !important;
-    font-size: 1rem !important;
-    min-width: 50px !important;
-    text-align: center !important;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.05)) !important;
-    padding: 8px 12px !important;
-    border-radius: 8px !important;
-    position: relative !important;
-}
-
-.segment-client-item .client-house {
-    flex: 1 !important;
-    color: #1a1a2e !important;
-    font-size: 0.95rem !important;
-    text-transform: capitalize !important;
-    position: relative !important;
-    font-weight: 500 !important;
-}
-
-.segment-client-item .client-info {
-    color: #94a3b8 !important;
-    font-size: 0.85rem !important;
-    white-space: nowrap !important;
-    position: relative !important;
-}
-
-/* Segment clients list container */
-.segment-clients-list {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 8px !important;
-    position: relative !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-/* Modal base styling */
+/* Modal base styling - DO NOT strip backgrounds from everything */
 .modal {
     position: fixed !important;
     top: 0 !important;
@@ -133,7 +33,6 @@
     display: flex !important;
     flex-direction: column !important;
     animation: modalSlideIn 0.3s ease-out !important;
-    position: relative !important;
 }
 
 @keyframes modalSlideIn {
@@ -155,7 +54,6 @@
     justify-content: space-between !important;
     align-items: center !important;
     border-bottom: none !important;
-    position: relative !important;
 }
 
 .modal-header h2 {
@@ -163,7 +61,6 @@
     font-weight: 600 !important;
     margin: 0 !important;
     color: white !important;
-    position: relative !important;
 }
 
 .modal-close {
@@ -181,7 +78,6 @@
     transition: all 0.15s ease !important;
     padding: 0 !important;
     line-height: 1 !important;
-    position: relative !important;
 }
 
 .modal-close:hover {
@@ -193,7 +89,6 @@
     padding: 24px !important;
     overflow-y: auto !important;
     flex: 1 !important;
-    position: relative !important;
     background: white !important;
 }
 
@@ -204,7 +99,6 @@
     justify-content: flex-end !important;
     gap: 16px !important;
     background: #f8f9ff !important;
-    position: relative !important;
 }
 
 .modal-actions button {
@@ -216,7 +110,6 @@
     border: 1px solid #e2e8f0 !important;
     background: white !important;
     color: #1a1a2e !important;
-    position: relative !important;
 }
 
 .modal-actions button:hover {
@@ -227,53 +120,94 @@
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1) !important;
 }
 
-/* Remove all number badges and counters */
-.segment-client-item .badge,
-.segment-client-item .counter,
-.segment-client-item .number,
-.segment-client-item span[style*="position: absolute"],
-.segment-client-item div[style*="position: absolute"] {
+/* =================================== */
+/* TARGETED FIX: Only segment-client-item overlays */
+/* =================================== */
+
+/* Remove pseudo-elements from segment client items only */
+.segment-client-item::before,
+.segment-client-item::after {
     display: none !important;
+    content: none !important;
 }
 
-/* Ensure no floating elements */
-.segment-clients-list * {
-    float: none !important;
+/* Ensure segment client items are clean */
+.segment-client-item {
+    background: white !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
+    margin-bottom: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
     position: relative !important;
 }
 
-/* Remove any blue backgrounds */
-.segment-client-item *[style*="background: blue"],
-.segment-client-item *[style*="background: lightblue"],
-.segment-client-item *[style*="background: rgb"],
-.segment-client-item *[style*="background: rgba"],
-.segment-client-item *[style*="background-color"] {
-    background: transparent !important;
+.segment-client-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1) !important;
+    border-color: #8b9aff !important;
 }
 
-/* Force clean slate for all spans */
-.segment-client-item span {
-    display: inline-block !important;
-    position: relative !important;
-    background: transparent !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    z-index: 1 !important;
-}
-
-/* Override any inline styles */
-.segment-client-item[style] * {
-    background: transparent !important;
-    position: relative !important;
-}
-
-/* Remove all absolute children */
+/* Ensure only direct span children of segment-client-item, nothing else */
 .segment-client-item > *:not(span) {
     display: none !important;
 }
 
-/* Ensure only the 3 expected spans exist */
+/* Style the three expected spans */
+.segment-client-item > span:nth-child(1) {
+    /* client-initials */
+    font-weight: 600 !important;
+    color: #667eea !important;
+    font-size: 1rem !important;
+    min-width: 50px !important;
+    text-align: center !important;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.05)) !important;
+    padding: 8px 12px !important;
+    border-radius: 8px !important;
+}
+
+.segment-client-item > span:nth-child(2) {
+    /* client-house */
+    flex: 1 !important;
+    color: #1a1a2e !important;
+    font-size: 0.95rem !important;
+    text-transform: capitalize !important;
+    font-weight: 500 !important;
+}
+
+.segment-client-item > span:nth-child(3) {
+    /* client-info */
+    color: #94a3b8 !important;
+    font-size: 0.85rem !important;
+    white-space: nowrap !important;
+}
+
+/* Hide any extra spans beyond the 3 we need */
 .segment-client-item > span:nth-child(n+4) {
     display: none !important;
 }
 
+/* Segment clients list container */
+.segment-clients-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+/* Remove any number overlays or tooltips specifically */
+.segment-client-item [title],
+.segment-client-item .badge,
+.segment-client-item .counter,
+.segment-client-item .number {
+    display: none !important;
+}
+
+/* Ensure no floating/absolute positioned children create overlays */
+.segment-client-item > [style*="position: absolute"],
+.segment-client-item > [style*="position: fixed"] {
+    display: none !important;
+}
