@@ -154,7 +154,8 @@ class SimpleBuilder {
             'document-vault-ui.js',
             'empty-states-errors.js',
             'alert-actionability.js',
-            'tracker-completion-enhancement.js'
+            'tracker-completion-enhancement.js',
+            'client-data-validation.js'
         ].map(f => path.join(CONFIG.enhancementsDir, f));
         
         enhancementFiles.forEach(file => {
