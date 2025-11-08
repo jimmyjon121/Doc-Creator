@@ -126,6 +126,7 @@ class SimpleBuilder {
             'styles.css',
             'unified-design.css',
             'global-helpers.js',
+            'event-system.js',
             'scripts.js',
             'bugfixes.js',
             'features.js',
@@ -150,7 +151,8 @@ class SimpleBuilder {
             'quick-actions-complete.js',
             'document-generator-ui.js',
             'client-document-storage.js',
-            'document-vault-ui.js'
+            'document-vault-ui.js',
+            'empty-states-errors.js'
         ].map(f => path.join(CONFIG.enhancementsDir, f));
         
         enhancementFiles.forEach(file => {
