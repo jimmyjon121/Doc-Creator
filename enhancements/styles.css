@@ -1,420 +1,5 @@
-/* ============================================
-   CARECONNECT PRO - UNIFIED DESIGN SYSTEM
-   Modern, cohesive, and visually stunning
-   ============================================ */
 
-/* Design Tokens */
-:root {
-    /* Brand Colors */
-    --ccp-primary: #667eea;
-    --ccp-primary-dark: #5a67d8;
-    --ccp-secondary: #764ba2;
-    --ccp-accent: #f093fb;
-    
-    /* Status Colors */
-    --ccp-success: #10b981;
-    --ccp-warning: #f59e0b;
-    --ccp-danger: #ef4444;
-    --ccp-info: #3b82f6;
-    
-    /* Neutrals */
-    --ccp-white: #ffffff;
-    --ccp-gray-50: #f9fafb;
-    --ccp-gray-100: #f3f4f6;
-    --ccp-gray-200: #e5e7eb;
-    --ccp-gray-300: #d1d5db;
-    --ccp-gray-600: #4b5563;
-    --ccp-gray-700: #374151;
-    --ccp-gray-900: #111827;
-    
-    /* Gradients */
-    --ccp-gradient-purple: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --ccp-gradient-blue: linear-gradient(135deg, #0099cc 0%, #006699 100%);
-    --ccp-gradient-light: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    
-    /* Shadows */
-    --ccp-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --ccp-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --ccp-shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --ccp-shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    --ccp-shadow-xl: 0 25px 50px -12px rgba(102, 126, 234, 0.25);
-    
-    /* Borders */
-    --ccp-border-radius: 12px;
-    --ccp-border-radius-lg: 16px;
-    --ccp-border-radius-xl: 20px;
-    
-    /* Transitions */
-    --ccp-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --ccp-transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Global Animations */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes scaleIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.8;
-    }
-}
-
-@keyframes shimmer {
-    0% {
-        background-position: -1000px 0;
-    }
-    100% {
-        background-position: 1000px 0;
-    }
-}
-
-/* Dashboard Grid Layout */
-.dashboard-grid {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    animation: fadeIn 0.5s ease-out;
-}
-
-@media (max-width: 1400px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Universal Widget Styling */
-.dashboard-widget {
-    background: var(--ccp-white) !important;
-    border-radius: var(--ccp-border-radius-lg) !important;
-    box-shadow: var(--ccp-shadow-md) !important;
-    overflow: hidden;
-    transition: var(--ccp-transition) !important;
-    animation: slideUp 0.4s ease-out;
-    border: 1px solid var(--ccp-gray-200) !important;
-}
-
-.dashboard-widget:hover {
-    box-shadow: var(--ccp-shadow-lg) !important;
-    transform: translateY(-2px);
-}
-
-/* Widget Headers */
-.dashboard-widget .widget-header,
-.dashboard-widget > div:first-child:has(h3),
-.widget-header {
-    background: var(--ccp-gradient-light);
-    padding: 20px 24px !important;
-    border-bottom: 2px solid var(--ccp-gray-100);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.dashboard-widget h3,
-.widget-header h3 {
-    font-size: 18px !important;
-    font-weight: 700 !important;
-    color: var(--ccp-gray-900) !important;
-    margin: 0 !important;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Widget Content */
-.dashboard-widget .widget-content,
-.widget-content {
-    padding: 24px !important;
-}
-
-/* ============================================
-   FLIGHT PLAN ZONES - Enhanced Styling
-   ============================================ */
-
-.zone-header {
-    padding: 16px 20px !important;
-    border-radius: var(--ccp-border-radius) !important;
-    cursor: pointer;
-    transition: var(--ccp-transition-fast) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    font-weight: 600 !important;
-    margin-bottom: 12px !important;
-    border: 2px solid transparent !important;
-}
-
-.zone-header:hover {
-    transform: translateX(4px) !important;
-    box-shadow: var(--ccp-shadow) !important;
-}
-
-.red-zone .zone-header {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.05)) !important;
-    border-color: rgba(239, 68, 68, 0.3) !important;
-    color: #991b1b !important;
-}
-
-.purple-zone .zone-header {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(124, 58, 237, 0.05)) !important;
-    border-color: rgba(139, 92, 246, 0.3) !important;
-    color: #6b21a8 !important;
-}
-
-.yellow-zone .zone-header {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.05)) !important;
-    border-color: rgba(245, 158, 11, 0.3) !important;
-    color: #92400e !important;
-}
-
-.green-zone .zone-header {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05)) !important;
-    border-color: rgba(16, 185, 129, 0.3) !important;
-    color: #065f46 !important;
-}
-
-.zone-content {
-    padding: 12px 8px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-    animation: slideDown 0.3s ease-out;
-}
-
-.priority-item {
-    background: var(--ccp-white) !important;
-    border: 1px solid var(--ccp-gray-200) !important;
-    border-radius: var(--ccp-border-radius) !important;
-    padding: 16px !important;
-    transition: var(--ccp-transition-fast) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 12px !important;
-    animation: scaleIn 0.3s ease-out;
-}
-
-.priority-item:hover {
-    box-shadow: var(--ccp-shadow-md) !important;
-    transform: translateY(-2px) !important;
-    border-color: var(--ccp-primary) !important;
-}
-
-.priority-item .labels {
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    color: var(--ccp-gray-600) !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
-}
-
-.priority-item .description {
-    color: var(--ccp-gray-900) !important;
-    font-weight: 500 !important;
-    flex: 1;
-}
-
-/* Zone Badges */
-.zone-badge {
-    background: var(--ccp-white);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 13px;
-    font-weight: 700;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 28px;
-    box-shadow: var(--ccp-shadow-sm);
-}
-
-.red-zone .zone-badge {
-    background: var(--ccp-danger);
-    color: var(--ccp-white);
-}
-
-.purple-zone .zone-badge {
-    background: var(--ccp-secondary);
-    color: var(--ccp-white);
-}
-
-.yellow-zone .zone-badge {
-    background: var(--ccp-warning);
-    color: var(--ccp-white);
-}
-
-.green-zone .zone-badge {
-    background: var(--ccp-success);
-    color: var(--ccp-white);
-}
-
-/* ============================================
-   CLIENT JOURNEY RADAR - Enhanced Styling
-   ============================================ */
-
-.journey-radar-widget .widget-content {
-    padding: 32px 24px !important;
-}
-
-.journey-pipeline {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    gap: 16px !important;
-}
-
-.journey-stage {
-    flex: 1;
-    text-align: center !important;
-    padding: 20px 12px !important;
-    border-radius: var(--ccp-border-radius) !important;
-    background: var(--ccp-gray-50) !important;
-    transition: var(--ccp-transition-fast) !important;
-    border: 2px solid transparent !important;
-}
-
-.journey-stage:hover {
-    background: var(--ccp-white) !important;
-    border-color: var(--ccp-primary) !important;
-    box-shadow: var(--ccp-shadow) !important;
-    transform: translateY(-4px) scale(1.05) !important;
-}
-
-.stage-label {
-    font-size: 11px !important;
-    font-weight: 700 !important;
-    color: var(--ccp-gray-600) !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
-    margin-bottom: 8px !important;
-}
-
-.stage-count {
-    font-size: 36px !important;
-    font-weight: 800 !important;
-    background: var(--ccp-gradient-purple) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
-    line-height: 1 !important;
-}
-
-.journey-arrow {
-    color: var(--ccp-gray-300) !important;
-    font-size: 24px !important;
-    flex-shrink: 0;
-}
-
-/* ============================================
-   TODAY'S MISSIONS - Enhanced Styling
-   ============================================ */
-
-.missions-widget {
-    background: var(--ccp-gradient-purple) !important;
-    border: none !important;
-}
-
-.missions-widget .widget-header {
-    background: rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
-}
-
-.missions-widget h3,
-.missions-widget .widget-header * {
-    color: var(--ccp-white) !important;
-}
-
-.missions-progress {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: var(--ccp-white);
-    font-weight: 600;
-}
-
-.mission-item {
-    background: var(--ccp-white) !important;
-    border-radius: var(--ccp-border-radius) !important;
-    padding: 18px !important;
-    margin-bottom: 12px !important;
-    box-shadow: var(--ccp-shadow) !important;
-    transition: var(--ccp-transition-fast) !important;
-    animation: slideUp 0.3s ease-out;
-    border-left: 4px solid var(--ccp-primary) !important;
-}
-
-.mission-item:hover {
-    box-shadow: var(--ccp-shadow-lg) !important;
-    transform: translateX(4px) !important;
-}
-
-.mission-item.completed {
-    opacity: 0.6;
-    border-left-color: var(--ccp-success) !important;
-}
-
-/* ============================================
-   BUTTONS - Universal Styling
-   ============================================ */
-
-.btn-quick-complete {
-    background: var(--ccp-white) !important;
-    border: 2px solid var(--ccp-primary) !important;
-    color: var(--ccp-primary) !important;
-    border-radius: 8px !important;
-    padding: 8px 12px !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    transition: var(--ccp-transition-fast) !important;
-    margin-left: 12px !important;
-    font-size: 13px !important;
-}
-
-.btn-quick-complete:hover {
-    background: var(--ccp-primary) !important;
-    color: var(--ccp-white) !important;
-    transform: scale(1.05) !important;
-    box-shadow: var(--ccp-shadow-md) !important;
-}
+/* Custom Enhancements - Add your custom styles here */
 
 /* Modal Overlay Styles */
 .modal-overlay {
@@ -423,8 +8,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -433,133 +17,99 @@
 }
 
 .modal-content {
-    background: var(--ccp-white);
-    padding: 32px;
-    border-radius: var(--ccp-border-radius-xl);
-    box-shadow: var(--ccp-shadow-xl);
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     max-width: 90%;
     max-height: 90vh;
     overflow-y: auto;
-    animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    border: 1px solid var(--ccp-gray-200);
+    animation: slideUp 0.3s ease;
 }
 
-/* ============================================
-   FORMS - Enhanced Styling
-   ============================================ */
-
+/* Form Enhancements */
 .form-group {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-weight: 600;
-    color: var(--ccp-gray-900);
-    font-size: 14px;
-    letter-spacing: 0.3px;
+    color: #2d3748;
 }
 
 .form-group input,
-.form-group select,
-.form-group textarea {
+.form-group select {
     width: 100%;
-    padding: 12px 16px;
-    border: 2px solid var(--ccp-gray-200);
-    border-radius: var(--ccp-border-radius);
-    font-size: 15px;
-    transition: var(--ccp-transition-fast);
-    background: var(--ccp-white);
-    font-family: inherit;
+    padding: 10px 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.2s;
 }
 
 .form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
+.form-group select:focus {
     outline: none;
-    border-color: var(--ccp-primary);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #667eea;
 }
 
 .form-group small {
     display: block;
-    margin-top: 6px;
+    margin-top: 4px;
     font-size: 12px;
-    color: var(--ccp-gray-600);
 }
 
-/* ============================================
-   BUTTONS - Universal Styling
-   ============================================ */
-
-.btn-primary,
-button.btn-primary,
-input[type="submit"].btn-primary {
-    background: var(--ccp-gradient-purple);
-    color: var(--ccp-white);
-    padding: 12px 28px;
+/* Button Styles */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 24px;
     border: none;
-    border-radius: var(--ccp-border-radius);
-    font-size: 15px;
+    border-radius: 6px;
+    font-size: 16px;
     font-weight: 600;
     cursor: pointer;
-    transition: var(--ccp-transition-fast);
-    box-shadow: var(--ccp-shadow);
-    position: relative;
-    overflow: hidden;
+    transition: transform 0.2s;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: var(--ccp-shadow-lg);
 }
 
-.btn-primary:active {
-    transform: translateY(0);
-}
-
-.btn-secondary,
-button.btn-secondary {
-    background: var(--ccp-gray-100);
-    color: var(--ccp-gray-900);
-    padding: 12px 28px;
-    border: 2px solid var(--ccp-gray-200);
-    border-radius: var(--ccp-border-radius);
-    font-size: 15px;
-    font-weight: 600;
+.btn-secondary {
+    background: #e2e8f0;
+    color: #2d3748;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
     cursor: pointer;
-    transition: var(--ccp-transition-fast);
+    transition: background-color 0.2s;
 }
 
 .btn-secondary:hover {
-    background: var(--ccp-gray-200);
-    border-color: var(--ccp-gray-300);
+    background: #cbd5e0;
 }
 
 .btn-icon {
-    background: var(--ccp-white);
-    border: 2px solid var(--ccp-gray-200);
-    padding: 10px 14px;
-    border-radius: var(--ccp-border-radius);
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 18px;
-    transition: var(--ccp-transition-fast);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    margin-left: 10px;
+    transition: all 0.2s;
 }
 
 .btn-icon:hover {
-    background: var(--ccp-gray-50);
-    border-color: var(--ccp-primary);
-    transform: scale(1.05);
+    background: #f7fafc;
+    border-color: #cbd5e0;
 }
 
-/* ============================================
-   ADDITIONAL ANIMATIONS
-   ============================================ */
-
+/* Notifications */
 @keyframes slideIn {
     from {
         transform: translateX(100%);
@@ -582,159 +132,30 @@ button.btn-secondary {
     }
 }
 
-/* ============================================
-   QUICK ACTIONS & CONTROLS
-   ============================================ */
-
-.quick-actions,
-.quick-action-btn,
-.header-btn {
-    transition: var(--ccp-transition-fast) !important;
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.quick-action-btn,
-.header-btn {
-    background: var(--ccp-white) !important;
-    border: 2px solid var(--ccp-gray-200) !important;
-    border-radius: var(--ccp-border-radius) !important;
-    padding: 10px 18px !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    box-shadow: var(--ccp-shadow-sm) !important;
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
-
-.quick-action-btn:hover,
-.header-btn:hover {
-    border-color: var(--ccp-primary) !important;
-    transform: translateY(-2px) !important;
-    box-shadow: var(--ccp-shadow) !important;
-}
-
-/* ============================================
-   CLIENT CARDS & LISTS
-   ============================================ */
-
-.client-card {
-    background: var(--ccp-white) !important;
-    border: 1px solid var(--ccp-gray-200) !important;
-    border-radius: var(--ccp-border-radius) !important;
-    padding: 20px !important;
-    margin-bottom: 16px !important;
-    box-shadow: var(--ccp-shadow) !important;
-    transition: var(--ccp-transition-fast) !important;
-    animation: slideUp 0.3s ease-out;
-}
-
-.client-card:hover {
-    box-shadow: var(--ccp-shadow-lg) !important;
-    transform: translateY(-2px) !important;
-    border-color: var(--ccp-primary) !important;
-}
-
-/* ============================================
-   TABS & NAVIGATION
-   ============================================ */
-
-.tab-button,
-.nav-tab {
-    padding: 12px 24px !important;
-    border: 2px solid transparent !important;
-    border-radius: var(--ccp-border-radius) !important;
-    font-weight: 600 !important;
-    transition: var(--ccp-transition-fast) !important;
-    cursor: pointer !important;
-}
-
-.tab-button.active,
-.nav-tab.active {
-    background: var(--ccp-gradient-purple) !important;
-    color: var(--ccp-white) !important;
-    box-shadow: var(--ccp-shadow) !important;
-}
-
-.tab-button:not(.active):hover,
-.nav-tab:not(.active):hover {
-    background: var(--ccp-gray-50) !important;
-    border-color: var(--ccp-gray-300) !important;
-}
-
-/* ============================================
-   BADGES & TAGS
-   ============================================ */
-
-.badge,
-.tag,
-.status-badge {
-    padding: 6px 12px !important;
-    border-radius: 6px !important;
-    font-size: 12px !important;
-    font-weight: 700 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 4px !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.5px !important;
-}
-
-.badge-success {
-    background: rgba(16, 185, 129, 0.1) !important;
-    color: #065f46 !important;
-}
-
-.badge-warning {
-    background: rgba(245, 158, 11, 0.1) !important;
-    color: #92400e !important;
-}
-
-.badge-danger {
-    background: rgba(239, 68, 68, 0.1) !important;
-    color: #991b1b !important;
-}
-
-.badge-info {
-    background: rgba(59, 130, 246, 0.1) !important;
-    color: #1e40af !important;
-}
-
-/* ============================================
-   LOADING & SPINNERS
-   ============================================ */
-
-.loading-spinner,
-.spinner {
-    border: 3px solid var(--ccp-gray-200);
-    border-top-color: var(--ccp-primary);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* ============================================
-   NOTIFICATIONS & TOASTS
-   ============================================ */
-
-.notification,
-.toast {
-    background: var(--ccp-white) !important;
-    border-radius: var(--ccp-border-radius) !important;
-    box-shadow: var(--ccp-shadow-xl) !important;
-    padding: 16px 20px !important;
-    border-left: 4px solid var(--ccp-primary) !important;
-    animation: slideIn 0.3s ease-out;
-}
-
-/* ============================================
-   SPECIFIC OVERRIDES
-   ============================================ */
 
 /* Hide dashboard subtitle - user requested removal */
 .dashboard-subtitle {
     display: none !important;
+}
+
+/* Add spacing to quick-complete checkbox buttons for better aesthetics */
+.btn-quick-complete {
+    margin-left: 12px !important;
 }
 
 /* Hide North Star and House Weather widgets - replaced with new widgets */
@@ -744,27 +165,4 @@ button.btn-secondary {
     visibility: hidden !important;
     height: 0 !important;
     overflow: hidden !important;
-}
-
-/* ============================================
-   RESPONSIVE DESIGN
-   ============================================ */
-
-@media (max-width: 768px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr !important;
-        gap: 16px !important;
-    }
-    
-    .dashboard-widget {
-        margin-bottom: 16px;
-    }
-    
-    .journey-pipeline {
-        flex-wrap: wrap !important;
-    }
-    
-    .journey-stage {
-        min-width: 100px;
-    }
 }

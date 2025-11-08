@@ -92,6 +92,7 @@ class SimpleBuilder {
             'notes-manager.js',
             'cm-tracker-export.js',
             'discharge-checklist.js',
+            'document-generator.js',
             'service-worker.js'
         ];
         
@@ -123,6 +124,8 @@ class SimpleBuilder {
         // Look for enhancement files
         const enhancementFiles = [
             'styles.css',
+            'unified-design.css',
+            'global-helpers.js',
             'scripts.js',
             'bugfixes.js',
             'features.js',
@@ -143,7 +146,11 @@ class SimpleBuilder {
             'missions-redesign.css',
             'missions-redesign.js',
             'morning-review.css',
-            'morning-review.js'
+            'morning-review.js',
+            'quick-actions-complete.js',
+            'document-generator-ui.js',
+            'client-document-storage.js',
+            'document-vault-ui.js'
         ].map(f => path.join(CONFIG.enhancementsDir, f));
         
         enhancementFiles.forEach(file => {
@@ -230,83 +237,38 @@ class SimpleBuilder {
         console.log('[PACKAGE] Creating distribution package...');
         
         // Create README
-        const readme = `
-================================================================================
-                    CARECONNECT PRO - VERSION ${CONFIG.version}
-================================================================================
+        const readme = `# CareConnect Pro v${CONFIG.version}
 
-INSTALLATION FOR CLINICIANS
-===========================
-
-Step 1: Open the Application
------------------------------
-- Double-click "CareConnect-Pro.html"
-- It opens in your browser automatically
-- No installation needed!
-
-Step 2: Login
--------------
-- Username: Doc121
-- Password: FFA121
-
-THAT'S IT! You're ready to create documents.
-
-================================================================================
-
-FEATURES
-========
-- Create aftercare documents
-- Generate PDF discharge packets  
-- Curated program library with filters
-- HIPAA compliant (local storage only)
-- Auto-save every 30 seconds
-- Dark mode available
-- Works offline
-
-TROUBLESHOOTING
-==============
-- Can't login? Check CAPS LOCK is off
-- Use Settings → Data Tools for export/import
-- Need help? Contact ClearHive Health support
-
-================================================================================
-Build Date: ${new Date().toISOString()}
-================================================================================
+Built on ${new Date().toLocaleString()}
 `;
+        fs.writeFileSync(path.join(CONFIG.distDir, 'README.md'), readme);
         
-        fs.writeFileSync(path.join(CONFIG.distDir, 'README.txt'), readme);
-        console.log('  [OK] README created');
+        // Copy package.json if it exists
+        const packageJsonSource = './package.json';
+        const packageJsonDest = path.join(CONFIG.distDir, 'package.json');
+        if (fs.existsSync(packageJsonSource)) {
+            fs.copyFileSync(packageJsonSource, packageJsonDest);
+            console.log('  [OK] Copied package.json');
+        }
         
-        // Create a simple batch file for Windows users
-        const batchFile = `@echo off
-echo Starting CareConnect Pro...
-start CareConnect-Pro.html
-exit`;
+        // Copy LICENSE if it exists
+        const licenseSource = './LICENSE';
+        const licenseDest = path.join(CONFIG.distDir, 'LICENSE');
+        if (fs.existsSync(licenseSource)) {
+            fs.copyFileSync(licenseSource, licenseDest);
+            console.log('  [OK] Copied LICENSE');
+        }
         
-        fs.writeFileSync(path.join(CONFIG.distDir, 'Start-CareConnect.bat'), batchFile);
-        console.log('  [OK] Windows launcher created');
-        
-        // Create a simple shell script for Mac/Linux users
-        const shellScript = `#!/bin/bash
-echo "Starting CareConnect Pro..."
-open CareConnect-Pro.html 2>/dev/null || xdg-open CareConnect-Pro.html 2>/dev/null || echo "Please open CareConnect-Pro.html in your browser"`;
-        
-        fs.writeFileSync(path.join(CONFIG.distDir, 'Start-CareConnect.sh'), shellScript);
-        fs.chmodSync(path.join(CONFIG.distDir, 'Start-CareConnect.sh'), '755');
-        console.log('  [OK] Mac/Linux launcher created');
+        // Packaging note: Skip recursive copy of dist into itself to prevent path explosion
     }
     
     copyDirectory(source, destination) {
-        if (!fs.existsSync(destination)) {
-            fs.mkdirSync(destination, { recursive: true });
-        }
-        
+        fs.mkdirSync(destination, { recursive: true });
         const files = fs.readdirSync(source);
         files.forEach(file => {
             const sourcePath = path.join(source, file);
             const destPath = path.join(destination, file);
-            
-            if (fs.statSync(sourcePath).isDirectory()) {
+            if (fs.lstatSync(sourcePath).isDirectory()) {
                 this.copyDirectory(sourcePath, destPath);
             } else {
                 fs.copyFileSync(sourcePath, destPath);
@@ -315,73 +277,5 @@ open CareConnect-Pro.html 2>/dev/null || xdg-open CareConnect-Pro.html 2>/dev/nu
     }
 }
 
-// Create enhancement examples if they don't exist
-function createEnhancementExamples() {
-    const enhancementsDir = 'enhancements';
-    
-    if (!fs.existsSync(enhancementsDir)) {
-        fs.mkdirSync(enhancementsDir);
-        
-        // Example CSS enhancement
-        fs.writeFileSync(path.join(enhancementsDir, 'styles.css'), `
-/* Custom Enhancements - Add your custom styles here */
-
-/* Example: Make buttons more prominent */
-.btn-primary {
-    font-size: 16px !important;
-    padding: 15px 30px !important;
-}
-
-/* Example: Custom branding color 
-:root {
-    --brand-color: #0099cc;
-}
-*/
-`);
-        
-        // Example JS enhancement
-        fs.writeFileSync(path.join(enhancementsDir, 'features.js'), `
-// Custom Features - Add your custom JavaScript here
-
-// Example: Add a custom keyboard shortcut
-/*
-document.addEventListener('keydown', function(e) {
-    // Ctrl+Shift+S to quick save
-    if (e.ctrlKey && e.shiftKey && e.key === 'S') {
-        e.preventDefault();
-        console.log('Quick save triggered!');
-        // Add your save logic here
-    }
-});
-*/
-
-// Example: Add custom logging
-console.log('CareConnect Pro - Enhanced Version Loaded');
-`);
-        
-        // Bugfix file
-        fs.writeFileSync(path.join(enhancementsDir, 'bugfixes.js'), `
-// Bugfixes - Add fixes for known issues here
-
-// Example: Fix for connection error in Chrome extension
-/*
-if (window.chrome && chrome.runtime) {
-    // Add any Chrome extension fixes here
-}
-*/
-`);
-        
-        console.log('[INFO] Created enhancement examples in enhancements/ folder');
-    }
-}
-
-// Main execution
-if (require.main === module) {
-    createEnhancementExamples();
-    const builder = new SimpleBuilder();
-    builder.build();
-}
-
-module.exports = SimpleBuilder;
-
-
+const builder = new SimpleBuilder();
+builder.build();
