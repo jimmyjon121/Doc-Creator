@@ -756,9 +756,10 @@ class DashboardWidgets {
             this.widgets.set('flightPlan', new FlightPlanWidget(widgetContainers.flightPlan));
         }
         
-        if (widgetContainers.houseWeather) {
-            this.widgets.set('houseWeather', new HouseWeatherWidget(widgetContainers.houseWeather));
-        }
+        // House Weather Widget - DISABLED (replaced with Active Client Tracker Grid)
+        // if (widgetContainers.houseWeather) {
+        //     this.widgets.set('houseWeather', new HouseWeatherWidget(widgetContainers.houseWeather));
+        // }
         
         if (widgetContainers.journeyRadar) {
             this.widgets.set('journeyRadar', new JourneyRadarWidget(widgetContainers.journeyRadar));
@@ -768,9 +769,10 @@ class DashboardWidgets {
             this.widgets.set('missions', new MissionsWidget(widgetContainers.missions));
         }
         
-        if (widgetContainers.metrics) {
-            this.widgets.set('metrics', new MetricsWidget(widgetContainers.metrics));
-        }
+        // Metrics Widget (North Star) - DISABLED (replaced with Aftercare Pipeline Status)
+        // if (widgetContainers.metrics) {
+        //     this.widgets.set('metrics', new MetricsWidget(widgetContainers.metrics));
+        // }
         
         if (widgetContainers.quickActions) {
             this.widgets.set('quickActions', new QuickActionsWidget(widgetContainers.quickActions));

@@ -157,3 +157,12 @@
 .btn-quick-complete {
     margin-left: 12px !important;
 }
+
+/* Hide North Star and House Weather widgets - replaced with new widgets */
+#metricsWidget,
+#houseWeatherWidget {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
