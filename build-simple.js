@@ -155,7 +155,11 @@ class SimpleBuilder {
             'empty-states-errors.js',
             'alert-actionability.js',
             'tracker-completion-enhancement.js',
-            'client-data-validation.js'
+            'client-data-validation.js',
+            'discharge-packet-integration.js',
+            'widget-rendering-optimization.js',
+            'indexeddb-optimization.js',
+            'css-audit.js'
         ].map(f => path.join(CONFIG.enhancementsDir, f));
         
         enhancementFiles.forEach(file => {
