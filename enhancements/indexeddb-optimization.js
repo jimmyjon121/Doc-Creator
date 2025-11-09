@@ -138,7 +138,11 @@
     
     // Enhance clientManager with cached queries
     function enhanceClientManager() {
-        if (!window.clientManager) return;
+        if (!window.clientManager || !window.clientManager.getAllClients) {
+            // Wait for clientManager to be ready
+            setTimeout(enhanceClientManager, 200);
+            return;
+        }
         
         // Cache getAllClients
         const originalGetAllClients = window.clientManager.getAllClients;

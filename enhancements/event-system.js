@@ -99,7 +99,11 @@
     
     // Enhance clientManager with events
     function enhanceClientManager() {
-        if (!window.clientManager) return;
+        if (!window.clientManager || !window.clientManager.updateClient) {
+            // Wait for clientManager to be ready
+            setTimeout(enhanceClientManager, 200);
+            return;
+        }
         
         const originalUpdateClient = window.clientManager.updateClient;
         window.clientManager.updateClient = async function(clientId, updates) {

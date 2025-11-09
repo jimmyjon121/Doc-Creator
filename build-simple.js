@@ -126,6 +126,7 @@ class SimpleBuilder {
             'styles.css',
             'unified-design.css',
             'global-helpers.js',
+            'initialization-fix.js',
             'event-system.js',
             'scripts.js',
             'bugfixes.js',

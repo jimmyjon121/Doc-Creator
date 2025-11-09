@@ -223,7 +223,11 @@
     
     // Optimize dashboard refresh
     function optimizeDashboardRefresh() {
-        if (!window.dashboardManager) return;
+        if (!window.dashboardManager || !window.dashboardManager.refreshDashboard) {
+            // Wait for dashboardManager to be ready
+            setTimeout(optimizeDashboardRefresh, 200);
+            return;
+        }
         
         const originalRefreshDashboard = window.dashboardManager.refreshDashboard;
         
