@@ -134,8 +134,8 @@
                         <div class="alert-actions-section">
                             <h4>Quick Actions</h4>
                             <div class="action-buttons-grid">
-                                ${alert.isTrackerTask ? `
-                                    <button class="btn btn-success" onclick="window.completeAlertFromModal('${clientId}', '${alert.trackerId}')">
+                                ${alert.isTrackerTask && alert.trackerId ? `
+                                    <button class="btn btn-success" onclick="window.completeAlertFromModal('${clientId}', '${alert.trackerId || ''}')">
                                         ✓ Mark Complete
                                     </button>
                                 ` : ''}
