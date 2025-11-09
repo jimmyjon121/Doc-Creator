@@ -110,9 +110,9 @@
             </div>
             ${config.buttons.length > 0 ? `
                 <div class="modal-footer">
-                    ${config.buttons.map((btn, index) => `
+                    ${config.buttons.map(btn => `
                         <button class="btn ${btn.primary ? 'btn-primary' : 'btn-secondary'}" 
-                                data-action-index="${index}">${btn.text}</button>
+                                onclick="(${btn.action.toString()})()">${btn.text}</button>
                     `).join('')}
                 </div>
             ` : ''}
@@ -120,21 +120,6 @@
         
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
-        
-        // Attach button event listeners
-        if (config.buttons.length > 0) {
-            const footerButtons = modal.querySelectorAll('.modal-footer button[data-action-index]');
-            footerButtons.forEach((button, index) => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    try {
-                        config.buttons[index].action();
-                    } catch (error) {
-                        console.error('Error executing button action:', error);
-                    }
-                });
-            });
-        }
         
         // Close on overlay click if enabled
         if (config.closeOnOverlay) {
@@ -529,3 +514,4 @@
     
     console.log('✅ Global helpers loaded successfully');
 })();
+

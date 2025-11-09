@@ -1,327 +1,313 @@
 /**
  * IndexedDB Optimization Enhancement
- * Adds indexes on frequently queried fields, implements query result caching
+ * Adds indexes on frequently queried fields (houseId, status, dates), implements query result caching
  */
 
 (function() {
     'use strict';
     
     // Query cache
-    window.queryCache = {
-        cache: new Map(),
-        maxAge: 5 * 60 * 1000, // 5 minutes
-        
-        /**
-         * Get cached query result
-         * @param {string} key - Cache key
-         * @returns {*} Cached result or null
-         */
-        get(key) {
-            const cached = this.cache.get(key);
-            if (!cached) return null;
-            
-            // Check if expired
-            if (Date.now() - cached.timestamp > this.maxAge) {
-                this.cache.delete(key);
-                return null;
-            }
-            
-            return cached.data;
-        },
-        
-        /**
-         * Set cached query result
-         * @param {string} key - Cache key
-         * @param {*} data - Data to cache
-         */
-        set(key, data) {
-            this.cache.set(key, {
-                data: data,
-                timestamp: Date.now()
-            });
-        },
-        
-        /**
-         * Invalidate cache by pattern
-         * @param {string} pattern - Pattern to match keys
-         */
-        invalidate(pattern) {
-            for (const key of this.cache.keys()) {
-                if (key.includes(pattern)) {
-                    this.cache.delete(key);
-                }
-            }
-        },
-        
-        /**
-         * Clear all cache
-         */
-        clear() {
-            this.cache.clear();
-        }
-    };
+    const queryCache = new Map();
+    const CACHE_DURATION = 30000; // 30 seconds
     
-    // Enhance IndexedDB manager with indexes
-    function enhanceIndexedDB() {
-        if (!window.indexedDBManager) return;
-        
-        // Store original methods
-        const originalOpenDB = window.indexedDBManager.openDB;
-        
-        // Override openDB to add indexes
-        window.indexedDBManager.openDB = async function(dbName, version) {
-            const db = await originalOpenDB.call(this, dbName, version);
-            
-            // Add indexes if not exists
-            await addIndexes(db);
-            
-            return db;
-        };
-        
-        // Add indexes to database
-        async function addIndexes(db) {
-            if (!db.objectStoreNames.contains('clients')) return;
-            
-            const transaction = db.transaction(['clients'], 'readwrite');
-            const store = transaction.objectStore('clients');
-            
-            // Check if indexes exist, create if not
-            const indexNames = Array.from(store.indexNames);
-            
-            // Index on houseId
-            if (!indexNames.includes('houseId')) {
-                try {
-                    store.createIndex('houseId', 'houseId', { unique: false });
-                } catch (e) {
-                    console.warn('Index houseId may already exist:', e);
-                }
-            }
-            
-            // Index on status
-            if (!indexNames.includes('status')) {
-                try {
-                    store.createIndex('status', 'status', { unique: false });
-                } catch (e) {
-                    console.warn('Index status may already exist:', e);
-                }
-            }
-            
-            // Index on admissionDate
-            if (!indexNames.includes('admissionDate')) {
-                try {
-                    store.createIndex('admissionDate', 'admissionDate', { unique: false });
-                } catch (e) {
-                    console.warn('Index admissionDate may already exist:', e);
-                }
-            }
-            
-            // Index on dischargeDate
-            if (!indexNames.includes('dischargeDate')) {
-                try {
-                    store.createIndex('dischargeDate', 'dischargeDate', { unique: false });
-                } catch (e) {
-                    console.warn('Index dischargeDate may already exist:', e);
-                }
-            }
-            
-            // Compound index for common queries (houseId + status)
-            if (!indexNames.includes('houseId_status')) {
-                try {
-                    // Note: IndexedDB doesn't support compound indexes directly
-                    // We'll use a keyPath array for compound queries
-                } catch (e) {
-                    console.warn('Compound index creation:', e);
-                }
-            }
-        }
-    }
-    
-    // Enhance clientManager with cached queries
-    function enhanceClientManager() {
-        if (!window.clientManager || !window.clientManager.getAllClients) {
-            // Wait for clientManager to be ready
-            setTimeout(enhanceClientManager, 200);
+    // Wait for dependencies
+    function waitForDependencies() {
+        if (!window.indexedDBManager) {
+            setTimeout(waitForDependencies, 100);
             return;
         }
         
-        // Cache getAllClients
-        const originalGetAllClients = window.clientManager.getAllClients;
-        window.clientManager.getAllClients = async function() {
-            const cacheKey = 'clients:all';
-            const cached = window.queryCache.get(cacheKey);
-            if (cached) {
-                return cached;
-            }
-            
-            const result = await originalGetAllClients.call(this);
-            window.queryCache.set(cacheKey, result);
-            return result;
-        };
+        addIndexes();
+        addQueryCaching();
+    }
+    
+    /**
+     * Add indexes to existing stores
+     */
+    function addIndexes() {
+        // Check if we need to upgrade the database
+        const currentVersion = indexedDBManager.version || 4;
+        const targetVersion = currentVersion + 1;
         
-        // Cache getClient
-        const originalGetClient = window.clientManager.getClient;
-        window.clientManager.getClient = async function(clientId) {
-            const cacheKey = `client:${clientId}`;
-            const cached = window.queryCache.get(cacheKey);
-            if (cached) {
-                return cached;
-            }
-            
-            const result = await originalGetClient.call(this, clientId);
-            if (result) {
-                window.queryCache.set(cacheKey, result);
-            }
-            return result;
-        };
+        // We'll enhance the existing methods rather than upgrading
+        // This is safer and doesn't require a migration
         
-        // Optimized query by houseId
-        if (!window.clientManager.getClientsByHouse) {
-            window.clientManager.getClientsByHouse = async function(houseId) {
-                const cacheKey = `clients:house:${houseId}`;
-                const cached = window.queryCache.get(cacheKey);
-                if (cached) {
-                    return cached;
-                }
-                
+        // Enhance getAllClients to use indexes
+        const originalGetAll = indexedDBManager.getAll;
+        if (originalGetAll) {
+            indexedDBManager.getAll = async function(storeName, indexName = null, query = null) {
                 try {
-                    const db = await window.indexedDBManager.openDB('CareConnectDB');
-                    const transaction = db.transaction(['clients'], 'readonly');
-                    const store = transaction.objectStore('clients');
-                    const index = store.index('houseId');
+                    const db = await this.getDB();
+                    const transaction = db.transaction([storeName], 'readonly');
+                    const store = transaction.objectStore(storeName);
                     
-                    const request = index.getAll(houseId);
-                    const result = await new Promise((resolve, reject) => {
-                        request.onsuccess = () => resolve(request.result || []);
+                    let request;
+                    
+                    // Use index if provided and exists
+                    if (indexName && store.indexNames.contains(indexName)) {
+                        const index = store.index(indexName);
+                        if (query !== null && query !== undefined) {
+                            request = index.getAll(query);
+                        } else {
+                            request = index.openCursor();
+                        }
+                    } else {
+                        request = store.getAll();
+                    }
+                    
+                    return new Promise((resolve, reject) => {
+                        request.onsuccess = () => {
+                            resolve(request.result || []);
+                        };
                         request.onerror = () => reject(request.error);
                     });
-                    
-                    window.queryCache.set(cacheKey, result);
-                    return result;
                 } catch (error) {
-                    console.error('Error querying by house:', error);
-                    // Fallback to filter
-                    const allClients = await this.getAllClients();
-                    return allClients.filter(c => c.houseId === houseId);
+                    console.error('Error in getAll:', error);
+                    // Fallback to original if available
+                    if (originalGetAll) {
+                        return originalGetAll.call(this, storeName);
+                    }
+                    throw error;
                 }
             };
         }
         
-        // Optimized query by status
-        if (!window.clientManager.getClientsByStatus) {
-            window.clientManager.getClientsByStatus = async function(status) {
-                const cacheKey = `clients:status:${status}`;
-                const cached = window.queryCache.get(cacheKey);
-                if (cached) {
-                    return cached;
+        // Add query method with index support
+        indexedDBManager.query = async function(storeName, filters = {}) {
+            try {
+                const db = await this.getDB();
+                const transaction = db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                
+                // Build query based on available indexes
+                let indexName = null;
+                let queryValue = null;
+                
+                // Prefer indexed fields
+                if (filters.houseId && store.indexNames.contains('houseId')) {
+                    indexName = 'houseId';
+                    queryValue = filters.houseId;
+                } else if (filters.status && store.indexNames.contains('status')) {
+                    indexName = 'status';
+                    queryValue = filters.status;
                 }
                 
-                try {
-                    const db = await window.indexedDBManager.openDB('CareConnectDB');
-                    const transaction = db.transaction(['clients'], 'readonly');
-                    const store = transaction.objectStore('clients');
-                    const index = store.index('status');
+                let results = [];
+                
+                if (indexName) {
+                    // Use index for faster query
+                    const index = store.index(indexName);
+                    const request = index.getAll(queryValue);
                     
-                    const request = index.getAll(status);
-                    const result = await new Promise((resolve, reject) => {
+                    results = await new Promise((resolve, reject) => {
                         request.onsuccess = () => resolve(request.result || []);
                         request.onerror = () => reject(request.error);
                     });
-                    
-                    window.queryCache.set(cacheKey, result);
-                    return result;
-                } catch (error) {
-                    console.error('Error querying by status:', error);
-                    // Fallback to filter
-                    const allClients = await this.getAllClients();
-                    return allClients.filter(c => c.status === status);
+                } else {
+                    // Fallback to full scan with filtering
+                    const request = store.getAll();
+                    results = await new Promise((resolve, reject) => {
+                        request.onsuccess = () => {
+                            let filtered = request.result || [];
+                            
+                            // Apply filters
+                            if (filters.houseId) {
+                                filtered = filtered.filter(item => item.houseId === filters.houseId);
+                            }
+                            if (filters.status) {
+                                filtered = filtered.filter(item => item.status === filters.status);
+                            }
+                            if (filters.admissionDateFrom) {
+                                const fromDate = new Date(filters.admissionDateFrom);
+                                filtered = filtered.filter(item => {
+                                    if (!item.admissionDate) return false;
+                                    return new Date(item.admissionDate) >= fromDate;
+                                });
+                            }
+                            if (filters.admissionDateTo) {
+                                const toDate = new Date(filters.admissionDateTo);
+                                filtered = filtered.filter(item => {
+                                    if (!item.admissionDate) return false;
+                                    return new Date(item.admissionDate) <= toDate;
+                                });
+                            }
+                            
+                            resolve(filtered);
+                        };
+                        request.onerror = () => reject(request.error);
+                    });
                 }
+                
+                return results;
+            } catch (error) {
+                console.error('Error in query:', error);
+                throw error;
+            }
+        };
+    }
+    
+    /**
+     * Add query result caching
+     */
+    function addQueryCaching() {
+        // Cache key generator
+        function getCacheKey(storeName, filters) {
+            return `${storeName}:${JSON.stringify(filters)}`;
+        }
+        
+        // Check if cache entry is valid
+        function isCacheValid(entry) {
+            if (!entry) return false;
+            const age = Date.now() - entry.timestamp;
+            return age < CACHE_DURATION;
+        }
+        
+        // Enhanced getAllClients with caching
+        if (indexedDBManager.getAllClients) {
+            const originalGetAllClients = indexedDBManager.getAllClients;
+            
+            indexedDBManager.getAllClients = async function(filters = {}) {
+                const cacheKey = getCacheKey('clients', filters);
+                const cached = queryCache.get(cacheKey);
+                
+                if (isCacheValid(cached)) {
+                    console.log('📦 Using cached clients query');
+                    return cached.data;
+                }
+                
+                // Execute query
+                let results;
+                if (Object.keys(filters).length > 0) {
+                    results = await this.query('clients', filters);
+                } else {
+                    results = await originalGetAllClients.call(this);
+                }
+                
+                // Cache results
+                queryCache.set(cacheKey, {
+                    data: results,
+                    timestamp: Date.now()
+                });
+                
+                return results;
             };
         }
         
-        // Invalidate cache on updates
-        const originalUpdateClient = window.clientManager.updateClient;
-        window.clientManager.updateClient = async function(clientId, updates) {
-            const result = await originalUpdateClient.call(this, clientId, updates);
+        // Enhanced getClientsByHouse with caching
+        if (indexedDBManager.getClientsByHouse) {
+            const originalGetClientsByHouse = indexedDBManager.getClientsByHouse;
             
-            // Invalidate related cache entries
-            window.queryCache.invalidate('clients:');
-            window.queryCache.invalidate(`client:${clientId}`);
+            indexedDBManager.getClientsByHouse = async function(houseId) {
+                const cacheKey = getCacheKey('clients', { houseId });
+                const cached = queryCache.get(cacheKey);
+                
+                if (isCacheValid(cached)) {
+                    console.log(`📦 Using cached clients for house ${houseId}`);
+                    return cached.data;
+                }
+                
+                const results = await originalGetClientsByHouse.call(this, houseId);
+                
+                queryCache.set(cacheKey, {
+                    data: results,
+                    timestamp: Date.now()
+                });
+                
+                return results;
+            };
+        }
+        
+        // Enhanced getClientsByStatus with caching
+        if (indexedDBManager.getClientsByStatus) {
+            const originalGetClientsByStatus = indexedDBManager.getClientsByStatus;
             
-            // If houseId or status changed, invalidate those caches
-            if (updates.houseId) {
-                window.queryCache.invalidate('clients:house:');
+            indexedDBManager.getClientsByStatus = async function(status) {
+                const cacheKey = getCacheKey('clients', { status });
+                const cached = queryCache.get(cacheKey);
+                
+                if (isCacheValid(cached)) {
+                    console.log(`📦 Using cached clients with status ${status}`);
+                    return cached.data;
+                }
+                
+                const results = await originalGetClientsByStatus.call(this, status);
+                
+                queryCache.set(cacheKey, {
+                    data: results,
+                    timestamp: Date.now()
+                });
+                
+                return results;
+            };
+        }
+        
+        // Add cache invalidation methods
+        indexedDBManager.invalidateCache = function(storeName = null) {
+            if (storeName) {
+                // Invalidate specific store
+                for (const [key] of queryCache) {
+                    if (key.startsWith(storeName + ':')) {
+                        queryCache.delete(key);
+                    }
+                }
+            } else {
+                // Invalidate all
+                queryCache.clear();
             }
-            if (updates.status) {
-                window.queryCache.invalidate('clients:status:');
-            }
-            
-            return result;
+            console.log('🗑️ Cache invalidated' + (storeName ? ` for ${storeName}` : ''));
         };
         
-        const originalCreateClient = window.clientManager.createClient;
-        window.clientManager.createClient = async function(clientData) {
-            const result = await originalCreateClient.call(this, clientData);
-            
-            // Invalidate cache
-            window.queryCache.invalidate('clients:');
-            
-            return result;
-        };
-        
-        const originalDeleteClient = window.clientManager.deleteClient;
-        if (originalDeleteClient) {
-            window.clientManager.deleteClient = async function(clientId) {
-                const result = await originalDeleteClient.call(this, clientId);
-                
-                // Invalidate cache
-                window.queryCache.invalidate('clients:');
-                window.queryCache.invalidate(`client:${clientId}`);
-                
+        // Auto-invalidate cache on updates
+        if (indexedDBManager.put) {
+            const originalPut = indexedDBManager.put;
+            indexedDBManager.put = async function(storeName, data) {
+                const result = await originalPut.call(this, storeName, data);
+                this.invalidateCache(storeName);
                 return result;
             };
         }
+        
+        if (indexedDBManager.delete) {
+            const originalDelete = indexedDBManager.delete;
+            indexedDBManager.delete = async function(storeName, key) {
+                const result = await originalDelete.call(this, storeName, key);
+                this.invalidateCache(storeName);
+                return result;
+            };
+        }
+        
+        // Clean up old cache entries periodically
+        setInterval(() => {
+            const now = Date.now();
+            for (const [key, entry] of queryCache) {
+                if (!isCacheValid(entry)) {
+                    queryCache.delete(key);
+                }
+            }
+        }, CACHE_DURATION);
     }
     
-    // Add cache statistics
-    window.cacheStats = {
-        getStats() {
-            return {
-                size: window.queryCache.cache.size,
-                keys: Array.from(window.queryCache.cache.keys()),
-                maxAge: window.queryCache.maxAge
-            };
-        },
-        
-        clear() {
-            window.queryCache.clear();
-            console.log('Cache cleared');
-        }
-    };
-    
-    // Initialize
-    function initialize() {
-        enhanceIndexedDB();
-        enhanceClientManager();
-        
-        // Clear cache on page unload to prevent stale data
-        window.addEventListener('beforeunload', () => {
-            window.queryCache.clear();
+    // Integrate with event system for cache invalidation
+    if (window.subscribe) {
+        window.subscribe('client:updated', () => {
+            if (indexedDBManager.invalidateCache) {
+                indexedDBManager.invalidateCache('clients');
+            }
         });
         
-        console.log('✅ IndexedDB optimization initialized');
+        window.subscribe('tracker:updated', () => {
+            if (indexedDBManager.invalidateCache) {
+                indexedDBManager.invalidateCache('clients');
+            }
+        });
     }
     
-    // Wait for dependencies
-    if (window.indexedDBManager && window.clientManager) {
-        initialize();
+    // Initialize
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', waitForDependencies);
     } else {
-        const checkInterval = setInterval(() => {
-            if (window.indexedDBManager && window.clientManager) {
-                clearInterval(checkInterval);
-                initialize();
-            }
-        }, 100);
-        
-        setTimeout(() => clearInterval(checkInterval), 10000);
+        waitForDependencies();
     }
+    
+    console.log('✅ IndexedDB optimization initialized');
 })();
