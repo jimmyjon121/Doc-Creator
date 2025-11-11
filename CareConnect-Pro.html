@@ -1672,10 +1672,10 @@
                 </div>
                 <div class="results__controls">
                     <div class="view-toggle" role="group" aria-label="Change program layout">
-                        <button type="button" class="is-active" data-view="grid">Grid</button>
-                        <button type="button" data-view="rows">Rows</button>
-                        <button type="button" data-view="compare">Compare</button>
-                        <button type="button" data-view="map">Map</button>
+                        <button type="button" class="is-active" data-view="grid" aria-pressed="true">Grid</button>
+                        <button type="button" data-view="rows" aria-pressed="false">Rows</button>
+                        <button type="button" data-view="compare" aria-pressed="false">Compare</button>
+                        <button type="button" data-view="map" aria-pressed="false">Map</button>
                     </div>
                     <label for="sortSelect" style="font-size:0.85rem; color: var(--text-subtle); display:flex; gap:8px; align-items:center;">
                         Sort
@@ -3641,6 +3641,7 @@
                 state.view = view;
                 viewToggleButtons.forEach(btn => {
                     btn.classList.toggle("is-active", btn.dataset.view === view);
+                    btn.setAttribute("aria-pressed", btn.dataset.view === view ? "true" : "false");
                 });
                 const isRows = view === "rows";
                 const isMap = view === "map";
