@@ -1963,6 +1963,13 @@
                 "aftercare-options": "Aftercare Options",
                 "aftercare-plan": "Aftercare Plan"
             };
+            const DISTANCE_FILTER_LABELS = {
+                all: "All resources",
+                therapy: "Therapy focus",
+                psychiatry: "Psychiatry focus",
+                iop: "IOP / Day programs",
+                virtual: "Virtual support"
+            };
             const srAnnouncer = document.getElementById("srAnnouncer");
             const overlays = {
                 overlay: document.getElementById("detailsOverlay"),
@@ -2166,19 +2173,35 @@
             }
 
             function updateResultsSummary(filteredPrograms) {
-                const activeFilters = countActiveFilters();
+                const activeFilterButtons = countActiveFilters();
                 const summaryParts = [];
                 if (state.searchTerm) {
                     summaryParts.push(`Matching “${state.searchTerm}”`);
                 }
-                if (activeFilters.length) {
-                    summaryParts.push(`${activeFilters.length} filter${activeFilters.length > 1 ? "s" : ""} active`);
+                if (activeFilterButtons.length) {
+                    summaryParts.push(`${activeFilterButtons.length} filter${activeFilterButtons.length > 1 ? "s" : ""} active`);
+                }
+                const mapFiltering = state.map.applyFiltersGlobally || state.view === "map";
+                const radiusMiles = Number.isFinite(state.map.radiusMiles) ? state.map.radiusMiles : state.map.defaultRadius;
+                const radiusLabel = `Radius ${radiusMiles} mi`;
+                if (mapFiltering) {
+                    summaryParts.push(radiusLabel);
+                    if (state.map.distanceFilter && state.map.distanceFilter !== "all") {
+                        summaryParts.push(DISTANCE_FILTER_LABELS[state.map.distanceFilter] || state.map.distanceFilter);
+                    }
                 }
                 elements.resultsSummary.textContent = summaryParts.length
                     ? `${filteredPrograms.length} program${filteredPrograms.length !== 1 ? "s" : ""} · ${summaryParts.join(" · ")}`
                     : `${filteredPrograms.length} program${filteredPrograms.length !== 1 ? "s are" : " is"} ready`;
-                elements.filtersLabel.textContent = activeFilters.length
-                    ? `Active filters: ${activeFilters.map(f => f.label).join(", ")}`
+                const filterLabels = activeFilterButtons.map(button => button.textContent.trim());
+                if (mapFiltering) {
+                    filterLabels.push(radiusLabel);
+                    if (state.map.distanceFilter && state.map.distanceFilter !== "all") {
+                        filterLabels.push(DISTANCE_FILTER_LABELS[state.map.distanceFilter] || state.map.distanceFilter);
+                    }
+                }
+                elements.filtersLabel.textContent = filterLabels.length
+                    ? `Active filters: ${filterLabels.join(", ")}`
                     : "No filters active";
             }
 
