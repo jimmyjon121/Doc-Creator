@@ -735,6 +735,19 @@
             box-shadow: 0 6px 18px rgba(16, 185, 129, 0.18);
         }
 
+        .compare-meta__item--lane {
+            border: 1px dashed rgba(110, 123, 255, 0.35);
+            background: rgba(233, 236, 255, 0.35);
+            color: var(--navy-700);
+            font-weight: 600;
+        }
+
+        .compare-meta__item--lane.is-empty {
+            background: rgba(255, 143, 143, 0.24);
+            border-color: rgba(255, 143, 143, 0.45);
+            color: #7a1e1e;
+        }
+
         .compare-section {
             display: flex;
             flex-direction: column;
@@ -2934,6 +2947,15 @@
                 return new Set(normalized).size > 1;
             }
 
+            function findProgramLane(programId) {
+                for (const [laneKey, items] of Object.entries(state.builder.lanes)) {
+                    if (items.some(item => item.programId === programId)) {
+                        return laneKey;
+                    }
+                }
+                return null;
+            }
+
             function renderComparisonView() {
                 if (!elements.compareGrid) return;
                 const selectedPrograms = state.comparison.programIds
@@ -2979,6 +3001,11 @@
                     const outcomesClass = outcomesDiff ? "compare-section compare-section--diff" : "compare-section";
                     const highlightsClass = highlightsDiff ? "compare-section compare-section--diff" : "compare-section";
                     const contactsClass = contactsDiff ? "compare-section compare-section--diff" : "compare-section";
+                    const laneKey = findProgramLane(program.id);
+                    const laneLabel = laneKey ? laneConfig[laneKey]?.label || laneKey : null;
+                    const laneBadge = laneKey
+                        ? `<span class="compare-meta__item compare-meta__item--lane">In builder · ${laneLabel}</span>`
+                        : `<span class="compare-meta__item compare-meta__item--lane is-empty">Not yet staged</span>`;
                     return `
                         <article class="compare-card" data-program-id="${program.id}">
                             <button type="button" class="compare-remove" aria-label="Remove ${program.name} from comparison">×</button>
@@ -2993,6 +3020,7 @@
                                 <span class="compare-meta__item${locationDiff ? " is-different" : ""}">Location · ${location}</span>
                                 <span class="compare-meta__item${acuityDiff ? " is-different" : ""}">Acuity ${program.acuity}/10</span>
                                 <span class="compare-meta__item${availabilityDiff ? " is-different" : ""}">${availability}</span>
+                                ${laneBadge}
                             </div>
                             <div class="${summaryClass}">
                                 <h4>Overview</h4>
@@ -3159,6 +3187,9 @@
                     showToast(`Added ${added} program${added === 1 ? "" : "s"} to ${laneConfig[targetLane].label}`);
                 } else {
                     showToast("All compared programs are already staged in the builder.");
+                }
+                if (state.view === "compare") {
+                    renderComparisonView();
                 }
             }
 
