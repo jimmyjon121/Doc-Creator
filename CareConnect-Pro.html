@@ -669,6 +669,31 @@
             gap: 4px;
         }
 
+        .compare-header-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .compare-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.74rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: rgba(110, 123, 255, 0.16);
+            color: var(--navy-700);
+        }
+
+        .compare-tag.is-different {
+            background: rgba(255, 196, 0, 0.28);
+            color: #5b4200;
+            box-shadow: 0 6px 18px rgba(255, 196, 0, 0.28);
+        }
+
         .compare-remove {
             position: absolute;
             top: 12px;
@@ -693,7 +718,7 @@
             gap: 6px;
         }
 
-        .compare-meta span {
+        .compare-meta__item {
             display: inline-flex;
             align-items: center;
             gap: 4px;
@@ -704,10 +729,24 @@
             background: rgba(110, 123, 255, 0.18);
         }
 
+        .compare-meta__item.is-different {
+            background: rgba(16, 185, 129, 0.22);
+            color: #0f5c46;
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.18);
+        }
+
         .compare-section {
             display: flex;
             flex-direction: column;
             gap: 6px;
+            border-radius: 12px;
+            padding: 8px 10px;
+        }
+
+        .compare-section--diff {
+            border-left: 3px solid var(--accent-500);
+            background: rgba(110, 123, 255, 0.12);
+            box-shadow: inset 0 0 0 1px rgba(110, 123, 255, 0.12);
         }
 
         .compare-section h4 {
@@ -2881,6 +2920,20 @@
                 }
             }
 
+            function hasVariance(values = []) {
+                const normalized = values.map(value => {
+                    if (Array.isArray(value)) {
+                        return JSON.stringify(value);
+                    }
+                    if (value && typeof value === "object") {
+                        return JSON.stringify(value);
+                    }
+                    const str = value == null ? "" : String(value).trim();
+                    return str.toLowerCase();
+                });
+                return new Set(normalized).size > 1;
+            }
+
             function renderComparisonView() {
                 if (!elements.compareGrid) return;
                 const selectedPrograms = state.comparison.programIds
@@ -2900,6 +2953,20 @@
 
                 const columns = Math.min(selectedPrograms.length, 4);
                 elements.compareGrid.className = `compare-grid compare-grid--columns-${columns}`;
+                const focusDiff = hasVariance(selectedPrograms.map(program => program.focus));
+                const formatDiff = hasVariance(selectedPrograms.map(program => program.format));
+                const locationDiff = hasVariance(selectedPrograms.map(program => program.location ? `${program.location.city}, ${program.location.state}` : "Location not provided"));
+                const acuityDiff = hasVariance(selectedPrograms.map(program => program.acuity));
+                const availabilityLabels = selectedPrograms.map(program => program.availabilityDays <= 0
+                    ? "Immediate start"
+                    : `Start in ${program.availabilityDays} day${program.availabilityDays === 1 ? "" : "s"}`);
+                const availabilityDiff = hasVariance(availabilityLabels);
+                const summaryDiff = hasVariance(selectedPrograms.map(program => program.summary));
+                const weeklyDiff = hasVariance(selectedPrograms.map(program => program.weeklyStructure || []));
+                const outcomesDiff = hasVariance(selectedPrograms.map(program => program.outcomes || []));
+                const highlightsDiff = hasVariance(selectedPrograms.map(program => program.highlights || []));
+                const contactsDiff = hasVariance(selectedPrograms.map(program => program.contacts || {}));
+
                 elements.compareGrid.innerHTML = selectedPrograms.map(program => {
                     const location = program.location
                         ? `${program.location.city}, ${program.location.state}`
@@ -2907,41 +2974,49 @@
                     const availability = program.availabilityDays <= 0
                         ? "Immediate start"
                         : `Start in ${program.availabilityDays} day${program.availabilityDays === 1 ? "" : "s"}`;
+                    const summaryClass = summaryDiff ? "compare-section compare-section--diff" : "compare-section";
+                    const weeklyClass = weeklyDiff ? "compare-section compare-section--diff" : "compare-section";
+                    const outcomesClass = outcomesDiff ? "compare-section compare-section--diff" : "compare-section";
+                    const highlightsClass = highlightsDiff ? "compare-section compare-section--diff" : "compare-section";
+                    const contactsClass = contactsDiff ? "compare-section compare-section--diff" : "compare-section";
                     return `
                         <article class="compare-card" data-program-id="${program.id}">
                             <button type="button" class="compare-remove" aria-label="Remove ${program.name} from comparison">×</button>
                             <header>
                                 <h3>${program.name}</h3>
-                                <span style="color:var(--text-subtle); font-size:0.85rem;">${program.focus} · ${program.format}</span>
+                                <div class="compare-header-tags">
+                                    <span class="compare-tag${focusDiff ? " is-different" : ""}">${program.focus}</span>
+                                    <span class="compare-tag${formatDiff ? " is-different" : ""}">${program.format}</span>
+                                </div>
                             </header>
                             <div class="compare-meta">
-                                <span>Location · ${location}</span>
-                                <span>Acuity ${program.acuity}/10</span>
-                                <span>${availability}</span>
+                                <span class="compare-meta__item${locationDiff ? " is-different" : ""}">Location · ${location}</span>
+                                <span class="compare-meta__item${acuityDiff ? " is-different" : ""}">Acuity ${program.acuity}/10</span>
+                                <span class="compare-meta__item${availabilityDiff ? " is-different" : ""}">${availability}</span>
                             </div>
-                            <div class="compare-section">
+                            <div class="${summaryClass}">
                                 <h4>Overview</h4>
                                 <div style="font-size:0.85rem; color:var(--text-subtle);">${program.summary}</div>
                             </div>
-                            <div class="compare-section">
+                            <div class="${weeklyClass}">
                                 <h4>Weekly Structure</h4>
                                 <div class="compare-list">
                                     ${program.weeklyStructure.map(item => `<div>• ${item}</div>`).join("")}
                                 </div>
                             </div>
-                            <div class="compare-section">
+                            <div class="${outcomesClass}">
                                 <h4>Outcomes</h4>
                                 <div class="compare-list">
                                     ${program.outcomes.map(item => `<div>• ${item}</div>`).join("")}
                                 </div>
                             </div>
-                            <div class="compare-section">
+                            <div class="${highlightsClass}">
                                 <h4>Highlights</h4>
                                 <div class="compare-list">
                                     ${program.highlights.map(item => `<div>• ${item}</div>`).join("")}
                                 </div>
                             </div>
-                            <div class="compare-section">
+                            <div class="${contactsClass}">
                                 <h4>Contact</h4>
                                 <div style="font-size:0.82rem; color:var(--text-subtle);">
                                     ${program.contacts?.director ? `${program.contacts.director}<br>` : ""}
@@ -2963,6 +3038,19 @@
                     showToast("Add programs to comparison before exporting.");
                     return;
                 }
+                const focusDiff = hasVariance(selectedPrograms.map(program => program.focus));
+                const formatDiff = hasVariance(selectedPrograms.map(program => program.format));
+                const locationDiff = hasVariance(selectedPrograms.map(program => program.location ? `${program.location.city}, ${program.location.state}` : "Location not provided"));
+                const acuityDiff = hasVariance(selectedPrograms.map(program => program.acuity));
+                const availabilityValues = selectedPrograms.map(program => program.availabilityDays <= 0
+                    ? "Immediate start"
+                    : `Start in ${program.availabilityDays} day${program.availabilityDays === 1 ? "" : "s"}`);
+                const availabilityDiff = hasVariance(availabilityValues);
+                const summaryDiff = hasVariance(selectedPrograms.map(program => program.summary));
+                const weeklyDiff = hasVariance(selectedPrograms.map(program => program.weeklyStructure || []));
+                const outcomesDiff = hasVariance(selectedPrograms.map(program => program.outcomes || []));
+                const highlightsDiff = hasVariance(selectedPrograms.map(program => program.highlights || []));
+                const contactsDiff = hasVariance(selectedPrograms.map(program => program.contacts || {}));
                 const title = `CareConnect Comparison – ${selectedPrograms.length} Program${selectedPrograms.length === 1 ? "" : "s"}`;
                 const html = `
                     <!DOCTYPE html>
@@ -2985,6 +3073,11 @@
                             .section { margin-top: 14px; }
                             .section h3 { margin: 0 0 6px; font-size: 0.8rem; text-transform: uppercase; color: #6970a0; letter-spacing: 0.08em; }
                             ul { margin: 0; padding-left: 18px; color: #48508A; }
+                            .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 999px; font-size: 0.74rem; font-weight: 600; margin-right: 6px; margin-top: 4px; background: rgba(110,123,255,0.16); color: #1f2145; }
+                            .badge.diff { background: rgba(255,196,0,0.28); color: #5b4200; box-shadow: 0 6px 18px rgba(255,196,0,0.22); }
+                            .chip { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 999px; font-size: 0.72rem; background: rgba(110,123,255,0.18); color: #1f2145; margin-right: 6px; margin-top: 4px; }
+                            .chip.diff { background: rgba(16,185,129,0.22); color: #125946; box-shadow: 0 6px 18px rgba(16,185,129,0.18); }
+                            .section.diff { border-left: 3px solid #6E7BFF; background: #eef1ff; padding: 8px 12px; border-radius: 12px; }
                         </style>
                     </head>
                     <body>
@@ -2994,25 +3087,32 @@
                             ${selectedPrograms.map(program => `
                                 <article class="card">
                                     <h2>${program.name}</h2>
-                                    <div class="sub">${program.focus} · ${program.format}</div>
-                                    <div class="sub">${program.location ? `${program.location.city}, ${program.location.state}` : "Location not provided"}</div>
-                                    <div class="section">
+                                    <div>
+                                        <span class="badge${focusDiff ? " diff" : ""}">${program.focus}</span>
+                                        <span class="badge${formatDiff ? " diff" : ""}">${program.format}</span>
+                                    </div>
+                                    <div>
+                                        <span class="chip${locationDiff ? " diff" : ""}">${program.location ? `${program.location.city}, ${program.location.state}` : "Location not provided"}</span>
+                                        <span class="chip${acuityDiff ? " diff" : ""}">Acuity ${program.acuity}/10</span>
+                                        <span class="chip${availabilityDiff ? " diff" : ""}">${program.availabilityDays <= 0 ? "Immediate start" : `Start in ${program.availabilityDays} day${program.availabilityDays === 1 ? "" : "s"}`}</span>
+                                    </div>
+                                    <div class="section${summaryDiff ? " diff" : ""}">
                                         <h3>Overview</h3>
                                         <p>${program.summary}</p>
                                     </div>
-                                    <div class="section">
+                                    <div class="section${weeklyDiff ? " diff" : ""}">
                                         <h3>Weekly Structure</h3>
                                         <ul>${program.weeklyStructure.map(item => `<li>${item}</li>`).join("")}</ul>
                                     </div>
-                                    <div class="section">
+                                    <div class="section${outcomesDiff ? " diff" : ""}">
                                         <h3>Outcomes</h3>
                                         <ul>${program.outcomes.map(item => `<li>${item}</li>`).join("")}</ul>
                                     </div>
-                                    <div class="section">
+                                    <div class="section${highlightsDiff ? " diff" : ""}">
                                         <h3>Highlights</h3>
                                         <ul>${program.highlights.map(item => `<li>${item}</li>`).join("")}</ul>
                                     </div>
-                                    <div class="section">
+                                    <div class="section${contactsDiff ? " diff" : ""}">
                                         <h3>Contact</h3>
                                         <p>
                                             ${program.contacts?.director ? `${program.contacts.director}<br>` : ""}
