@@ -899,6 +899,17 @@
             border-color: #4f46e5;
         }
         
+        /* Prevent accidental JSON rendering */
+        body > *:not(script):not(style):not(link) {
+            white-space: normal;
+        }
+        
+        /* Hide any raw JSON that might accidentally render */
+        body > pre:not(.code-block),
+        body > code:not(.inline-code) {
+            display: none !important;
+        }
+        
         .clients-table-container {
             background: white;
             border-radius: 8px;
@@ -1160,8 +1171,178 @@
             flex-wrap: wrap;
         }
 
+        body.programs-docs-v2-active {
+            overflow-x: hidden;
+        }
+        
+        body.programs-docs-v2-active #mainApp {
+            padding: 0 !important;
+        }
+        
         .programs-docs-container {
-            min-height: 400px;
+            width: 100%;
+            height: 100%;
+            min-height: calc(100vh - var(--programs-header-height, 180px));
+            position: relative;
+            overflow: visible;
+        }
+        
+        /* Ensure Programs tab takes full space */
+        #programsTab.tab-content {
+            width: 100%;
+            height: 100%;
+            min-height: calc(100vh - var(--programs-header-height, 180px));
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #programsTab.tab-content.active {
+            display: flex !important;
+        }
+        
+        /* Hide legacy elements when module is loaded */
+        body.programs-docs-v2-active .legacy-programs-wrapper,
+        body.programs-docs-v2-active #programsDocsError,
+        body.programs-docs-v2-active #programsDocsLoader {
+            display: none !important;
+        }
+        
+        /* Make sure the module content fills the container */
+        .programs-docs-container > * {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* When module is loaded, ensure its root elements take full space */
+        body.programs-docs-v2-active #programsDocsContainer,
+        body.programs-docs-v2-active #programsDocsContainer > body,
+        body.programs-docs-v2-active #programsDocsContainer > html {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: calc(100vh - var(--programs-header-height, 180px)) !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Ensure the module's workspace takes full space */
+        body.programs-docs-v2-active .workspace,
+        body.programs-docs-v2-active .three-pane-layout,
+        body.programs-docs-v2-active [class*="workspace"] {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: calc(100vh - var(--programs-header-height, 180px)) !important;
+        }
+        
+        /* Remove any max-width constraints */
+        body.programs-docs-v2-active #programsDocsContainer * {
+            max-width: none !important;
+        }
+        
+        /* Ensure tab content area doesn't constrain */
+        body.programs-docs-v2-active #programsTab {
+            max-width: 100% !important;
+            overflow: visible !important;
+        }
+        
+        /* Stretch the outer container to full viewport */
+        body.programs-docs-v2-active .container {
+            width: 100vw !important;
+            max-width: 100vw !important;
+            margin: 0 !important;
+            padding: clamp(16px, 2.5vw, 44px) clamp(16px, 2.5vw, 56px) !important;
+            border-radius: 0 !important;
+            min-height: 100vh !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+        
+        body.programs-docs-v2-active .header,
+        body.programs-docs-v2-active .main-content {
+            max-width: 100% !important;
+            border-radius: 24px !important;
+        }
+        
+        body.programs-docs-v2-active .main-content {
+            padding: clamp(16px, 2vw, 36px) !important;
+            grid-template-columns: 1fr !important; /* Override grid layout */
+        }
+        
+        /* Override module's fixed layout */
+        body.programs-docs-v2-active .app-shell {
+            max-width: 100% !important;
+            width: 100vw !important;
+            margin: 0 !important;
+            padding-left: 2vw !important;
+            padding-right: 2vw !important;
+            grid-template-columns: minmax(250px, 0.2fr) minmax(400px, 1fr) minmax(300px, 0.25fr) !important;
+        }
+        
+        /* Make panes responsive */
+        body.programs-docs-v2-active .pane {
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        
+        /* Dynamic height calculation */
+        body.programs-docs-v2-active #programsDocsContainer {
+            height: calc(100vh - var(--programs-header-height, 180px)) !important;
+        }
+        
+        /* Ultra-wide screens (>2000px) */
+        @media (min-width: 2000px) {
+            body.programs-docs-v2-active .app-shell {
+                grid-template-columns: minmax(300px, 0.18fr) minmax(600px, 1fr) minmax(350px, 0.22fr) !important;
+                padding-left: 3vw !important;
+                padding-right: 3vw !important;
+            }
+        }
+        
+        /* Standard desktop (1400px - 2000px) */
+        @media (min-width: 1400px) and (max-width: 2000px) {
+            body.programs-docs-v2-active .app-shell {
+                grid-template-columns: minmax(260px, 0.2fr) minmax(500px, 1fr) minmax(320px, 0.24fr) !important;
+            }
+        }
+        
+        /* Tablet/small desktop (<1400px) */
+        @media (max-width: 1400px) {
+            body.programs-docs-v2-active .app-shell {
+                grid-template-columns: minmax(240px, 0.22fr) minmax(400px, 1fr) minmax(280px, 0.26fr) !important;
+            }
+        }
+        
+        /* Remove fixed padding from body and containers */
+        body.programs-docs-v2-active {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+        
+        /* Override programs panel constraints */
+        body.programs-docs-v2-active .programs-panel {
+            max-width: 100% !important;
+            width: 100% !important;
+        }
+        
+        /* Ensure selection panel doesn't interfere */
+        body.programs-docs-v2-active .selection-panel {
+            display: none !important;
+        }
+        
+        body.programs-docs-v2-active .app-footer {
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding-left: 2vw !important;
+            padding-right: 2vw !important;
+        }
+        
+        /* Ensure toolbar stretches full width */
+        body.programs-docs-v2-active .toolbar {
+            width: 100vw !important;
+            left: 0 !important;
+            right: 0 !important;
+            margin: 0 !important;
         }
 
         .legacy-programs-wrapper {
@@ -1689,7 +1870,17 @@
             }
         }
         
-        const PROGRAMS_DOCS_MODULE_PATH = 'CareConnect-Pro.html';
+        // Module path - the module file is copied to dist as programs-docs-module.html during build
+        // When served from dist/, use the same directory; when from root, use dist/ prefix
+        const PROGRAMS_DOCS_MODULE_PATH = (() => {
+            const pathname = window.location.pathname;
+            // If served from dist folder, use same directory
+            if (pathname.includes('/dist/') || pathname.endsWith('/dist/CareConnect-Pro.html')) {
+                return 'programs-docs-module.html';
+            }
+            // If served from root, use dist/ prefix
+            return 'dist/programs-docs-module.html';
+        })();
         let programsDocsLegacyNoticeShown = false;
 
         function shouldUseProgramsDocs() {
@@ -1700,8 +1891,12 @@
             } catch (error) {
                 console.warn('Programs & Docs feature flag unavailable:', error);
             }
+            // Default to true if feature flags not available
             return true;
         }
+        
+        // Make function globally available immediately
+        window.shouldUseProgramsDocs = shouldUseProgramsDocs;
 
         async function mountProgramsDocsModule(forceReload = false) {
             const container = document.getElementById('programsDocsContainer');
@@ -1732,11 +1927,17 @@
                 ? `${PROGRAMS_DOCS_MODULE_PATH}?cacheBust=${Date.now()}`
                 : PROGRAMS_DOCS_MODULE_PATH;
 
+            console.log('[Programs & Docs] Loading module from:', fetchUrl);
+            console.log('[Programs & Docs] Current pathname:', window.location.pathname);
+
             const mountPromise = (async () => {
                 try {
                     const response = await fetch(fetchUrl, { cache: 'no-store' });
                     if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}`);
+                        if (response.status === 404) {
+                            throw new Error(`Module not found at ${fetchUrl}. Please check the file path.`);
+                        }
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
 
                     const htmlText = await response.text();
@@ -1771,7 +1972,123 @@
                     container.innerHTML = doc.body.innerHTML;
                     container.hidden = false;
                     loader.hidden = true;
+                    if (errorEl) {
+                        errorEl.hidden = true;
+                    }
                     document.body.classList.add('programs-docs-v2-active');
+                    
+                    // Apply inline styles to override parent containers
+                    const applyFullViewportStyles = () => {
+                        // Override .container
+                        const outerContainer = document.querySelector('.container');
+                        if (outerContainer) {
+                            outerContainer.style.width = '100vw';
+                            outerContainer.style.maxWidth = '100vw';
+                            outerContainer.style.margin = '0';
+                            outerContainer.style.padding = 'clamp(16px, 2.5vw, 44px) clamp(16px, 2.5vw, 56px)';
+                            outerContainer.style.borderRadius = '0';
+                            outerContainer.style.minHeight = '100vh';
+                            outerContainer.style.boxShadow = 'none';
+                            outerContainer.style.background = 'transparent';
+                        }
+                        
+                        // Override .main-content
+                        const mainContent = document.querySelector('.main-content');
+                        if (mainContent) {
+                            mainContent.style.gridTemplateColumns = '1fr';
+                            mainContent.style.maxWidth = '100%';
+                            mainContent.style.padding = 'clamp(16px, 2vw, 36px)';
+                        }
+                        
+                        // Override #mainApp
+                        const mainApp = document.getElementById('mainApp');
+                        if (mainApp) {
+                            mainApp.style.padding = '0';
+                        }
+                        
+                        // Hide selection panel
+                        const selectionPanel = document.querySelector('.selection-panel');
+                        if (selectionPanel) {
+                            selectionPanel.style.display = 'none';
+                        }
+                        
+                        // Override programs panel
+                        const programsPanel = document.querySelector('.programs-panel');
+                        if (programsPanel) {
+                            programsPanel.style.maxWidth = '100%';
+                            programsPanel.style.width = '100%';
+                        }
+                    };
+                    
+                    // Apply styles immediately
+                    applyFullViewportStyles();
+                    
+                    // Ensure container takes full space
+                    container.style.width = '100%';
+                    container.style.height = '100%';
+                    container.style.minHeight = 'calc(100vh - 200px)';
+                    container.style.display = 'block';
+                    
+                    // Hide legacy wrapper if it exists
+                    const legacyWrapper = document.getElementById('legacyProgramsWrapper');
+                    if (legacyWrapper) {
+                        legacyWrapper.hidden = true;
+                        legacyWrapper.style.display = 'none';
+                    }
+                    
+                    const adjustProgramsDocsLayout = () => {
+                        // Re-apply full viewport styles
+                        applyFullViewportStyles();
+                        
+                        const nav = document.querySelector('.tab-navigation');
+                        let headerHeight = container.getBoundingClientRect().top;
+                        if (headerHeight <= 0 && nav) {
+                            headerHeight = nav.getBoundingClientRect().bottom;
+                        }
+                        if (!Number.isFinite(headerHeight) || headerHeight <= 0) {
+                            headerHeight = 150;
+                        }
+                        headerHeight = Math.max(120, Math.round(headerHeight));
+                        document.documentElement.style.setProperty('--programs-header-height', `${headerHeight}px`);
+                        
+                        const targetHeight = `calc(100vh - ${headerHeight}px)`;
+                        container.style.height = targetHeight;
+                        container.style.minHeight = targetHeight;
+                        
+                        const programsTab = document.getElementById('programsTab');
+                        if (programsTab) {
+                            programsTab.style.minHeight = targetHeight;
+                        }
+                        
+                        const shell = container.querySelector('.app-shell');
+                        if (shell) {
+                            const viewportWidth = window.innerWidth;
+                            if (viewportWidth > 1600) {
+                                const scaleFactor = viewportWidth / 1600;
+                                const gap = Math.min(56, Math.round(24 * scaleFactor));
+                                shell.style.gap = `${gap}px`;
+                            } else {
+                                shell.style.removeProperty('gap');
+                            }
+                        }
+                    };
+                    
+                    adjustProgramsDocsLayout();
+                    
+                    if (window.__programsDocsLayoutAdjuster) {
+                        window.removeEventListener('resize', window.__programsDocsLayoutAdjuster);
+                    }
+                    window.__programsDocsLayoutAdjuster = () => adjustProgramsDocsLayout();
+                    window.addEventListener('resize', window.__programsDocsLayoutAdjuster, { passive: true });
+                    
+                    if (window.__programsDocsResizeObserver instanceof ResizeObserver) {
+                        window.__programsDocsResizeObserver.disconnect();
+                    }
+                    if (typeof ResizeObserver === 'function') {
+                        window.__programsDocsResizeObserver = new ResizeObserver(() => adjustProgramsDocsLayout());
+                        window.__programsDocsResizeObserver.observe(document.body);
+                        window.__programsDocsResizeObserver.observe(container);
+                    }
 
                     // Execute inline scripts sequentially
                     const scripts = Array.from(doc.querySelectorAll('script'));
@@ -1800,12 +2117,16 @@
                     return true;
                 } catch (error) {
                     console.error('Programs & Docs mount failure:', error);
+                    console.error('Attempted to load from:', fetchUrl);
                     loader.hidden = true;
                     if (errorEl) {
                         errorEl.hidden = false;
                         const errorParagraph = errorEl.querySelector('p');
                         if (errorParagraph) {
-                            errorParagraph.textContent = `Please retry loading or notify support. (${error.message})`;
+                            const friendlyMessage = error.message.includes('404') || error.message.includes('not found')
+                                ? 'Module file not found. Please ensure CareConnect-Pro.html is accessible.'
+                                : `Failed to load module: ${error.message}`;
+                            errorParagraph.textContent = friendlyMessage;
                         }
                     }
                     revealLegacyProgramsNotice('load-error');
@@ -1817,11 +2138,17 @@
             window.__programsDocsMountPromise = mountPromise;
             return mountPromise;
         }
+        
+        // Make mount function globally available
+        window.mountProgramsDocsModule = mountProgramsDocsModule;
 
         function retryProgramsDocsMount() {
             window.__programsDocsMountPromise = null;
             return mountProgramsDocsModule(true).catch(() => {});
         }
+        
+        // Make retry function globally available
+        window.retryProgramsDocsMount = retryProgramsDocsMount;
 
         function toggleLegacyPrograms(show) {
             const wrapper = document.getElementById('legacyProgramsWrapper');
@@ -10200,19 +10527,33 @@
                                     tabElement.style.opacity = '1';
                                 }
                                 
-                                // Show selection panel for Programs tab ONLY
-                                const selectionPanel = document.querySelector('.selection-panel');
-                                if (selectionPanel) {
-                                    selectionPanel.style.display = 'flex';
-                                    selectionPanel.style.visibility = 'visible';
-                                    console.log('✅ Showing selection panel for Programs tab');
+                                // Load Programs & Docs module if needed
+                                if (typeof shouldUseProgramsDocs === 'function' && shouldUseProgramsDocs()) {
+                                    if (typeof mountProgramsDocsModule === 'function') {
+                                        console.log('[Programs & Docs] Attempting to mount module...');
+                                        mountProgramsDocsModule().catch(error => {
+                                            console.error('[Programs & Docs] Failed to mount:', error);
+                                        });
+                                    } else {
+                                        console.warn('[Programs & Docs] mountProgramsDocsModule function not available');
+                                    }
+                                } else {
+                                    console.log('[Programs & Docs] Feature flag disabled or function not available');
                                 }
                                 
-                                // Restore main content layout with side panel
+                                // Hide selection panel for Programs & Docs module (it has its own UI)
+                                const selectionPanel = document.querySelector('.selection-panel');
+                                if (selectionPanel) {
+                                    selectionPanel.style.display = 'none';
+                                    selectionPanel.style.visibility = 'hidden';
+                                    console.log('✅ Hidden selection panel for Programs & Docs module');
+                                }
+                                
+                                // Make main content full width for Programs & Docs module
                                 const mainContent = document.querySelector('.main-content');
                                 if (mainContent) {
-                                    mainContent.style.gridTemplateColumns = '1fr 440px';
-                                    mainContent.style.maxWidth = '';
+                                    mainContent.style.gridTemplateColumns = '1fr';
+                                    mainContent.style.maxWidth = '100%';
                                 }
                                 
                                 // Initialize client selector when programs tab is shown
@@ -10636,4 +10977,3 @@
     </div>
 </body>
 </html>
-
