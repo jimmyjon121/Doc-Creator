@@ -2078,6 +2078,8 @@
                 circleLayer: null,
                 legendControl: null,
                 groups: [],
+                lastStats: null,
+                lastError: null,
                 isReady: false
             };
             const refreshMapDebounced = debounce(() => {
@@ -2473,14 +2475,61 @@
                 mapState.legendControl.addTo(mapState.instance);
             }
 
-            function updateMapLegendPrograms(count) {
-                if (elements.mapLegend) {
-                    elements.mapLegend.innerHTML = `
-                        <span class="map-legend__item">
-                            Showing ${count} program${count === 1 ? "" : "s"} on map
-                        </span>
-                    `;
-                }
+            function updateMapLegendPrograms(groups, stats = {}) {
+                if (!elements.mapLegend) return;
+                const formatCounts = {
+                    onsite: 0,
+                    hybrid: 0,
+                    virtual: 0,
+                    telehealth: 0
+                };
+                let total = 0;
+                groups.forEach(group => {
+                    group.programs.forEach(entry => {
+                        total += 1;
+                        const format = (entry.program.format || "").toLowerCase();
+                        if (format.includes("virtual")) {
+                            formatCounts.virtual += 1;
+                        } else if (format.includes("hybrid")) {
+                            formatCounts.hybrid += 1;
+                        } else if (format.includes("telehealth")) {
+                            formatCounts.telehealth += 1;
+                        } else {
+                            formatCounts.onsite += 1;
+                        }
+                    });
+                });
+                const missing = stats.missingLocation || 0;
+                const filterExcluded = stats.filterExcluded || 0;
+                const distanceExcluded = stats.distanceExcluded || 0;
+                elements.mapLegend.innerHTML = `
+                    <span class="map-legend__item">
+                        <span class="legend-swatch legend-swatch--onsite"></span>
+                        Onsite
+                        <span class="map-legend__count">${formatCounts.onsite}</span>
+                    </span>
+                    <span class="map-legend__item">
+                        <span class="legend-swatch legend-swatch--hybrid"></span>
+                        Hybrid
+                        <span class="map-legend__count">${formatCounts.hybrid}</span>
+                    </span>
+                    <span class="map-legend__item">
+                        <span class="legend-swatch legend-swatch--virtual"></span>
+                        Virtual
+                        <span class="map-legend__count">${formatCounts.virtual}</span>
+                    </span>
+                    <span class="map-legend__item">
+                        <span class="legend-swatch legend-swatch--telehealth"></span>
+                        Telehealth
+                        <span class="map-legend__count">${formatCounts.telehealth}</span>
+                    </span>
+                    <span class="map-legend__item">
+                        Showing ${total} program${total === 1 ? "" : "s"}
+                    </span>
+                    ${missing ? `<span class="map-legend__item">Missing location data: ${missing}</span>` : ""}
+                    ${filterExcluded ? `<span class="map-legend__item">Filtered out: ${filterExcluded}</span>` : ""}
+                    ${distanceExcluded ? `<span class="map-legend__item">Outside radius: ${distanceExcluded}</span>` : ""}
+                `;
             }
 
             function computeDistanceMiles(lat1, lon1, lat2, lon2) {
@@ -2521,14 +2570,24 @@
                 const groups = new Map();
                 const center = state.map.center;
                 const radius = state.map.radiusMiles;
+                let missingLocation = 0;
+                let filterExcluded = 0;
+                let distanceExcluded = 0;
                 programs.forEach(program => {
                     const loc = program.location;
-                    if (!loc || typeof loc.lat !== "number" || typeof loc.lng !== "number") return;
-                    if (!matchesDistanceFilter(program)) return;
+                    if (!loc || typeof loc.lat !== "number" || typeof loc.lng !== "number") {
+                        missingLocation += 1;
+                        return;
+                    }
+                    if (!matchesDistanceFilter(program)) {
+                        filterExcluded += 1;
+                        return;
+                    }
                     let distanceMiles = null;
                     if (typeof center.lat === "number" && typeof center.lng === "number") {
                         distanceMiles = computeDistanceMiles(center.lat, center.lng, loc.lat, loc.lng);
                         if (radius && distanceMiles > radius) {
+                            distanceExcluded += 1;
                             return;
                         }
                     }
@@ -2538,7 +2597,14 @@
                     }
                     groups.get(key).programs.push({ program, distanceMiles });
                 });
-                return Array.from(groups.values());
+                return {
+                    groups: Array.from(groups.values()),
+                    stats: {
+                        missingLocation,
+                        filterExcluded,
+                        distanceExcluded
+                    }
+                };
             }
 
             function createMarker(group) {
@@ -2637,7 +2703,8 @@
             async function updateMap(programs) {
                 await ensureMapReady();
                 mapState.markersLayer.clearLayers();
-                const groups = buildMapGroups(programs);
+                const { groups, stats } = buildMapGroups(programs);
+                mapState.lastStats = stats;
                 groups.forEach(group => {
                     const marker = createMarker(group);
                     if (marker) {
@@ -2646,12 +2713,12 @@
                 });
                 if (!groups.length) {
                     elements.mapStatusLabel.textContent = "No mappable programs with the current filters. Try expanding the radius or removing a filter.";
-                    updateMapLegendPrograms(0);
+                    updateMapLegendPrograms([], stats);
                     mapState.groups = [];
                     return;
                 }
                 updateMapCircle();
-                updateMapLegendPrograms(groups.reduce((sum, group) => sum + group.programs.length, 0));
+                updateMapLegendPrograms(groups, stats);
                 mapState.groups = groups;
                 if (groups.length === 1) {
                     const group = groups[0];
@@ -3126,8 +3193,18 @@
                         return;
                     }
                     elements.mapStatusLabel.textContent = "Map view ready. Drag, zoom, or double-click to explore.";
-                    await updateMap(sorted);
-                    updateResultsSummary(sorted);
+                    try {
+                        await updateMap(sorted);
+                        mapState.lastError = null;
+                        updateResultsSummary(sorted);
+                    } catch (error) {
+                        mapState.lastError = error;
+                        console.error("Map rendering error:", error);
+                        elements.mapStatusLabel.textContent = "Map unavailable. Switching back to list view.";
+                        showToast("Map temporarily unavailable. Showing list view instead.");
+                        state.map.applyFiltersGlobally = false;
+                        setView("grid");
+                    }
                     return;
                 }
 
