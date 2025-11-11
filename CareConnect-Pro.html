@@ -2314,6 +2314,16 @@
                 return temp.textContent?.trim() || "";
             }
 
+            function formatDocTimestamp(value) {
+                if (!value) return null;
+                const date = new Date(value);
+                if (Number.isNaN(date.getTime())) return null;
+                return date.toLocaleString(undefined, {
+                    dateStyle: "medium",
+                    timeStyle: "short"
+                });
+            }
+
             function collectBuilderSnapshot(focusProgramId = null) {
                 const lanes = {};
                 Object.entries(state.builder.lanes).forEach(([laneKey, items]) => {
@@ -2367,30 +2377,76 @@
                     atHome: "At-Home Supports"
                 };
 
+                const docIntro = (() => {
+                    if (snapshot.documentType === "aftercare-plan") {
+                        return "This individualized Aftercare Plan highlights the primary placement and supporting services staged across the next 30 days.";
+                    }
+                    if (snapshot.documentType === "aftercare-options") {
+                        return "Use this curated Aftercare Options grid to compare each recommended program and capture family feedback.";
+                    }
+                    return "Program selections and at-home resources prepared for handoff.";
+                })();
+
                 const sections = laneOrder.map(laneKey => {
                     const entries = snapshot.lanes[laneKey] || [];
                     if (!entries.length) return "";
                     const entryHtml = entries.map(entry => {
                         if (entry.type === "manual") {
+                            const badges = [];
+                            if (entry.city) {
+                                badges.push(sanitizeTextForExport(entry.city));
+                            }
+                            if (entry.focus) {
+                                badges.push(sanitizeTextForExport(entry.focus));
+                            }
+                            const logged = formatDocTimestamp(entry.addedAt);
+                            if (logged) {
+                                badges.push(`Logged ${sanitizeTextForExport(logged)}`);
+                            }
+                            if (entry.lastEdited && entry.lastEdited !== entry.addedAt) {
+                                const updated = formatDocTimestamp(entry.lastEdited);
+                                if (updated) {
+                                    badges.push(`Updated ${sanitizeTextForExport(updated)}`);
+                                }
+                            }
+                            const metaHtml = badges.length
+                                ? `<div class="doc-meta">${badges.map(label => `<span>${label}</span>`).join("")}</div>`
+                                : "";
                             return `
                                 <article class="doc-card">
                                     <h3>${sanitizeTextForExport(entry.resourceName || "Resource")}</h3>
-                                    <div class="doc-meta">
-                                        ${entry.city ? `<span>${sanitizeTextForExport(entry.city)}</span>` : ""}
-                                        ${entry.focus ? `<span>${sanitizeTextForExport(entry.focus)}</span>` : ""}
-                                    </div>
+                                    ${metaHtml}
                                     ${entry.notesHtml ? `<div class="doc-notes">${entry.notesHtml}</div>` : ""}
                                 </article>
                             `;
                         }
+                        const badges = [];
+                        if (entry.focus) {
+                            badges.push(sanitizeTextForExport(entry.focus));
+                        }
+                        if (entry.format) {
+                            badges.push(sanitizeTextForExport(entry.format));
+                        }
+                        if (entry.trackLabel) {
+                            badges.push(`Track · ${sanitizeTextForExport(entry.trackLabel)}`);
+                        }
+                        if (entry.clientInitials) {
+                            badges.push(`Client · ${sanitizeTextForExport(entry.clientInitials)}`);
+                        }
+                        const logged = formatDocTimestamp(entry.addedAt);
+                        if (logged) {
+                            badges.push(`Logged ${sanitizeTextForExport(logged)}`);
+                        }
+                        const metaHtml = badges.length
+                            ? `<div class="doc-meta">${badges.map(label => `<span>${label}</span>`).join("")}</div>`
+                            : "";
+                        const focusBadge = snapshot.focusProgramId && entry.programId === snapshot.focusProgramId
+                            ? `<span class="doc-badge doc-badge--primary">${snapshot.documentType === "aftercare-plan" ? "Primary Program" : "Highlighted"}</span>`
+                            : "";
                         return `
-                            <article class="doc-card">
-                                <h3>${sanitizeTextForExport(entry.programName || "Program")}</h3>
-                                <div class="doc-meta">
-                                    ${entry.focus ? `<span>${sanitizeTextForExport(entry.focus)}</span>` : ""}
-                                    ${entry.format ? `<span>${sanitizeTextForExport(entry.format)}</span>` : ""}
-                                    ${entry.trackLabel ? `<span>Track: ${sanitizeTextForExport(entry.trackLabel)}</span>` : ""}
-                                </div>
+                            <article class="doc-card${focusBadge ? " doc-card--focus" : ""}">
+                                <h3>${sanitizeTextForExport(entry.programName || "Program")}${focusBadge}</h3>
+                                ${metaHtml}
                                 ${
                                     entry.reason
                                         ? `<div class="doc-notes">${formatTextForExport(entry.reason)}</div>`
@@ -2418,6 +2474,7 @@
                             header { margin-bottom: 24px; }
                             h1 { margin: 0; font-size: 1.6rem; }
                             .doc-meta { margin-top: 6px; color: #48508A; font-size: 0.9rem; }
+                            .doc-intro { margin: 12px 0 0 0; font-size: 0.95rem; color: #3a3f7a; line-height: 1.5; }
                             section { margin-bottom: 24px; }
                             section h2 { margin-bottom: 12px; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.08em; color: #48508A; }
                             .doc-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
@@ -2431,6 +2488,7 @@
                         <header>
                             <h1>${sanitizeTextForExport(label)}</h1>
                             <div class="doc-meta">Generated ${generatedAt}</div>
+                            <p class="doc-intro">${sanitizeTextForExport(docIntro)}</p>
                         </header>
                         ${sections}
                     </body>
