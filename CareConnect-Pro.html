@@ -1734,8 +1734,8 @@
             <header>
                 <h2>Document Builder</h2>
                 <div class="builder__meta">
-                    <span id="builderSummary">No programs added yet</span>
-                    <span id="draftStatus">Draft not saved</span>
+                    <span id="builderSummary" aria-live="polite">No programs added yet</span>
+                    <span id="draftStatus" aria-live="polite">Draft not saved</span>
                 </div>
             </header>
             <div class="builder__lanes" id="builderLanes" aria-live="polite"></div>
@@ -3475,8 +3475,8 @@
                                 ${laneKey === "atHome" ? "＋ Add Resource" : "＋ Add Program"}
                             </button>
                         </div>
-                        <div class="lane__list" id="lane-${laneKey}">
-                            ${items.length ? "" : `<div class="builder-hint">${laneKey === "atHome" ? "No resources added yet. Use Add Resource to capture local supports." : "No programs added yet. Use Add Program or from a card."}</div>`}
+                        <div class="lane__list" id="lane-${laneKey}" role="list">
+                            ${items.length ? "" : `<div class="builder-hint" role="note">${laneKey === "atHome" ? "No resources added yet. Use Add Resource to capture local supports." : "No programs added yet. Use Add Program or from a card."}</div>`}
                         </div>
                     `;
 
@@ -3493,6 +3493,7 @@
                                 ? new Date(item.addedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
                                 : "just now";
                             tile.className = "builder-tile builder-tile--manual";
+                            tile.setAttribute("role", "listitem");
                             tile.dataset.resourceId = item.id || "";
                             tile.innerHTML = `
                                 <div class="builder-manual-header">
@@ -3533,6 +3534,7 @@
                         `).join("");
                         const trackLabel = getTrackLabel(currentTrack, item.programId);
                         tile.className = "builder-tile";
+                        tile.setAttribute("role", "listitem");
                         tile.dataset.programId = program.id;
                         tile.innerHTML = `
                             <div class="builder-tile__title">
