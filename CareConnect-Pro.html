@@ -968,6 +968,33 @@
             color: var(--text-subtle);
         }
 
+        .builder__context {
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1px dashed rgba(110, 123, 255, 0.35);
+            background: rgba(233, 236, 255, 0.6);
+            color: var(--text-subtle);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .builder__context strong {
+            color: var(--navy-700);
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        .builder__context span {
+            font-size: 0.78rem;
+        }
+
+        .builder__context.is-empty {
+            border-style: dotted;
+            background: rgba(233, 236, 255, 0.35);
+        }
+
         .builder__lanes {
             display: flex;
             flex-direction: column;
@@ -1738,6 +1765,7 @@
                     <span id="draftStatus" aria-live="polite">Draft not saved</span>
                 </div>
             </header>
+            <div class="builder__context" id="builderClientContext" role="status" aria-live="polite"></div>
             <div class="builder__lanes" id="builderLanes" aria-live="polite"></div>
         </aside>
     </main>
@@ -2004,6 +2032,7 @@
                 builderSummary: document.getElementById("builderSummary"),
                 draftStatus: document.getElementById("draftStatus"),
                 versionFooter: document.getElementById("versionFooter"),
+                 builderClientContext: document.getElementById("builderClientContext"),
                 toast: document.getElementById("toast"),
                 detailsTitle: document.getElementById("detailsTitle"),
                 detailsSubtitle: document.getElementById("detailsSubtitle"),
@@ -2052,7 +2081,8 @@
                         sustain: [],
                         atHome: []
                     },
-                    lastSaved: null
+                 associatedClientId: null,
+                 lastSaved: null
                 };
             }
 
@@ -2068,6 +2098,7 @@
                 view: "grid",
                 documentType: savedDraft?.documentType || "aftercare-options",
                 builder: savedDraft?.builder || createEmptyBuilder(),
+                 clientContext: savedDraft?.clientContext || null,
                 map: {
                     center: (() => {
                         const primaryProgram = PROGRAMS.find(p => p.location && typeof p.location.lat === "number" && typeof p.location.lng === "number");
@@ -2103,6 +2134,16 @@
                 selectedProgramId: null,
                 quickAddLane: "stabilize"
             };
+
+         if (state.clientContext?.clientId && !state.builder.associatedClientId) {
+             state.builder.associatedClientId = state.clientContext.clientId;
+         } else if (!state.clientContext && state.builder.associatedClientId) {
+             state.clientContext = {
+                 clientId: state.builder.associatedClientId,
+                 initials: "",
+                 kipuId: null
+             };
+         }
 
             if (savedDraft?.comparisonProgramIds?.length) {
                 state.comparison.programIds = savedDraft.comparisonProgramIds
@@ -2171,6 +2212,113 @@
                     elements.toast.classList.remove("is-visible");
                 }, 2800);
             }
+
+         function updateClientContextDisplay() {
+             const banner = elements.builderClientContext;
+             if (!banner) return;
+             const ctx = state.clientContext;
+             if (ctx && ctx.clientId) {
+                 banner.classList.remove("is-empty");
+                 banner.innerHTML = `
+                     <strong>Client ${escapeHtml(ctx.initials || "")}</strong>
+                     <span>Drafts and documents will associate with this client automatically.</span>
+                 `;
+             } else {
+                 banner.classList.add("is-empty");
+                 banner.innerHTML = `
+                     <strong>No client selected</strong>
+                     <span>Open the Clients tab and choose “Create Document” to link a client.</span>
+                 `;
+             }
+         }
+
+         function applyClientInitialsToBuilder(initials) {
+             const normalized = (initials || "").toUpperCase();
+             if (!normalized) return false;
+             let changed = false;
+             Object.values(state.builder.lanes).forEach(laneItems => {
+                 laneItems.forEach(item => {
+                     if (item.programId && !item.client) {
+                         item.client = normalized;
+                         changed = true;
+                     }
+                 });
+             });
+             return changed;
+         }
+
+         function setClientContext(context = {}, options = {}) {
+             const clientId = typeof context?.clientId === "string" && context.clientId.trim() ? context.clientId.trim() : null;
+             const initials = (context?.initials || "").toUpperCase().slice(0, 12);
+             const kipuId = context?.kipuId || null;
+             const previous = state.clientContext;
+
+             if (!clientId) {
+                 if (previous) {
+                     state.clientContext = null;
+                     if (state.builder) {
+                         state.builder.associatedClientId = null;
+                     }
+                     updateClientContextDisplay();
+                     if (options.save !== false) {
+                         scheduleAutosave();
+                     }
+                     return { applied: true, context: null };
+                 }
+                 updateClientContextDisplay();
+                 return { applied: false, context: null };
+             }
+
+             const hasChanged =
+                 !previous ||
+                 previous.clientId !== clientId ||
+                 (initials && previous.initials !== initials) ||
+                 previous.kipuId !== kipuId;
+
+             state.clientContext = {
+                 clientId,
+                 initials,
+                 kipuId
+             };
+             if (state.builder) {
+                 state.builder.associatedClientId = clientId;
+             }
+
+             const prefilled = applyClientInitialsToBuilder(initials);
+             if (prefilled) {
+                 renderBuilder();
+             } else {
+                 updateClientContextDisplay();
+             }
+
+             if (options.announce !== false) {
+                 announce(`Programs workspace linked to client ${initials || clientId}.`);
+             }
+
+             if (options.save !== false) {
+                 scheduleAutosave();
+             }
+
+            if (clientId && window.clientManager?.setCurrentClient) {
+                Promise.resolve(window.clientManager.setCurrentClient(clientId)).catch(error => {
+                    console.warn("Failed to sync client manager current client:", error);
+                });
+             }
+
+             if (window.CareConnect?.events) {
+                 try {
+                     window.CareConnect.events.emit("programs-docs:client-context-set", {
+                         clientId,
+                         initials,
+                         kipuId
+                     });
+                 } catch (error) {
+                     console.warn("Programs docs event emit failed:", error);
+                 }
+             }
+
+             return { applied: hasChanged || prefilled, context: state.clientContext };
+         }
 
             function updateResultsSummary(filteredPrograms) {
                 const activeFilterButtons = countActiveFilters();
@@ -2260,6 +2408,15 @@
                     .replace(/</g, "&lt;")
                     .replace(/>/g, "&gt;");
             }
+
+         function escapeHtml(text = "") {
+             return text
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#39;");
+         }
 
             function escapeAttribute(value = "") {
                 return value
@@ -2362,7 +2519,12 @@
                     documentType: state.documentType,
                     generatedAt: new Date().toISOString(),
                     focusProgramId,
-                    lanes
+                    lanes,
+                    clientContext: state.clientContext ? {
+                        clientId: state.clientContext.clientId,
+                        initials: state.clientContext.initials,
+                        kipuId: state.clientContext.kipuId || null
+                    } : null
                 };
             }
 
@@ -2382,10 +2544,14 @@
                         return "This individualized Aftercare Plan highlights the primary placement and supporting services staged across the next 30 days.";
                     }
                     if (snapshot.documentType === "aftercare-options") {
-                        return "Use this curated Aftercare Options grid to compare each recommended program and capture family feedback.";
+                        return "Use this curated Aftercare Options grid to compare recommended programs and capture family feedback.";
                     }
-                    return "Program selections and at-home resources prepared for handoff.";
+                    return "";
                 })();
+                const introHtml = docIntro ? `<p class="doc-intro">${sanitizeTextForExport(docIntro)}</p>` : "";
+                const clientHtml = snapshot.clientContext?.initials
+                    ? `<div class="doc-client">Client: ${sanitizeTextForExport(snapshot.clientContext.initials)}</div>`
+                    : "";
 
                 const sections = laneOrder.map(laneKey => {
                     const entries = snapshot.lanes[laneKey] || [];
@@ -2474,7 +2640,8 @@
                             header { margin-bottom: 24px; }
                             h1 { margin: 0; font-size: 1.6rem; }
                             .doc-meta { margin-top: 6px; color: #48508A; font-size: 0.9rem; }
-                            .doc-intro { margin: 12px 0 0 0; font-size: 0.95rem; color: #3a3f7a; line-height: 1.5; }
+                            .doc-client { margin-top: 6px; color: #48508A; font-size: 0.88rem; font-weight: 500; }
+                            .doc-intro { margin-top: 12px; font-size: 0.95rem; color: #3a3f7a; line-height: 1.5; }
                             section { margin-bottom: 24px; }
                             section h2 { margin-bottom: 12px; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.08em; color: #48508A; }
                             .doc-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
@@ -2488,7 +2655,8 @@
                         <header>
                             <h1>${sanitizeTextForExport(label)}</h1>
                             <div class="doc-meta">Generated ${generatedAt}</div>
-                            <p class="doc-intro">${sanitizeTextForExport(docIntro)}</p>
+                            ${clientHtml}
+                            ${introHtml}
                         </header>
                         ${sections}
                     </body>
@@ -2506,7 +2674,7 @@
             function normalizeProgramEntry(entry = {}) {
                 return {
                     programId: entry.programId || "",
-                    client: entry.client || "",
+                 client: entry.client ? String(entry.client).toUpperCase() : "",
                     reason: entry.reason || "",
                     track: entry.track || getDefaultTrackId(entry.programId),
                     addedAt: entry.addedAt || entry.timestamp || new Date().toISOString()
@@ -3633,6 +3801,7 @@
                 });
 
                 updateBuilderSummary();
+                updateClientContextDisplay();
             }
 
             function updateBuilderSummary() {
@@ -3777,9 +3946,10 @@
                     }
                     return;
                 }
+             const defaultInitials = (state.clientContext?.initials || "").toUpperCase();
                 laneItems.push({
                     programId,
-                    client: "",
+                 client: defaultInitials,
                     reason: "",
                     track: getDefaultTrackId(programId),
                     addedAt: new Date().toISOString()
@@ -3947,7 +4117,16 @@
                 const payload = {
                     version: 2,
                     documentType: state.documentType,
-                    builder: state.builder,
+                    builder: {
+                        lanes: state.builder.lanes,
+                        lastSaved: state.builder.lastSaved,
+                        associatedClientId: state.builder.associatedClientId || null
+                    },
+                    clientContext: state.clientContext ? {
+                        clientId: state.clientContext.clientId,
+                        initials: state.clientContext.initials,
+                        kipuId: state.clientContext.kipuId || null
+                    } : null,
                     comparison: {
                         programIds: state.comparison.programIds.slice(0, state.comparison.limit)
                     },
@@ -3960,6 +4139,17 @@
                 };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
                 updateDraftMeta();
+                if (state.clientContext?.clientId && window.CareConnect?.events) {
+                    try {
+                        window.CareConnect.events.emit("programs-docs:draft-saved", {
+                            clientId: state.clientContext.clientId,
+                            savedAt: state.builder.lastSaved,
+                            documentType: state.documentType
+                        });
+                    } catch (error) {
+                        console.warn("Programs docs draft event failed:", error);
+                    }
+                }
                 if (trigger === "manual") {
                     showToast("Draft saved");
                 }
@@ -4003,6 +4193,7 @@
                             },
                             lastSaved: data.builder.lastSaved || data.lastSaved || null
                         };
+                        builder.associatedClientId = data.builder.associatedClientId || data.associatedClientId || null;
                     } else if (data.lanes) {
                         builder = {
                             lanes: {
@@ -4013,6 +4204,7 @@
                             },
                             lastSaved: data.lastSaved || null
                         };
+                        builder.associatedClientId = data.associatedClientId || null;
                     } else {
                         builder = null;
                     }
@@ -4042,11 +4234,35 @@
                         }
                         : null;
 
+                    let clientContext = null;
+                    if (data.clientContext && typeof data.clientContext === "object") {
+                        const normalizedId = typeof data.clientContext.clientId === "string" && data.clientContext.clientId.trim()
+                            ? data.clientContext.clientId.trim()
+                            : builder?.associatedClientId || null;
+                        const normalizedInitials = data.clientContext.initials
+                            ? String(data.clientContext.initials).toUpperCase().slice(0, 12)
+                            : "";
+                        if (normalizedId) {
+                            clientContext = {
+                                clientId: normalizedId,
+                                initials: normalizedInitials,
+                                kipuId: data.clientContext.kipuId || null
+                            };
+                        }
+                    } else if (builder?.associatedClientId) {
+                        clientContext = {
+                            clientId: builder.associatedClientId,
+                            initials: "",
+                            kipuId: null
+                        };
+                    }
+
                     return {
                         builder,
                         documentType: data.documentType === "aftercare-plan" ? "aftercare-plan" : "aftercare-options",
                         comparisonProgramIds,
-                        mapState
+                        mapState,
+                        clientContext
                     };
                 } catch (error) {
                     console.warn("Unable to load draft", error);
@@ -4078,6 +4294,17 @@
                 docWindow.document.write(html);
                 docWindow.document.close();
                 docWindow.focus();
+                if (state.clientContext?.clientId && window.CareConnect?.events) {
+                    try {
+                        window.CareConnect.events.emit("programs-docs:document-generated", {
+                            clientId: state.clientContext.clientId,
+                            documentType: docType,
+                            generatedAt: snapshot.generatedAt
+                        });
+                    } catch (error) {
+                        console.warn("Programs docs generation event failed:", error);
+                    }
+                }
                 showToast(`${label} generated with ${summary}`);
             }
 
@@ -4183,7 +4410,11 @@
 
             function hydrateFromDraft() {
                 setDocumentType(state.documentType, { announce: false, scheduleSave: false });
+             if (state.clientContext?.initials) {
+                 applyClientInitialsToBuilder(state.clientContext.initials);
+             }
                 renderBuilder();
+             updateClientContextDisplay();
             }
 
             function init() {
@@ -4191,6 +4422,12 @@
                 hydrateFromDraft();
                 populateQuickAddOptions();
                 updateComparisonStatus();
+             if (window.__pendingProgramsDocsClientContext) {
+                 setClientContext(window.__pendingProgramsDocsClientContext, { announce: false, save: false });
+                 delete window.__pendingProgramsDocsClientContext;
+             } else {
+                 updateClientContextDisplay();
+             }
 
                 documentTypeButtons.forEach(button => {
                     button.addEventListener("click", () => setDocumentType(button.dataset.docType));
@@ -4308,14 +4545,52 @@
                 });
 
                 announce("Programs workspace ready");
+                if (window.CareConnect?.events) {
+                    try {
+                        window.CareConnect.events.emit("programs-docs:ready", { timestamp: Date.now() });
+                    } catch (error) {
+                        console.warn("Programs docs ready event failed:", error);
+                    }
+                }
             }
 
-            window.openDetails = openDetails;
-            window.addToBuilder = addToBuilder;
-            window.generateDocument = generateDocument;
-            window.saveDraft = saveDraft;
+         const programsDocsAPI = {
+             setClientContext(context = {}) {
+                 return Promise.resolve(setClientContext(context));
+             },
+             getClientContext() {
+                 if (!state.clientContext) {
+                     return null;
+                 }
+                 return {
+                     clientId: state.clientContext.clientId,
+                     initials: state.clientContext.initials,
+                     kipuId: state.clientContext.kipuId || null
+                 };
+             },
+             focusSearch() {
+                 if (elements.searchInput) {
+                     elements.searchInput.focus();
+                 }
+             },
+             refresh() {
+                 renderPrograms();
+                 renderBuilder();
+             }
+         };
+
+         window.CareConnectProgramsDocs = Object.assign(window.CareConnectProgramsDocs || {}, programsDocsAPI);
+
+         window.openDetails = openDetails;
+         window.addToBuilder = addToBuilder;
+         window.generateDocument = generateDocument;
+         window.saveDraft = saveDraft;
 
             init();
+         if (window.CareConnectProgramsDocs) {
+             window.CareConnectProgramsDocs.ready = true;
+         }
+         window.CareConnectProgramsDocsReady = true;
         }());
     </script>
 </body>

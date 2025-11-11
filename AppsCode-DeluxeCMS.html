@@ -2716,6 +2716,13 @@
                                 </button>
                             </div>
                             
+                            <div class="modal-toolbar" style="display:flex; justify-content:flex-end; gap:12px; margin: 12px 0 20px 0;">
+                                <button class="primary-action" onclick="generateClientDocument('${clientId}', { focusSearch: true })" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+                                    <span>✨</span>
+                                    <span>Create Document for ${client.initials}</span>
+                                </button>
+                            </div>
+                            
                             <!-- Main Content Area -->
                             <div class="modal-body">
                                 <!-- Sidebar Navigation -->
@@ -4584,12 +4591,56 @@
         }
         
         // Generate document for client
-        async function generateClientDocument(clientId) {
-            const client = await window.clientManager.getClient(clientId);
-            if (client) {
-                await window.clientManager.setCurrentClient(clientId);
+        async function generateClientDocument(clientId, options = {}) {
+            try {
+                const client = await window.clientManager.getClient(clientId);
+                if (!client) {
+                    showAlert('Client not found', 'error');
+                    return;
+                }
+
+                const contextPayload = {
+                    clientId,
+                    initials: client.initials || '',
+                    kipuId: client.kipuId || null
+                };
+
+                window.__pendingProgramsDocsClientContext = contextPayload;
+
+                await mountProgramsDocsModule();
+
+                if (window.CareConnectProgramsDocs?.setClientContext) {
+                    await window.CareConnectProgramsDocs.setClientContext(contextPayload);
+                }
+
+                window.__pendingProgramsDocsClientContext = null;
+
+                if (window.clientManager?.setCurrentClient) {
+                    await window.clientManager.setCurrentClient(clientId);
+                }
+
+                sessionStorage.setItem('currentClientId', clientId);
                 switchTab('programs');
-                showAlert(`Switched to ${client.initials} - Select programs for document`, 'info');
+
+                if (options.focusSearch && window.CareConnectProgramsDocs?.focusSearch) {
+                    window.CareConnectProgramsDocs.focusSearch();
+                }
+
+                if (window.CareConnect?.events) {
+                    try {
+                        window.CareConnect.events.emit('clients:programs-docs-opened', {
+                            clientId,
+                            initials: client.initials || ''
+                        });
+                    } catch (eventError) {
+                        console.warn('Programs docs open event failed:', eventError);
+                    }
+                }
+
+                showAlert(`Programs workspace ready for ${client.initials || 'client'}.`, 'success');
+            } catch (error) {
+                console.error('Failed to open Programs & Docs for client:', error);
+                showAlert('Unable to open Programs & Docs. Please try again.', 'error');
             }
         }
         
