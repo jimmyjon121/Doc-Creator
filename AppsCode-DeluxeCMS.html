@@ -1109,6 +1109,94 @@
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
     </style>
+
+    <style>
+        .programs-docs-loader,
+        .programs-docs-error {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid rgba(110, 123, 255, 0.2);
+            background: rgba(233, 236, 255, 0.55);
+            color: #151633;
+            font-size: 15px;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .programs-docs-loader .loader-spinner {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 3px solid rgba(110, 123, 255, 0.3);
+            border-top-color: #6E7BFF;
+            animation: programsDocsSpin 0.9s linear infinite;
+        }
+
+        .programs-docs-error {
+            flex-direction: column;
+            align-items: flex-start;
+            background: rgba(255, 245, 245, 0.85);
+            border: 1px solid rgba(221, 72, 72, 0.35);
+        }
+
+        .programs-docs-error h3 {
+            margin: 0;
+            font-size: 16px;
+            color: #b42318;
+        }
+
+        .programs-docs-error p {
+            margin: 4px 0 12px 0;
+            color: #7a271a;
+            font-size: 14px;
+        }
+
+        .programs-docs-error-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .programs-docs-container {
+            min-height: 400px;
+        }
+
+        .legacy-programs-wrapper {
+            margin-top: 24px;
+        }
+
+        .legacy-programs-notice {
+            padding: 20px;
+            border: 1px dashed rgba(110, 123, 255, 0.35);
+            border-radius: 16px;
+            background: white;
+            color: #48508A;
+        }
+
+        .legacy-programs-notice h4 {
+            margin: 0 0 8px 0;
+            color: #0F1020;
+            font-size: 16px;
+        }
+
+        .legacy-programs-notice p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        body.programs-docs-v2-active .selection-panel {
+            display: none !important;
+        }
+
+        @keyframes programsDocsSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
     
     <!-- Client Tracking JavaScript -->
     <script>
@@ -1488,13 +1576,13 @@
                 if (programsPanel) {
                     const tabNavHTML = `
                         <div class="tab-navigation" style="display: flex !important; gap: 8px; margin-bottom: 20px; visibility: visible !important; z-index: 10; position: relative;">
-                            <button class="tab-btn" onclick="switchTab('dashboard')">
+                            <button class="tab-btn" data-tab-target="dashboard" onclick="switchTab('dashboard')">
                                 <span>🎯 Dashboard</span>
                             </button>
-                            <button class="tab-btn active" onclick="switchTab('programs')">
-                                <span>📋 Programs</span>
+                            <button class="tab-btn active" data-tab-target="programs" onclick="switchTab('programs')">
+                                <span>📑 Programs &amp; Docs</span>
                             </button>
-                            <button class="tab-btn" onclick="switchTab('clients')">
+                            <button class="tab-btn" data-tab-target="clients" onclick="switchTab('clients')">
                                 <span>👥 Clients</span>
                             </button>
                         </div>
@@ -1576,6 +1664,174 @@
             }
         }
         
+        const PROGRAMS_DOCS_MODULE_PATH = 'CareConnect-Pro.html';
+        let programsDocsLegacyNoticeShown = false;
+
+        function shouldUseProgramsDocs() {
+            try {
+                if (window.featureFlags?.isEnabled) {
+                    return window.featureFlags.isEnabled('programsV2Core') !== false;
+                }
+            } catch (error) {
+                console.warn('Programs & Docs feature flag unavailable:', error);
+            }
+            return true;
+        }
+
+        async function mountProgramsDocsModule(forceReload = false) {
+            const container = document.getElementById('programsDocsContainer');
+            const loader = document.getElementById('programsDocsLoader');
+            const errorEl = document.getElementById('programsDocsError');
+
+            if (!container || !loader) {
+                console.warn('Programs & Docs container missing from shell.');
+                return false;
+            }
+
+            if (!shouldUseProgramsDocs()) {
+                revealLegacyProgramsNotice('feature-disabled');
+                return false;
+            }
+
+            if (window.__programsDocsMountPromise && !forceReload) {
+                return window.__programsDocsMountPromise;
+            }
+
+            loader.hidden = false;
+            if (errorEl) {
+                errorEl.hidden = true;
+            }
+            container.hidden = true;
+
+            const fetchUrl = forceReload
+                ? `${PROGRAMS_DOCS_MODULE_PATH}?cacheBust=${Date.now()}`
+                : PROGRAMS_DOCS_MODULE_PATH;
+
+            const mountPromise = (async () => {
+                try {
+                    const response = await fetch(fetchUrl, { cache: 'no-store' });
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const htmlText = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, 'text/html');
+
+                    // Inject styles once
+                    doc.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+                        const href = link.getAttribute('href');
+                        if (!href) return;
+                        if (document.querySelector(`link[data-programs-docs-style="true"][href="${href}"]`)) {
+                            return;
+                        }
+                        const clone = link.cloneNode(true);
+                        clone.dataset.programsDocsStyle = 'true';
+                        document.head.appendChild(clone);
+                    });
+
+                    window.__programsDocsInlineStyles = window.__programsDocsInlineStyles || new Set();
+                    doc.querySelectorAll('style').forEach(styleTag => {
+                        const cssText = styleTag.textContent || '';
+                        if (window.__programsDocsInlineStyles.has(cssText)) {
+                            return;
+                        }
+                        const clone = styleTag.cloneNode(true);
+                        clone.dataset.programsDocsStyle = 'true';
+                        clone.dataset.programsDocsInline = 'true';
+                        window.__programsDocsInlineStyles.add(cssText);
+                        document.head.appendChild(clone);
+                    });
+
+                    container.innerHTML = doc.body.innerHTML;
+                    container.hidden = false;
+                    loader.hidden = true;
+                    document.body.classList.add('programs-docs-v2-active');
+
+                    // Execute inline scripts sequentially
+                    const scripts = Array.from(doc.querySelectorAll('script'));
+                    for (const scriptNode of scripts) {
+                        const scriptEl = document.createElement('script');
+                        for (const attr of scriptNode.attributes) {
+                            scriptEl.setAttribute(attr.name, attr.value);
+                        }
+                        if (scriptNode.src) {
+                            scriptEl.src = scriptNode.src;
+                        } else {
+                            scriptEl.textContent = scriptNode.textContent;
+                        }
+                        scriptEl.dataset.programsDocsScript = 'true';
+                        container.appendChild(scriptEl);
+
+                        if (scriptEl.src) {
+                            await new Promise((resolve, reject) => {
+                                scriptEl.onload = resolve;
+                                scriptEl.onerror = () => reject(new Error(`Failed to load ${scriptEl.src}`));
+                            });
+                        }
+                    }
+
+                    window.__programsDocsLoaded = true;
+                    return true;
+                } catch (error) {
+                    console.error('Programs & Docs mount failure:', error);
+                    loader.hidden = true;
+                    if (errorEl) {
+                        errorEl.hidden = false;
+                        const errorParagraph = errorEl.querySelector('p');
+                        if (errorParagraph) {
+                            errorParagraph.textContent = `Please retry loading or notify support. (${error.message})`;
+                        }
+                    }
+                    revealLegacyProgramsNotice('load-error');
+                    document.body.classList.remove('programs-docs-v2-active');
+                    throw error;
+                }
+            })();
+
+            window.__programsDocsMountPromise = mountPromise;
+            return mountPromise;
+        }
+
+        function retryProgramsDocsMount() {
+            window.__programsDocsMountPromise = null;
+            return mountProgramsDocsModule(true).catch(() => {});
+        }
+
+        function toggleLegacyPrograms(show) {
+            const wrapper = document.getElementById('legacyProgramsWrapper');
+            if (!wrapper) return;
+            if (show) {
+                revealLegacyProgramsNotice('manual-request');
+                wrapper.hidden = false;
+            } else {
+                wrapper.hidden = true;
+            }
+        }
+
+        function revealLegacyProgramsNotice(reason) {
+            const wrapper = document.getElementById('legacyProgramsWrapper');
+            const errorEl = document.getElementById('programsDocsError');
+            if (!wrapper) return;
+
+            if (!wrapper.dataset.rendered) {
+                wrapper.innerHTML = `
+                    <div class="legacy-programs-notice">
+                        <h4>Legacy Programs experience</h4>
+                        <p>The updated Programs &amp; Docs module is currently unavailable (${reason}). Disable the <code>programsV2Core</code> feature flag or contact support for assistance.</p>
+                    </div>
+                `;
+                wrapper.dataset.rendered = 'true';
+            }
+
+            wrapper.hidden = false;
+            if (errorEl) {
+                errorEl.hidden = false;
+            }
+            programsDocsLegacyNoticeShown = true;
+            document.body.classList.remove('programs-docs-v2-active');
+        }
+
         // Switch between tabs
         function switchTab(tab) {
             // Update tab buttons
@@ -1584,11 +1840,13 @@
             });
             
             // Find and activate the clicked button
-            const clickedBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => 
-                btn.textContent.toLowerCase().includes(tab.toLowerCase()) ||
-                (tab === 'programs' && btn.textContent.includes('📋')) ||
-                (tab === 'clients' && btn.textContent.includes('👤'))
-            );
+            const clickedBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => {
+                const target = btn.dataset.tabTarget;
+                if (target) {
+                    return target === tab;
+                }
+                return btn.textContent.toLowerCase().includes(tab.toLowerCase());
+            });
             if (clickedBtn) {
                 clickedBtn.classList.add('active');
             }
@@ -1600,7 +1858,14 @@
             
             if (tab === 'programs') {
                 const programsTab = document.getElementById('programsTab');
-                if (programsTab) programsTab.classList.add('active');
+                if (programsTab) {
+                    programsTab.classList.add('active');
+                }
+                if (shouldUseProgramsDocs()) {
+                    mountProgramsDocsModule().catch(() => {});
+                } else if (!window.__legacyProgramsInitialized) {
+                    initializeLegacyProgramsModule();
+                }
             } else if (tab === 'clients') {
                 const clientsTab = document.getElementById('clientsTab');
                 if (clientsTab) clientsTab.classList.add('active');
@@ -1609,6 +1874,9 @@
                 if (!cmTrackerInitialized) {
                     initializeCMTracker();
                 }
+            } else if (tab === 'dashboard') {
+                const dashboardTab = document.getElementById('dashboardTab');
+                if (dashboardTab) dashboardTab.classList.add('active');
             }
         }
         
@@ -9650,13 +9918,13 @@
                 
                 <!-- Tab Navigation -->
                 <div class="tab-navigation" style="display: flex !important; gap: 8px; margin-bottom: 20px; visibility: visible !important;">
-                    <button class="tab-btn" onclick="switchTab('dashboard')">
+                    <button class="tab-btn" data-tab-target="dashboard" onclick="switchTab('dashboard')">
                         <span>🎯 Dashboard</span>
                     </button>
-                    <button class="tab-btn active" onclick="switchTab('programs')">
-                        <span>📋 Programs</span>
+                    <button class="tab-btn active" data-tab-target="programs" onclick="switchTab('programs')">
+                        <span>📑 Programs &amp; Docs</span>
                     </button>
-                    <button class="tab-btn" onclick="switchTab('clients')">
+                    <button class="tab-btn" data-tab-target="clients" onclick="switchTab('clients')">
                         <span>👥 Clients</span>
                     </button>
                 </div>
@@ -10226,433 +10494,20 @@
                 
                 <!-- Programs Tab Content -->
                 <div id="programsTab" class="tab-content active">
-                
-                <div class="quick-actions" style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
-                    <button class="quick-action-btn" onclick="selectAllPrograms()">Select All</button>
-                    <button class="quick-action-btn" onclick="clearAllPrograms()">Clear All</button>
-                    <button class="quick-action-btn" onclick="openDocumentVault().catch(console.error)" style="background: #10b981; color: white;">🗄️ Vault</button>
-                    <button class="quick-action-btn" onclick="createDischargePacket()" style="background: #8b5cf6; color: white;">📦 DC Packet</button>
-                    <button class="quick-action-btn" onclick="switchTab('clients')" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; font-weight: bold; border: 2px solid #6366f1;">
-                        👤 Clients
-                    </button>
-                    
-                    <!-- Quick Client Switcher -->
-                    <div style="position: relative; display: inline-block;">
-                        <button class="quick-action-btn" onclick="toggleRecentClients()" style="background: #f59e0b; color: white; min-width: 150px;">
-                            ⚡ Recent Clients ▼
-                        </button>
-                        <div id="recentClientsDropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e5e7eb; border-radius: 6px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); z-index: 1000; margin-top: 4px; min-width: 200px;">
-                            <!-- Recent clients will be loaded here -->
+                    <div id="programsDocsLoader" class="programs-docs-loader" role="status" aria-live="polite">
+                        <span class="loader-spinner" aria-hidden="true"></span>
+                        <span class="loader-copy">Loading Programs &amp; Docs workspace…</span>
+                    </div>
+                    <div id="programsDocsContainer" class="programs-docs-container" hidden></div>
+                    <div id="programsDocsError" class="programs-docs-error" hidden role="alert">
+                        <h3>Programs workspace unavailable</h3>
+                        <p>Please retry loading or switch back to the legacy module if needed.</p>
+                        <div class="programs-docs-error-actions">
+                            <button type="button" class="btn btn-primary" onclick="retryProgramsDocsMount()">Retry load</button>
+                            <button type="button" class="btn" onclick="toggleLegacyPrograms(true)">Open legacy Programs view</button>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Favorite Programs Section -->
-                <div id="favoritePrograms" style="display: none; margin-bottom: 15px; padding: 15px; background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 8px; border: 1px solid #f59e0b;">
-                    <h4 style="margin: 0 0 10px 0; color: #92400e; font-size: 14px;">⭐ Favorite Programs (Quick Add)</h4>
-                    <div id="favoriteProgramsList" style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <!-- Favorite programs will be loaded here -->
-                    </div>
-                    <button onclick="manageFavorites()" style="margin-top: 10px; padding: 6px 12px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                        Manage Favorites
-                    </button>
-                </div>
-                
-                <div class="search-container" style="margin-top: 10px; display: flex; gap: 10px; align-items: center;">
-                    <input type="text" class="search-box" id="searchBox" placeholder="🔍 Search programs by name, location, features, or contacts..." oninput="handleSearch(this.value)" style="flex: 1;">
-                    <div class="search-indicator" id="searchIndicator" style="display: none;">🔍 Searching...</div>
-                    <button class="add-program-btn" id="addProgramBtn" onclick="showAddProgramDialog()" style="background: #0066cc; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap; flex-shrink: 0;">
-                        ➕ Add New Program
-                    </button>
-                </div>
-
-                
-                <!-- Enhanced Filter System -->
-                <div class="enhanced-filters-container" id="enhancedFiltersContainer" style="margin-top: 20px; padding: 20px; background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                        <h3 style="margin: 0; color: #374151; font-size: 18px;">🔍 Advanced Filters</h3>
-                        <button onclick="toggleEnhancedFilters()" style="background: none; border: none; color: #6366f1; cursor: pointer; font-size: 14px;">
-                            <span id="toggleFilterText">Show More</span> ▼
-                        </button>
-                    </div>
-                    
-                    <!-- Enhanced Filters Grid (Initially Hidden) -->
-                    <div id="enhancedFiltersGrid" style="display: none;">
-                        <!-- Smart Query Panel -->
-                        <div class="filter-group" style="grid-column: 1 / -1; background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                            <label for="naturalLanguageSearch" style="display: block; font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px;">
-                                🧠 Smart Query (natural language)
-                            </label>
-                            <input type="text" 
-                                   class="natural-language-search" 
-                                   id="naturalLanguageSearch" 
-                                   placeholder="Type natural language requests like 'RTC within 50 miles that accepts Medicaid'"
-                                   style="width: 100%; padding: 12px 16px; font-size: 15px; border: 2px solid #d1d5db; border-radius: 8px; transition: all 0.2s;">
-                            <small style="display: block; margin-top: 6px; color: #6b7280; font-size: 13px;">
-                                Tip: Auto-parses age, level of care, insurance, distance, and specialties.
-                            </small>
-                            <div id="nlSearchSuggestions" style="margin-top: 10px; display: none;"></div>
-                        </div>
-                        
-                        <!-- Smart Presets -->
-                        <div class="smart-presets" style="margin-bottom: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button class="smart-preset" onclick="applySmartPreset('nearby_quality')" style="padding: 6px 12px; background: white; border: 1px solid #d1d5db; border-radius: 20px; font-size: 13px; cursor: pointer;">
-                                📍 Nearby High-Quality
-                            </button>
-                            <button class="smart-preset" onclick="applySmartPreset('insurance_accepted')" style="padding: 6px 12px; background: white; border: 1px solid #d1d5db; border-radius: 20px; font-size: 13px; cursor: pointer;">
-                                💳 Accepts Insurance
-                            </button>
-                            <button class="smart-preset" onclick="applySmartPreset('immediate_availability')" style="padding: 6px 12px; background: white; border: 1px solid #d1d5db; border-radius: 20px; font-size: 13px; cursor: pointer;">
-                                ⚡ Available Now
-                            </button>
-                        </div>
-                        
-                        <!-- Filter Grid -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px;">
-                            
-                            <!-- Insurance Filter -->
-                            <div class="filter-group" style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                                <label style="font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px; display: block;">
-                                    💳 Insurance Accepted
-                                </label>
-                                <select id="insuranceFilter" multiple style="width: 100%; min-height: 100px; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;">
-                                    <option value="Medicaid">Medicaid</option>
-                                    <option value="Medicare">Medicare</option>
-                                    <option value="Private">Private Insurance</option>
-                                    <option value="BCBS">Blue Cross Blue Shield</option>
-                                    <option value="Aetna">Aetna</option>
-                                    <option value="United">United Healthcare</option>
-                                    <option value="Cigna">Cigna</option>
-                                    <option value="Tricare">Tricare</option>
-                                    <option value="Self-Pay">Self-Pay</option>
-                                    <option value="Sliding Scale">Sliding Scale</option>
-                                </select>
-                            </div>
-                            
-                            <!-- Cost Range Filter -->
-                            <div class="filter-group" style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                                <label style="font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px; display: block;">
-                                    💰 Cost Range
-                                </label>
-                                <div class="cost-checkboxes" style="display: flex; flex-direction: column; gap: 8px;">
-                                    <label style="display: flex; align-items: center; font-size: 14px; cursor: pointer;">
-                                        <input type="checkbox" value="$" style="margin-right: 8px;"> $ (Under $10k/month)
-                                    </label>
-                                    <label style="display: flex; align-items: center; font-size: 14px; cursor: pointer;">
-                                        <input type="checkbox" value="$$" style="margin-right: 8px;"> $$ ($10k-$20k/month)
-                                    </label>
-                                    <label style="display: flex; align-items: center; font-size: 14px; cursor: pointer;">
-                                        <input type="checkbox" value="$$$" style="margin-right: 8px;"> $$$ ($20k-$30k/month)
-                                    </label>
-                                    <label style="display: flex; align-items: center; font-size: 14px; cursor: pointer;">
-                                        <input type="checkbox" value="$$$$" style="margin-right: 8px;"> $$$$ (Over $30k/month)
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <!-- Demographics -->
-                            <div class="filter-group" style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                                <label style="font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px; display: block;">
-                                    👥 Demographics
-                                </label>
-                                <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                                    <select id="genderFilter" style="flex: 1; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;">
-                                        <option value="">Any Gender</option>
-                                        <option value="male">Male Only</option>
-                                        <option value="female">Female Only</option>
-                                        <option value="co-ed">Co-ed</option>
-                                    </select>
-                                    <input type="number" 
-                                           id="ageFilter" 
-                                           placeholder="Age" 
-                                           min="5" 
-                                           max="99"
-                                           style="width: 80px; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;">
-                                </div>
-                            </div>
-                            
-                            <!-- Location Filter -->
-                            <div class="filter-group" style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                                <label style="font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px; display: block;">
-                                    📍 Location
-                                </label>
-                                <div style="display: flex; gap: 8px;">
-                                    <input type="text" 
-                                           id="zipCodeFilter" 
-                                           placeholder="ZIP code" 
-                                           pattern="[0-9]{5}"
-                                           style="flex: 1; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;">
-                                    <div style="display: flex; align-items: center; gap: 4px;">
-                                        <input type="number" 
-                                               id="radiusFilter" 
-                                               placeholder="Miles" 
-                                               min="10" 
-                                               max="500" 
-                                               value="50"
-                                               style="width: 60px; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;">
-                                        <span style="font-size: 13px; color: #6b7280;">mi</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Specialties Filter -->
-                            <div class="filter-group" style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                                <label style="font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px; display: block;">
-                                    🎯 Specialties
-                                </label>
-                                <select id="specialtiesFilter" multiple style="width: 100%; min-height: 100px; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px;">
-                                    <option value="DBT">DBT</option>
-                                    <option value="CBT">CBT</option>
-                                    <option value="EMDR">EMDR</option>
-                                    <option value="Trauma-Informed">Trauma-Informed</option>
-                                    <option value="Eating Disorder">Eating Disorder</option>
-                                    <option value="Substance Abuse">Substance Abuse</option>
-                                    <option value="Dual Diagnosis">Dual Diagnosis</option>
-                                    <option value="LGBTQ+">LGBTQ+ Affirming</option>
-                                    <option value="ASD">Autism Spectrum</option>
-                                    <option value="ADHD">ADHD</option>
-                                    <option value="Anxiety">Anxiety</option>
-                                    <option value="Depression">Depression</option>
-                                    <option value="Self-Harm">Self-Harm</option>
-                                    <option value="OCD">OCD</option>
-                                </select>
-                            </div>
-                            
-                            <!-- Data Quality Filter -->
-                            <div class="filter-group" style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb;">
-                                <label style="font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 8px; display: block;">
-                                    📊 Data Quality (Min)
-                                </label>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <input type="range" 
-                                           id="dataQualityFilter" 
-                                           min="0" 
-                                           max="100" 
-                                           value="0"
-                                           style="flex: 1;">
-                                    <span id="dataQualityValue" style="font-size: 14px; color: #6b7280; min-width: 40px;">0%</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Filter Actions -->
-                        <div class="filter-actions" style="display: flex; gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
-                            <button onclick="applyEnhancedFilters()" style="padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                                Apply Filters
-                            </button>
-                            <button onclick="clearEnhancedFilters()" style="padding: 10px 20px; background: white; color: #6b7280; border: 1px solid #d1d5db; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                                Clear All
-                            </button>
-                            <button onclick="saveFilterPreset()" style="padding: 10px 20px; background: white; color: #6b7280; border: 1px solid #d1d5db; border-radius: 8px; font-weight: 600; cursor: pointer;">
-                                Save Preset
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Filter Results Summary -->
-                    <div id="filterResultsSummary" style="margin-top: 12px; padding: 12px; background: #f0f9ff; border: 1px solid #3b82f6; border-radius: 6px; display: none;">
-                        <span id="filterResultsText" style="color: #1e40af; font-size: 14px;"></span>
-                    </div>
-                </div>
-
-                
-                <!-- Interactive Map System -->
-                <div id="mapSystemContainer" style="display: none; margin-top: 20px;">
-                    <div style="background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden;">
-                        <!-- Map Header -->
-                        <div style="padding: 20px; border-bottom: 1px solid #e5e7eb;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <h3 style="margin: 0; color: #374151; font-size: 18px; font-weight: 600;">
-                                    🗺️ Interactive Program Map
-                                </h3>
-                                <div style="display: flex; gap: 12px;">
-                                    <button onclick="toggleMapView()" id="mapViewToggle" style="
-                                        padding: 8px 16px;
-                                        background: #6366f1;
-                                        color: white;
-                                        border: none;
-                                        border-radius: 8px;
-                                        font-weight: 600;
-                                        cursor: pointer;
-                                        font-size: 14px;
-                                    ">Show Map View</button>
-                                    <button onclick="toggleVisualization('timeline')" style="
-                                        padding: 8px 16px;
-                                        background: white;
-                                        color: #6b7280;
-                                        border: 1px solid #d1d5db;
-                                        border-radius: 8px;
-                                        font-weight: 600;
-                                        cursor: pointer;
-                                        font-size: 14px;
-                                    ">📊 Timeline</button>
-                                    <button onclick="toggleVisualization('cost')" style="
-                                        padding: 8px 16px;
-                                        background: white;
-                                        color: #6b7280;
-                                        border: 1px solid #d1d5db;
-                                        border-radius: 8px;
-                                        font-weight: 600;
-                                        cursor: pointer;
-                                        font-size: 14px;
-                                    ">💰 Cost Analysis</button>
-                                </div>
-                            </div>
-                            
-                            <!-- Map Controls -->
-                            <div id="mapControls" style="display: none; margin-top: 16px;">
-                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-                                    <!-- Location Search -->
-                                    <div style="display: flex; gap: 8px;">
-                                        <input type="text" 
-                                               id="mapLocationSearch" 
-                                               placeholder="Enter ZIP or city..."
-                                               style="flex: 1; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px;">
-                                        <button onclick="searchMapLocation()" style="
-                                            padding: 8px 12px;
-                                            background: #3b82f6;
-                                            color: white;
-                                            border: none;
-                                            border-radius: 6px;
-                                            cursor: pointer;
-                                        ">Search</button>
-                                    </div>
-                                    
-                                    <!-- Radius Control -->
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <label style="font-size: 14px; color: #6b7280;">Radius:</label>
-                                        <input type="range" 
-                                               id="mapRadiusSlider" 
-                                               min="10" 
-                                               max="200" 
-                                               value="50"
-                                               style="flex: 1;">
-                                        <span id="mapRadiusValue" style="font-size: 14px; color: #374151; min-width: 50px;">50 mi</span>
-                                    </div>
-                                    
-                                    <!-- Map Type -->
-                                    <select id="mapTypeSelector" onchange="changeMapType(this.value)" style="
-                                        padding: 8px 12px;
-                                        border: 1px solid #d1d5db;
-                                        border-radius: 6px;
-                                        background: white;
-                                    ">
-                                        <option value="street">Street Map</option>
-                                        <option value="satellite">Satellite</option>
-                                        <option value="terrain">Terrain</option>
-                                        <option value="dark">Dark Mode</option>
-                                    </select>
-                                    
-                                    <!-- Cluster Toggle -->
-                                    <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer;">
-                                        <input type="checkbox" id="clusterToggle" checked onchange="toggleClustering(this.checked)">
-                                        <span>Group Nearby Programs</span>
-                                    </label>
-                                </div>
-                                
-                                <!-- Quick Stats -->
-                                <div id="mapStats" style="display: flex; gap: 20px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="font-size: 12px; color: #6b7280;">Programs in view:</span>
-                                        <span id="programsInView" style="font-weight: 600; color: #374151;">0</span>
-                                    </div>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="font-size: 12px; color: #6b7280;">Within radius:</span>
-                                        <span id="programsInRadius" style="font-weight: 600; color: #10b981;">0</span>
-                                    </div>
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span style="font-size: 12px; color: #6b7280;">Selected:</span>
-                                        <span id="mapSelectedCount" style="font-weight: 600; color: #6366f1;">0</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Map Container -->
-                        <div id="mapContainer" style="height: 500px; position: relative; display: none;">
-                            <div id="programMap" style="height: 100%; width: 100%;"></div>
-                            
-                            <!-- Map Loading Overlay -->
-                            <div id="mapLoading" style="
-                                position: absolute;
-                                top: 0;
-                                left: 0;
-                                right: 0;
-                                bottom: 0;
-                                background: rgba(255, 255, 255, 0.9);
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                z-index: 1000;
-                            ">
-                                <div style="text-align: center;">
-                                    <div class="loading-spinner"></div>
-                                    <p style="margin-top: 12px; color: #6b7280;">Loading map...</p>
-                                </div>
-                            </div>
-                            
-                            <!-- Distance Circle Overlay -->
-                            <div id="distanceCircle" style="display: none;"></div>
-                        </div>
-                        
-                        <!-- Alternative Visualizations -->
-                        <div id="visualizationContainer" style="padding: 20px; display: none;">
-                            <canvas id="chartCanvas"></canvas>
-                        </div>
-                        
-                        <!-- Accessible Table View -->
-                        <div id="accessibleTableView" style="padding: 20px; display: none;">
-                            <table style="width: 100%; border-collapse: collapse;">
-                                <thead>
-                                    <tr style="background: #f9fafb;">
-                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Program</th>
-                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Location</th>
-                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Distance</th>
-                                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb;">Type</th>
-                                        <th style="padding: 12px; text-align: center; border-bottom: 2px solid #e5e7eb;">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="accessibleTableBody">
-                                    <!-- Programs will be listed here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                
-                
-                
-                <div class="filter-buttons" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                    <button class="filter-btn active" onclick="filterPrograms('all', this)">All Programs</button>
-                    
-                    <!-- Category dropdown -->
-                    <select class="filter-dropdown" onchange="filterPrograms(this.value, this)" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; background: white; cursor: pointer;">
-                        <option value="">Filter by Type...</option>
-                        <option value="rtc">RTC</option>
-                        <option value="tbs">TBS</option>
-                        <option value="wilderness">Wilderness</option>
-                        <option value="php-iop">PHP/IOP</option>
-                        <option value="transitional">Transitional</option>
-                        <option value="virtual">Virtual</option>
-                        <option value="asd">ASD</option>
-                        <option value="evaluation">Evaluation</option>
-                        <option value="athome">AT HOME</option>
-                    </select>
-                </div>
-                
-                <!-- Recently Used Programs -->
-                <div id="recentlyUsedSection" style="display: none; margin-bottom: 20px;">
-                    <h3 style="color: #0099cc; margin-bottom: 10px;">🕐 Recently Used</h3>
-                    <div class="recent-programs-grid" id="recentProgramsGrid">
-                        <!-- Recent programs will be loaded here -->
-                    </div>
-                    <hr style="margin: 20px 0; border: none; border-top: 1px solid #e0e0e0;">
-                </div>
-                
-                <div class="program-grid" id="programGrid">
-                    <!-- Programs will be loaded here -->
-                </div>
-                
+                    <div id="legacyProgramsWrapper" class="legacy-programs-wrapper" hidden aria-live="polite"></div>
                 </div> <!-- End of programsTab -->
                 
                 <!-- Clients Tab Content -->
@@ -10683,8 +10538,8 @@
                                 <button class="cm-action-btn" onclick="showReports()">
                                     📈 Reports
                                 </button>
-                                <button class="cm-action-btn" onclick="switchTab('programs')" style="background: #f3f4f6;">
-                                    📋 Programs
+                                <button class="cm-action-btn" onclick="switchTab('programs')" style="background: #f3f4f6;" data-tab-target="programs">
+                                    📑 Programs &amp; Docs
                                 </button>
                             </div>
                             
@@ -21437,8 +21292,13 @@
             setTimeout(() => msg.remove(), 3000);
         }
         
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Content Loaded - Starting initialization...');
+        function initializeLegacyProgramsModule() {
+            if (window.__legacyProgramsInitialized) {
+                return;
+            }
+            window.__legacyProgramsInitialized = true;
+
+            console.log('Legacy Programs module initializing...');
 
             // Load any saved custom programs first
             loadCustomPrograms();
@@ -21455,29 +21315,49 @@
 
             // Add a small delay to ensure DOM is fully ready
             setTimeout(() => {
-            renderPrograms();
+                renderPrograms();
                 console.log('Programs rendered');
             }, 100);
             
             // Search functionality (combined with active filter)
-            document.getElementById('searchBox').addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const cards = document.querySelectorAll('.program-card');
-                cards.forEach(card => {
-                    const program = programs.find(p => p.id === card.dataset.id);
-                    const matchesSearch = `${program.name} ${program.location} ${program.type}`.toLowerCase().includes(searchTerm);
-                    const matchesFilter = (currentFilter === 'all' || program.category === currentFilter);
-                    card.style.display = (matchesSearch && matchesFilter) ? 'block' : 'none';
+            const searchInput = document.getElementById('searchBox');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const cards = document.querySelectorAll('.program-card');
+                    cards.forEach(card => {
+                        const program = programs.find(p => p.id === card.dataset.id);
+                        const matchesSearch = `${program.name} ${program.location} ${program.type}`.toLowerCase().includes(searchTerm);
+                        const matchesFilter = (currentFilter === 'all' || program.category === currentFilter);
+                        card.style.display = (matchesSearch && matchesFilter) ? 'block' : 'none';
+                    });
                 });
-            });
+            }
             
             // Close modal when clicking outside
-            window.onclick = function(event) {
+            window.addEventListener('click', function(event) {
                 const modal = document.getElementById('previewModal');
                 if (event.target == modal) {
                     closePreview();
                 }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (shouldUseProgramsDocs()) {
+                mountProgramsDocsModule().catch(() => {});
+            } else {
+                console.log('Programs & Docs v2 disabled — expecting legacy module.');
+                document.body.classList.remove('programs-docs-v2-active');
             }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (shouldUseProgramsDocs()) {
+                console.log('Programs & Docs v2 active — skipping legacy programs initialization.');
+                return;
+            }
+            initializeLegacyProgramsModule();
         });
         
         // Set document type
