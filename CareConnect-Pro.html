@@ -2135,6 +2135,10 @@
                 quickAddLane: "stabilize"
             };
 
+            state.globalListenersRegistered = false;
+            state._eventBusRetryCount = 0;
+            state._eventBusUnsubscribers = [];
+
          if (state.clientContext?.clientId && !state.builder.associatedClientId) {
              state.builder.associatedClientId = state.clientContext.clientId;
          } else if (!state.clientContext && state.builder.associatedClientId) {
@@ -2172,6 +2176,7 @@
 
             let autosaveTimer = null;
             let leafletLoader = null;
+            let builderBroadcastTimer = null;
             const mapState = {
                 instance: null,
                 markersLayer: null,
@@ -2247,78 +2252,95 @@
              return changed;
          }
 
-         function setClientContext(context = {}, options = {}) {
-             const clientId = typeof context?.clientId === "string" && context.clientId.trim() ? context.clientId.trim() : null;
-             const initials = (context?.initials || "").toUpperCase().slice(0, 12);
-             const kipuId = context?.kipuId || null;
-             const previous = state.clientContext;
-
-             if (!clientId) {
-                 if (previous) {
-                     state.clientContext = null;
-                     if (state.builder) {
-                         state.builder.associatedClientId = null;
-                     }
-                     updateClientContextDisplay();
-                     if (options.save !== false) {
-                         scheduleAutosave();
-                     }
-                     return { applied: true, context: null };
+         function emitProgramEvent(eventName, payload = {}) {
+             try {
+                 if (window.eventBus?.emit) {
+                     window.eventBus.emit(eventName, payload);
                  }
-                 updateClientContextDisplay();
-                 return { applied: false, context: null };
+             } catch (error) {
+                 console.warn(`Programs docs eventBus emit failed for ${eventName}:`, error);
              }
-
-             const hasChanged =
-                 !previous ||
-                 previous.clientId !== clientId ||
-                 (initials && previous.initials !== initials) ||
-                 previous.kipuId !== kipuId;
-
-             state.clientContext = {
-                 clientId,
-                 initials,
-                 kipuId
-             };
-             if (state.builder) {
-                 state.builder.associatedClientId = clientId;
+             if (window.CareConnect?.events?.emit) {
+                 try {
+                     window.CareConnect.events.emit(eventName, payload);
+                 } catch (error) {
+                     console.warn(`CareConnect events emit failed for ${eventName}:`, error);
+                 }
              }
+         }
 
-             const prefilled = applyClientInitialsToBuilder(initials);
-             if (prefilled) {
-                 renderBuilder();
-             } else {
-                 updateClientContextDisplay();
-             }
+        function setClientContext(context = {}, options = {}) {
+            const clientId = typeof context?.clientId === "string" && context.clientId.trim() ? context.clientId.trim() : null;
+            const initials = (context?.initials || "").toUpperCase().slice(0, 12);
+            const kipuId = context?.kipuId || null;
+            const previous = state.clientContext;
 
-             if (options.announce !== false) {
-                 announce(`Programs workspace linked to client ${initials || clientId}.`);
-             }
+            if (!clientId) {
+                if (previous) {
+                    state.clientContext = null;
+                    if (state.builder) {
+                        state.builder.associatedClientId = null;
+                    }
+                    updateClientContextDisplay();
+                    if (options.save !== false) {
+                        scheduleAutosave();
+                    }
+                    queueBuilderBroadcast("client-cleared");
+                    emitProgramEvent("programs:clientContextCleared", { previousClientId: previous.clientId || null });
+                    emitProgramEvent("programs-docs:client-context-cleared", { previousClientId: previous.clientId || null });
+                    return { applied: true, context: null };
+                }
+                updateClientContextDisplay();
+                return { applied: false, context: null };
+            }
 
-             if (options.save !== false) {
-                 scheduleAutosave();
-             }
+            const hasChanged =
+                !previous ||
+                previous.clientId !== clientId ||
+                (initials && previous.initials !== initials) ||
+                previous.kipuId !== kipuId;
+
+            state.clientContext = {
+                clientId,
+                initials,
+                kipuId
+            };
+            if (state.builder) {
+                state.builder.associatedClientId = clientId;
+            }
+
+            const prefilled = applyClientInitialsToBuilder(initials);
+            if (prefilled) {
+                renderBuilder();
+            } else {
+                updateClientContextDisplay();
+            }
+
+            if (options.announce !== false) {
+                announce(`Programs workspace linked to client ${initials || clientId}.`);
+            }
+
+            if (options.save !== false) {
+                scheduleAutosave();
+            }
 
             if (clientId && window.clientManager?.setCurrentClient) {
                 Promise.resolve(window.clientManager.setCurrentClient(clientId)).catch(error => {
                     console.warn("Failed to sync client manager current client:", error);
                 });
-             }
+            }
 
-             if (window.CareConnect?.events) {
-                 try {
-                     window.CareConnect.events.emit("programs-docs:client-context-set", {
-                         clientId,
-                         initials,
-                         kipuId
-                     });
-                 } catch (error) {
-                     console.warn("Programs docs event emit failed:", error);
-                 }
-             }
+            const payload = {
+                clientId,
+                initials,
+                kipuId
+            };
+            emitProgramEvent("programs:clientContextSet", payload);
+            emitProgramEvent("programs-docs:client-context-set", payload);
+            queueBuilderBroadcast("client-context");
 
-             return { applied: hasChanged || prefilled, context: state.clientContext };
-         }
+            return { applied: hasChanged || prefilled, context: state.clientContext };
+        }
 
             function updateResultsSummary(filteredPrograms) {
                 const activeFilterButtons = countActiveFilters();
@@ -2399,6 +2421,9 @@
                 }
                 if (options.scheduleSave !== false && previous !== normalized) {
                     scheduleAutosave();
+                }
+                if (previous !== normalized) {
+                    queueBuilderBroadcast("document-type");
                 }
             }
 
@@ -2526,6 +2551,35 @@
                         kipuId: state.clientContext.kipuId || null
                     } : null
                 };
+            }
+
+            function getBuilderSummary() {
+                const laneCounts = Object.fromEntries(Object.keys(state.builder.lanes).map(key => [key, state.builder.lanes[key]?.length || 0]));
+                const total = Object.values(laneCounts).reduce((sum, value) => sum + value, 0);
+                const manualResources = state.builder.lanes.atHome?.filter(item => !item.programId).length || 0;
+                return {
+                    laneCounts,
+                    total,
+                    manualResources,
+                    documentType: state.documentType,
+                    clientId: state.clientContext?.clientId || null,
+                    clientInitials: state.clientContext?.initials || "",
+                    timestamp: Date.now()
+                };
+            }
+
+            function queueBuilderBroadcast(reason = "update") {
+                clearTimeout(builderBroadcastTimer);
+                builderBroadcastTimer = window.setTimeout(() => {
+                    const summary = getBuilderSummary();
+                    const snapshot = collectBuilderSnapshot();
+                    emitProgramEvent("programs:builderUpdated", {
+                        reason,
+                        summary,
+                        snapshot
+                    });
+                    builderBroadcastTimer = null;
+                }, 160);
             }
 
             function renderDocumentHtml(snapshot) {
@@ -3802,6 +3856,7 @@
 
                 updateBuilderSummary();
                 updateClientContextDisplay();
+                queueBuilderBroadcast("render");
             }
 
             function updateBuilderSummary() {
@@ -3956,29 +4011,43 @@
                 });
                 renderBuilder();
                 scheduleAutosave();
+                queueBuilderBroadcast("add");
                 if (!options.silent) {
                     showToast(`${program.name} added to ${laneConfig[lane].label}`);
                 }
             }
 
-            function addManualAtHomeResource() {
-                const entry = normalizeAtHomeEntry({
-                    id: generateAtHomeId(),
-                    addedAt: new Date().toISOString(),
-                    notesHtml: "",
-                    notesText: ""
-                });
+            function addManualAtHomeResource(entryOverrides = null, options = null) {
+                const overrides = entryOverrides && typeof entryOverrides === "object" ? { ...entryOverrides } : {};
+                const opts = options && typeof options === "object" ? { ...options } : {};
+                const timestamp = new Date().toISOString();
+                if (!overrides.addedAt) {
+                    overrides.addedAt = timestamp;
+                }
+                if (!overrides.id) {
+                    overrides.id = generateAtHomeId();
+                }
+                const entry = normalizeAtHomeEntry(overrides);
                 state.builder.lanes.atHome.push(entry);
                 renderBuilder();
                 scheduleAutosave();
-                showToast("At-home resource added");
-                window.requestAnimationFrame(() => {
-                    const newIndex = state.builder.lanes.atHome.length - 1;
-                    const editor = elements.builderLanes.querySelector(`.builder-tile[data-lane="atHome"][data-index="${newIndex}"] .editor-surface`);
-                    if (editor) {
-                        editor.focus();
-                    }
-                });
+                queueBuilderBroadcast(opts.reason || "add-manual");
+                const suppressToast = opts.silent || opts.toast === false;
+                if (!suppressToast) {
+                    const toastMessage = typeof opts.toast === "string" ? opts.toast : "At-home resource added";
+                    showToast(toastMessage);
+                }
+                const shouldFocus = opts.focus !== undefined ? opts.focus : !opts.silent;
+                if (shouldFocus) {
+                    window.requestAnimationFrame(() => {
+                        const newIndex = state.builder.lanes.atHome.length - 1;
+                        const editor = elements.builderLanes.querySelector(`.builder-tile[data-lane="atHome"][data-index="${newIndex}"] .editor-surface`);
+                        if (editor) {
+                            editor.focus();
+                        }
+                    });
+                }
+                return entry;
             }
 
             function handleBuilderInput(event) {
@@ -4009,6 +4078,7 @@
                         item.lastEdited = new Date().toISOString();
                         scheduleAutosave();
                     }
+                    queueBuilderBroadcast("at-home-edit");
                     return;
                 }
 
@@ -4017,6 +4087,7 @@
                     item.addedAt = item.addedAt || new Date().toISOString();
                     renderBuilder();
                     scheduleAutosave();
+                    queueBuilderBroadcast("track-change");
                     return;
                 }
 
@@ -4024,10 +4095,12 @@
                     item.client = target.value.toUpperCase();
                     item.addedAt = item.addedAt || new Date().toISOString();
                     scheduleAutosave();
+                    queueBuilderBroadcast("tile-edit");
                 } else if (target instanceof HTMLTextAreaElement) {
                     item.reason = target.value;
                     item.addedAt = item.addedAt || new Date().toISOString();
                     scheduleAutosave();
+                    queueBuilderBroadcast("tile-edit");
                 }
             }
 
@@ -4064,6 +4137,7 @@
                 scheduleAutosave();
                 const laneLabel = laneConfig[lane]?.label || "Lane";
                 showToast(`${laneLabel} set to ${getTrackLabel(trackId)}`);
+                queueBuilderBroadcast("track-apply-lane");
             }
 
             function handleTileAction(event) {
@@ -4093,6 +4167,7 @@
                     const removed = laneItems.splice(index, 1)[0];
                     renderBuilder();
                     scheduleAutosave();
+                    queueBuilderBroadcast("tile-remove");
                     if (removed) {
                         if (removed.programId) {
                             const program = getProgramById(removed.programId);
@@ -4105,10 +4180,12 @@
                     [laneItems[index - 1], laneItems[index]] = [laneItems[index], laneItems[index - 1]];
                     renderBuilder();
                     scheduleAutosave();
+                    queueBuilderBroadcast("tile-move-up");
                 } else if (action === "down" && index < laneItems.length - 1) {
                     [laneItems[index], laneItems[index + 1]] = [laneItems[index + 1], laneItems[index]];
                     renderBuilder();
                     scheduleAutosave();
+                    queueBuilderBroadcast("tile-move-down");
                 }
             }
 
@@ -4139,17 +4216,21 @@
                 };
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
                 updateDraftMeta();
-                if (state.clientContext?.clientId && window.CareConnect?.events) {
+                const draftEvent = {
+                    clientId: state.clientContext?.clientId || null,
+                    savedAt: state.builder.lastSaved,
+                    documentType: state.documentType
+                };
+                emitProgramEvent("programs:draftSaved", draftEvent);
+                emitProgramEvent("programs-docs:draft-saved", draftEvent);
+                if (state.clientContext?.clientId && window.eventBus?.emit) {
                     try {
-                        window.CareConnect.events.emit("programs-docs:draft-saved", {
-                            clientId: state.clientContext.clientId,
-                            savedAt: state.builder.lastSaved,
-                            documentType: state.documentType
-                        });
+                        window.eventBus.emit("cache:invalidateClient", { clientId: state.clientContext.clientId });
                     } catch (error) {
-                        console.warn("Programs docs draft event failed:", error);
+                        console.warn("Programs docs cache event failed:", error);
                     }
                 }
+                queueBuilderBroadcast(trigger === "manual" ? "save-manual" : "save-auto");
                 if (trigger === "manual") {
                     showToast("Draft saved");
                 }
@@ -4294,17 +4375,14 @@
                 docWindow.document.write(html);
                 docWindow.document.close();
                 docWindow.focus();
-                if (state.clientContext?.clientId && window.CareConnect?.events) {
-                    try {
-                        window.CareConnect.events.emit("programs-docs:document-generated", {
-                            clientId: state.clientContext.clientId,
-                            documentType: docType,
-                            generatedAt: snapshot.generatedAt
-                        });
-                    } catch (error) {
-                        console.warn("Programs docs generation event failed:", error);
-                    }
-                }
+                const generatedEvent = {
+                    clientId: state.clientContext?.clientId || null,
+                    documentType: docType,
+                    generatedAt: snapshot.generatedAt,
+                    snapshot
+                };
+                emitProgramEvent("document:generated", generatedEvent);
+                emitProgramEvent("programs-docs:document-generated", generatedEvent);
                 showToast(`${label} generated with ${summary}`);
             }
 
@@ -4417,6 +4495,160 @@
              updateClientContextDisplay();
             }
 
+            function registerGlobalEventListeners() {
+                if (state.globalListenersRegistered) {
+                    return;
+                }
+                const bus = window.eventBus;
+                if (!bus?.on) {
+                    if (state._eventBusRetryCount < 25) {
+                        state._eventBusRetryCount += 1;
+                        window.setTimeout(registerGlobalEventListeners, 150);
+                    }
+                    return;
+                }
+
+                state.globalListenersRegistered = true;
+                state._eventBusRetryCount = 0;
+
+                const unsubscribers = [];
+
+                const handleClientDeleted = (data = {}) => {
+                    if (!data?.clientId) return;
+                    if (state.clientContext?.clientId === data.clientId) {
+                        setClientContext(null, { announce: true, save: true });
+                        renderBuilder();
+                        showToast("Client removed. Builder reset.");
+                        queueBuilderBroadcast("client-deleted");
+                    }
+                };
+
+                const handleClientUpdated = (data = {}) => {
+                    if (!data?.clientId || state.clientContext?.clientId !== data.clientId) {
+                        return;
+                    }
+                    let changed = false;
+                    if (data.newData?.initials) {
+                        const incomingInitials = String(data.newData.initials).toUpperCase();
+                        if (incomingInitials !== state.clientContext.initials) {
+                            state.clientContext.initials = incomingInitials;
+                            if (applyClientInitialsToBuilder(incomingInitials)) {
+                                renderBuilder();
+                            } else {
+                                updateClientContextDisplay();
+                            }
+                            changed = true;
+                        }
+                    }
+                    if (data.newData?.kipuId && data.newData.kipuId !== state.clientContext.kipuId) {
+                        state.clientContext.kipuId = data.newData.kipuId;
+                        changed = true;
+                    }
+                    if (changed) {
+                        queueBuilderBroadcast("client-updated");
+                    }
+                };
+
+                const handleTrackerUpdated = (data = {}) => {
+                    if (!data?.clientId || state.clientContext?.clientId !== data.clientId) {
+                        return;
+                    }
+                    queueBuilderBroadcast("tracker-updated");
+                };
+
+                unsubscribers.push(bus.on("client:deleted", handleClientDeleted));
+                unsubscribers.push(bus.on("client:updated", handleClientUpdated));
+                unsubscribers.push(bus.on("tracker:updated", handleTrackerUpdated));
+
+                unsubscribers.push(bus.on("programs-docs:set-context", eventData => {
+                    if (!eventData || typeof eventData !== "object") {
+                        return;
+                    }
+                    setClientContext(eventData, {
+                        announce: eventData.announce,
+                        save: eventData.save
+                    });
+                }));
+
+                unsubscribers.push(bus.on("programs-docs:clear-context", eventData => {
+                    setClientContext(null, {
+                        announce: eventData?.announce !== false,
+                        save: eventData?.save !== false
+                    });
+                }));
+
+                unsubscribers.push(bus.on("programs-docs:set-document-type", eventData => {
+                    if (!eventData || typeof eventData !== "object") return;
+                    if (!eventData.documentType) return;
+                    setDocumentType(eventData.documentType, {
+                        announce: eventData.announce,
+                        scheduleSave: eventData.scheduleSave
+                    });
+                }));
+
+                unsubscribers.push(bus.on("programs-docs:add-program", eventData => {
+                    if (!eventData || typeof eventData !== "object") return;
+                    if (!eventData.programId) return;
+                    const requestedLane = typeof eventData.lane === "string" && state.builder.lanes[eventData.lane]
+                        ? eventData.lane
+                        : "stabilize";
+                    addToBuilder(eventData.programId, requestedLane, {
+                        silent: Boolean(eventData.silent)
+                    });
+                }));
+
+                unsubscribers.push(bus.on("programs-docs:add-at-home-resource", eventData => {
+                    if (!eventData || typeof eventData !== "object") {
+                        addManualAtHomeResource();
+                        return;
+                    }
+                    const entryData = eventData.entry && typeof eventData.entry === "object"
+                        ? eventData.entry
+                        : (
+                            ("name" in eventData || "focus" in eventData || "notesHtml" in eventData || "notes" in eventData || "city" in eventData)
+                                ? {
+                                    name: eventData.name,
+                                    focus: eventData.focus,
+                                    city: eventData.city,
+                                    notesHtml: eventData.notesHtml,
+                                    notes: eventData.notes
+                                }
+                                : {}
+                        );
+                    addManualAtHomeResource(entryData, {
+                        silent: Boolean(eventData.silent),
+                        toast: eventData.toast,
+                        focus: eventData.focus,
+                        reason: eventData.reason || "add-manual-event"
+                    });
+                }));
+
+                const respondToBuilderRequest = (eventData = {}) => {
+                    const summary = getBuilderSummary();
+                    const snapshot = collectBuilderSnapshot();
+                    emitProgramEvent("programs:builderUpdated", {
+                        reason: eventData.reason || "requested",
+                        summary,
+                        snapshot,
+                        requestId: eventData.requestId || null
+                    });
+                };
+
+                unsubscribers.push(bus.on("programs:request-builder-summary", respondToBuilderRequest));
+                unsubscribers.push(bus.on("programs-docs:request-builder", respondToBuilderRequest));
+
+                unsubscribers.push(bus.on("programs-docs:refresh", () => {
+                    renderPrograms();
+                    renderBuilder();
+                    queueBuilderBroadcast("refresh-event");
+                }));
+
+                state._eventBusUnsubscribers = unsubscribers;
+
+                console.info("Programs & Docs: subscribed to global event bus", unsubscribers.length);
+                queueBuilderBroadcast("listeners-registered");
+            }
+
             function init() {
                 renderPrograms();
                 hydrateFromDraft();
@@ -4428,6 +4660,7 @@
              } else {
                  updateClientContextDisplay();
              }
+             registerGlobalEventListeners();
 
                 documentTypeButtons.forEach(button => {
                     button.addEventListener("click", () => setDocumentType(button.dataset.docType));
@@ -4545,13 +4778,8 @@
                 });
 
                 announce("Programs workspace ready");
-                if (window.CareConnect?.events) {
-                    try {
-                        window.CareConnect.events.emit("programs-docs:ready", { timestamp: Date.now() });
-                    } catch (error) {
-                        console.warn("Programs docs ready event failed:", error);
-                    }
-                }
+                emitProgramEvent("programs:ready", { timestamp: Date.now() });
+                emitProgramEvent("programs-docs:ready", { timestamp: Date.now() });
             }
 
          const programsDocsAPI = {
