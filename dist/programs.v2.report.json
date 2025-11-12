@@ -1,0 +1,74 @@
+{
+  "totals": {
+    "programs": 140,
+    "networkParents": 25,
+    "networkChildren": 84
+  },
+  "countsByState": {
+    "Unknown": 39,
+    "FL": 7,
+    "FL)": 2,
+    "NJ": 4,
+    "IL": 4,
+    "MD)": 8,
+    "MA": 7,
+    "VT": 4,
+    "NH": 6,
+    "CT": 17,
+    "NY": 20,
+    "UT": 4,
+    "CA": 3,
+    "TX": 2,
+    "MS": 1,
+    "AZ": 1,
+    "MT": 1,
+    "VA": 1,
+    "NC": 2,
+    "ID (Permanently Closed)": 1,
+    "Ages 13–18)": 1,
+    "and Residential Services": 1,
+    "Georgia (Young Adult Transitional / Neurodiverse Program)": 1,
+    "Florida (Outpatient / Residential Transitional)": 1,
+    "North Carolina (Residential Treatment Center for Adolescent Boys)": 1,
+    "PA": 1
+  },
+  "countsByFocus": {
+    "Comprehensive Support": 66,
+    "Residential Treatment": 50,
+    "Virtual Care": 3,
+    "Intensive Outpatient": 5,
+    "Outpatient Services": 5,
+    "Partial Hospitalization": 3,
+    "Sober Living": 2,
+    "Therapeutic Boarding School": 6
+  },
+  "duplicates": [
+    {
+      "name": "Charlie Health",
+      "state": "Unknown",
+      "ids": [
+        "charlie_health_parent",
+        "charlie_health"
+      ],
+      "count": 2
+    },
+    {
+      "name": "Phoenix House",
+      "state": "Unknown",
+      "ids": [
+        "phoenix_house_parent",
+        "phoenix_house"
+      ],
+      "count": 2
+    },
+    {
+      "name": "Residential Treatment Facility",
+      "state": "NY",
+      "ids": [
+        "child_center_ny_rtf",
+        "olv_human_services_rtf"
+      ],
+      "count": 2
+    }
+  ]
+}
