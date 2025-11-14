@@ -69,6 +69,14 @@ class SimpleBuilder {
     copyRequiredFiles() {
         console.log('[COPY] Copying required JavaScript files...');
         
+        // Copy Programs & Docs module file to dist
+        const moduleFile = 'CareConnect-Pro.html';
+        if (fs.existsSync(moduleFile)) {
+            const moduleDest = path.join(CONFIG.distDir, 'programs-docs-module.html');
+            fs.copyFileSync(moduleFile, moduleDest);
+            console.log(`  [OK] Copied ${moduleFile} as programs-docs-module.html`);
+        }
+        
         // List of JS files that need to be in dist
         const requiredFiles = [
             'feature-flags.js',
@@ -117,6 +125,14 @@ class SimpleBuilder {
             this.copyDirectory(libsSource, libsDest);
             console.log('  [OK] Copied libs folder');
         }
+
+        // Copy onboarding assets
+        const onboardingSource = './onboarding';
+        const onboardingDest = path.join(CONFIG.distDir, 'onboarding');
+        if (fs.existsSync(onboardingSource)) {
+            this.copyDirectory(onboardingSource, onboardingDest);
+            console.log('  [OK] Copied onboarding assets');
+        }
     }
     
     applyEnhancements(content) {
@@ -158,7 +174,8 @@ class SimpleBuilder {
             'client-data-validation.js',
             'discharge-packet-integration.js',
             'widget-rendering-optimization.js',
-            'indexeddb-optimization.js'
+            'indexeddb-optimization.js',
+            'onboarding-integration.js'
         ].map(f => path.join(CONFIG.enhancementsDir, f));
         
         enhancementFiles.forEach(file => {

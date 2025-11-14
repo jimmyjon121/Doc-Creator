@@ -6,7 +6,11 @@
 class MorningReviewDashboard {
     constructor() {
         this.dbManager = window.indexedDBManager;
-        this.trackerEngine = window.trackerEngine || new TrackerEngine();
+        // Wait for TrackerEngine to be available
+        if (typeof TrackerEngine !== 'undefined' && !window.trackerEngine) {
+            window.trackerEngine = new TrackerEngine();
+        }
+        this.trackerEngine = window.trackerEngine || null;
         this.clientManager = window.clientManager;
         
         // Time-based greetings
@@ -591,9 +595,25 @@ class MorningReviewDashboard {
     }
 }
 
-// Initialize and export
+// Initialize and export - wait for dependencies
 if (typeof window !== 'undefined') {
-    window.morningReview = new MorningReviewDashboard();
+    function initializeMorningReview() {
+        if (window.trackerEngine && window.clientManager) {
+            try {
+                window.morningReview = new MorningReviewDashboard();
+            } catch (error) {
+                console.error('Failed to initialize MorningReviewDashboard:', error);
+                // Create a fallback instance that won't crash
+                window.morningReview = {
+                    generateMorningReview: async () => ({ error: 'Dashboard not available' }),
+                    renderMorningReview: () => console.warn('Morning review not available')
+                };
+            }
+        } else {
+            setTimeout(initializeMorningReview, 100);
+        }
+    }
+    initializeMorningReview();
 }
 
 // Export for Node.js

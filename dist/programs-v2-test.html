@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programs V2 Test - 140 Programs</title>
+    <script>
+        // Set feature flag immediately
+        window.featureFlags = { programsV2Data: true };
+        
+        // Override fetch to log when programs.v2.json is loaded
+        const originalFetch = window.fetch;
+        window.fetch = function(...args) {
+            if (args[0] && args[0].includes('programs.v2.json')) {
+                console.log('Loading programs.v2.json...');
+            }
+            return originalFetch.apply(this, args);
+        };
+    </script>
+</head>
+<body style="margin: 0; padding: 20px; font-family: sans-serif;">
+    <div style="background: #f0f0f0; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
+        <h2 style="margin: 0;">Programs V2 Data Test</h2>
+        <p style="margin: 5px 0 0 0;">Feature flag enabled. Should load 140 programs from programs.v2.json</p>
+        <button onclick="checkStatus()" style="padding: 5px 10px;">Check Status</button>
+        <span id="status" style="margin-left: 10px;"></span>
+    </div>
+    
+    <script>
+        function checkStatus() {
+            const frame = document.getElementById('moduleFrame');
+            const win = frame.contentWindow;
+            const status = document.getElementById('status');
+            
+            if (win.PROGRAMS) {
+                status.textContent = `Loaded ${win.PROGRAMS.length} programs from ${win.PROGRAMS_DATA_STATUS?.source || 'unknown'}`;
+                status.style.color = win.PROGRAMS.length > 10 ? 'green' : 'orange';
+            } else {
+                status.textContent = 'Programs not loaded yet';
+                status.style.color = 'red';
+            }
+        }
+        
+        // Auto-check after load
+        window.addEventListener('load', () => {
+            setTimeout(checkStatus, 2000);
+        });
+    </script>
+    
+    <iframe 
+        id="moduleFrame"
+        src="programs-docs-module.html" 
+        style="width: 100%; height: calc(100vh - 120px); border: 1px solid #ccc; border-radius: 5px;"
+        onload="setTimeout(checkStatus, 1000)"
+    ></iframe>
+</body>
+</html>

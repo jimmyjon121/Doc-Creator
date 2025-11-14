@@ -9,7 +9,11 @@ const LOG_FILE = path.resolve(__dirname, '..', 'dist', 'dev-server.log');
 function log(message) {
   const timestamp = new Date().toISOString();
   const line = `[${timestamp}] ${message}`;
-  fs.appendFileSync(LOG_FILE, line + '\n');
+  try {
+    fs.appendFileSync(LOG_FILE, line + '\n');
+  } catch (err) {
+    // Log file might not be writable, just use console
+  }
   console.log(line);
 }
 
@@ -19,7 +23,7 @@ function getFile(filePath, callback) {
       return callback(err);
     }
     if (stats.isDirectory()) {
-      const indexFile = path.join(filePath, 'index.html');
+      const indexFile = path.join(filePath, '_START_DEV_SERVER_HERE.html');
       fs.stat(indexFile, (indexErr, indexStats) => {
         if (!indexErr && indexStats.isFile()) {
           return fs.readFile(indexFile, callback);
@@ -34,8 +38,8 @@ function getFile(filePath, callback) {
 
 const server = http.createServer((req, res) => {
   const urlPath = decodeURIComponent(req.url.split('?')[0]);
-  const safeSuffix = urlPath.replace(/\/g, '/');
-  const relativePath = safeSuffix === '/' ? '/CareConnect-Pro.html' : safeSuffix;
+  const safeSuffix = urlPath.replace(/\\/g, '/');
+  const relativePath = safeSuffix === '/' ? '/_START_DEV_SERVER_HERE.html' : safeSuffix;
   const filePath = path.join(PUBLIC_DIR, relativePath);
 
   getFile(filePath, (err, data) => {

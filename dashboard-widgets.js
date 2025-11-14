@@ -401,8 +401,18 @@ class MissionsWidget extends DashboardWidget {
         this.showLoading();
         
         try {
-            const priorities = dashboardManager.cache.priorities;
-            const quickWins = await dashboardManager.getQuickWins();
+            if (!window.dashboardManager || !window.dashboardManager.cache) {
+                throw new Error('Dashboard manager not available');
+            }
+            
+            const priorities = dashboardManager.cache.priorities || { red: [], purple: [], yellow: [], green: [] };
+            let quickWins = [];
+            try {
+                quickWins = await dashboardManager.getQuickWins() || [];
+            } catch (quickWinsError) {
+                console.warn('Failed to load quick wins:', quickWinsError);
+                quickWins = [];
+            }
             
             // Determine primary mission (most urgent red zone item)
             const primaryMission = priorities.red?.[0];
@@ -542,11 +552,39 @@ class MissionsWidget extends DashboardWidget {
                 </div>
             `;
             
+            // If no missions at all, show empty state
+            if (!primaryMission && secondaryMissions.length === 0 && quickWins.length === 0) {
+                html = `
+                    <div class="missions-widget">
+                        <div class="widget-header">
+                            <h3>🎯 Today's Missions</h3>
+                        </div>
+                        <div class="missions-content">
+                            <div class="empty-state" style="padding: 40px; text-align: center; color: #6b7280;">
+                                <div style="font-size: 48px; margin-bottom: 16px;">✨</div>
+                                <div style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">All caught up!</div>
+                                <div style="font-size: 14px;">No missions for today</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
             this.container.innerHTML = html;
             this.hideLoading();
         } catch (error) {
             console.error('Failed to render missions:', error);
-            this.container.innerHTML = '<div class="widget-error">Failed to load missions</div>';
+            this.container.innerHTML = `
+                <div class="missions-widget">
+                    <div class="widget-header">
+                        <h3>🎯 Today's Missions</h3>
+                    </div>
+                    <div class="widget-error" style="padding: 20px; text-align: center; color: #dc2626;">
+                        Failed to load missions. Please refresh the page.
+                    </div>
+                </div>
+            `;
+            this.hideLoading();
         }
     }
 

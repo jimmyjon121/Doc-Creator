@@ -296,10 +296,19 @@
             enhanceClientDisplay();
         });
         
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+        const waitForBody = () => {
+            const target = document.body;
+            if (!target) {
+                setTimeout(waitForBody, 50);
+                return;
+            }
+            observer.observe(target, {
+                childList: true,
+                subtree: true
+            });
+        };
+
+        waitForBody();
     }
     
     // Export functions for external use

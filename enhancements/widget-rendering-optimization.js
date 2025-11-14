@@ -286,10 +286,19 @@
             });
         });
         
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+        const attachObserver = () => {
+            const target = document.body;
+            if (!target) {
+                setTimeout(attachObserver, 50);
+                return;
+            }
+            observer.observe(target, {
+                childList: true,
+                subtree: true
+            });
+        };
+
+        attachObserver();
         
         // Enhance client search specifically
         if (window.clientManager) {
@@ -367,3 +376,5 @@
     
     console.log('✅ Widget rendering optimization initialized');
 })();
+
+

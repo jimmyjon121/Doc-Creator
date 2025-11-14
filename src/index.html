@@ -14,6 +14,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="FFAS Docs">
+    <!-- Redirect to login page if not authenticated (backup redirect) -->
+    <script>
+        // Immediate redirect check - runs before page renders
+        if (!sessionStorage.getItem('isLoggedIn') && !window.location.search.includes('fromExtension')) {
+            window.location.replace('login.html');
+        }
+    </script>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232196a6'/%3E%3Cpath d='M 20 15 Q 32 12 44 15 L 40 22 Q 32 20 24 22 Q 18 28 18 38 L 26 38 Q 26 32 29 29 Q 32 27 37 28 L 35 33 Q 32 32 30 33 Q 28 35 28 38 L 36 38 Q 36 35 37 33 Q 40 32 44 33 L 42 38 Q 38 37 37 38 Q 36 40 36 45 L 29 45 Q 29 42 26 42 L 18 45 Q 15 32 22 22 Q 26 18 32 15' fill='white'/%3E%3C/svg%3E">
     
         /* Modern UI Enhancement Styles - Override Existing */
@@ -2651,48 +2658,117 @@
 </head>
 <body>
     <!-- BUILD:BODY -->
-    <!-- Login Screen -->
-    <div id="loginScreen" style="display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index: 10000; align-items: center; justify-content: center;">
-        <div class="login-content" style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 400px; max-width: 90%;">
-            <h2 style="margin: 0 0 10px 0; color: #1a202c; text-align: center; font-size: 28px;">Family First</h2>
-            <p style="text-align: center; color: #718096; margin-bottom: 30px; font-size: 14px;">ADOLESCENT SERVICES - Document Creator</p>
-            
-            <div id="loginError" style="display: none; background: #fed7d7; color: #9b2c2c; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 14px;"></div>
-            
-            <form id="staticLoginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label for="loginUsername">Username</label>
-                    <input type="text" id="loginUsername" name="username" required placeholder="Enter username" autocomplete="username">
+    <!-- Landing Page / Login Screen - DEPRECATED: Now using dedicated login.html -->
+    <div id="loginScreen" style="display: none; grid-template-columns: 1fr 1fr 1fr; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #e6f3ff 0%, #d6ebff 50%, #c6e3ff 100%); z-index: 10000; min-height: 100vh;">
+        
+        <!-- Left Column: Features -->
+        <div style="padding: 60px 40px; display: flex; flex-direction: column; justify-content: center; background: rgba(255,255,255,0.3); backdrop-filter: blur(10px);">
+            <h3 style="color: #0066cc; font-size: 24px; font-weight: 700; margin-bottom: 30px; text-align: center;">✨ Key Features</h3>
+            <div style="display: flex; flex-direction: column; gap: 24px;">
+                <div style="background: rgba(255,255,255,0.6); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,102,204,0.1);">
+                    <div style="font-size: 32px; margin-bottom: 8px;">📋</div>
+                    <h4 style="color: #0066cc; font-size: 18px; font-weight: 600; margin-bottom: 6px;">Professional Documents</h4>
+                    <p style="color: #333; font-size: 14px; line-height: 1.5;">Generate comprehensive aftercare plans with ease</p>
                 </div>
                 
-                <div class="form-group">
-                    <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" name="password" required placeholder="Enter password" autocomplete="current-password">
+                <div style="background: rgba(255,255,255,0.6); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,102,204,0.1);">
+                    <div style="font-size: 32px; margin-bottom: 8px;">🔍</div>
+                    <h4 style="color: #0066cc; font-size: 18px; font-weight: 600; margin-bottom: 6px;">Program Database</h4>
+                    <p style="color: #333; font-size: 14px; line-height: 1.5;">Access hundreds of treatment programs instantly</p>
                 </div>
                 
-                <button type="submit" class="login-btn">Sign In</button>
-            </form>
-            
-            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
-                <p style="color: #718096; font-size: 14px; margin-bottom: 10px;">First time here?</p>
-                <button onclick="showAccountCreation()" type="button" style="
-                    background: none;
-                    border: 2px solid #667eea;
-                    color: #667eea;
-                    padding: 10px 30px;
-                    border-radius: 8px;
-                    font-size: 14px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                " onmouseover="this.style.background='#667eea'; this.style.color='white';" onmouseout="this.style.background='none'; this.style.color='#667eea';">
-                    Create Your Profile
-                </button>
+                <div style="background: rgba(255,255,255,0.6); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,102,204,0.1);">
+                    <div style="font-size: 32px; margin-bottom: 8px;">⚡</div>
+                    <h4 style="color: #0066cc; font-size: 18px; font-weight: 600; margin-bottom: 6px;">Quick & Efficient</h4>
+                    <p style="color: #333; font-size: 14px; line-height: 1.5;">Save time with intelligent matching and templates</p>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.6); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,102,204,0.1);">
+                    <div style="font-size: 32px; margin-bottom: 8px;">🔒</div>
+                    <h4 style="color: #0066cc; font-size: 18px; font-weight: 600; margin-bottom: 6px;">Secure & Private</h4>
+                    <p style="color: #333; font-size: 14px; line-height: 1.5;">HIPAA-compliant with local data storage</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Center Column: Branding -->
+        <div style="padding: 60px 40px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: rgba(255,255,255,0.4); backdrop-filter: blur(10px);">
+            <div style="margin-bottom: 40px;">
+                <div style="font-size: 72px; margin-bottom: 20px;">🏥</div>
+                <h1 style="color: #0066cc; font-size: 42px; font-weight: 700; margin-bottom: 12px; letter-spacing: -1px;">CareConnect Pro</h1>
+                <div style="width: 80px; height: 4px; background: linear-gradient(90deg, #0066cc, #4da6ff); margin: 0 auto 20px; border-radius: 2px;"></div>
+                <h2 style="color: #0066cc; font-size: 24px; font-weight: 600; margin-bottom: 8px;">Family First</h2>
+                <p style="color: #4d94ff; font-size: 16px; font-weight: 500;">ADOLESCENT SERVICES</p>
             </div>
             
-            <p style="text-align: center; margin-top: 20px; color: #a0aec0; font-size: 12px;">🔒 Secure Document Generation System</p>
+            <div style="background: rgba(255,255,255,0.8); padding: 30px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,102,204,0.15); max-width: 320px;">
+                <p style="color: #333; font-size: 15px; line-height: 1.6; margin-bottom: 0;">
+                    Professional Aftercare Document Builder
+                </p>
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e6f3ff;">
+                    <p style="color: #666; font-size: 13px; margin: 0;">
+                        Helping clinicians create comprehensive treatment plans with confidence and efficiency.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column: Login Form -->
+        <div style="padding: 60px 40px; display: flex; flex-direction: column; justify-content: center; background: rgba(255,255,255,0.5); backdrop-filter: blur(10px);">
+            <div class="login-content" style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,102,204,0.2); width: 100%; max-width: 100%;">
+                <h2 style="margin: 0 0 8px 0; color: #0066cc; text-align: center; font-size: 28px; font-weight: 700;">Welcome Back</h2>
+                <p style="text-align: center; color: #666; margin-bottom: 30px; font-size: 14px;">Sign in to continue</p>
+                
+                <div id="loginError" style="display: none; background: #fed7d7; color: #9b2c2c; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;"></div>
+                
+                <form id="staticLoginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="loginUsername" style="color: #0066cc; font-weight: 600;">Username</label>
+                        <input type="text" id="loginUsername" name="username" required placeholder="Enter username" autocomplete="username" style="border-color: #b3d9ff;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loginPassword" style="color: #0066cc; font-weight: 600;">Password</label>
+                        <input type="password" id="loginPassword" name="password" required placeholder="Enter password" autocomplete="current-password" style="border-color: #b3d9ff;">
+                    </div>
+                    
+                    <button type="submit" class="login-btn" style="background: linear-gradient(135deg, #0066cc 0%, #4da6ff 100%); width: 100%; margin-top: 10px;">Sign In</button>
+                </form>
+                
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e6f3ff; text-align: center;">
+                    <p style="color: #666; font-size: 14px; margin-bottom: 10px;">First time here?</p>
+                    <button onclick="showAccountCreation()" type="button" style="
+                        background: white;
+                        border: 2px solid #0066cc;
+                        color: #0066cc;
+                        padding: 10px 30px;
+                        border-radius: 8px;
+                        font-size: 14px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        width: 100%;
+                    " onmouseover="this.style.background='#0066cc'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='#0066cc';">
+                        Create Your Profile
+                    </button>
+                </div>
+                
+                <p style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">🔒 Secure Document Generation System</p>
+            </div>
         </div>
     </div>
+    
+    <style>
+        @media (max-width: 1024px) {
+            #loginScreen {
+                grid-template-columns: 1fr !important;
+                overflow-y: auto;
+            }
+            #loginScreen > div {
+                padding: 40px 20px !important;
+            }
+        }
+    </style>
 
     <!-- Main App (Hidden until login) -->
     <div id="mainApp" style="display: none;">
@@ -3821,14 +3897,11 @@
         function logout() {
             // Clear session
             sessionStorage.clear();
+            localStorage.removeItem('careconnect_session');
+            localStorage.removeItem('careconnect_user');
             
-            // Hide main app, show login
-            document.getElementById('mainApp').style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'flex';
-            document.getElementById('userMenu').style.display = 'none';
-            
-            // Show notification
-            showNotification('You have been logged out successfully.', 'info');
+            // Redirect to dedicated login page
+            window.location.href = 'login.html';
             
             // Clear any form data
             document.getElementById('loginUsername').value = '';
@@ -4104,6 +4177,16 @@
             return selectedPrograms || [];
         }
         
+        // Check if already logged in on page load - IMMEDIATE CHECK BEFORE DOM LOADS
+        // Redirect to login page immediately if not authenticated (before DOM renders)
+        (function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (!urlParams.has('fromExtension') && sessionStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.href = 'login.html';
+                return;
+            }
+        })();
+        
         // Check if already logged in on page load
         window.addEventListener('DOMContentLoaded', function() {
             // Check for extension flag first
@@ -4146,8 +4229,11 @@
                         dataEncryption.isInitialized = false;
                     });
                 }
+            } else {
+                // Not logged in - redirect to dedicated login page
+                console.log('🔐 Not authenticated, redirecting to login page...');
+                window.location.href = 'login.html';
             }
-            // Otherwise just show the login form that's already in the HTML
             
             // Initialize features
             try {
