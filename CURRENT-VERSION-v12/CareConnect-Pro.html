@@ -13,7 +13,7 @@
     <title>CareConnect Pro v4.0.0 - Professional Aftercare Document Builder</title>
     
     <!-- Content Security Policy for enhanced security -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org https://c.tile.openstreetmap.org https://tile.openstreetmap.fr https://a.tile.openstreetmap.fr https://b.tile.openstreetmap.fr https://c.tile.openstreetmap.fr https://server.arcgisonline.com https://services.arcgisonline.com https://*.opentopomap.org https://*.basemaps.cartocdn.com; font-src 'self' data:; connect-src 'self' https://nominatim.openstreetmap.org https://tile.openstreetmap.org https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org https://c.tile.openstreetmap.org https://tile.openstreetmap.fr https://a.tile.openstreetmap.fr https://b.tile.openstreetmap.fr https://c.tile.openstreetmap.fr https://server.arcgisonline.com https://services.arcgisonline.com https://*.opentopomap.org https://*.basemaps.cartocdn.com; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org https://c.tile.openstreetmap.org https://tile.openstreetmap.fr https://a.tile.openstreetmap.fr https://b.tile.openstreetmap.fr https://c.tile.openstreetmap.fr https://server.arcgisonline.com https://services.arcgisonline.com https://*.opentopomap.org https://*.basemaps.cartocdn.com; font-src 'self' data:; connect-src 'self' https://nominatim.openstreetmap.org https://tile.openstreetmap.org https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org https://c.tile.openstreetmap.org https://tile.openstreetmap.fr https://a.tile.openstreetmap.fr https://b.tile.openstreetmap.fr https://c.tile.openstreetmap.fr https://server.arcgisonline.com https://services.arcgisonline.com https://*.opentopomap.org https://*.basemaps.cartocdn.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
     
     <!-- PDF Libraries for document merging -->
     <!-- Libraries loaded locally for HIPAA compliance - no external CDN -->
@@ -9382,16 +9382,8 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         
         /* Client Tracking Styles */
         .tab-navigation {
-            display: flex !important;
-            gap: 8px;
-            margin-bottom: 20px;
-            margin-top: 10px;
-            background: linear-gradient(to right, #e0e7ff, #fce7f3);
-            padding: 8px;
-            border-radius: 12px;
-            visibility: visible !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            border: 2px solid #6366f1;
+            display: none !important;
+            visibility: hidden !important;
         }
         
         .tab-btn {
@@ -9427,7 +9419,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         
         .tab-content {
             display: none;
-            height: calc(100% - 60px);
+            height: 100%;
         }
         
         .tab-content.active {
@@ -13989,6 +13981,418 @@ if (!document.querySelector('#morning-review-badge-styles')) {
     }
 }
 
+        /* Clinician Workspace Auth Screen */
+        .auth-screen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+            background:
+                radial-gradient(circle at top left, rgba(255, 255, 255, 0.12), transparent 55%),
+                radial-gradient(circle at bottom right, rgba(30, 64, 175, 0.4), transparent 55%),
+                linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 10000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #0f172a;
+        }
+
+        .auth-orb {
+            position: absolute;
+            border-radius: 999px;
+            filter: blur(40px);
+            opacity: 0.75;
+            pointer-events: none;
+            animation: authOrbFloat 12s ease-in-out infinite;
+        }
+
+        .auth-orb--1 {
+            width: 340px;
+            height: 340px;
+            top: -80px;
+            left: -40px;
+            background: radial-gradient(circle, rgba(248, 250, 252, 0.9), rgba(148, 163, 184, 0.1));
+            animation-delay: -2s;
+        }
+
+        .auth-orb--2 {
+            width: 260px;
+            height: 260px;
+            bottom: -40px;
+            right: 12%;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.85), rgba(37, 99, 235, 0.1));
+            animation-delay: -4s;
+        }
+
+        .auth-orb--3 {
+            width: 220px;
+            height: 220px;
+            top: 18%;
+            right: -60px;
+            background: radial-gradient(circle, rgba(249, 115, 22, 0.85), rgba(126, 34, 206, 0.15));
+            animation-delay: -6s;
+        }
+
+        @keyframes authOrbFloat {
+            0%, 100% { transform: translate3d(0, 0, 0); }
+            33% { transform: translate3d(18px, -10px, 0); }
+            66% { transform: translate3d(-14px, 12px, 0); }
+        }
+
+        .auth-shell {
+            position: relative;
+            width: 100%;
+            max-width: 1120px;
+            min-height: 540px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+            gap: 32px;
+            z-index: 1;
+        }
+
+        .auth-panel {
+            position: relative;
+            border-radius: 28px;
+            backdrop-filter: blur(26px);
+            -webkit-backdrop-filter: blur(26px);
+        }
+
+        .auth-panel--left {
+            padding: 32px;
+            background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.94));
+            box-shadow:
+                0 24px 60px rgba(15, 23, 42, 0.30),
+                0 0 0 1px rgba(226, 232, 240, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .auth-panel--right {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-brand {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .auth-brand-text {
+            flex: 1;
+        }
+
+        .auth-logo {
+            width: 100px;
+            height: 100px;
+            margin-left: -12px;
+            display: block;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 14px;
+            object-fit: contain;
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.12);
+        }
+
+        .auth-logo[alt] {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            text-align: center;
+            color: #4b5563;
+        }
+
+        .auth-brand-parent {
+            font-size: 14px;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .auth-brand-product {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            color: #111827;
+        }
+
+        .auth-brand-org {
+            margin-top: 4px;
+            font-size: 14px;
+            color: #4b5563;
+        }
+
+        .auth-title {
+            margin: 24px 0 6px;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: #111827;
+        }
+
+        .auth-subtitle {
+            margin: 0 0 18px;
+            font-size: 14px;
+            color: #4b5563;
+            max-width: 420px;
+        }
+
+        .auth-bullets {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .auth-bullets li {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 14px;
+            color: #111827;
+            margin-bottom: 12px;
+        }
+
+        .auth-bullets li::before {
+            content: '•';
+            color: #4f46e5;
+            font-weight: 700;
+            margin-top: 1px;
+        }
+
+        .auth-footnote {
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(209, 213, 219, 0.9);
+        }
+
+        .auth-footnote-main {
+            font-size: 13px;
+            color: #374151;
+            margin: 0 0 4px;
+        }
+
+        .auth-footnote-sub {
+            font-size: 12px;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+            padding: 28px 26px;
+            border-radius: 24px;
+            background: rgba(248, 250, 252, 0.98);
+            box-shadow:
+                0 20px 45px rgba(15, 23, 42, 0.40),
+                0 0 0 1px rgba(226, 232, 240, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.7);
+        }
+
+        .auth-card-header h2 {
+            margin: 0 0 6px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .auth-card-header p {
+            margin: 0;
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        .auth-form {
+            margin-top: 20px;
+        }
+
+        .auth-alert {
+            display: none;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(254, 215, 215, 0.8);
+            color: #9b2c2c;
+            border: 1px solid rgba(252, 165, 165, 0.8);
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .auth-field {
+            margin-bottom: 16px;
+        }
+
+        .auth-field label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .auth-field input {
+            width: 100%;
+            padding: 11px 12px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            font-size: 14px;
+            background: #ffffff;
+            color: #111827;
+            transition: border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .auth-field input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.16);
+        }
+
+        .auth-form-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 2px 0 18px;
+        }
+
+        .auth-remember {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #4b5563;
+        }
+
+        .auth-remember input {
+            width: 16px;
+            height: 16px;
+            accent-color: #4f46e5;
+        }
+
+        .auth-link {
+            border: none;
+            background: none;
+            padding: 0;
+            font-size: 12px;
+            color: #4f46e5;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .auth-submit-btn {
+            width: 100%;
+            margin-bottom: 12px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #f9fafb;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            box-shadow: 0 12px 30px rgba(79, 70, 229, 0.40);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+        }
+
+        .auth-submit-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 40px rgba(79, 70, 229, 0.50);
+            filter: brightness(1.03);
+        }
+
+        .auth-submit-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 10px 24px rgba(79, 70, 229, 0.35);
+        }
+
+        .auth-small-print {
+            font-size: 11px;
+            color: #6b7280;
+            line-height: 1.45;
+            margin: 0 0 12px;
+        }
+
+        .auth-support {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px dashed rgba(209, 213, 219, 0.9);
+        }
+
+        .auth-support-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        .auth-support p {
+            margin: 0;
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 960px) {
+            .auth-shell {
+                grid-template-columns: minmax(0, 1fr);
+                max-width: 560px;
+                gap: 20px;
+            }
+
+            .auth-panel--left {
+                padding: 26px 24px;
+                border-radius: 24px;
+            }
+
+            .auth-panel--right {
+                justify-content: stretch;
+            }
+
+            .auth-card {
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .auth-screen {
+                padding: 18px;
+            }
+
+            .auth-panel--left {
+                padding: 22px 20px;
+                border-radius: 22px;
+            }
+
+            .auth-card {
+                border-radius: 20px;
+                padding: 22px 20px;
+            }
+
+            .auth-brand-product {
+                font-size: 26px;
+            }
+
+            .auth-title {
+                font-size: 22px;
+            }
+
+            .auth-form-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .auth-link {
+                align-self: flex-start;
+            }
+        }
+
 </style>
     <style>
         .programs-docs-loader,
@@ -14717,6 +15121,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         
         // Ensure tab navigation is visible
         function ensureTabNavigationVisible() {
+            return; // Disabled - using drawer navigation instead
             const tabNav = document.querySelector('.tab-navigation');
             if (!tabNav) {
                 // Tab navigation doesn't exist, create it
@@ -14724,13 +15129,13 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 if (programsPanel) {
                     const tabNavHTML = `
                         <div class="tab-navigation">
-                            <button class="tab-btn" data-tab-target="dashboard" onclick="switchTab('dashboard')">
+                            <button class="tab-btn" data-tab-target="dashboard" onclick="window.switchTab && window.switchTab('dashboard')">
                                 <span>🎯 Dashboard</span>
                             </button>
-                            <button class="tab-btn active" data-tab-target="programs" onclick="switchTab('programs')">
+                            <button class="tab-btn active" data-tab-target="programs" onclick="window.switchTab && window.switchTab('programs')">
                                 <span>📑 Programs &amp; Docs</span>
                             </button>
-                            <button class="tab-btn" data-tab-target="clients" onclick="switchTab('clients')">
+                            <button class="tab-btn" data-tab-target="clients" onclick="window.switchTab && window.switchTab('clients')">
                                 <span>👥 Clients</span>
                             </button>
                         </div>
@@ -15180,53 +15585,8 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             initializeLegacyProgramsModule();
         }
 
-        // Switch between tabs
-        function switchTab(tab) {
-            // Update tab buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Find and activate the clicked button
-            const clickedBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => {
-                const target = btn.dataset.tabTarget;
-                if (target) {
-                    return target === tab;
-                }
-                return btn.textContent.toLowerCase().includes(tab.toLowerCase());
-            });
-            if (clickedBtn) {
-                clickedBtn.classList.add('active');
-            }
-            
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            if (tab === 'programs') {
-                const programsTab = document.getElementById('programsTab');
-                if (programsTab) {
-                    programsTab.classList.add('active');
-                }
-                if (shouldUseProgramsDocs()) {
-                    mountProgramsDocsModule().catch(() => {});
-                } else if (!window.__legacyProgramsInitialized) {
-                    initializeLegacyProgramsModule();
-                }
-            } else if (tab === 'clients') {
-                const clientsTab = document.getElementById('clientsTab');
-                if (clientsTab) clientsTab.classList.add('active');
-                
-                // Initialize CM Tracker if not already initialized
-                if (!cmTrackerInitialized) {
-                    initializeCMTracker();
-                }
-            } else if (tab === 'dashboard') {
-                const dashboardTab = document.getElementById('dashboardTab');
-                if (dashboardTab) dashboardTab.classList.add('active');
-            }
-        }
+        // Legacy switchTab function removed - using the main one defined later in the file
+        // This ensures all tab switching goes through the unified implementation
         
         // Quick add client
         async function quickAddClient() {
@@ -15289,8 +15649,8 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             }, 300);
         }
         
-        // Refresh clients list
-        async function refreshClientsList() {
+        // Refresh clients list - make globally available
+        window.refreshClientsList = async function refreshClientsList() {
             // Check if old UI container exists (may not exist in CM Tracker view)
             const clientsContainer = document.getElementById('clientsList');
             if (!clientsContainer) {
@@ -15867,8 +16227,8 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             }, 2000); // Increased timeout to ensure clientManager is initialized
         });
         // CM Tracker Functions
-        // Show add client modal
-        async function showAddClientModal() {
+        // Show add client modal - make globally available
+        window.showAddClientModal = async function showAddClientModal() {
             const houses = await housesManager.getActiveHouses();
             const currentHouse = houses.find(h => h.id === currentHouseId) || houses[0];
             
@@ -19804,15 +20164,8 @@ if (!document.querySelector('#morning-review-badge-styles')) {
     <style>
         /* Tab Navigation Styles */
         .tab-navigation {
-            display: flex !important;
-            gap: 8px;
-            margin-bottom: 20px;
-            visibility: visible !important;
-            padding: 0;
-            border-bottom: 2px solid #e5e7eb;
-            background: white;
-            border-radius: 8px 8px 0 0;
-            padding: 8px 12px;
+            display: none !important;
+            visibility: hidden !important;
         }
         
         .tab-btn {
@@ -20377,10 +20730,10 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 
         .container {
             max-width: 1320px;
-            margin: 32px auto 60px;
+            margin: calc(var(--app-shell-total-header, 128px) + 20px) auto 60px;
             padding: 32px;
             background: white;
-            min-height: calc(100vh - 100px);
+            min-height: calc(100vh - var(--app-shell-total-header, 128px) - 80px);
             border-radius: 28px;
             box-shadow: 0 25px 60px rgba(102, 126, 234, 0.25);
             overflow: hidden;
@@ -22357,45 +22710,111 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 </button>
     
     <!-- Login Screen -->
-    <div id="loginScreen" style="display: flex; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); z-index: 10000; align-items: center; justify-content: center;">
-        <div class="login-content" style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); width: 400px; max-width: 90%;">
-            <h2 style="margin: 0 0 10px 0; color: #1a202c; text-align: center; font-size: 28px;">Family First</h2>
-            <p style="text-align: center; color: #718096; margin-bottom: 30px; font-size: 14px;">ADOLESCENT SERVICES - Document Creator</p>
-            
-            <div id="loginError" style="display: none; background: #fed7d7; color: #9b2c2c; padding: 12px; border-radius: 6px; margin-bottom: 20px; font-size: 14px;"></div>
-            
-            <form id="staticLoginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label for="loginUsername">Username</label>
-                    <input type="text" id="loginUsername" name="username" required placeholder="Enter username" autocomplete="username">
+    <div id="loginScreen" class="auth-screen">
+        <div class="auth-orb auth-orb--1"></div>
+        <div class="auth-orb auth-orb--2"></div>
+        <div class="auth-orb auth-orb--3"></div>
+
+        <div class="auth-shell">
+            <section class="auth-panel auth-panel--left">
+                <header class="auth-brand">
+                    <div class="auth-brand-text">
+                        <div class="auth-brand-parent">ClearHive Health</div>
+                        <div class="auth-brand-product">CareConnect</div>
+                        <div class="auth-brand-org">for Family First Adolescent Services</div>
+                    </div>
+                    <img src="images/file.svg" alt="Family First" class="auth-logo" />
+                </header>
+
+                <div class="auth-copy">
+                    <h1 class="auth-title">Clinician Workspace</h1>
+                    <p class="auth-subtitle">
+                        A secure space for therapists, case managers, and clinical coaches to manage
+                        aftercare planning and documentation.
+                    </p>
+                    <ul class="auth-bullets">
+                        <li>Build discharge and aftercare packets in minutes</li>
+                        <li>Track aftercare planning tasks in one view</li>
+                        <li>Keep documentation consistent across the team</li>
+                    </ul>
                 </div>
+
+                <footer class="auth-footnote">
+                    <p class="auth-footnote-main">
+                        🔒 All data stays on this device. CareConnect stores no PHI or full names.
+                    </p>
+                    <p class="auth-footnote-sub">
+                        Internal use only · Family First Adolescent Services
+                    </p>
+                </footer>
+            </section>
+
+            <section class="auth-panel auth-panel--right">
+                <div class="auth-card">
+                    <header class="auth-card-header">
+                        <h2>Sign in to CareConnect</h2>
+                        <p>
+                            Use your assigned CareConnect credentials.<br>
+                            This login is for Family First clinical staff only.
+                        </p>
+                    </header>
                 
-                <div class="form-group">
-                    <label for="loginPassword">Password</label>
-                    <input type="password" id="loginPassword" name="password" required placeholder="Enter password" autocomplete="current-password">
+                    <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+                        <div id="loginError" class="auth-alert" role="alert"></div>
+
+                        <div class="auth-field">
+                            <label for="loginUsername">Username</label>
+                            <input
+                                id="loginUsername"
+                                name="username"
+                                type="text"
+                                autocomplete="username"
+                                placeholder="e.g. cmolina"
+                                required
+                            >
+                        </div>
+                        
+                        <div class="auth-field">
+                            <label for="loginPassword">Password</label>
+                            <input
+                                id="loginPassword"
+                                name="password"
+                                type="password"
+                                autocomplete="current-password"
+                                placeholder="••••••••"
+                                required
+                            >
+                        </div>
+                        
+                        <div class="auth-form-row">
+                            <label class="auth-remember">
+                                <input type="checkbox" id="rememberMe">
+                                <span>Remember me on this device</span>
+                            </label>
+                            <button type="button" class="auth-link" onclick="alert('If you forgot your password, contact your supervisor or IT admin.');">
+                                Forgot password?
+                            </button>
+                        </div>
+                        
+                        <button type="submit" class="auth-submit-btn">
+                            Enter workspace
+                        </button>
+
+                        <p class="auth-small-print">
+                            By signing in you confirm you are an authorized member of the Family First clinical team
+                            and agree to follow all HIPAA and privacy policies.
+                        </p>
+                    </form>
+
+                    <div class="auth-support">
+                        <div class="auth-support-label">Need access?</div>
+                        <p>
+                            New to CareConnect or locked out of your account?<br>
+                            Please contact your supervisor or designated CareConnect admin.
+                        </p>
+                    </div>
                 </div>
-                
-                <button type="submit" class="login-btn">Sign In</button>
-            </form>
-            
-            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
-                <p style="color: #718096; font-size: 14px; margin-bottom: 10px;">First time here?</p>
-                <button onclick="showAccountCreation()" type="button" style="
-                    background: none;
-                    border: 2px solid #667eea;
-                    color: #667eea;
-                    padding: 10px 30px;
-                    border-radius: 8px;
-                    font-size: 14px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                " onmouseover="this.style.background='#667eea'; this.style.color='white';" onmouseout="this.style.background='none'; this.style.color='#667eea';">
-                    Create Your Profile
-                </button>
-            </div>
-            
-            <p style="text-align: center; margin-top: 20px; color: #a0aec0; font-size: 12px;">🔒 Secure Document Generation System</p>
+            </section>
         </div>
     </div>
 
@@ -22499,7 +22918,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                     </div>
                     <div class="section-header__actions">
                         <button type="button" class="section-chip" onclick="window.refreshDashboard && window.refreshDashboard(true)">Refresh</button>
-                        <button type="button" class="section-chip" onclick="showSelectionPanel()">Show Docs Panel</button>
+                        <button type="button" class="section-chip" onclick="window.showSelectionPanel && window.showSelectionPanel()">Show Docs Panel</button>
                     </div>
                 `,
                 clients: `
@@ -22535,6 +22954,9 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                     <div class="section-header__actions">
                         <button type="button" class="section-chip is-primary" onclick="window.mountProgramsDocsModule && window.mountProgramsDocsModule(true)">Retry</button>
                     </div>
+                `,
+                'programs': `
+                    <!-- Programs section uses its own toolbar, so hide this header -->
                 `,
                 default: `
                     <div class="section-header__content">
@@ -22625,8 +23047,19 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 const target = event.target.closest('[data-nav-target]');
                 if (!target) return;
                 const tab = target.getAttribute('data-nav-target');
-                if (tab && typeof window.switchTab === 'function') {
-                    window.switchTab(tab);
+                if (tab) {
+                    if (typeof window.switchTab === 'function') {
+                        window.switchTab(tab);
+                    } else {
+                        console.warn('switchTab not available yet, will retry...');
+                        setTimeout(() => {
+                            if (typeof window.switchTab === 'function') {
+                                window.switchTab(tab);
+                            } else {
+                                console.error('switchTab still not available');
+                            }
+                        }, 100);
+                    }
                 }
                 closeNav();
             });
@@ -23240,15 +23673,13 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 
         /* ============= DASHBOARD STYLES ============= */
         .tab-navigation {
-            display: none;
-            gap: 8px;
-            margin-bottom: 20px;
-            visibility: visible !important;
-            padding: 10px 0;
+            display: none !important;
+            visibility: hidden !important;
         }
 
         body.tab-nav-fallback .tab-navigation {
-            display: flex !important;
+            display: none !important;
+            visibility: hidden !important;
         }
 
         .tab-btn {
@@ -23841,15 +24272,15 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             <!-- Left Panel: Program List -->
             <div class="programs-panel">
                 
-                <!-- Tab Navigation -->
-                <div class="tab-navigation">
-                    <button class="tab-btn" data-tab-target="dashboard" onclick="switchTab('dashboard')">
+                <!-- Tab Navigation - Hidden (using drawer navigation instead) -->
+                <div class="tab-navigation" style="display: none !important;">
+                    <button class="tab-btn" data-tab-target="dashboard" onclick="window.switchTab && window.switchTab('dashboard')">
                         <span>🎯 Dashboard</span>
                     </button>
-                    <button class="tab-btn active" data-tab-target="programs" onclick="switchTab('programs')">
+                    <button class="tab-btn active" data-tab-target="programs" onclick="window.switchTab && window.switchTab('programs')">
                         <span>📑 Programs &amp; Docs</span>
                     </button>
-                    <button class="tab-btn" data-tab-target="clients" onclick="switchTab('clients')">
+                    <button class="tab-btn" data-tab-target="clients" onclick="window.switchTab && window.switchTab('clients')">
                         <span>👥 Clients</span>
                     </button>
                 </div>
@@ -23903,8 +24334,8 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 </div>
                 
                 <script>
-                    // Tab switching function
-                    function switchTab(tab) {
+                    // Tab switching function - make globally available
+                    window.switchTab = function switchTab(tab) {
                         try {
                             console.log('Switching to tab:', tab);
                             console.trace('Tab switch called from:');
@@ -24158,8 +24589,8 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                         }, 0);
                     }
                     
-                    // Function to show selection panel (document generation UI)
-                    function showSelectionPanel() {
+                    // Function to show selection panel (document generation UI) - make globally available
+                    window.showSelectionPanel = function showSelectionPanel() {
                         // Restore all elements marked as hidden by dashboard
                         const hiddenElements = document.querySelectorAll('[data-dashboard-hidden="true"]');
                         hiddenElements.forEach(el => {
@@ -24506,7 +24937,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                         <!-- House Content Area -->
                         <div class="house-content" id="houseContent">
                             <div class="cm-quick-actions">
-                                <button class="cm-action-btn primary" onclick="showAddClientModal()">
+                                <button class="cm-action-btn primary" onclick="window.showAddClientModal && window.showAddClientModal()">
                                     ➕ Add Client
                                 </button>
                                 <button class="cm-action-btn" onclick="showBulkImport()">
@@ -24521,7 +24952,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                                 <button class="cm-action-btn" onclick="showReports()">
                                     📈 Reports
                                 </button>
-                                <button class="cm-action-btn" onclick="switchTab('programs')" style="background: #f3f4f6;" data-tab-target="programs">
+                                <button class="cm-action-btn" onclick="window.switchTab && window.switchTab('programs')" style="background: #f3f4f6;" data-tab-target="programs">
                                     📑 Programs &amp; Docs
                                 </button>
                             </div>

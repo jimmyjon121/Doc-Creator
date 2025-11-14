@@ -59,7 +59,7 @@
 
         .toolbar {
             position: sticky;
-            top: calc(var(--app-shell-top-offset, 64px) + 12px);
+            top: var(--app-shell-top-offset, 64px);
             z-index: 90;
             padding: 18px clamp(20px, 3vw, 32px);
             display: grid;
@@ -73,7 +73,8 @@
             box-shadow: 0 12px 32px rgba(10, 12, 32, 0.24);
             width: min(1280px, 100%);
             margin: 0 auto clamp(12px, 2vh, 28px);
-            border-radius: 20px;
+            margin-top: 0;
+            border-radius: 0 0 20px 20px;
         }
 
         .toolbar__brand {
