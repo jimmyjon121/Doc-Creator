@@ -25,6 +25,20 @@ class DashboardWidget {
         this.loading = false;
     }
 
+    renderEmptyState(message, options = {}) {
+        if (!this.container) return;
+        const actionHtml = options.showDemoAction
+            ? `<button type="button" class="widget-empty__action" onclick="window.populateDemoClients && window.populateDemoClients(50)">Populate demo data</button>`
+            : '';
+        this.container.innerHTML = `
+            <div class="widget-empty">
+                <p>${message}</p>
+                ${actionHtml}
+            </div>
+        `;
+        this.hideLoading();
+    }
+
     async refresh() {
         await this.render();
     }
@@ -43,7 +57,10 @@ class FlightPlanWidget extends DashboardWidget {
         
         try {
             const data = dashboardManager.cache.priorities;
-            if (!data) return;
+            if (!data || this.isZonesEmpty(data)) {
+                this.renderEmptyState('No priority alerts yet. Add clients or populate demo data to see this queue.', { showDemoAction: true });
+                return;
+            }
             
             const timeContext = dashboardManager.getTimeAwareGreeting();
             
@@ -95,6 +112,10 @@ class FlightPlanWidget extends DashboardWidget {
             console.error('Failed to render flight plan:', error);
             this.container.innerHTML = '<div class="widget-error">Failed to load priorities</div>';
         }
+    }
+
+    isZonesEmpty(data) {
+        return this.zones.every(zone => !Array.isArray(data[zone]) || data[zone].length === 0);
     }
 
     getZoneConfig(zone) {
@@ -170,106 +191,6 @@ class FlightPlanWidget extends DashboardWidget {
     }
 }
 
-// House Weather Widget
-class HouseWeatherWidget extends DashboardWidget {
-    constructor(container) {
-        super('houseWeather', container);
-        this.showOnlyNeedingAttention = false;
-    }
-
-    async render() {
-        this.showLoading();
-        
-        try {
-            const data = dashboardManager.cache.houseHealth;
-            if (!data) return;
-            
-            let html = `
-                <div class="house-weather-widget">
-                    <div class="widget-header">
-                        <h3>🏠 House Weather System</h3>
-                        <label class="filter-toggle">
-                            <input type="checkbox" ${this.showOnlyNeedingAttention ? 'checked' : ''} 
-                                   onchange="dashboardWidgets.toggleHouseFilter(this.checked)">
-                            Show only houses needing attention
-                        </label>
-                    </div>
-                    <div class="house-cards">
-            `;
-            
-            // Sort houses by score (worst first)
-            const sortedHouses = Object.values(data).sort((a, b) => a.score - b.score);
-            
-            for (const houseData of sortedHouses) {
-                if (this.showOnlyNeedingAttention && houseData.score >= 90) continue;
-                
-                html += this.renderHouseCard(houseData);
-            }
-            
-            html += `
-                    </div>
-                </div>
-            `;
-            
-            this.container.innerHTML = html;
-            this.hideLoading();
-        } catch (error) {
-            console.error('Failed to render house weather:', error);
-            this.container.innerHTML = '<div class="widget-error">Failed to load house data</div>';
-        }
-    }
-
-    renderHouseCard(houseData) {
-        const trendIcon = houseData.trend === 'improving' ? '↑' : 
-                         houseData.trend === 'declining' ? '↓' : '→';
-        const trendClass = houseData.trend === 'improving' ? 'trend-up' : 
-                          houseData.trend === 'declining' ? 'trend-down' : 'trend-stable';
-        
-        const scoreClass = houseData.score >= 90 ? 'excellent' :
-                          houseData.score >= 75 ? 'good' :
-                          houseData.score >= 60 ? 'fair' : 'critical';
-        
-        return `
-            <div class="house-card score-${scoreClass}" onclick="dashboardWidgets.navigateToHouse('${houseData.house.id}')">
-                <div class="house-header">
-                    <span class="weather-icon" title="${this.getWeatherDescription(houseData.weather)}">
-                        ${houseData.weather}
-                    </span>
-                    <span class="house-name">${houseData.house.name}</span>
-                    <span class="trend ${trendClass}">${trendIcon}</span>
-                </div>
-                <div class="health-bar-container">
-                    <div class="health-bar">
-                        <div class="health-bar-fill" style="width: ${houseData.score}%"></div>
-                    </div>
-                    <div class="score-text">${Math.round(houseData.score)}%</div>
-                </div>
-                <div class="house-stats">
-                    <span class="client-count">${houseData.clientCount} clients</span>
-                    ${houseData.issues.length > 0 ? 
-                        `<span class="issue-count" onclick="event.stopPropagation(); dashboardWidgets.showHouseIssues('${houseData.house.id}')">${houseData.issues.length} issues</span>` : 
-                        '<span class="no-issues">✓ All clear</span>'
-                    }
-                </div>
-            </div>
-        `;
-    }
-
-    getWeatherDescription(weather) {
-        const descriptions = {
-            '☀️': 'Sunny - All milestones on track',
-            '⛅': 'Partly Cloudy - 1-2 items pending',
-            '🌧️': 'Rainy - 3+ overdue items',
-            '⛈️': 'Stormy - Critical issues requiring immediate attention'
-        };
-        return descriptions[weather] || 'Unknown';
-    }
-
-    toggleFilter(showOnlyNeedingAttention) {
-        this.showOnlyNeedingAttention = showOnlyNeedingAttention;
-        this.render();
-    }
-}
 
 // Client Journey Radar Widget
 class JourneyRadarWidget extends DashboardWidget {
@@ -281,16 +202,20 @@ class JourneyRadarWidget extends DashboardWidget {
         this.showLoading();
         
         try {
-            const data = dashboardManager.cache.journeyData;
-            if (!data) return;
+            const data = dashboardManager.cache.journeyData || {};
+            const hasClients = Object.values(data).some(list => Array.isArray(list) && list.length > 0);
+            if (!hasClients) {
+                this.renderEmptyState('No journey data yet. Add clients or populate demo data to visualize progress.', { showDemoAction: true });
+                return;
+            }
             
             const segments = [
-                { key: 'admission', label: 'Admission', color: 'green' },
                 { key: 'week1', label: 'Week 1', color: 'green' },
-                { key: 'day14', label: 'Day 14', color: 'yellow' },
-                { key: 'day30', label: 'Day 30', color: 'orange' },
-                { key: 'day45plus', label: '45+ Days', color: 'red' },
-                { key: 'discharge', label: 'Discharge Pipeline', color: 'purple' }
+                { key: 'day14to16', label: 'Day 14-16', color: 'yellow', critical: true },
+                { key: 'day30', label: 'Day 30', color: 'blue' },
+                { key: 'day45plus', label: '45+ Days', color: 'orange' },
+                { key: 'dischargePipeline', label: 'Discharge Pipeline', color: 'purple' },
+                { key: 'recentlyDischarged', label: 'Recently Discharged', color: 'gray' }
             ];
             
             let html = `
@@ -305,20 +230,33 @@ class JourneyRadarWidget extends DashboardWidget {
                 const clients = data[segment.key] || [];
                 const hasClients = clients.length > 0;
                 
+                // Check for critical aftercare needs
+                let criticalIndicator = '';
+                if (segment.key === 'day14to16' && clients.length > 0) {
+                    const needingAftercare = clients.filter(c => c.needsAftercare).length;
+                    if (needingAftercare > 0) {
+                        criticalIndicator = `<span class="critical-indicator" title="${needingAftercare} need aftercare thread">⚠️</span>`;
+                    }
+                }
+
                 html += `
-                    <div class="journey-segment segment-${segment.color} ${hasClients ? 'has-clients' : ''}" 
+                    <div class="journey-segment segment-${segment.color} ${hasClients ? 'has-clients' : ''} ${segment.critical ? 'critical-stage' : ''}" 
                          data-segment="${segment.key}"
                          onclick="${hasClients ? `dashboardWidgets.showSegmentClients('${segment.key}')` : ''}">
-                        <div class="segment-label">${segment.label}</div>
+                        <div class="segment-label">${segment.label} ${criticalIndicator}</div>
                         <div class="segment-count">${clients.length}</div>
-                        ${segment.key === 'discharge' && clients.length > 0 ? 
+                        ${segment.key === 'dischargePipeline' && clients.length > 0 ? 
                             `<div class="segment-detail">Next: ${clients[0].initials} in ${clients[0].daysUntilDischarge}d</div>` : 
+                            ''
+                        }
+                        ${segment.key === 'recentlyDischarged' && clients.length > 0 ? 
+                            `<div class="segment-detail">Latest: ${clients[0].initials} ${clients[0].daysSinceDischarge}d ago</div>` : 
                             ''
                         }
                     </div>
                 `;
                 
-                if (segment.key !== 'discharge') {
+                if (segment.key !== 'recentlyDischarged') {
                     html += '<div class="segment-connector">→</div>';
                 }
             }
@@ -351,317 +289,118 @@ class JourneyRadarWidget extends DashboardWidget {
     }
 }
 
-// Today's Missions Widget
-class MissionsWidget extends DashboardWidget {
+// Coach Schedule Widget
+class CoachScheduleWidget extends DashboardWidget {
     constructor(container) {
-        super('missions', container);
-        this.completedMissions = new Set(this.loadCompletedMissions());
-    }
-    
-    loadCompletedMissions() {
-        const today = new Date().toDateString();
-        const saved = localStorage.getItem('completedMissions');
-        if (saved) {
-            const data = JSON.parse(saved);
-            // Reset if it's a new day
-            if (data.date !== today) {
-                localStorage.removeItem('completedMissions');
-                return [];
-            }
-            return data.missions || [];
-        }
-        return [];
-    }
-    
-    saveCompletedMissions() {
-        const today = new Date().toDateString();
-        localStorage.setItem('completedMissions', JSON.stringify({
-            date: today,
-            missions: Array.from(this.completedMissions)
-        }));
-    }
-    
-    getMissionId(mission) {
-        return `${mission.client.id}-${mission.type || mission.action || 'mission'}`;
-    }
-    
-    isMissionComplete(mission) {
-        return this.completedMissions.has(this.getMissionId(mission));
+        super('coachSchedule', container);
     }
 
     async render() {
         this.showLoading();
-        
+
         try {
-            const priorities = dashboardManager.cache.priorities;
-            const quickWins = await dashboardManager.getQuickWins();
-            
-            // Determine primary mission (most urgent red zone item)
-            const primaryMission = priorities.red?.[0];
-            
-            // Secondary missions (next 2-3 important items)
-            const secondaryMissions = [
-                ...(priorities.red?.slice(1, 2) || []),
-                ...(priorities.purple?.slice(0, 2) || []),
-                ...(priorities.yellow?.slice(0, 2) || [])
-            ].slice(0, 3);
-            
-            // Count missions
-            const allMissions = [];
-            if (primaryMission && !this.isMissionComplete(primaryMission)) allMissions.push(primaryMission);
-            secondaryMissions.forEach(m => { if (!this.isMissionComplete(m)) allMissions.push(m); });
-            quickWins.slice(0, 3).forEach(w => { if (!this.isMissionComplete(w)) allMissions.push(w); });
-            
-            const totalMissions = (primaryMission ? 1 : 0) + secondaryMissions.length + Math.min(quickWins.length, 3);
-            const completedCount = this.completedMissions.size;
-            
+            const schedule = await this.buildSchedule();
+            const hasItems = schedule.today.length > 0 || schedule.week.length > 0;
+
+            if (!hasItems) {
+                this.renderEmptyState('No scheduled work yet. Add clients or populate demo data to surface your upcoming tasks.', { showDemoAction: true });
+                return;
+            }
+
+            const todayLabel = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+
             let html = `
-                <div class="missions-widget">
+                <div class="coach-schedule-widget">
                     <div class="widget-header">
-                        <h3>🎯 Today's Missions</h3>
-                        <div class="mission-progress">
-                            ${this.renderProgress(completedCount, totalMissions)}
-                            <span class="progress-text">${completedCount}/${totalMissions} Complete</span>
-                        </div>
+                        <h3>🗓 Coach Schedule</h3>
+                        <span class="schedule-date">${todayLabel}</span>
                     </div>
-                    <div class="missions-content">
-            `;
-            
-            // Primary Mission
-            if (primaryMission) {
-                const isComplete = this.isMissionComplete(primaryMission);
-                const missionId = this.getMissionId(primaryMission);
-                
-                html += `
-                    <div class="mission-section primary-mission ${isComplete ? 'completed' : ''}">
-                        <div class="mission-header">
-                            <span class="mission-icon">🎯</span>
-                            <span class="mission-type">Primary Objective</span>
-                            <span class="mission-time">Est. 15 min</span>
-                        </div>
-                        <div class="mission-item" id="mission-${missionId}">
-                            <input type="checkbox" 
-                                   class="mission-checkbox" 
-                                   id="check-${missionId}"
-                                   ${isComplete ? 'checked' : ''}
-                                   onchange="dashboardWidgets.toggleMission('${missionId}', this.checked)">
-                            <label for="check-${missionId}" class="mission-content">
-                                <div class="mission-client">${primaryMission.client.initials}</div>
-                                <div class="mission-task ${isComplete ? 'task-complete' : ''}">${primaryMission.message}</div>
-                            </label>
-                            ${!isComplete ? `
-                                <button class="btn-mission-action" onclick="dashboardWidgets.takeAction('primary', '${primaryMission.type}', '${primaryMission.client.id}')">
-                                    Take Action
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
-            }
-            
-            // Secondary Missions
-            if (secondaryMissions.length > 0) {
-                html += `
-                    <div class="mission-section secondary-missions">
-                        <div class="mission-header">
-                            <span class="mission-icon">🎖️</span>
-                            <span class="mission-type">Secondary Objectives</span>
-                            <span class="mission-time">Est. ${secondaryMissions.length * 15} min</span>
-                        </div>
-                `;
-                
-                for (const mission of secondaryMissions) {
-                    const isComplete = this.isMissionComplete(mission);
-                    const missionId = this.getMissionId(mission);
-                    
-                    html += `
-                        <div class="mission-item ${isComplete ? 'completed' : ''}" id="mission-${missionId}">
-                            <input type="checkbox" 
-                                   class="mission-checkbox" 
-                                   id="check-${missionId}"
-                                   ${isComplete ? 'checked' : ''}
-                                   onchange="dashboardWidgets.toggleMission('${missionId}', this.checked)">
-                            <label for="check-${missionId}" class="mission-content">
-                                <div class="mission-client">${mission.client.initials}</div>
-                                <div class="mission-task ${isComplete ? 'task-complete' : ''}">${mission.message}</div>
-                            </label>
-                        </div>
-                    `;
-                }
-                
-                html += '</div>';
-            }
-            
-            // Quick Wins
-            if (quickWins.length > 0) {
-                const displayWins = quickWins.slice(0, 3);
-                const totalTime = displayWins.reduce((sum, win) => sum + win.estimatedTime, 0);
-                
-                html += `
-                    <div class="mission-section quick-wins">
-                        <div class="mission-header">
-                            <span class="mission-icon">⚡</span>
-                            <span class="mission-type">Quick Wins</span>
-                            <span class="mission-time">< ${totalTime} min total</span>
-                        </div>
-                `;
-                
-                for (const win of displayWins) {
-                    const isComplete = this.isMissionComplete(win);
-                    const missionId = this.getMissionId(win);
-                    
-                    html += `
-                        <div class="mission-item quick-win ${isComplete ? 'completed' : ''}" id="mission-${missionId}">
-                            <input type="checkbox" 
-                                   class="mission-checkbox" 
-                                   id="check-${missionId}"
-                                   ${isComplete ? 'checked' : ''}
-                                   onchange="dashboardWidgets.toggleMission('${missionId}', this.checked)">
-                            <label for="check-${missionId}" class="mission-content">
-                                <div class="mission-client">${win.client.initials}</div>
-                                <div class="mission-task ${isComplete ? 'task-complete' : ''}">${win.action}</div>
-                                <span class="quick-time">${win.estimatedTime}m</span>
-                            </label>
-                        </div>
-                    `;
-                }
-                
-                html += '</div>';
-            }
-            
-            html += `
-                    </div>
+                    ${this.renderScheduleSection('Today', schedule.today)}
+                    ${this.renderScheduleSection('Upcoming', schedule.week)}
                 </div>
             `;
-            
+
             this.container.innerHTML = html;
             this.hideLoading();
         } catch (error) {
-            console.error('Failed to render missions:', error);
-            this.container.innerHTML = '<div class="widget-error">Failed to load missions</div>';
+            console.error('Failed to render schedule:', error);
+            this.container.innerHTML = '<div class="widget-error">Failed to load schedule</div>';
         }
     }
 
-    renderProgress(completed, total) {
-        const circles = [];
-        for (let i = 0; i < total; i++) {
-            const isCompleted = i < completed;
-            circles.push(`<span class="progress-circle ${isCompleted ? 'completed' : ''}">${isCompleted ? '✓' : '○'}</span>`);
-        }
-        return circles.join('');
-    }
-    
-    toggleMission(missionId, isChecked) {
-        if (isChecked) {
-            this.completedMissions.add(missionId);
-        } else {
-            this.completedMissions.delete(missionId);
-        }
-        this.saveCompletedMissions();
-        
-        // Update visual state with animation
-        const missionElement = document.getElementById(`mission-${missionId}`);
-        if (missionElement) {
-            if (isChecked) {
-                missionElement.classList.add('completed');
-                // Add completion animation
-                missionElement.style.animation = 'missionComplete 0.5s ease';
-            } else {
-                missionElement.classList.remove('completed');
-            }
-            
-            // Update task text styling
-            const taskElement = missionElement.querySelector('.mission-task');
-            if (taskElement) {
-                taskElement.classList.toggle('task-complete', isChecked);
-            }
-        }
-        
-        // Re-render to update progress
-        setTimeout(() => this.render(), 600);
-    }
-}
+    async buildSchedule() {
+        const priorities = dashboardManager.cache?.priorities || { red: [], yellow: [], purple: [], green: [] };
+        const quickWins = await dashboardManager.getQuickWins();
 
-// North Star Metrics Widget
-class MetricsWidget extends DashboardWidget {
-    constructor(container) {
-        super('metrics', container);
+        const today = [];
+        const week = [];
+
+        const mapItem = (item, bucket) => ({
+            client: item.client,
+            label: item.message || item.action,
+            action: item.action,
+            bucket,
+            due: item.dueDate || bucket,
+            type: item.type || 'task'
+        });
+
+        const addItems = (source = [], bucket = 'Today', target = today) => {
+            source.forEach(item => target.push(mapItem(item, bucket)));
+        };
+
+        addItems(priorities.red, 'Urgent');
+        addItems(priorities.yellow, 'Due today');
+        addItems(priorities.purple, 'Discharge prep', week);
+        addItems(priorities.green, 'Upcoming', week);
+
+        quickWins.slice(0, 3).forEach(win => {
+            today.push({
+                client: win.client,
+                label: win.action,
+                action: win.action,
+                bucket: 'Quick win',
+                due: `${win.estimatedTime}m`,
+                type: 'quickwin'
+            });
+        });
+
+        return {
+            today: today.slice(0, 6),
+            week: week.slice(0, 6)
+        };
     }
 
-    async render() {
-        this.showLoading();
-        
-        try {
-            const metrics = dashboardManager.cache.metrics;
-            if (!metrics) return;
-            
-            const trendIcon = metrics.trend?.direction === 'up' ? '↑' : 
-                             metrics.trend?.direction === 'down' ? '↓' : '→';
-            const trendClass = metrics.trend?.direction === 'up' ? 'trend-positive' : 
-                              metrics.trend?.direction === 'down' ? 'trend-negative' : '';
-            
-            let html = `
-                <div class="metrics-widget">
-                    <div class="widget-header">
-                        <h3>⭐ Your North Star</h3>
-                    </div>
-                    <div class="metrics-grid">
-                        <div class="metric-item">
-                            <div class="metric-value">${metrics.todayAftercareOnTime}/${metrics.todayAftercareTotal}</div>
-                            <div class="metric-label">Today's Aftercare</div>
-                            ${metrics.todayAftercareOnTime === metrics.todayAftercareTotal && metrics.todayAftercareTotal > 0 ? 
-                                '<div class="metric-badge">✅ Perfect!</div>' : ''}
-                        </div>
-                        <div class="metric-item">
-                            <div class="metric-value">
-                                ${metrics.weekCompletionRate}%
-                                <span class="trend-indicator ${trendClass}">${trendIcon}</span>
-                            </div>
-                            <div class="metric-label">Week Completion</div>
-                            ${metrics.trend ? 
-                                `<div class="metric-comparison">${trendIcon} ${Math.abs(metrics.trend.percentage)}% vs last week</div>` : 
-                                ''}
-                        </div>
-                        <div class="metric-item">
-                            <div class="metric-value">${metrics.activeClients}</div>
-                            <div class="metric-label">Active Clients</div>
-                            <div class="metric-detail">across ${metrics.totalHouses} houses</div>
-                        </div>
-                        <div class="metric-item">
-                            <div class="metric-value">${metrics.weeklyComplete}/${metrics.weeklyGoal}</div>
-                            <div class="metric-label">Weekly Goal</div>
-                            <div class="metric-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" style="width: ${(metrics.weeklyComplete / metrics.weeklyGoal) * 100}%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    ${this.renderStreak(metrics)}
+    renderScheduleSection(title, items) {
+        if (!items.length) {
+            return '';
+        }
+
+        const rows = items.map(item => {
+            const hasClient = Boolean(item.client?.id);
+            return `
+            <div class="schedule-item">
+                <div class="schedule-item__main">
+                    <span class="schedule-client">${item.client?.initials || '--'}</span>
+                    <span class="schedule-label">${item.label}</span>
                 </div>
-            `;
-            
-            this.container.innerHTML = html;
-            this.hideLoading();
-        } catch (error) {
-            console.error('Failed to render metrics:', error);
-            this.container.innerHTML = '<div class="widget-error">Failed to load metrics</div>';
-        }
-    }
+                <div class="schedule-item__meta">
+                    <span class="schedule-bucket">${item.bucket}</span>
+                    <span class="schedule-due">${item.due}</span>
+                    ${hasClient ? `<button class="schedule-action" onclick="dashboardWidgets.takeAction('schedule', '${item.type}', '${item.client.id}')">Open</button>` : ''}
+                </div>
+            </div>
+        `; }).join('');
 
-    renderStreak(metrics) {
-        // Mock streak data - would be calculated from historical data
-        const streakDays = 3;
-        if (streakDays === 0) return '';
-        
         return `
-            <div class="streak-indicator">
-                <span class="streak-icon">🔥</span>
-                <span class="streak-text">${streakDays} day streak - all milestones on time!</span>
+            <div class="schedule-section">
+                <div class="schedule-section__title">${title}</div>
+                ${rows}
             </div>
         `;
     }
 }
+
+
 
 // Quick Actions Widget
 class QuickActionsWidget extends DashboardWidget {
@@ -673,31 +412,27 @@ class QuickActionsWidget extends DashboardWidget {
         const suggestions = await dashboardManager.generateSmartSuggestions();
         
         let html = `
-            <div class="quick-actions-widget">
-                <div class="actions-row">
-                    <button class="quick-action-btn" onclick="showAddClientModal()">
-                        <span class="action-icon">➕</span>
-                        <span class="action-label">Add Client</span>
+            <div class="quick-actions">
+                <div class="quick-actions__row">
+                    <button class="quick-actions__btn" onclick="showAddClientModal()">
+                        <span>➕</span>
+                        <small>Add Client</small>
                     </button>
-                    <button class="quick-action-btn" onclick="dashboardWidgets.quickGenerateDoc()">
-                        <span class="action-icon">📄</span>
-                        <span class="action-label">Generate Doc</span>
+                    <button class="quick-actions__btn" onclick="dashboardWidgets.quickGenerateDoc()">
+                        <span>📄</span>
+                        <small>Generate Doc</small>
                     </button>
-                    <button class="quick-action-btn" onclick="dashboardWidgets.viewAllAlerts()">
-                        <span class="action-icon">🔔</span>
-                        <span class="action-label">All Alerts</span>
+                    <button class="quick-actions__btn" onclick="dashboardWidgets.viewAllAlerts()">
+                        <span>🔔</span>
+                        <small>All Alerts</small>
                     </button>
-                    <button class="quick-action-btn" onclick="dashboardWidgets.exportDashboard()">
-                        <span class="action-icon">📊</span>
-                        <span class="action-label">Export Report</span>
+                    <button class="quick-actions__btn" onclick="dashboardWidgets.exportDashboard()">
+                        <span>📊</span>
+                        <small>Export</small>
                     </button>
-                    <button class="quick-action-btn" onclick="dashboardWidgets.enterFocusMode()">
-                        <span class="action-icon">🎯</span>
-                        <span class="action-label">Focus Mode</span>
-                    </button>
-                    <button class="quick-action-btn refresh" onclick="dashboardManager.refreshDashboard()">
-                        <span class="action-icon">🔄</span>
-                        <span class="action-label">Refresh</span>
+                    <button class="quick-actions__btn" onclick="initializeDashboard && initializeDashboard(true)">
+                        <span>🔄</span>
+                        <small>Refresh</small>
                     </button>
                 </div>
                 ${suggestions.length > 0 ? this.renderSuggestions(suggestions) : ''}
@@ -733,42 +468,29 @@ class DashboardWidgets {
     async initialize() {
         console.log('Initializing dashboard widgets...');
         
-        // Create widget instances
         const widgetContainers = {
             flightPlan: document.getElementById('flightPlanWidget'),
-            houseWeather: document.getElementById('houseWeatherWidget'),
             journeyRadar: document.getElementById('journeyRadarWidget'),
-            missions: document.getElementById('missionsWidget'),
-            metrics: document.getElementById('metricsWidget'),
+            coachSchedule: document.getElementById('coachScheduleWidget'),
             quickActions: document.getElementById('quickActionsWidget')
         };
         
-        // Initialize widgets
         if (widgetContainers.flightPlan) {
             this.widgets.set('flightPlan', new FlightPlanWidget(widgetContainers.flightPlan));
-        }
-        
-        if (widgetContainers.houseWeather) {
-            this.widgets.set('houseWeather', new HouseWeatherWidget(widgetContainers.houseWeather));
         }
         
         if (widgetContainers.journeyRadar) {
             this.widgets.set('journeyRadar', new JourneyRadarWidget(widgetContainers.journeyRadar));
         }
         
-        if (widgetContainers.missions) {
-            this.widgets.set('missions', new MissionsWidget(widgetContainers.missions));
-        }
-        
-        if (widgetContainers.metrics) {
-            this.widgets.set('metrics', new MetricsWidget(widgetContainers.metrics));
+        if (widgetContainers.coachSchedule) {
+            this.widgets.set('coachSchedule', new CoachScheduleWidget(widgetContainers.coachSchedule));
         }
         
         if (widgetContainers.quickActions) {
             this.widgets.set('quickActions', new QuickActionsWidget(widgetContainers.quickActions));
         }
         
-        // Register widgets with dashboard manager
         for (const [id, widget] of this.widgets) {
             dashboardManager.registerWidget(id, widget);
         }
@@ -778,46 +500,28 @@ class DashboardWidgets {
 
     async renderAll() {
         console.log('Rendering all widgets...');
-        
-        // Render critical widgets first (Flight Plan)
-        const flightPlan = this.widgets.get('flightPlan');
-        if (flightPlan) await flightPlan.render();
-        
-        // Then render other widgets in parallel
-        const otherWidgets = Array.from(this.widgets.values()).filter(w => w.id !== 'flightPlan');
-        await Promise.all(otherWidgets.map(widget => widget.render()));
+        await Promise.all(Array.from(this.widgets.values()).map(widget => widget.render()));
     }
 
-    // Widget action handlers
     toggleZone(zone) {
         const widget = this.widgets.get('flightPlan');
         if (widget) widget.toggleZone(zone);
     }
     
-    toggleMission(missionId, isChecked) {
-        const widget = this.widgets.get('missions');
-        if (widget) widget.toggleMission(missionId, isChecked);
-    }
-
     async takeAction(actionId, type, clientId) {
-        // Handle different action types
         if (type === 'aftercare_urgent' || type === 'aftercare_critical') {
-            // Open aftercare options modal
             const client = await clientManager.getClient(clientId);
             if (client) {
                 viewClientDetails(client);
-                // Switch to aftercare tab
                 setTimeout(() => {
                     const aftercareTab = document.querySelector('[onclick*="showClientTab(\'aftercare\')"]');
                     if (aftercareTab) aftercareTab.click();
                 }, 100);
             }
         } else if (type === 'discharge_prep') {
-            // Open client details on overview tab
             const client = await clientManager.getClient(clientId);
             if (client) viewClientDetails(client);
         } else if (type.includes('milestone')) {
-            // Open client details on milestones tab
             const client = await clientManager.getClient(clientId);
             if (client) {
                 viewClientDetails(client);
@@ -825,6 +529,11 @@ class DashboardWidgets {
                     const milestonesTab = document.querySelector('[onclick*="showClientTab(\'milestones\')"]');
                     if (milestonesTab) milestonesTab.click();
                 }, 100);
+            }
+        } else if (clientId) {
+            const client = await clientManager.getClient(clientId);
+            if (client) {
+                viewClientDetails(client);
             }
         }
     }
@@ -844,59 +553,34 @@ class DashboardWidgets {
         }
     }
 
-    toggleHouseFilter(showOnlyNeedingAttention) {
-        const widget = this.widgets.get('houseWeather');
-        if (widget) widget.toggleFilter(showOnlyNeedingAttention);
-    }
-
-    navigateToHouse(houseId) {
-        // Switch to Clients tab and select house
-        switchTab('clients');
-        setTimeout(() => switchToHouse(houseId), 100);
-    }
-
-    showHouseIssues(houseId) {
-        // Show modal with house issues
-        const houseData = dashboardManager.cache.houseHealth[houseId];
-        if (!houseData) return;
-        
-        let issuesHtml = '<ul>';
-        for (const issue of houseData.issues) {
-            issuesHtml += `<li>${issue.client}: ${issue.milestone} (${issue.type})</li>`;
-        }
-        issuesHtml += '</ul>';
-        
-        showModal({
-            title: `${houseData.house.name} Issues`,
-            content: issuesHtml,
-            buttons: [
-                {
-                    text: 'Go to House',
-                    action: () => this.navigateToHouse(houseId)
-                },
-                {
-                    text: 'Close',
-                    action: () => closeModal()
-                }
-            ]
-        });
-    }
-
     showSegmentClients(segment) {
         const clients = dashboardManager.cache.journeyData[segment];
         if (!clients || clients.length === 0) return;
         
         let content = '<div class="segment-clients-list">';
         for (const client of clients) {
-            const daysInfo = segment === 'discharge' ? 
-                ` - ${client.daysUntilDischarge} days until discharge` : 
-                ` - Day ${dashboardManager.calculateDaysInCare(client.admissionDate)}`;
+            let daysInfo = '';
+            let statusIndicator = '';
+            
+            if (segment === 'dischargePipeline') {
+                daysInfo = ` - ${client.daysUntilDischarge} days until discharge`;
+            } else if (segment === 'recentlyDischarged') {
+                daysInfo = ` - Discharged ${client.daysSinceDischarge} days ago`;
+            } else if (segment === 'day14to16') {
+                daysInfo = ` - Day ${client.daysInCare}`;
+                if (client.needsAftercare) {
+                    statusIndicator = '<span class="status-indicator urgent">Aftercare needed</span>';
+                }
+            } else {
+                daysInfo = ` - Day ${dashboardManager.calculateDaysInCare(client.admissionDate)}`;
+            }
             
             content += `
                 <div class="segment-client-item" onclick="viewClientDetails(clientManager.getClient('${client.id}'))">
                     <span class="client-initials">${client.initials}</span>
                     <span class="client-house">${client.houseId}</span>
                     <span class="client-info">${daysInfo}</span>
+                    ${statusIndicator}
                 </div>
             `;
         }
@@ -911,29 +595,21 @@ class DashboardWidgets {
 
     getSegmentTitle(segment) {
         const titles = {
-            admission: 'New Admissions',
             week1: 'Week 1 Clients',
-            day14: 'Day 14 Clients',
+            day14to16: 'Day 14-16 Aftercare Window',
             day30: 'Day 30 Clients',
             day45plus: '45+ Days Clients',
-            discharge: 'Discharge Pipeline'
+            dischargePipeline: 'Discharge Pipeline',
+            recentlyDischarged: 'Recently Discharged'
         };
         return titles[segment] || 'Clients';
     }
 
-    async markMissionComplete(clientId, type) {
-        // Handle mission completion
-        console.log('Marking mission complete:', clientId, type);
-        await dashboardManager.refreshDashboard();
-    }
-
     quickGenerateDoc() {
-        // Show quick document generation modal
         switchTab('programs');
     }
 
     viewAllAlerts() {
-        // Show all alerts in a modal
         const alerts = dashboardManager.cache.priorities;
         let content = '<div class="all-alerts-view">';
         
@@ -965,8 +641,7 @@ class DashboardWidgets {
                 exportDate: new Date().toISOString(),
                 coach: dashboardManager.currentCoach,
                 priorities: dashboardManager.cache.priorities,
-                metrics: dashboardManager.cache.metrics,
-                houseHealth: dashboardManager.cache.houseHealth
+                metrics: dashboardManager.cache.metrics
             };
             
             const csv = this.convertToCSV(data);

@@ -130,7 +130,26 @@ class DashboardManager {
             return this.cache;
         } catch (error) {
             console.error('Failed to load dashboard data:', error);
-            throw error;
+            // Return empty cache structure instead of throwing
+            this.cache = {
+                priorities: { red: [], purple: [], yellow: [], green: [] },
+                houseHealth: {},
+                journeyData: {},
+                metrics: {
+                    todayAftercareOnTime: 0,
+                    todayAftercareTotal: 0,
+                    weekCompletionRate: 0,
+                    weekTotal: 0,
+                    weekComplete: 0,
+                    activeClients: 0,
+                    totalHouses: 6,
+                    weeklyGoal: 5,
+                    weeklyComplete: 0,
+                    trend: null
+                },
+                lastCacheTime: Date.now()
+            };
+            return this.cache;
         }
     }
 
@@ -142,6 +161,9 @@ class DashboardManager {
     async loadCriticalAlerts() {
         try {
             const clients = await this.getRelevantClients();
+            if (!clients || clients.length === 0) {
+                return { red: [], purple: [], yellow: [], green: [] };
+            }
             const alerts = [];
             const now = new Date();
             
@@ -297,7 +319,13 @@ class DashboardManager {
 
     async loadHouseHealth() {
         try {
-            const houses = await housesManager.getHouses();
+            if (typeof housesManager === 'undefined') {
+                return {};
+            }
+            const houses = await housesManager.getHouses?.() || [];
+            if (houses.length === 0) {
+                return {};
+            }
             const healthScores = {};
             
             for (const house of houses) {
@@ -360,36 +388,49 @@ class DashboardManager {
 
     async loadJourneyData() {
         try {
-            const clients = await this.getRelevantClients();
+            const clients = await this.getRelevantClients() || [];
             const segments = {
-                admission: [],
-                week1: [],
-                day14: [],
-                day30: [],
-                day45plus: [],
-                discharge: []
+                week1: [],          // Days 0-7: New admissions
+                day14to16: [],      // Days 14-16: Aftercare planning window
+                day30: [],          // Day 30: Mid-stay review
+                day45plus: [],      // 45+ days: Extended stay
+                dischargePipeline: [], // Clients with discharge dates set
+                recentlyDischarged: [] // Discharged in last 7 days
             };
+            
+            const today = new Date();
             
             for (const client of clients) {
                 const daysInCare = this.calculateDaysInCare(client.admissionDate);
                 
-                if (client.dischargeDate) {
-                    const daysUntilDischarge = this.calculateDaysUntil(client.dischargeDate);
-                    if (daysUntilDischarge <= 7 && daysUntilDischarge >= 0) {
-                        segments.discharge.push({ ...client, daysUntilDischarge });
+                // Check if recently discharged (last 7 days)
+                if (client.dischargeDate && client.status === 'discharged') {
+                    const daysSinceDischarge = this.calculateDaysSince(client.dischargeDate);
+                    if (daysSinceDischarge >= 0 && daysSinceDischarge <= 7) {
+                        segments.recentlyDischarged.push({ ...client, daysSinceDischarge });
                         continue;
                     }
                 }
                 
-                if (daysInCare <= 1) {
-                    segments.admission.push(client);
-                } else if (daysInCare <= 7) {
+                // Check if in discharge pipeline (has future discharge date)
+                if (client.dischargeDate && client.status === 'active') {
+                    const daysUntilDischarge = this.calculateDaysUntil(client.dischargeDate);
+                    if (daysUntilDischarge >= 0) {
+                        segments.dischargePipeline.push({ ...client, daysUntilDischarge });
+                        continue;
+                    }
+                }
+                
+                // Categorize by days in care
+                if (daysInCare >= 0 && daysInCare <= 7) {
                     segments.week1.push(client);
-                } else if (daysInCare <= 14) {
-                    segments.day14.push(client);
-                } else if (daysInCare <= 30) {
+                } else if (daysInCare >= 14 && daysInCare <= 16) {
+                    // Critical aftercare window - check if aftercare thread sent
+                    const needsAftercare = !client.aftercareThreadSent;
+                    segments.day14to16.push({ ...client, daysInCare, needsAftercare });
+                } else if (daysInCare >= 28 && daysInCare <= 32) {
                     segments.day30.push(client);
-                } else {
+                } else if (daysInCare >= 45) {
                     segments.day45plus.push(client);
                 }
             }
@@ -403,7 +444,7 @@ class DashboardManager {
 
     async loadMetrics() {
         try {
-            const clients = await this.getRelevantClients();
+            const clients = await this.getRelevantClients() || [];
             const today = new Date();
             const weekStart = new Date(today);
             weekStart.setDate(today.getDate() - 7);
@@ -464,18 +505,38 @@ class DashboardManager {
     }
 
     async getRelevantClients() {
+        if (!window.clientManager?.getAllClients) {
+            return [];
+        }
+
+        // Always load full list once so we can make smart decisions
+        const allClients = await clientManager.getAllClients();
+
+        // If view is set to "myClients", filter by coach assignment
         if (this.currentView === 'myClients' && !this.currentCoach.isAdmin) {
-            // Filter by coach assignment
-            const allClients = await clientManager.getAllClients();
-            return allClients.filter(client => 
+            const myClients = allClients.filter(client => 
                 client.caseManagerInitials === this.currentCoach.initials ||
                 client.familyAmbassadorPrimaryInitials === this.currentCoach.initials ||
                 client.familyAmbassadorSecondaryInitials === this.currentCoach.initials
             );
-        } else {
-            // All clients
-            return await clientManager.getAllClients();
+
+            // Demo / safety fallback: if no clients are assigned to this coach but
+            // there ARE clients in the system, fall back to all clients so the
+            // dashboard never looks empty when data exists.
+            if (myClients.length === 0 && allClients.length > 0) {
+                console.warn(
+                    '[Dashboard] No clients assigned to coach',
+                    this.currentCoach?.initials,
+                    '- falling back to all clients view.'
+                );
+                return allClients;
+            }
+
+            return myClients;
         }
+
+        // Default: all clients
+        return allClients;
     }
 
     calculateDaysInCare(admissionDate) {
@@ -493,6 +554,15 @@ class DashboardManager {
         const today = new Date();
         const diffTime = target - today;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    }
+
+    calculateDaysSince(pastDate) {
+        if (!pastDate) return null;
+        const past = new Date(pastDate);
+        const today = new Date();
+        const diffTime = today - past;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
         return diffDays;
     }
 
@@ -557,6 +627,9 @@ class DashboardManager {
 
     async getQuickWins() {
         // Find tasks that can be completed in under 5 minutes
+        if (!window.milestonesManager) {
+            return [];
+        }
         const clients = await this.getRelevantClients();
         const quickWins = [];
         

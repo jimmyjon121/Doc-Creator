@@ -1,15 +1,14 @@
 # CareConnect Pro Versions
 
 ## Current Release
-- Version: **v12.1-clean** (tag after QA)
+- Version: **v12.2-dashboard** (Coach Dashboard refresh)
 - Location: `CURRENT-VERSION-v12/`
 - Deliverable: copy of `dist/` after build (`CareConnect-Pro.html`, launch scripts, README)
-- Notes: Legacy folders removed from active repo tree (Nov 6, 2025)
+- Notes: New coach dashboard layout, Tracker Compliance grid, demo-mode wiring, Programs & Docs loader fallback.
 
-## Previous Release
-- Version: **v12.0** (pre-clean)
-- Tag: `v12.0-pre-clean`
-- Snapshot: see Git tag for full history
+## Previous Releases
+- **v12.1-clean** – first cleaned v12 app bundle; reference snapshot in `CURRENT-VERSION-v12/CareConnect-Pro_v12.1-STABLE.html`.
+- **v12.0-pre-clean** – initial v12 series before repo cleanup (see tag `v12.0-pre-clean`).
 
 ## Structure Expectations
 ```
@@ -31,4 +30,4 @@ Doc-Creator/
 - v11.x and older assets removed from working tree (see git history before `v12.0-pre-clean`)
 - Chrome extension bundles archived in tag history only
 
-_Last updated: November 6, 2025_
+_Last updated: November 16, 2025_

@@ -92,6 +92,7 @@ class ClientManager {
             // Additional tracking fields (NEW)
             dateOptionsProvided: clientData.dateOptionsProvided || null,
             isArchived: false, // New clients are never archived
+            isDemo: Boolean(clientData.isDemo),
             
             // Existing fields
             createdDate: new Date().toISOString(),
@@ -157,6 +158,27 @@ class ClientManager {
         this.notifyListeners('client-created', client);
         
         return client;
+    }
+
+    /**
+     * Delete client by ID
+     */
+    async deleteClient(clientId) {
+        const client = await this.getClient(clientId);
+        if (!client) {
+            console.warn('Attempted to delete client that does not exist:', clientId);
+            return false;
+        }
+        
+        await this.dbManager.delete(this.storeName, clientId);
+        this.clientsCache = this.clientsCache.filter(c => c.id !== clientId);
+        
+        if (this.currentClient && this.currentClient.id === clientId) {
+            this.currentClient = null;
+        }
+        
+        this.notifyListeners('client-deleted', client);
+        return true;
     }
     
     /**
@@ -860,6 +882,48 @@ class ClientManager {
         };
         
         return stats;
+    }
+
+    /**
+     * Generate demo clients for sandboxing
+     */
+    async generateDemoClients(count = 50) {
+        if (typeof window === 'undefined' || !window.demoDataGenerator || typeof window.demoDataGenerator.createClients !== 'function') {
+            throw new Error('Demo data generator not available');
+        }
+        
+        const generatedData = window.demoDataGenerator.createClients(count) || [];
+        if (generatedData.length === 0) {
+            console.warn('Demo data generator returned no clients.');
+            return [];
+        }
+        
+        const existingClients = await this.getAllClients();
+        const demoClients = existingClients.filter(client => client.isDemo || client.tags?.includes('demo'));
+        
+        for (const client of demoClients) {
+            try {
+                await this.deleteClient(client.id);
+            } catch (error) {
+                console.error('Failed to remove demo client', client.id, error);
+            }
+        }
+        
+        const createdClients = [];
+        for (const clientData of generatedData) {
+            try {
+                const client = await this.createClient({
+                    ...clientData,
+                    tags: Array.from(new Set([...(clientData.tags || []), 'demo'])),
+                    isDemo: true
+                });
+                createdClients.push(client);
+            } catch (error) {
+                console.error('Failed to create demo client:', error, clientData);
+            }
+        }
+        
+        return createdClients;
     }
     
     /**

@@ -1,3 +1,16 @@
+# CareConnect Clinical Intel v12.2 – Coach Dashboard Refresh
+
+## Release Date: November 16, 2025
+
+### Summary
+- Rebuilt the **Coach Dashboard** into a clear three-panel layout (Daily Flight Plan, Client Journey Radar with Day 14–16 aftercare segment, and Coach Schedule).
+- Added the **Tracker Compliance** widget with a compact house grid so coaches can see house health without deep scrolling.
+- Unified dashboard data wiring through `clientManager` / `dashboardManager` so demo and real clients flow through the same pipeline.
+- Introduced a `ccConfig.demoMode` switch: on localhost, demo clients can be auto-seeded; in production, demo helpers and buttons are suppressed.
+- Hardened the **Programs & Docs** loader with a fallback path so `programs-docs-module.html` reliably loads from `CURRENT-VERSION-v12/` during dev.
+
+---
+
 # CareConnect Clinical Intel v12.0 - Universal Dynamic Extraction System
 
 ## Release Date: October 13, 2024

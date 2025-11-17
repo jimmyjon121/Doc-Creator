@@ -31,6 +31,22 @@
             --radius-sm: 12px;
             --transition-fast: 160ms cubic-bezier(0.4, 0, 0.2, 1);
             --transition-medium: 260ms cubic-bezier(0.22, 1, 0.36, 1);
+            --programs-toolbar-height: clamp(100px, 12vh, 148px);
+        }
+
+        /* Dark mode variables */
+        body.dark-mode {
+            --navy-900: #E9ECFF;
+            --navy-700: #D7DBF8;
+            --navy-500: #9FA6D7;
+            --text-strong: #E9ECFF;
+            --text-subtle: #B8BFE8;
+            --surface: #1F2145;
+            --surface-alt: rgba(31, 33, 69, 0.85);
+            --neutral-50: #2A2D5A;
+            --accent-500: #8D97FF;
+            --accent-400: #A8B0FF;
+            --accent-200: #C9CEFF;
         }
 
         * {
@@ -48,13 +64,32 @@
                 linear-gradient(145deg, #ffffff 0%, #F3F4FF 100%);
         }
 
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            background: radial-gradient(circle at 20% 70%, rgba(110, 123, 255, 0.08), transparent 60%);
-            z-index: -1;
+        /* Removed body::before overlay to prevent foggy appearance */
+
+        body.dark-mode {
+            background: linear-gradient(145deg, #151633 0%, #1F2145 100%);
+            color: var(--text-strong);
+        }
+
+        body.dark-mode .program-card {
+            background: rgba(31, 33, 69, 0.95);
+            border-color: rgba(141, 151, 255, 0.2);
+            color: var(--text-strong);
+        }
+
+        body.dark-mode .badge {
+            background: rgba(141, 151, 255, 0.2);
+            color: var(--accent-200);
+        }
+
+        body.dark-mode .program-card__tag {
+            background: rgba(141, 151, 255, 0.15);
+            color: var(--accent-200);
+        }
+
+        body.dark-mode .toolbar {
+            background: rgba(21, 22, 51, 0.95);
+            border-color: rgba(141, 151, 255, 0.2);
         }
 
         .toolbar {
@@ -471,7 +506,7 @@
         }
 
         .toolbar__audience-toggle-btn.is-active {
-            background: rgba(255, 255, 255, 0.92);
+            background: #ffffff;
             color: var(--navy-700);
             font-weight: 600;
             box-shadow: 0 10px 20px rgba(110, 123, 255, 0.28);
@@ -543,46 +578,113 @@
 
         .filters h2,
         .builder h2 {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             letter-spacing: 0.02em;
+            margin-bottom: 8px;
+        }
+
+        .filters {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .filters > p {
+            font-size: 0.82rem !important;
+            line-height: 1.4;
+            margin: 0 0 16px 0 !important;
         }
 
         .filters__group {
-            margin-top: 22px;
+            margin-top: 18px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
+        }
+
+        .filters__group h3 {
+            font-size: 0.7rem !important;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-subtle);
+            margin: 0 0 4px 0;
+            font-weight: 600;
+            opacity: 0.6;
         }
 
         .chip-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 6px;
+        }
+
+        .chip-row[data-empty="true"]::after {
+            content: "Type state abbreviation to filter";
+            font-size: 0.75rem;
+            color: var(--text-subtle);
+            opacity: 0.4;
+            font-style: italic;
         }
 
         .chip {
-            padding: 8px 14px;
-            border-radius: 999px;
-            background: var(--neutral-50);
-            border: 1px solid transparent;
-            color: var(--text-subtle);
-            font-size: 0.85rem;
+            padding: 5px 10px;
+            border-radius: 6px;
+            background: rgba(233, 236, 255, 0.3);
+            border: 1px solid rgba(110, 123, 255, 0.12);
+            color: var(--navy-700);
+            font-size: 0.78rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: transform var(--transition-fast), border var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+            transition: all var(--transition-fast);
+            white-space: nowrap;
         }
 
         .chip:is(:hover, :focus-visible) {
-            transform: translateY(-2px);
-            border-color: var(--accent-200);
-            color: var(--navy-700);
+            transform: translateY(-1px);
+            background: rgba(110, 123, 255, 0.1);
+            border-color: rgba(110, 123, 255, 0.3);
+            box-shadow: 0 2px 6px rgba(110, 123, 255, 0.15);
         }
 
         .chip.is-active {
-            background: rgba(110, 123, 255, 0.16);
-            border-color: var(--accent-400);
-            color: var(--navy-700);
+            background: linear-gradient(135deg, rgba(110, 123, 255, 0.2), rgba(110, 123, 255, 0.12));
+            border-color: #6E7BFF;
+            color: #6E7BFF;
             font-weight: 600;
+            box-shadow: 0 1px 4px rgba(110, 123, 255, 0.2);
+        }
+
+        /* Special handling for state chips */
+        .filters__group[aria-label="State"] .chip-row {
+            max-height: 150px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 2px;
+        }
+
+        .filters__group[aria-label="State"] .chip {
+            padding: 3px 8px;
+            font-size: 0.72rem;
+        }
+
+        /* Scrollbar styling for state list */
+        .filters__group[aria-label="State"] .chip-row::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .filters__group[aria-label="State"] .chip-row::-webkit-scrollbar-track {
+            background: rgba(110, 123, 255, 0.05);
+            border-radius: 2px;
+        }
+
+        .filters__group[aria-label="State"] .chip-row::-webkit-scrollbar-thumb {
+            background: rgba(110, 123, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        .filters__group[aria-label="State"] .chip-row::-webkit-scrollbar-thumb:hover {
+            background: rgba(110, 123, 255, 0.3);
         }
 
         .filters__meta {
@@ -605,9 +707,10 @@
 
         .results__header {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 18px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            margin-bottom: 12px;
         }
 
         .results__header-info {
@@ -630,6 +733,80 @@
             display: flex;
             align-items: center;
             gap: 12px;
+        }
+
+        .results-controls-bar {
+            position: sticky;
+            top: calc(var(--app-shell-top-offset, 64px) + var(--programs-toolbar-height, 128px) + 8px);
+            z-index: 85;
+            margin-bottom: 18px;
+            background: #ffffff;
+            border: 1px solid rgba(21, 22, 51, 0.06);
+            border-radius: 18px;
+            padding: 12px 18px;
+            box-shadow: 0 12px 32px rgba(15, 16, 32, 0.08);
+            backdrop-filter: blur(12px);
+        }
+
+        .results__pagination {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            font-size: 0.85rem;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            border: 1px solid rgba(110, 123, 255, 0.1);
+        }
+
+        .results__pagination.is-disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .pagination-button {
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            border: 1px solid rgba(21, 22, 51, 0.12);
+            background: var(--neutral-50);
+            color: var(--navy-700);
+            cursor: pointer;
+            transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+        }
+
+        .pagination-button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination-button:is(:hover, :focus-visible):not(:disabled) {
+            background: rgba(110, 123, 255, 0.12);
+            color: var(--navy-900);
+            transform: translateY(-1px);
+        }
+
+        .pagination-status {
+            white-space: nowrap;
+            color: var(--text-subtle);
+        }
+
+        .pagination-size {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding-left: 12px;
+            border-left: 1px solid rgba(21, 22, 51, 0.08);
+        }
+
+        .pagination-size select {
+            border: 1px solid rgba(21, 22, 51, 0.12);
+            border-radius: 999px;
+            padding: 6px 24px 6px 12px;
+            background: var(--neutral-50);
+            color: var(--text-strong);
+            font-size: 0.85rem;
         }
 
         .view-toggle {
@@ -670,13 +847,14 @@
         .results__grid {
             flex: 1;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 18px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            align-items: stretch;
         }
 
         .results__grid.is-compact {
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 14px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 18px;
         }
 
         .results__map {
@@ -698,7 +876,7 @@
             top: 120px;
             right: 24px;
             padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.92);
+            background: #ffffff;
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-soft);
             display: none;
@@ -1006,7 +1184,7 @@
         }
 
         .compare-card {
-            background: rgba(255, 255, 255, 0.92);
+            background: #ffffff;
             border-radius: var(--radius-lg);
             border: 1px solid rgba(110, 123, 255, 0.2);
             box-shadow: var(--shadow-soft);
@@ -1203,7 +1381,7 @@
             gap: 16px;
             padding: 20px;
             border-radius: var(--radius-md);
-            background: rgba(255, 255, 255, 0.92);
+            background: #ffffff;
             border: 1px solid rgba(145, 153, 225, 0.18);
             box-shadow: var(--shadow-card);
             position: relative;
@@ -1211,6 +1389,10 @@
             transform: translateY(6px);
             opacity: 0;
             animation: cardIn var(--transition-medium) forwards;
+            min-height: 0;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            height: 100%;
         }
 
         .program-card::before {
@@ -1236,6 +1418,12 @@
         .program-card__title h3 {
             font-size: 1.05rem;
             line-height: 1.3;
+            margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
         }
 
         .program-card__meta {
@@ -1251,6 +1439,11 @@
             font-size: 0.75rem;
             background: rgba(110, 123, 255, 0.15);
             color: var(--navy-700);
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
         }
 
         .badge--neutral {
@@ -1272,6 +1465,14 @@
             font-size: 0.92rem;
             color: var(--text-subtle);
             line-height: 1.5;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            margin: 0;
+            min-height: 3em;
+            max-height: 3em;
         }
 
         .program-card__tags {
@@ -1286,6 +1487,11 @@
             background: rgba(233, 236, 255, 0.7);
             border-radius: 999px;
             color: var(--navy-500);
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
         }
 
         .program-card__actions {
@@ -1293,6 +1499,8 @@
             flex-wrap: wrap;
             gap: 10px;
             align-items: center;
+            margin-top: auto;
+            padding-top: 12px;
         }
 
         .program-card__actions select {
@@ -1304,9 +1512,54 @@
         }
 
         .program-card__actions .pill-button {
-            flex-grow: 1;
+            /* Make card actions feel lighter and less dominant */
+            flex: 0 0 auto;
             justify-content: center;
             text-align: center;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 999px;
+        }
+
+        .program-card__actions .compare-toggle {
+            border: 1.5px solid #6E7BFF;
+            background: transparent;
+            color: #6E7BFF;
+            font-weight: 600;
+        }
+
+        .program-card__actions .compare-toggle:is(:hover, :focus-visible) {
+            background: rgba(110, 123, 255, 0.1);
+            border-color: #8D97FF;
+            box-shadow: 0 4px 12px rgba(110, 123, 255, 0.2);
+        }
+
+        .program-card__actions .compare-toggle.is-active {
+            background: #6E7BFF;
+            border-color: #6E7BFF;
+            color: white;
+            box-shadow: 0 8px 20px rgba(110, 123, 255, 0.35);
+        }
+
+        .program-card__actions .compare-toggle:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .program-card__actions button[data-action="details"] {
+            border: 1.5px solid #6E7BFF;
+            background: transparent;
+            color: #6E7BFF;
+            font-weight: 600;
+        }
+
+        .program-card__actions button[data-action="details"]:hover {
+            background: rgba(110, 123, 255, 0.1);
+            border-color: #8D97FF;
         }
 
         .builder {
@@ -1713,23 +1966,27 @@
 
         .details-panel {
             position: fixed;
-            top: 96px;
-            right: -420px;
-            width: 360px;
-            max-width: calc(100% - 56px);
+            top: 88px;
+            right: -640px;
+            width: 520px;
+            max-width: min(640px, 100% - 80px);
             background: var(--surface);
             border-radius: var(--radius-lg);
             box-shadow: 0 28px 60px rgba(15, 16, 32, 0.26);
-            padding: 24px;
+            padding: 28px 28px 18px;
             display: flex;
             flex-direction: column;
-            gap: 18px;
-            z-index: 30;
+            gap: 20px;
+            z-index: 120; /* Above the in-module toolbar (z-index 90) */
             transition: right var(--transition-medium);
+            max-height: calc(100vh - 104px);
+            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.6;
         }
 
         .details-panel.is-open {
-            right: 32px;
+            right: 40px;
         }
 
         .details-overlay {
@@ -1739,7 +1996,7 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity var(--transition-fast);
-            z-index: 25;
+            z-index: 110; /* Below panel, above toolbar and content */
         }
 
         .details-overlay.is-active {
@@ -1750,11 +2007,12 @@
         .details-panel header {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .details-panel header h2 {
-            font-size: 1.15rem;
+            font-size: 1.25rem;
+            line-height: 1.3;
         }
 
         .details-panel__meta {
@@ -1766,21 +2024,21 @@
         .details-panel__section {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         .details-panel__section h3 {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: var(--text-subtle);
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.08em;
         }
 
         .details-panel__list {
             padding-left: 18px;
             margin: 0;
             display: grid;
-            gap: 4px;
+            gap: 6px;
             color: var(--text-subtle);
         }
 
@@ -1906,12 +2164,15 @@
             max-width: 100%;
             width: 100%;
             margin: 0 auto;
-            padding: 18px 28px 48px;
+            margin-top: 40px;
+            padding: 18px 28px;
             color: var(--text-subtle);
             font-size: 0.8rem;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
+            position: relative;
+            opacity: 0.5;
         }
 
         .toast {
@@ -2009,10 +2270,50 @@
             }
 
             .details-panel {
-                top: 90px;
-                right: 24px;
-                width: calc(100% - 48px);
+                top: 80px;
+                right: 16px;
+                width: calc(100% - 32px);
                 max-width: none;
+                max-height: calc(100vh - 96px);
+            }
+
+            .results-controls-bar {
+                position: sticky;
+                top: calc(var(--app-shell-top-offset, 64px) + var(--programs-toolbar-height, 132px));
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .results__controls {
+                width: 100%;
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+
+            .results__pagination {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .results__grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .results__grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .program-card__actions {
+                flex-direction: column;
+            }
+            
+            .program-card__actions .pill-button {
+                width: 100%;
             }
         }
 
@@ -2027,6 +2328,33 @@
 
             .pane {
                 padding: 18px;
+            }
+
+            .results-controls-bar {
+                position: static;
+                box-shadow: none;
+            }
+
+            .results__controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .results__pagination {
+                flex-wrap: wrap;
+                justify-content: flex-start;
+                gap: 12px;
+            }
+
+            .pagination-size {
+                border-left: none;
+                padding-left: 0;
+            }
+
+            .view-toggle {
+                width: 100%;
+                justify-content: space-between;
             }
 
             .results__grid {
@@ -2115,12 +2443,12 @@
     <main class="app-shell">
         <aside class="pane filters" aria-label="Program filters">
             <h2>Filter Programs</h2>
-            <p style="margin:8px 0 0; color: var(--text-subtle); font-size:0.88rem;">
+            <p>
                 Narrow by focus, delivery format, or alignment to insurance resources. Filters stack to refine results.
             </p>
 
             <section class="filters__group" aria-label="Focus areas">
-                <h3 style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; color: var(--text-subtle); margin:0;">Focus</h3>
+                <h3>Focus</h3>
                 <div class="chip-row">
                     <button class="chip" data-group="focus" data-value="Intensive Outpatient">Intensive Outpatient</button>
                     <button class="chip" data-group="focus" data-value="Partial Hospitalization">Partial Hospitalization</button>
@@ -2129,7 +2457,7 @@
             </section>
 
             <section class="filters__group" aria-label="Format">
-                <h3 style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; color: var(--text-subtle); margin:0;">Format</h3>
+                <h3>Format</h3>
                 <div class="chip-row">
                     <button class="chip" data-group="format" data-value="Hybrid">Hybrid</button>
                     <button class="chip" data-group="format" data-value="Onsite">Onsite</button>
@@ -2138,7 +2466,7 @@
             </section>
 
             <section class="filters__group" aria-label="Insurance alignment">
-                <h3 style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; color: var(--text-subtle); margin:0;">Insurance Alignment</h3>
+                <h3>Insurance Alignment</h3>
                 <div class="chip-row">
                     <button class="chip" data-group="insurance" data-value="In-Network">In-Network</button>
                     <button class="chip" data-group="insurance" data-value="OON w/ Negotiation">OON with Negotiation</button>
@@ -2147,12 +2475,12 @@
             </section>
 
             <section class="filters__group" aria-label="State">
-                <h3 style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; color: var(--text-subtle); margin:0;">State</h3>
+                <h3>State</h3>
                 <div class="chip-row" id="stateFilterChips" data-empty="true"></div>
             </section>
 
             <section class="filters__group" aria-label="Quick toggles">
-                <h3 style="font-size:0.9rem; text-transform:uppercase; letter-spacing:0.05em; color: var(--text-subtle); margin:0;">Quick Toggles</h3>
+                <h3>Quick Toggles</h3>
                 <div class="chip-row">
                     <button class="chip" data-group="flag" data-value="Immediate">Immediate Starts</button>
                     <button class="chip" data-group="flag" data-value="Openings">Openings this Week</button>
@@ -2172,6 +2500,8 @@
                     <div class="results__count" id="resultsHeading">Programs Ready for Next Step</div>
                     <div class="results__filters" id="resultsSummary">Loading programs…</div>
                 </div>
+            </div>
+            <div class="results-controls-bar" role="region" aria-label="Program layout and sorting controls">
                 <div class="results__controls">
                     <div class="view-toggle" role="group" aria-label="Change program layout">
                         <button type="button" class="is-active" data-view="grid" aria-pressed="true">Grid</button>
@@ -2187,6 +2517,20 @@
                             <option value="distance">Distance (Nearest)</option>
                         </select>
                     </label>
+                    <div class="results__pagination" id="paginationControls" role="group" aria-label="Program pagination controls">
+                        <button type="button" class="pagination-button" id="paginationPrevButton" aria-label="Previous page">&lsaquo;</button>
+                        <span class="pagination-status" id="paginationStatus">Loading…</span>
+                        <button type="button" class="pagination-button" id="paginationNextButton" aria-label="Next page">&rsaquo;</button>
+                        <label class="pagination-size" for="paginationPageSize">
+                            Per page
+                            <select id="paginationPageSize" aria-label="Programs per page">
+                                <option value="12">12</option>
+                                <option value="24" selected>24</option>
+                                <option value="48">48</option>
+                                <option value="all">All</option>
+                            </select>
+                        </label>
+                    </div>
                 </div>
             </div>
             <div class="results__grid" id="resultsGrid" role="list"></div>
@@ -2874,6 +3218,7 @@
             const MAP_RADIUS_OPTIONS = [10, 25, 50, 100, 150, 250];
             const MAP_FOCUS_OPTIONS = ["all", "therapy", "psychiatry", "iop", "virtual"];
             const FONT_SCALE_OPTIONS = [0.8, 1, 1.2, 1.5];
+            const VIRTUAL_CHUNK_SIZE = 24;
 
             const PREFERENCES_DEFAULTS = {
                 view: "grid",
@@ -3124,6 +3469,11 @@
 
             const elements = {
                 resultsGrid: document.getElementById("resultsGrid"),
+                paginationControls: document.getElementById("paginationControls"),
+                paginationStatus: document.getElementById("paginationStatus"),
+                paginationPrevButton: document.getElementById("paginationPrevButton"),
+                paginationNextButton: document.getElementById("paginationNextButton"),
+                paginationPageSize: document.getElementById("paginationPageSize"),
                 mapContainer: document.getElementById("resultsMapContainer"),
                 mapCanvas: document.getElementById("resultsMapCanvas"),
                 mapLegend: document.getElementById("mapLegend"),
@@ -3279,6 +3629,15 @@
                 documentType: savedDraft?.documentType || preferredDocumentType,
                 builder: savedDraft?.builder || createEmptyBuilder(),
                  clientContext: savedDraft?.clientContext || null,
+                pagination: {
+                    pageSizeOption: preferredProgramsPerPage,
+                    pageSizeValue: preferredPageSize,
+                    currentPage: 1,
+                    totalPages: 1,
+                    totalResults: 0,
+                    visibleRange: { start: 0, end: 0 },
+                    lastSignature: null
+                },
                 notes: new Map(),
                 map: {
                     center: (() => {
@@ -3310,7 +3669,7 @@
                 },
                 virtual: {
                     enabled: false,
-                    pageSize: preferredPageSize,
+                    chunkSize: VIRTUAL_CHUNK_SIZE,
                     renderedCount: 0,
                     observer: null,
                     sentinel: null,
@@ -3478,10 +3837,19 @@
                     }
 
                     const programsSetting = sanitizeProgramsPerPage(prefs.programsPerPage);
-                    const pageSize = programsSetting === "all"
+                    const pageSizeValue = programsSetting === "all"
                         ? Number.MAX_SAFE_INTEGER
                         : Number(programsSetting);
-                    stateRef.virtual.pageSize = pageSize;
+                    stateRef.pagination.pageSizeOption = programsSetting;
+                    stateRef.pagination.pageSizeValue = pageSizeValue;
+                    stateRef.pagination.currentPage = 1;
+                    stateRef.pagination.lastSignature = null;
+                    if (elements.paginationPageSize) {
+                        elements.paginationPageSize.value = programsSetting === "all"
+                            ? "all"
+                            : String(programsSetting);
+                    }
+                    shouldRerender = true;
                     stateRef.autosaveInterval = sanitizeAutosave(prefs.autosaveInterval);
 
                     if (elements.mapRadiusInput) {
@@ -3827,8 +4195,9 @@
 
             function assignProgramMetadata(program) {
                 if (!program) return;
-                if (!Array.isArray(program.insurance) || !program.insurance.length) {
-                    program.insurance = ["Information pending"];
+                // Leave insurance empty if we don't have good data yet; avoid placeholder noise like "Information pending"
+                if (!Array.isArray(program.insurance)) {
+                    program.insurance = [];
                 }
                 if (!Array.isArray(program.flags)) {
                     program.flags = [];
@@ -4355,6 +4724,22 @@
             function updateResultsSummary(filteredPrograms) {
                 const activeFilterButtons = countActiveFilters();
                 const summaryParts = [];
+                if (state.view !== "map" && state.view !== "compare") {
+                    if (!filteredPrograms.length) {
+                        summaryParts.push("No programs ready");
+                    } else if (state.pagination.pageSizeOption === "all") {
+                        summaryParts.push(`${filteredPrograms.length} program${filteredPrograms.length !== 1 ? "s" : ""} ready`);
+                    } else {
+                        const range = state.pagination.visibleRange;
+                        if (range.start && range.end) {
+                            summaryParts.push(`${range.start}–${range.end} of ${filteredPrograms.length} programs`);
+                        } else {
+                            summaryParts.push(`${filteredPrograms.length} program${filteredPrograms.length !== 1 ? "s" : ""} ready`);
+                        }
+                    }
+                } else {
+                    summaryParts.push(`${filteredPrograms.length} program${filteredPrograms.length !== 1 ? "s" : ""} ready`);
+                }
                 if (state.searchTerm) {
                     summaryParts.push(`Matching “${state.searchTerm}”`);
                 }
@@ -4370,9 +4755,10 @@
                         summaryParts.push(DISTANCE_FILTER_LABELS[state.map.distanceFilter] || state.map.distanceFilter);
                     }
                 }
-                elements.resultsSummary.textContent = summaryParts.length
-                    ? `${filteredPrograms.length} program${filteredPrograms.length !== 1 ? "s" : ""} · ${summaryParts.join(" · ")}`
-                    : `${filteredPrograms.length} program${filteredPrograms.length !== 1 ? "s are" : " is"} ready`;
+                if (!summaryParts.length) {
+                    summaryParts.push(`${filteredPrograms.length} program${filteredPrograms.length !== 1 ? "s" : ""} ready`);
+                }
+                elements.resultsSummary.textContent = summaryParts.join(" · ");
                 const filterLabels = activeFilterButtons.map(button => button.textContent.trim());
                 if (mapFiltering) {
                     filterLabels.push(radiusLabel);
@@ -4385,8 +4771,75 @@
                     : "No filters active";
             }
 
+            function updatePaginationUi() {
+                if (!elements.paginationControls) return;
+                const listViewActive = state.view !== "map" && state.view !== "compare";
+                elements.paginationControls.classList.toggle("is-disabled", !listViewActive);
+                const totalResults = state.pagination.totalResults || 0;
+                const pageSizeOption = state.pagination.pageSizeOption;
+                const range = state.pagination.visibleRange || { start: 0, end: 0 };
+                let statusText = "";
+
+                if (!listViewActive) {
+                    statusText = state.view === "map" ? "Map view active" : "Compare view active";
+                } else if (!totalResults) {
+                    statusText = "No programs to show";
+                } else if (pageSizeOption === "all") {
+                    statusText = `Showing all ${totalResults} program${totalResults !== 1 ? "s" : ""}`;
+                } else {
+                    statusText = `Showing ${range.start}–${range.end} of ${totalResults}`;
+                }
+
+                if (elements.paginationStatus) {
+                    elements.paginationStatus.textContent = statusText;
+                }
+
+                const totalPages = state.pagination.totalPages || 1;
+                const disableNav = !listViewActive || !totalResults || pageSizeOption === "all";
+                if (elements.paginationPrevButton) {
+                    const disablePrev = disableNav || state.pagination.currentPage <= 1;
+                    elements.paginationPrevButton.disabled = disablePrev;
+                }
+                if (elements.paginationNextButton) {
+                    const disableNext = disableNav || state.pagination.currentPage >= totalPages;
+                    elements.paginationNextButton.disabled = disableNext;
+                }
+
+                if (elements.paginationPageSize) {
+                    const targetValue = pageSizeOption === "all"
+                        ? "all"
+                        : String(pageSizeOption);
+                    if (elements.paginationPageSize.value !== targetValue) {
+                        elements.paginationPageSize.value = targetValue;
+                    }
+                    elements.paginationPageSize.disabled = !listViewActive;
+                }
+            }
+
             function countActiveFilters() {
                 return filterButtons.filter(btn => btn.classList.contains("is-active"));
+            }
+
+            function serializeFilterSet(set) {
+                if (!set || typeof set.forEach !== "function") return "";
+                return Array.from(set).sort().join("|");
+            }
+
+            function buildPaginationSignature() {
+                const center = state.map?.center || {};
+                const mapDescriptor = (state.map.applyFiltersGlobally || state.view === "map")
+                    ? `${state.map.distanceFilter}|${state.map.radiusMiles}|${Number(center.lat || 0).toFixed(2)}|${Number(center.lng || 0).toFixed(2)}`
+                    : "map-off";
+                return [
+                    state.searchTerm || "",
+                    serializeFilterSet(state.filters.focus),
+                    serializeFilterSet(state.filters.format),
+                    serializeFilterSet(state.filters.insurance),
+                    serializeFilterSet(state.filters.flag),
+                    serializeFilterSet(state.filters.state),
+                    state.viewMode,
+                    mapDescriptor
+                ].join("||");
             }
 
             function getDocumentTypeLabel(value) {
@@ -5368,11 +5821,7 @@
                 const focusDiff = hasVariance(selectedPrograms.map(program => program.focus));
                 const formatDiff = hasVariance(selectedPrograms.map(program => program.format));
                 const locationDiff = hasVariance(selectedPrograms.map(program => program.location ? `${program.location.city}, ${program.location.state}` : "Location not provided"));
-                const acuityDiff = hasVariance(selectedPrograms.map(program => program.acuity));
-                const availabilityLabels = selectedPrograms.map(program => program.availabilityDays <= 0
-                    ? "Immediate start"
-                    : `Start in ${program.availabilityDays} day${program.availabilityDays === 1 ? "" : "s"}`);
-                const availabilityDiff = hasVariance(availabilityLabels);
+                const acuityDiff = hasVariance(selectedPrograms.map(program => program.acuity)); // kept for potential analytics, not surfaced in UI
                 const summaryDiff = hasVariance(selectedPrograms.map(program => program.summary));
                 const weeklyDiff = hasVariance(selectedPrograms.map(program => program.weeklyStructure || []));
                 const outcomesDiff = hasVariance(selectedPrograms.map(program => program.outcomes || []));
@@ -5383,9 +5832,6 @@
                     const location = program.location
                         ? `${program.location.city}, ${program.location.state}`
                         : "Location not provided";
-                    const availability = program.availabilityDays <= 0
-                        ? "Immediate start"
-                        : `Start in ${program.availabilityDays} day${program.availabilityDays === 1 ? "" : "s"}`;
                     const summaryClass = summaryDiff ? "compare-section compare-section--diff" : "compare-section";
                     const weeklyClass = weeklyDiff ? "compare-section compare-section--diff" : "compare-section";
                     const outcomesClass = outcomesDiff ? "compare-section compare-section--diff" : "compare-section";
@@ -5408,8 +5854,6 @@
                             </header>
                             <div class="compare-meta">
                                 <span class="compare-meta__item${locationDiff ? " is-different" : ""}">Location · ${location}</span>
-                                <span class="compare-meta__item${acuityDiff ? " is-different" : ""}">Acuity ${program.acuity}/10</span>
-                                <span class="compare-meta__item${availabilityDiff ? " is-different" : ""}">${availability}</span>
                                 ${laneBadge}
                             </div>
                             <div class="${summaryClass}">
@@ -5601,6 +6045,7 @@
                 card.setAttribute("role", "listitem");
                 card.dataset.programId = program.id;
                 const isCompared = isProgramCompared(program.id);
+                const comparisonLimitReached = !isCompared && state.comparison.programIds.length >= state.comparison.limit;
                 if (isCompared) {
                     card.classList.add("is-compared");
                 }
@@ -5613,6 +6058,7 @@
                 ];
                 if (!familyView) {
                     const insuranceBadges = (program.insurance || [])
+                        .filter(entry => entry && entry !== "Information pending")
                         .slice(0, 2)
                         .map(entry => `<span class="badge">${escapeHtml(entry)}</span>`);
                     metaBadges.push(...insuranceBadges);
@@ -5623,9 +6069,6 @@
                 if (hasNotes) {
                     metaBadges.push(`<span class="badge badge--note">Clinician note</span>`);
                 }
-                const availabilityLabel = program.availabilityDays <= 0
-                    ? "Immediate start"
-                    : `Start in ${program.availabilityDays} day${program.availabilityDays > 1 ? "s" : ""}`;
                 card.innerHTML = `
                     <div class="program-card__header">
                         <div class="program-card__title">
@@ -5634,17 +6077,13 @@
                                 ${metaBadges.join("")}
                             </div>
                         </div>
-                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; font-size:0.78rem; color:var(--text-subtle);">
-                            <span>Acuity ${program.acuity}/10</span>
-                            <span>${availabilityLabel}</span>
-                        </div>
                     </div>
                     <p class="program-card__summary">${escapeHtml(program.summary || "")}</p>
                     <div class="program-card__tags">
                         ${(program.tags || []).map(tag => `<span class="program-card__tag">${escapeHtml(tag)}</span>`).join("")}
                     </div>
                     <div class="program-card__actions">
-                        <button class="pill-button compare-toggle ${isCompared ? "is-active" : ""}" data-action="compare" type="button">
+                        <button class="pill-button compare-toggle ${isCompared ? "is-active" : ""}" data-action="compare" type="button" aria-pressed="${isCompared ? "true" : "false"}" ${comparisonLimitReached ? "disabled" : ""}>
                             ${isCompared ? "In Compare" : "Compare"}
                         </button>
                         <select aria-label="Select builder lane" data-program-lane>
@@ -5690,7 +6129,7 @@
                 resetVirtualization();
                 state.virtual.enabled = true;
                 state.virtual.data = programs;
-                const initialEnd = Math.min(state.virtual.pageSize, programs.length);
+                const initialEnd = Math.min(state.virtual.chunkSize, programs.length);
                 appendVirtualChunk(0, initialEnd);
                 const sentinel = document.createElement("div");
                 sentinel.className = "virtual-sentinel";
@@ -5700,7 +6139,7 @@
                 state.virtual.observer = new IntersectionObserver(entries => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
-                            const nextEnd = state.virtual.renderedCount + state.virtual.pageSize;
+                            const nextEnd = state.virtual.renderedCount + state.virtual.chunkSize;
                             appendVirtualChunk(state.virtual.renderedCount, nextEnd);
                             if (state.virtual.renderedCount >= state.virtual.data.length) {
                                 resetVirtualization();
@@ -5715,11 +6154,22 @@
                 const filtered = applyFilters(PROGRAMS);
                 const sorted = sortPrograms(filtered.slice());
                 state.filteredPrograms = sorted;
+                state.pagination.totalResults = sorted.length;
+
+                if (state.view !== "map" && state.view !== "compare") {
+                    const signature = buildPaginationSignature();
+                    if (signature !== state.pagination.lastSignature) {
+                        state.pagination.lastSignature = signature;
+                        state.pagination.currentPage = 1;
+                    }
+                }
 
                 if (state.view === "compare") {
                     resetVirtualization();
                     renderComparisonView();
                     updateComparisonStatus();
+                    updatePaginationUi();
+                    updateResultsSummary(sorted);
                     return;
                 }
 
@@ -5731,6 +6181,8 @@
                         if (mapState.markersLayer) {
                             mapState.markersLayer.clearLayers();
                         }
+                        state.pagination.visibleRange = { start: 0, end: 0 };
+                        updatePaginationUi();
                         updateResultsSummary(sorted);
                         return;
                     }
@@ -5738,6 +6190,8 @@
                     try {
                         await updateMap(sorted);
                         mapState.lastError = null;
+                        state.pagination.visibleRange = { start: 1, end: sorted.length };
+                        updatePaginationUi();
                         updateResultsSummary(sorted);
                     } catch (error) {
                         mapState.lastError = error;
@@ -5766,21 +6220,62 @@
                         <div style="margin-top:8px;">Try removing a filter or widening the focus area.</div>
                     `;
                     elements.resultsGrid.appendChild(emptyState);
+                    state.pagination.totalPages = 1;
+                    state.pagination.visibleRange = { start: 0, end: 0 };
+                    updatePaginationUi();
                     updateResultsSummary(sorted);
                     return;
                 }
 
-                const shouldVirtualize = sorted.length > state.virtual.pageSize * 2;
+                const usesPagination = state.pagination.pageSizeOption !== "all";
+
+                if (usesPagination) {
+                    resetVirtualization();
+                    const pageSize = Math.max(1, state.pagination.pageSizeValue || PREFERENCES_DEFAULTS.programsPerPage);
+                    const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+                    state.pagination.totalPages = totalPages;
+                    if (state.pagination.currentPage > totalPages) {
+                        state.pagination.currentPage = totalPages;
+                    }
+                    if (state.pagination.currentPage < 1) {
+                        state.pagination.currentPage = 1;
+                    }
+                    const startIndex = (state.pagination.currentPage - 1) * pageSize;
+                    const endIndex = Math.min(sorted.length, startIndex + pageSize);
+                    let pageItems = sorted.slice(startIndex, endIndex);
+                    if (!pageItems.length && sorted.length) {
+                        state.pagination.currentPage = 1;
+                        state.pagination.visibleRange = {
+                            start: 1,
+                            end: Math.min(pageSize, sorted.length)
+                        };
+                        pageItems = sorted.slice(0, pageSize);
+                    } else {
+                        state.pagination.visibleRange = {
+                            start: startIndex + 1,
+                            end: endIndex
+                        };
+                    }
+                    const fragment = document.createDocumentFragment();
+                    pageItems.forEach(program => fragment.appendChild(createProgramCard(program)));
+                    elements.resultsGrid.appendChild(fragment);
+                    updatePaginationUi();
+                    updateResultsSummary(sorted);
+                    return;
+                }
+
+                state.pagination.totalPages = 1;
+                state.pagination.visibleRange = { start: 1, end: sorted.length };
+                const shouldVirtualize = sorted.length > state.virtual.chunkSize * 2;
                 if (shouldVirtualize) {
-                    elements.resultsGrid.innerHTML = "";
                     setupVirtualization(sorted);
-                    updateResultsSummary(sorted);
-                    return;
+                } else {
+                    resetVirtualization();
+                    const fragment = document.createDocumentFragment();
+                    sorted.forEach(program => fragment.appendChild(createProgramCard(program)));
+                    elements.resultsGrid.appendChild(fragment);
                 }
-
-                resetVirtualization();
-                sorted.forEach(program => elements.resultsGrid.appendChild(createProgramCard(program)));
-
+                updatePaginationUi();
                 updateResultsSummary(sorted);
             }
 
@@ -6372,6 +6867,41 @@
                     localStorage.setItem("ccpro-preferred-view", view);
                 } catch (error) {
                     console.warn("Unable to persist preferred view", error);
+                }
+                renderPrograms();
+            }
+
+            function goToPage(pageNumber) {
+                if (state.pagination.pageSizeOption === "all") return;
+                const totalPages = state.pagination.totalPages || 1;
+                const clamped = Math.max(1, Math.min(pageNumber, totalPages));
+                if (clamped === state.pagination.currentPage) return;
+                state.pagination.currentPage = clamped;
+                renderPrograms();
+            }
+
+            function changePage(delta) {
+                goToPage(state.pagination.currentPage + delta);
+            }
+
+            function setPaginationPageSize(option, { persist = true } = {}) {
+                let normalized = option === "all" ? "all" : Number(option);
+                if (normalized !== "all" && !PROGRAMS_PER_PAGE_OPTIONS.includes(normalized)) {
+                    normalized = PREFERENCES_DEFAULTS.programsPerPage;
+                }
+                if (state.pagination.pageSizeOption === normalized) {
+                    return;
+                }
+                state.pagination.pageSizeOption = normalized;
+                state.pagination.pageSizeValue = normalized === "all" ? Number.MAX_SAFE_INTEGER : Number(normalized);
+                state.pagination.currentPage = 1;
+                state.pagination.lastSignature = null;
+                if (persist) {
+                    preferencesState = {
+                        ...preferencesState,
+                        programsPerPage: normalized
+                    };
+                    saveUserPreferences(preferencesState);
                 }
                 renderPrograms();
             }
@@ -7080,6 +7610,11 @@
                     button.addEventListener("click", () => setDocumentType(button.dataset.docType));
                 });
                 setDocumentType(state.documentType, { silent: true });
+                if (elements.paginationPageSize) {
+                    elements.paginationPageSize.value = state.pagination.pageSizeOption === "all"
+                        ? "all"
+                        : String(state.pagination.pageSizeOption);
+                }
                 audienceToggleButtons.forEach(button => {
                     button.addEventListener("click", () => setAudienceMode(button.dataset.audience));
                 });
@@ -7108,6 +7643,11 @@
                 elements.builderLanes.addEventListener("input", handleBuilderInput);
                 elements.builderLanes.addEventListener("change", handleBuilderInput);
                 elements.builderLanes.addEventListener("click", handleTileAction);
+                elements.paginationPrevButton?.addEventListener("click", () => changePage(-1));
+                elements.paginationNextButton?.addEventListener("click", () => changePage(1));
+                elements.paginationPageSize?.addEventListener("change", event => {
+                    setPaginationPageSize(event.target.value);
+                });
                 elements.builderLanes.addEventListener("mousedown", event => {
                     const target = event.target;
                     if (target instanceof HTMLButtonElement && target.dataset.editorCommand) {

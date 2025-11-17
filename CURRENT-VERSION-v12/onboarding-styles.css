@@ -1,0 +1,1019 @@
+/**
+ * Onboarding Styles
+ * Mirrors the CareConnect v12 visual system.
+ */
+
+/* ========================================
+   BRAND TOKENS
+   ======================================== */
+
+:root {
+    --cc-brand-indigo: #6366f1;
+    --cc-brand-indigo-dark: #4f46e5;
+    --cc-brand-purple: #7c3aed;
+    --cc-surface-0: #ffffff;
+    --cc-surface-50: #f8fafc;
+    --cc-surface-100: #f3f4f6;
+    --cc-surface-900: #111827;
+    --cc-muted-500: #6b7280;
+
+    --onboarding-primary: var(--cc-brand-indigo);
+    --onboarding-secondary: var(--cc-brand-purple);
+    --onboarding-success: #22c55e;
+    --onboarding-warning: #fbbf24;
+    --onboarding-danger: #ef4444;
+    --onboarding-dark: #1f2937;
+    --onboarding-light: var(--cc-surface-100);
+    --onboarding-overlay: rgba(17, 24, 39, 0.72);
+    --onboarding-shadow: 0 24px 60px rgba(79, 70, 229, 0.25);
+    --onboarding-radius: 16px;
+    --onboarding-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --onboarding-gradient: linear-gradient(135deg, var(--onboarding-primary) 0%, var(--onboarding-secondary) 100%);
+}
+
+/* ========================================
+   MODAL OVERLAYS
+   ======================================== */
+
+.onboarding-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--onboarding-overlay);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.onboarding-modal {
+    background: var(--cc-surface-0);
+    border-radius: var(--onboarding-radius);
+    padding: 44px 40px;
+    max-width: 520px;
+    width: 90%;
+    box-shadow: var(--onboarding-shadow);
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.onboarding-modal .modal-icon {
+    font-size: 64px;
+    text-align: center;
+    margin-bottom: 20px;
+    animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.onboarding-modal h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--onboarding-dark);
+    margin: 0 0 16px 0;
+    text-align: center;
+}
+
+.onboarding-modal p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--cc-muted-500);
+    margin: 0 0 32px 0;
+    text-align: center;
+}
+
+.onboarding-modal .modal-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+/* ========================================
+   BUTTONS
+   ======================================== */
+
+.btn-primary,
+.btn-secondary,
+.btn-small {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--onboarding-transition);
+    outline: none;
+}
+
+.btn-primary {
+    background: var(--onboarding-gradient);
+    color: white;
+    box-shadow: 0 12px 30px rgba(99, 102, 241, 0.35);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--onboarding-secondary) 0%, var(--onboarding-primary) 100%);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: var(--cc-surface-100);
+    color: var(--onboarding-dark);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
+.btn-secondary:hover {
+    background: var(--cc-surface-0);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.btn-large {
+    padding: 16px 32px;
+    font-size: 18px;
+}
+
+.btn-small {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+/* ========================================
+   VIDEO COMPONENT
+   ======================================== */
+
+.onboarding-video-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--onboarding-gradient);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.onboarding-video-container {
+    width: 92%;
+    max-width: 820px;
+    text-align: center;
+}
+
+.video-content {
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: var(--onboarding-radius);
+    padding: 40px;
+    margin-bottom: 20px;
+    box-shadow: var(--onboarding-shadow);
+}
+
+.video-scene {
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.scene-svg {
+    width: 100%;
+    max-width: 460px;
+    height: auto;
+}
+
+.video-caption {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--onboarding-dark);
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.video-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+}
+
+.video-progress {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.video-progress .progress-bar {
+    height: 100%;
+    background: var(--onboarding-light);
+    transition: width 0.3s ease;
+}
+
+.skip-button {
+    background: rgba(255, 255, 255, 0.18);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    padding: 10px 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: var(--onboarding-transition);
+}
+
+.skip-button:hover {
+    background: rgba(255, 255, 255, 0.28);
+    transform: translateY(-1px);
+}
+
+.skip-button.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ========================================
+   VIDEO ANIMATIONS
+   ======================================== */
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.delay-1 { animation-delay: 0.2s; opacity: 0; animation-fill-mode: forwards; }
+.delay-2 { animation-delay: 0.4s; opacity: 0; animation-fill-mode: forwards; }
+.delay-3 { animation-delay: 0.6s; opacity: 0; animation-fill-mode: forwards; }
+
+.paper-stack { animation: stackPaper 1s ease-in-out infinite; }
+.stack-1 { animation-delay: 0s; }
+.stack-2 { animation-delay: 0.3s; }
+.stack-3 { animation-delay: 0.6s; }
+
+.person-stressed { animation: shake 0.5s ease-in-out infinite; }
+.clock-ticking .clock-hand { animation: rotate 2s linear infinite; transform-origin: 330px 90px; }
+.dashboard-elements rect { animation: fadeInUp 0.6s ease-out; }
+.progress-fill { animation: progressFill 2s ease-out; }
+.floating-check { animation: floatUp 2s ease-out infinite; }
+.person-happy { animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+.transform-arrow { animation: pulse 1.5s ease-in-out infinite; }
+.sparkle { animation: sparkle 1.5s ease-in-out infinite; }
+.savings-badge { animation: scaleIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+.pulse { animation: pulse 2s ease-in-out infinite; }
+.logo-reveal { animation: scaleIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+.scale-in { animation: scaleIn 0.6s ease-out; }
+.ready-indicator { animation: slideUp 0.6s ease-out; }
+
+/* ========================================
+   TOUR OVERLAY
+   ======================================== */
+
+.onboarding-tour-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--onboarding-overlay);
+    z-index: 9998;
+    pointer-events: none;
+    transition: clip-path 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.onboarding-highlight {
+    position: relative;
+    z-index: 10000;
+    box-shadow:
+        0 0 0 4px rgba(99, 102, 241, 0.95),
+        0 0 0 12px rgba(99, 102, 241, 0.25);
+    border-radius: 12px;
+    animation: highlightPulse 2s ease-in-out infinite;
+}
+
+/* ========================================
+   TOUR TOOLTIP
+   ======================================== */
+
+.onboarding-tour-tooltip {
+    position: fixed;
+    background: var(--cc-surface-0);
+    border-radius: var(--onboarding-radius);
+    box-shadow: var(--onboarding-shadow);
+    max-width: 420px;
+    width: 90%;
+    z-index: 10001;
+    pointer-events: all;
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tooltip-header {
+    padding: 20px 24px 16px 24px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: flex-start;
+}
+
+.tooltip-progress {
+    flex: 1;
+}
+
+.progress-text {
+    font-size: 14px;
+    color: rgba(71, 85, 105, 0.85);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 6px;
+    background: var(--cc-surface-100);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.progress-bar-container .progress-bar {
+    height: 100%;
+    background: var(--onboarding-gradient);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tooltip-close {
+    background: none;
+    border: none;
+    font-size: 28px;
+    color: rgba(71, 85, 105, 0.7);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--onboarding-transition);
+}
+
+.tooltip-close:hover {
+    color: var(--onboarding-danger);
+    transform: rotate(90deg);
+}
+
+.tooltip-content {
+    padding: 22px 24px;
+}
+
+.tooltip-content h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--onboarding-dark);
+    margin: 0 0 12px 0;
+}
+
+.tooltip-content p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(71, 85, 105, 0.9);
+    margin: 0;
+}
+
+.tooltip-pro-tip {
+    margin-top: 16px;
+    padding: 14px;
+    background: #fefce8;
+    border-left: 4px solid var(--onboarding-warning);
+    border-radius: 6px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.tooltip-pro-tip.hidden {
+    display: none;
+}
+
+.tip-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.tip-text {
+    font-size: 14px;
+    color: #a16207;
+    line-height: 1.5;
+}
+
+.tooltip-footer {
+    padding: 16px 24px 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.tooltip-footer button {
+    flex: 1;
+}
+
+/* ========================================
+   PRACTICE MODE
+   ======================================== */
+
+.practice-environment {
+    position: fixed;
+    inset: 0;
+    background: #eef2ff;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.practice-header {
+    background: var(--cc-surface-0);
+    padding: 18px 32px;
+    box-shadow: 0 10px 30px rgba(79, 70, 229, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.practice-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(99, 102, 241, 0.1);
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 2px solid rgba(99, 102, 241, 0.25);
+}
+
+.badge-icon {
+    font-size: 20px;
+}
+
+.badge-text {
+    font-weight: 600;
+    color: var(--onboarding-primary);
+}
+
+.practice-progress {
+    font-size: 14px;
+    color: rgba(17, 24, 39, 0.7);
+    font-weight: 600;
+}
+
+.practice-exit {
+    background: var(--cc-surface-100);
+    border: none;
+    padding: 9px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--onboarding-transition);
+}
+
+.practice-exit:hover {
+    background: var(--cc-surface-0);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.practice-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 24px;
+    padding: 24px 28px;
+    overflow: hidden;
+}
+
+.practice-task-panel {
+    background: var(--cc-surface-0);
+    border-radius: var(--onboarding-radius);
+    padding: 32px;
+    box-shadow: 0 12px 32px rgba(79, 70, 229, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.task-instruction h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--onboarding-dark);
+    margin: 0 0 12px 0;
+}
+
+.task-instruction p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: rgba(71, 85, 105, 0.92);
+    margin: 0 0 20px 0;
+}
+
+.task-hint {
+    margin-top: 18px;
+    padding: 14px;
+    background: #ecfdf5;
+    border-left: 4px solid var(--onboarding-success);
+    border-radius: 6px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.task-hint.hidden {
+    display: none;
+}
+
+.hint-text {
+    font-size: 14px;
+    color: #047857;
+    line-height: 1.5;
+}
+
+.task-validation {
+    padding: 24px;
+    background: #ecfdf5;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.15);
+}
+
+.task-validation.hidden {
+    display: none;
+}
+
+.validation-icon {
+    font-size: 48px;
+    color: var(--onboarding-success);
+    margin-bottom: 12px;
+}
+
+.practice-dashboard {
+    background: var(--cc-surface-0);
+    border-radius: var(--onboarding-radius);
+    padding: 32px;
+    box-shadow: 0 12px 32px rgba(79, 70, 229, 0.08);
+    overflow-y: auto;
+}
+
+.practice-clients {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.practice-client-card {
+    background: var(--cc-surface-50);
+    border-radius: 14px;
+    padding: 24px;
+    border: 2px solid transparent;
+    transition: var(--onboarding-transition);
+}
+
+.practice-client-card:hover {
+    border-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 16px 32px rgba(99, 102, 241, 0.18);
+    transform: translateY(-4px);
+}
+
+.client-header {
+    display: flex;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.client-initials {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--onboarding-gradient);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.client-info {
+    flex: 1;
+}
+
+.client-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--onboarding-dark);
+}
+
+.client-meta {
+    font-size: 14px;
+    color: rgba(71, 85, 105, 0.75);
+    margin-top: 4px;
+}
+
+.client-progress {
+    margin-bottom: 18px;
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--cc-surface-100);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--onboarding-gradient);
+    transition: width 0.4s ease;
+}
+
+.progress-text {
+    font-size: 13px;
+    color: rgba(71, 85, 105, 0.7);
+    font-weight: 600;
+}
+
+.client-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.task-celebration {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 100px;
+    animation: celebrationPop 2s ease-out;
+    pointer-events: none;
+}
+
+/* ========================================
+   COMPLETION & CELEBRATION
+   ======================================== */
+
+.onboarding-modal.completion {
+    text-align: center;
+}
+
+.celebration-icon {
+    animation: celebrationBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.confetti-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 14px;
+    top: -12px;
+    border-radius: 4px;
+    animation: confettiFall 5s linear;
+    background: var(--onboarding-primary);
+}
+
+.completion-stats {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin: 32px 0;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-icon {
+    font-size: 32px;
+    color: var(--onboarding-success);
+    margin-bottom: 10px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: rgba(71, 85, 105, 0.85);
+    font-weight: 600;
+}
+
+.pro-tip {
+    background: #fefce8;
+    padding: 16px;
+    border-radius: 10px;
+    margin: 22px 0;
+    font-size: 14px;
+    color: #a16207;
+    text-align: left;
+}
+
+.achievements {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 32px 0;
+}
+
+.achievement {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(99, 102, 241, 0.08);
+    border-radius: 12px;
+    animation: slideInRight 0.5s ease-out;
+}
+
+.achievement-icon {
+    font-size: 32px;
+}
+
+.achievement-name {
+    font-weight: 600;
+    color: var(--onboarding-dark);
+}
+
+/* ========================================
+   NOTIFICATIONS & BADGES
+   ======================================== */
+
+.onboarding-notification {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    background: var(--cc-surface-0);
+    padding: 16px 22px;
+    border-radius: 12px;
+    box-shadow: var(--onboarding-shadow);
+    z-index: 10002;
+    transform: translateY(120px);
+    opacity: 0;
+    transition: var(--onboarding-transition);
+    border-left: 4px solid var(--onboarding-primary);
+}
+
+.onboarding-notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.onboarding-notification.success {
+    border-left-color: var(--onboarding-success);
+}
+
+.onboarding-notification.warning {
+    border-left-color: var(--onboarding-warning);
+}
+
+.onboarding-notification.error {
+    border-left-color: var(--onboarding-danger);
+}
+
+/* ========================================
+   SAMPLE CLIENTS PREVIEW (INTRO MODAL)
+   ======================================== */
+
+.sample-clients-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 32px 0;
+}
+
+.sample-client {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    background: rgba(99, 102, 241, 0.08);
+    border-radius: 12px;
+}
+
+.client-icon {
+    font-size: 28px;
+    width: 50px;
+    height: 50px;
+    background: var(--onboarding-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.sample-client strong {
+    display: block;
+    font-weight: 600;
+    color: var(--onboarding-dark);
+    margin-bottom: 4px;
+}
+
+.sample-client span {
+    font-size: 14px;
+    color: rgba(71, 85, 105, 0.85);
+}
+
+/* ========================================
+   KEYFRAME ANIMATIONS
+   ======================================== */
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(60px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes stackPaper {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes fadeInUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes progressFill {
+    from { width: 0; }
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-50px); opacity: 0; }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+@keyframes sparkle {
+    0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    50% { transform: scale(1.2) rotate(180deg); opacity: 0.5; }
+}
+
+@keyframes highlightPulse {
+    0%, 100% {
+        box-shadow:
+            0 0 0 4px rgba(99, 102, 241, 0.95),
+            0 0 0 12px rgba(99, 102, 241, 0.25);
+    }
+    50% {
+        box-shadow:
+            0 0 0 4px rgba(99, 102, 241, 0.95),
+            0 0 0 16px rgba(99, 102, 241, 0.35);
+    }
+}
+
+@keyframes confettiFall {
+    to { transform: translateY(100vh) rotate(720deg); }
+}
+
+@keyframes celebrationPop {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+}
+
+@keyframes celebrationBounce {
+    0% { transform: scale(0) rotate(0deg); }
+    50% { transform: scale(1.2) rotate(180deg); }
+    100% { transform: scale(1) rotate(360deg); }
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 1024px) {
+    .practice-content {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+
+    .practice-task-panel {
+        padding: 24px;
+    }
+
+    .practice-dashboard {
+        padding: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .onboarding-modal {
+        padding: 32px 24px;
+        max-width: 95%;
+    }
+
+    .onboarding-modal h2 {
+        font-size: 24px;
+    }
+
+    .onboarding-modal p {
+        font-size: 14px;
+    }
+
+    .onboarding-tour-tooltip {
+        max-width: 95%;
+    }
+
+    .tooltip-content h3 {
+        font-size: 18px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .modal-actions button {
+        width: 100%;
+    }
+
+    .completion-stats {
+        flex-direction: column;
+        gap: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .practice-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .client-actions {
+        flex-direction: column;
+    }
+
+    .client-actions button {
+        width: 100%;
+    }
+}
+
+/* ========================================
+   UTILITIES & PRINT
+   ======================================== */
+
+.hidden {
+    display: none !important;
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+@media print {
+    .onboarding-modal-overlay,
+    .onboarding-video-overlay,
+    .onboarding-tour-overlay,
+    .practice-environment {
+        display: none !important;
+    }
+}
+
+
