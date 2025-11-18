@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConnect Pro - Aftercare Planning Made Easy</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-teal: #17a2b8;
+            --secondary-coral: #ff6b6b;
+            --success-green: #51cf66;
+            --warm-cream: #fdfbf7;
+            --warm-gray: #495057;
+            --light-gray: #e9ecef;
+            --border-color: #dee2e6;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-hover: 0 4px 16px rgba(0,0,0,0.15);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--warm-cream) 0%, #fff 100%);
+            color: var(--warm-gray);
+            line-height: 1.6;
+        }
+        
+        /* Welcome Screen */
+        .welcome-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .welcome-card {
+            background: white;
+            border-radius: 24px;
+            padding: 48px;
+            max-width: 600px;
+            box-shadow: var(--shadow-hover);
+            text-align: center;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .welcome-emoji {
+            font-size: 64px;
+            margin-bottom: 24px;
+        }
+        
+        .welcome-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-teal);
+            margin-bottom: 16px;
+        }
+        
+        .welcome-subtitle {
+            font-size: 18px;
+            color: var(--warm-gray);
+            margin-bottom: 32px;
+        }
+        
+        .welcome-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .welcome-input:focus {
+            outline: none;
+            border-color: var(--primary-teal);
+            box-shadow: 0 0 0 3px rgba(23, 162, 184, 0.1);
+        }
+        
+        .btn-start {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary-teal) 0%, #138496 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(23, 162, 184, 0.3);
+        }
+        
+        .welcome-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .welcome-stat {
+            text-align: center;
+        }
+        
+        .welcome-stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-teal);
+        }
+        
+        .welcome-stat-label {
+            font-size: 12px;
+            color: var(--warm-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Main App Layout */
+        .app-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            height: 100vh;
+            max-width: 1800px;
+            margin: 0 auto;
+        }
+        
+        /* Left Sidebar */
+        .sidebar-left {
+            background: white;
+            border-right: 1px solid var(--border-color);
+            padding: 24px;
+            overflow-y: auto;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-teal) 0%, #138496 100%);
+            border-radius: 16px;
+            color: white;
+            margin-bottom: 24px;
+        }
+        
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .user-info h3 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .user-info p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .workflow-steps {
+            margin-bottom: 32px;
+        }
+        
+        .workflow-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--warm-gray);
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .workflow-step:hover {
+            background: var(--warm-cream);
+        }
+        
+        .workflow-step.active {
+            background: linear-gradient(135deg, rgba(23, 162, 184, 0.1) 0%, rgba(19, 132, 150, 0.1) 100%);
+            border-left: 3px solid var(--primary-teal);
+        }
+        
+        .workflow-step.completed {
+            opacity: 0.6;
+        }
+        
+        .step-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            background: var(--light-gray);
+        }
+        
+        .workflow-step.active .step-icon {
+            background: var(--primary-teal);
+            color: white;
+        }
+        
+        .workflow-step.completed .step-icon {
+            background: var(--success-green);
+            color: white;
+        }
+        
+        .step-label {
+            flex: 1;
+        }
+        
+        .step-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+        
+        .step-description {
+            font-size: 11px;
+            color: var(--warm-gray);
+            opacity: 0.7;
+        }
+        
+        .quick-actions {
+            margin-bottom: 32px;
+        }
+        
+        .quick-action-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .quick-action-btn:hover {
+            border-color: var(--primary-teal);
+            background: var(--warm-cream);
+        }
+        
+        .quick-action-icon {
+            font-size: 20px;
+        }
+        
+        .quick-action-text {
+            flex: 1;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .modules-section {
+            margin-top: 24px;
+        }
+        
+        .module-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, white 100%);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .module-card:hover {
+            border-color: var(--primary-teal);
+            transform: translateX(4px);
+        }
+        
+        .module-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .module-title {
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        .module-badge {
+            background: var(--success-green);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        .module-progress {
+            height: 4px;
+            background: var(--light-gray);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .module-progress-fill {
+            height: 100%;
+            background: var(--success-green);
+            transition: width 0.3s ease;
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            padding: 32px;
+            overflow-y: auto;
+        }
+        
+        .content-header {
+            margin-bottom: 32px;
+        }
+        
+        .content-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-teal);
+            margin-bottom: 8px;
+        }
+        
+        .content-subtitle {
+            font-size: 16px;
+            color: var(--warm-gray);
+        }
+        
+        .encouragement-banner {
+            background: linear-gradient(135deg, var(--secondary-coral) 0%, #fa5252 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            animation: slideIn 0.5s ease;
+        }
+        
+        .encouragement-icon {
+            font-size: 32px;
+        }
+        
+        .encouragement-text {
+            flex: 1;
+        }
+        
+        .encouragement-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .encouragement-message {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* Program Cards */
+        .programs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        .program-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .program-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-teal) 0%, var(--secondary-coral) 100%);
+        }
+        
+        .program-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-teal);
+        }
+        
+        .program-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
+        }
+        
+        .program-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--warm-gray);
+            margin-bottom: 4px;
+        }
+        
+        .program-location {
+            font-size: 14px;
+            color: var(--warm-gray);
+            opacity: 0.7;
+        }
+        
+        .program-rating {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .star {
+            color: #ffd43b;
+            font-size: 16px;
+        }
+        
+        .program-highlight {
+            background: linear-gradient(135deg, rgba(81, 207, 102, 0.1) 0%, rgba(81, 207, 102, 0.05) 100%);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-left: 3px solid var(--success-green);
+        }
+        
+        .highlight-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--success-green);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .highlight-text {
+            font-size: 14px;
+            color: var(--warm-gray);
+        }
+        
+        .program-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .tag {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .tag-level {
+            background: rgba(23, 162, 184, 0.1);
+            color: var(--primary-teal);
+        }
+        
+        .tag-specialty {
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--secondary-coral);
+        }
+        
+        .program-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: var(--primary-teal);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #138496;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--warm-gray);
+            border: 2px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--primary-teal);
+            color: var(--primary-teal);
+        }
+        
+        /* Right Sidebar */
+        .sidebar-right {
+            background: white;
+            border-left: 1px solid var(--border-color);
+            padding: 24px;
+            overflow-y: auto;
+        }
+        
+        .tips-section {
+            margin-bottom: 32px;
+        }
+        
+        .tips-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--primary-teal);
+        }
+        
+        .tip-card {
+            background: linear-gradient(135deg, #fff9e6 0%, #fff 100%);
+            border-left: 3px solid #ffd43b;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .tip-icon {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .tip-text {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        
+        .progress-celebration {
+            background: linear-gradient(135deg, var(--success-green) 0%, #37b24d 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .celebration-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+        
+        .celebration-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .celebration-detail {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .quick-reference {
+            margin-top: 32px;
+        }
+        
+        .reference-item {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .reference-item:hover {
+            background: var(--warm-cream);
+        }
+        
+        .reference-title {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        
+        .reference-description {
+            font-size: 11px;
+            color: var(--warm-gray);
+            opacity: 0.7;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .app-container {
+                grid-template-columns: 280px 1fr;
+            }
+            
+            .sidebar-right {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .app-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar-left {
+                display: none;
+            }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome Screen -->
+    <div id="welcomeScreen" class="welcome-screen">
+        <div class="welcome-card">
+            <div class="welcome-emoji">👋</div>
+            <h1 class="welcome-title">Welcome to CareConnect Pro</h1>
+            <p class="welcome-subtitle">Let's create amazing aftercare plans together!</p>
+            
+            <input type="text" 
+                   class="welcome-input" 
+                   id="clinicianName"
+                   placeholder="Enter your name (optional)"
+                   autofocus>
+            
+            <button class="btn-start" onclick="startSession()">
+                Let's Get Started!
+            </button>
+            
+            <div class="welcome-stats">
+                <div class="welcome-stat">
+                    <div class="welcome-stat-number">247</div>
+                    <div class="welcome-stat-label">Programs</div>
+                </div>
+                <div class="welcome-stat">
+                    <div class="welcome-stat-number">5</div>
+                    <div class="welcome-stat-label">Learning Modules</div>
+                </div>
+                <div class="welcome-stat">
+                    <div class="welcome-stat-number">100%</div>
+                    <div class="welcome-stat-label">Success Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main App -->
+    <div id="mainApp" class="app-container hidden">
+        <!-- Left Sidebar -->
+        <div class="sidebar-left">
+            <div class="user-profile">
+                <div class="user-avatar">👤</div>
+                <div class="user-info">
+                    <h3 id="userName">Clinician</h3>
+                    <p>47 families helped this month!</p>
+                </div>
+            </div>
+            
+            <div class="workflow-steps">
+                <div class="workflow-title">Your Workflow</div>
+                
+                <div class="workflow-step active" data-step="explore">
+                    <div class="step-icon">🔍</div>
+                    <div class="step-label">
+                        <div class="step-name">Explore Programs</div>
+                        <div class="step-description">Find the right fit</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step" data-step="compare">
+                    <div class="step-icon">⚖️</div>
+                    <div class="step-label">
+                        <div class="step-name">Compare Options</div>
+                        <div class="step-description">Side-by-side analysis</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step" data-step="document">
+                    <div class="step-icon">📝</div>
+                    <div class="step-label">
+                        <div class="step-name">Create Documents</div>
+                        <div class="step-description">Professional plans</div>
+                    </div>
+                </div>
+                
+                <div class="workflow-step" data-step="package">
+                    <div class="step-icon">📦</div>
+                    <div class="step-label">
+                        <div class="step-name">Package & Share</div>
+                        <div class="step-description">Complete discharge packet</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <div class="workflow-title">Quick Actions</div>
+                <button class="quick-action-btn">
+                    <span class="quick-action-icon">➕</span>
+                    <span class="quick-action-text">Add New Program</span>
+                </button>
+                <button class="quick-action-btn">
+                    <span class="quick-action-icon">📚</span>
+                    <span class="quick-action-text">View Learning Modules</span>
+                </button>
+                <button class="quick-action-btn">
+                    <span class="quick-action-icon">📊</span>
+                    <span class="quick-action-text">My Statistics</span>
+                </button>
+            </div>
+            
+            <div class="modules-section">
+                <div class="workflow-title">Learning Modules</div>
+                
+                <div class="module-card">
+                    <div class="module-header">
+                        <div class="module-title">Understanding Levels of Care</div>
+                        <div class="module-badge">NEW</div>
+                    </div>
+                    <div class="module-progress">
+                        <div class="module-progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="module-card">
+                    <div class="module-header">
+                        <div class="module-title">Reading Program Profiles</div>
+                    </div>
+                    <div class="module-progress">
+                        <div class="module-progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="content-header">
+                <h1 class="content-title">Explore Treatment Programs</h1>
+                <p class="content-subtitle">Find the perfect match for your client's needs</p>
+            </div>
+            
+            <div class="encouragement-banner">
+                <div class="encouragement-icon">💪</div>
+                <div class="encouragement-text">
+                    <div class="encouragement-title">You're doing great work!</div>
+                    <div class="encouragement-message">You've reviewed 12 programs today. Keep going!</div>
+                </div>
+            </div>
+            
+            <div id="programsGrid" class="programs-grid">
+                <!-- Programs will be loaded here -->
+            </div>
+        </div>
+        
+        <!-- Right Sidebar -->
+        <div class="sidebar-right">
+            <div class="progress-celebration">
+                <div class="celebration-icon">🎉</div>
+                <div class="celebration-text">3 Programs Selected</div>
+                <div class="celebration-detail">Ready to compare!</div>
+            </div>
+            
+            <div class="tips-section">
+                <h3 class="tips-title">💡 Pro Tips</h3>
+                
+                <div class="tip-card">
+                    <div class="tip-icon">✨</div>
+                    <div class="tip-text">
+                        Great choice! Residential programs work best for clients needing 24/7 support.
+                    </div>
+                </div>
+                
+                <div class="tip-card">
+                    <div class="tip-icon">📞</div>
+                    <div class="tip-text">
+                        Remember to verify insurance coverage before presenting options to families.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quick-reference">
+                <h3 class="tips-title">📚 Quick Reference</h3>
+                
+                <div class="reference-item">
+                    <div class="reference-title">What is IOP?</div>
+                    <div class="reference-description">Intensive Outpatient Program explained</div>
+                </div>
+                
+                <div class="reference-item">
+                    <div class="reference-title">Insurance Guide</div>
+                    <div class="reference-description">Common coverage requirements</div>
+                </div>
+                
+                <div class="reference-item">
+                    <div class="reference-title">Red Flags</div>
+                    <div class="reference-description">Warning signs in admissions</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/programs-data.js"></script>
+    <script>
+        // Session Management
+        function startSession() {
+            const name = document.getElementById('clinicianName').value || 'Clinician';
+            document.getElementById('userName').textContent = name;
+            
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
+            loadPrograms();
+        }
+        
+        // Load and Display Programs
+        function loadPrograms() {
+            const grid = document.getElementById('programsGrid');
+            const programs = window.programsData || [];
+            
+            if (programs.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 48px;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
+                        <h3 style="margin-bottom: 8px;">No programs yet</h3>
+                        <p style="color: var(--warm-gray); opacity: 0.7;">Use the Chrome extension to add programs from treatment center websites</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = '';
+            programs.forEach(program => {
+                const card = createProgramCard(program);
+                grid.appendChild(card);
+            });
+        }
+        
+        function createProgramCard(program) {
+            const card = document.createElement('div');
+            card.className = 'program-card';
+            
+            const stars = '⭐'.repeat(5);
+            const levelTag = program.clinical?.levelsOfCare?.[0] || 'Treatment';
+            const specialty = program.clinical?.specializations?.[0] || 'General';
+            
+            card.innerHTML = `
+                <div class="program-header">
+                    <div>
+                        <h3 class="program-name">${program.name}</h3>
+                        <div class="program-location">${program.location?.city || ''}, ${program.location?.state || ''}</div>
+                    </div>
+                    <div class="program-rating">${stars}</div>
+                </div>
+                
+                <div class="program-highlight">
+                    <div class="highlight-label">What Makes It Special</div>
+                    <div class="highlight-text">${program.clinical?.primaryFocus || 'Comprehensive care program'}</div>
+                </div>
+                
+                <div class="program-tags">
+                    <span class="tag tag-level">${levelTag}</span>
+                    <span class="tag tag-specialty">${specialty}</span>
+                </div>
+                
+                <div class="program-actions">
+                    <button class="btn btn-primary">View Details</button>
+                    <button class="btn btn-secondary">Compare</button>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        // Workflow Navigation
+        document.querySelectorAll('.workflow-step').forEach(step => {
+            step.addEventListener('click', () => {
+                document.querySelectorAll('.workflow-step').forEach(s => s.classList.remove('active'));
+                step.classList.add('active');
+            });
+        });
+    </script>
+
+<script>
+// programs-data.js - Treatment programs database
+// This data is loaded from your existing programs or can be populated via Chrome Extension
+
+window.programsData = [
+    {
+        id: 'program_1',
+        name: 'Charlie Health Virtual IOP Program',
+        location: { city: 'Virtual', state: '', distance: null },
+        type: 'Virtual Program',
+        category: 'virtual',
+        clinical: {
+            levelsOfCare: ['IOP'],
+            primaryFocus: 'Mental Health',
+            specializations: ['Anxiety', 'Depression', 'Mental Health'],
+            modalities: {
+                evidenceBased: ['Group Therapy', 'Individual Therapy', 'Family Therapy'],
+                experiential: [],
+                holistic: []
+            }
+        },
+        population: {
+            ages: '13-25',
+            gender: 'Co-ed',
+            specialPopulations: []
+        },
+        structure: {
+            lengthOfStay: '6-10 weeks',
+            capacity: '',
+            staffRatio: '',
+            groupSize: ''
+        },
+        admissions: {
+            insurance: ['Most Major Insurers'],
+            privatePay: true,
+            requirements: []
+        },
+        contact: {
+            phone: '561.203.5396',
+            email: '',
+            contactPerson: 'Gabriella H.'
+        },
+        website: 'https://www.charliehealth.com',
+        quality: {
+            accreditations: [],
+            memberships: []
+        }
+    },
+    {
+        id: 'program_2',
+        name: 'The Last House',
+        location: { city: 'Los Angeles', state: 'CA', distance: null },
+        type: 'Sober Living',
+        category: 'sober-living',
+        clinical: {
+            levelsOfCare: ['Sober Living'],
+            primaryFocus: 'Substance Use Disorders',
+            specializations: ['Substance Use', 'Recovery Support'],
+            modalities: {
+                evidenceBased: ['12-Step'],
+                experiential: ['Community Activities'],
+                holistic: []
+            }
+        },
+        population: {
+            ages: '18+',
+            gender: 'Males Only',
+            specialPopulations: ['Young Adults']
+        },
+        structure: {
+            lengthOfStay: 'Flexible',
+            capacity: '',
+            staffRatio: '',
+            groupSize: ''
+        },
+        admissions: {
+            insurance: [],
+            privatePay: true,
+            requirements: []
+        },
+        contact: {
+            phone: '866.677.0090',
+            email: '',
+            address: '3101 Ocean Park Blvd #302, Santa Monica, CA 90405'
+        },
+        website: 'https://thelasthouse.net',
+        quality: {
+            accreditations: [],
+            memberships: []
+        }
+    },
+    {
+        id: 'program_3',
+        name: 'Patton Sober Living Homes',
+        location: { city: 'Dallas', state: 'TX', distance: null },
+        type: 'Sober Living',
+        category: 'sober-living',
+        clinical: {
+            levelsOfCare: ['Sober Living'],
+            primaryFocus: 'Substance Use Disorders',
+            specializations: ['Substance Use', 'Life Skills'],
+            modalities: {
+                evidenceBased: ['12-Step', 'Employment Coaching'],
+                experiential: ['Life Skills Training'],
+                holistic: []
+            }
+        },
+        population: {
+            ages: '18-25',
+            gender: 'Males Only',
+            specialPopulations: ['Young Adults']
+        },
+        structure: {
+            lengthOfStay: 'Flexible',
+            capacity: '',
+            staffRatio: '',
+            groupSize: ''
+        },
+        admissions: {
+            insurance: [],
+            privatePay: true,
+            requirements: ['Employment or Education (25+ hrs/week)']
+        },
+        contact: {
+            phone: '(469) 974-4639',
+            email: '',
+            contactPerson: 'Austin Shook, Program Director',
+            address: '13028 Fall Manor Dr, Dallas, TX 75243'
+        },
+        website: 'https://pattonsoberliving.com/index.html',
+        quality: {
+            accreditations: [],
+            memberships: []
+        }
+    },
+    {
+        id: 'program_4',
+        name: 'Stonewater Adolescent Recovery Center',
+        location: { city: 'Oxford', state: 'MS', distance: null },
+        type: 'Residential Treatment',
+        category: 'residential',
+        clinical: {
+            levelsOfCare: ['Residential', 'Detox'],
+            primaryFocus: 'Dual Diagnosis',
+            specializations: ['Substance Use', 'Mental Health', 'Dual Diagnosis'],
+            modalities: {
+                evidenceBased: ['Psychiatric Care', 'Individual Therapy', 'Family Therapy'],
+                experiential: [],
+                holistic: ['Faith-Based']
+            }
+        },
+        population: {
+            ages: 'Adolescents',
+            gender: 'Males Only',
+            specialPopulations: []
+        },
+        structure: {
+            lengthOfStay: 'Variable',
+            capacity: '',
+            staffRatio: '',
+            groupSize: ''
+        },
+        admissions: {
+            insurance: ['Most Major Insurers'],
+            privatePay: true,
+            requirements: []
+        },
+        contact: {
+            phone: '(570) 222-3449',
+            email: 'info@serenitylodgerecovery.com',
+            contactPerson: 'Bridget Norris',
+            address: '21 Weida Ct Nicholson, PA 18446'
+        },
+        website: 'https://stonewaterrecovery.com',
+        quality: {
+            accreditations: [],
+            memberships: []
+        }
+    },
+    {
+        id: 'program_5',
+        name: 'Resilience Recovery Residences',
+        location: { city: 'West Palm Beach', state: 'FL', distance: null },
+        type: 'Sober Living',
+        category: 'sober-living',
+        clinical: {
+            levelsOfCare: ['Sober Living', 'IOP'],
+            primaryFocus: 'Substance Use Disorders',
+            specializations: ['Substance Use', 'Recovery Support'],
+            modalities: {
+                evidenceBased: ['12-Step', 'IOP', 'Therapy'],
+                experiential: [],
+                holistic: []
+            }
+        },
+        population: {
+            ages: '16+',
+            gender: 'Males Only',
+            specialPopulations: ['Young Adults']
+        },
+        structure: {
+            lengthOfStay: 'Phased (60-120+ days)',
+            capacity: '',
+            staffRatio: '',
+            groupSize: ''
+        },
+        admissions: {
+            insurance: [],
+            privatePay: true,
+            requirements: ['Completed Primary Treatment']
+        },
+        contact: {
+            phone: '424-254-4304',
+            email: '',
+            contactPerson: 'Christopher Martinez, Owner',
+            address: '3011 Poinsettia Ave, West Palm Beach, FL 33407'
+        },
+        website: 'www.resiliencerecoveryresources.com',
+        quality: {
+            accreditations: [],
+            memberships: []
+        }
+    },
+    {
+        id: 'program_6',
+        name: 'The Insight Program',
+        location: { city: 'Tampa', state: 'FL', distance: null },
+        type: 'IOP',
+        category: 'outpatient',
+        clinical: {
+            levelsOfCare: ['IOP'],
+            primaryFocus: 'Substance Use Disorders',
+            specializations: ['Substance Use', 'Co-Occurring Disorders'],
+            modalities: {
+                evidenceBased: ['Individual Therapy', 'Family Therapy', '12-Step'],
+                experiential: [],
+                holistic: []
+            }
+        },
+        population: {
+            ages: '13-25',
+            gender: 'Co-ed',
+            specialPopulations: ['Adolescents', 'Young Adults']
+        },
+        structure: {
+            lengthOfStay: 'Variable',
+            capacity: '',
+            staffRatio: '',
+            groupSize: ''
+        },
+        admissions: {
+            insurance: ['Most Major Insurers'],
+            privatePay: true,
+            requirements: []
+        },
+        contact: {
+            phone: '470-505-9786',
+            email: '',
+            contactPerson: 'Adam Schwartz',
+            address: '13944 Lynmar Blvd, Tampa, FL 33626'
+        },
+        website: 'https://theinsightprogram.com/',
+        quality: {
+            accreditations: [],
+            memberships: []
+        }
+    },
+    {
+        id: 'program_7',
+        name: 'Turnbridge Residential',
+        location: { city: 'New Haven', state: 'CT', distance: null },
+        type: 'Residential Treatment',
+        category: 'residential',
+        clinical: {
+            levelsOfCare: ['Residential', 'Sober Living'],
+            primaryFocus: 'Dual Diagnosis',
+            specializations: ['Substance Use', 'Mental Health', 'Life Skills'],
+            modalities: {
+                evidenceBased: ['Therapy', 'Medication Management'],
+                experiential: ['Recreation', 'Wellness Activities'],
+                holistic: []
+            }
+        },
+        population: {
+            ages: 'Young Adults',
+            gender: 'Co-ed',
+            specialPopulations: []
+        },
+        structure: {
+            lengthOfStay: 'Long-term (Phased)',
+            capacity: '',
+            staffRatio: '',
+            groupSize: ''
+        },
+        admissions: {
+            insurance: ['Most Major Insurers'],
+            privatePay: true,
+            requirements: []
+        },
+        contact: {
+            phone: '512.921.3533',
+            email: 'blegacki@turnbridge.com',
+            contactPerson: 'Beth Legacki',
+            address: '189 Orange Street, New Haven, CT 06510'
+        },
+        website: 'www.turnbridge.com',
+        quality: {
+            accreditations: [],
+            memberships: []
+        }
+    },
+    {
+        id: 'program_8',
+        name: 'Greater Nashua Mental Health',
+        location: { city: 'Nashua', state: 'NH', distance: null },
+        type: 'IOP',
+        category: 'outpatient',
+        clinical: {
+            levelsOfCare: ['IOP'],
+            primaryFocus: 'Dual Diagnosis',
+            specializations: ['Substance Use', 'Mental Health'],
+            modalities: {
+                evidenceBased: ['Group Therapy', 'Individual Therapy', 'Family Therapy', 'Psychiatric Services'],
+                experiential: [],
+                holistic: []
+            }
+        },
+        population: {
+            ages: 'Adolescents',
+            gender: 'Co-ed',
+            specialPopulations: []
+        },
+        structure: {
+            lengthOfStay: 'Variable',
+            capacity: '',
+            staffRatio: '',
+            groupSize: ''
+        },
+        admissions: {
+            insurance: ['Most Commercial Plans'],
+            privatePay: true,
+            requirements: []
+        },
+        contact: {
+            phone: '603.401.1597',
+            email: '',
+            address: '15 Prospect Street, Nashua, NH 03060'
+        },
+        website: 'https://gnmhc.org/',
+        quality: {
+            accreditations: [],
+            memberships: []
+        }
+    },
+    {
+        id: 'program_9',
+        name: 'Directions Behavioral Health',
+        location: { city: 'Nashua', state: 'NH', distance: null },
+        type: 'PHP/IOP',
+        category: 'outpatient',
+        clinical: {
+            levelsOfCare: ['PHP', 'IOP'],
+            primaryFocus: 'Mental Health',
+            specializations: ['Mental Health', 'Substance Use'],
+            modalities: {
+                evidenceBased: ['Group Therapy', 'Psychiatric Services'],
+                experiential: [],
+                holistic: []
+            }
+        },
+        population: {
+            ages: 'Adolescents & Young Adults',
+            gender: 'Co-ed',
+            specialPopulations: []
+        },
+        structure: {
+            lengthOfStay: 'Variable',
+            capacity: '',
+            staffRatio: '',
+            groupSize: ''
+        },
+        admissions: {
+            insurance: ['Most Commercial Plans'],
+            privatePay: true,
+            requirements: []
+        },
+        contact: {
+            phone: '603.880.8188',
+            email: '',
+            address: '25 Technology Way, Nashua, NH 03060'
+        },
+        website: 'https://www.directionbehavioralhealth.com/',
+        quality: {
+            accreditations: [],
+            memberships: []
+        }
+    },
+    {
+        id: 'program_10',
+        name: 'In Balance Academy',
+        location: { city: 'Tucson', state: 'AZ', distance: null },
+        type: 'Therapeutic Boarding School',
+        category: 'therapeutic-school',
+        clinical: {
+            levelsOfCare: ['Residential'],
+            primaryFocus: 'Therapeutic Education',
+            specializations: ['Character Development', 'Academic Support'],
+            modalities: {
+                evidenceBased: ['Family Therapy', 'Individual Therapy'],
+                experiential: ['Service Learning', 'Mentorship'],
+                holistic: ['Values-Based']
+            }
+        },
+        population: {
+            ages: 'Adolescents',
+            gender: 'Males Only',
+            specialPopulations: []
+        },
+        structure: {
+            lengthOfStay: '12-18 months',
+            capacity: '',
+            staffRatio: '',
+            groupSize: ''
+        },
+        admissions: {
+            insurance: ['Most Major Insurers'],
+            privatePay: true,
+            requirements: []
+        },
+        contact: {
+            phone: '801.369.0238',
+            email: 'ptaylor@livestronghouse.com',
+            contactPerson: 'Tiffany, Director of Admissions',
+            address: '195 25th Street, Suite 300, Ogden, UT 84401'
+        },
+        website: 'www.inbalanceacademy.com',
+        quality: {
+            accreditations: [],
+            memberships: []
+        }
+    }
+];
+
+// Save to localStorage for persistence
+try {
+    localStorage.setItem('careconnect_programs', JSON.stringify(window.programsData));
+    console.log(`[Programs] Loaded ${window.programsData.length} programs into storage`);
+} catch (e) {
+    console.warn('[Programs] Could not save to localStorage:', e);
+}
+
+</script>
+</body>
+</html>
