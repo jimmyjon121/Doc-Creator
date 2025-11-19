@@ -2,6 +2,15 @@
 <html>
 <head>
     <title>Quick Session Test</title>
+    <script>
+        (function enforceDevOnlyTool() {
+            const allowedHosts = ['', 'localhost', '127.0.0.1'];
+            if (!allowedHosts.includes(window.location.hostname)) {
+                document.documentElement.innerHTML = '<main style="font-family: Arial, sans-serif; padding: 2rem; text-align: center;"><h1>Dev Tool Disabled</h1><p>This quick session test is only available when running the app locally.</p></main>';
+                throw new Error('test-quick.html is dev-only');
+            }
+        })();
+    </script>
     <style>
         body {
             font-family: Arial, sans-serif;

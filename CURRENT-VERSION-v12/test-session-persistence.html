@@ -4,6 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Session Persistence Test - CareConnect</title>
+    <script>
+        (function enforceDevOnlyTool() {
+            const allowedHosts = ['', 'localhost', '127.0.0.1'];
+            if (!allowedHosts.includes(window.location.hostname)) {
+                document.documentElement.innerHTML = '<main style="font-family: -apple-system,BlinkMacSystemFont,\\'Segoe UI\\',sans-serif;padding:2rem;text-align:center;"><h1>Dev Tool Disabled</h1><p>This session test is available only on local development builds.</p></main>';
+                throw new Error('test-session-persistence.html is dev-only');
+            }
+        })();
+    </script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

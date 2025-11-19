@@ -6,7 +6,13 @@
 (function() {
     'use strict';
     
-    console.log('🔧 Applying session persistence fix...');
+    const debugLog = (...args) => {
+        if (window.DEBUG) {
+            console.log(...args);
+        }
+    };
+    
+    debugLog('🔧 Applying session persistence fix...');
     
     // Override the forceLoginScreen function to properly handle localStorage
     window.forceLoginScreen = function() {
@@ -16,7 +22,7 @@
         
         // Check if session is expired
         if (isLoggedIn && loginExpires && now > loginExpires) {
-            console.log('⏰ Session expired, clearing...');
+            debugLog('⏰ Session expired, clearing...');
             localStorage.removeItem('isLoggedIn');
             localStorage.removeItem('username');
             localStorage.removeItem('fullName');
@@ -74,7 +80,7 @@
             if (mainContent) {
                 mainContent.style.display = 'none';
             }
-            console.log('🔐 Showing login screen');
+            debugLog('🔐 Showing login screen');
         } else {
             // Hide login screen
             loginScreen.style.display = 'none';
@@ -82,7 +88,7 @@
             if (mainContent) {
                 mainContent.style.display = '';
             }
-            console.log('✅ User is logged in, showing main content');
+            debugLog('✅ User is logged in, showing main content');
             
             // Refresh TTL
             if (window.refreshLoginSessionTTL) {
@@ -104,7 +110,7 @@
         const username = usernameInput.value;
         const password = passwordInput.value;
         
-        console.log('Attempting login with:', username);
+        debugLog('Attempting login with:', username);
         
         // Validate credentials
         if ((username === 'MasterAdmin' && password === 'FFA@dm1n2025!') ||
@@ -122,7 +128,7 @@
             const expiry = Date.now() + (2 * 60 * 60 * 1000);
             localStorage.setItem('loginExpires', expiry.toString());
             
-            console.log('✅ Login successful!');
+            debugLog('✅ Login successful!');
             
             // Hide login screen and show content
             const loginScreen = document.getElementById('loginScreen');
@@ -141,7 +147,7 @@
     // Check session on load
     function initSession() {
         const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        console.log('Session check on load - isLoggedIn:', isLoggedIn);
+        debugLog('Session check on load - isLoggedIn:', isLoggedIn);
         
         if (isLoggedIn) {
             // Verify session hasn't expired
@@ -149,18 +155,18 @@
             const now = Date.now();
             
             if (loginExpires && now < loginExpires) {
-                console.log('✅ Valid session found, user remains logged in');
+                debugLog('✅ Valid session found, user remains logged in');
                 // Refresh TTL
                 const newExpiry = Date.now() + (2 * 60 * 60 * 1000);
                 localStorage.setItem('loginExpires', newExpiry.toString());
             } else if (loginExpires && now >= loginExpires) {
-                console.log('⏰ Session expired');
+                debugLog('⏰ Session expired');
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('loginExpires');
                 window.forceLoginScreen();
             }
         } else {
-            console.log('🔐 No session found, showing login');
+            debugLog('🔐 No session found, showing login');
             window.forceLoginScreen();
         }
     }
@@ -172,5 +178,5 @@
         initSession();
     }
     
-    console.log('✅ Session persistence fix applied');
+    debugLog('✅ Session persistence fix applied');
 })();

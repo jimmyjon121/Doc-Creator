@@ -885,48 +885,6 @@ class ClientManager {
     }
 
     /**
-     * Generate demo clients for sandboxing
-     */
-    async generateDemoClients(count = 50) {
-        if (typeof window === 'undefined' || !window.demoDataGenerator || typeof window.demoDataGenerator.createClients !== 'function') {
-            throw new Error('Demo data generator not available');
-        }
-        
-        const generatedData = window.demoDataGenerator.createClients(count) || [];
-        if (generatedData.length === 0) {
-            console.warn('Demo data generator returned no clients.');
-            return [];
-        }
-        
-        const existingClients = await this.getAllClients();
-        const demoClients = existingClients.filter(client => client.isDemo || client.tags?.includes('demo'));
-        
-        for (const client of demoClients) {
-            try {
-                await this.deleteClient(client.id);
-            } catch (error) {
-                console.error('Failed to remove demo client', client.id, error);
-            }
-        }
-        
-        const createdClients = [];
-        for (const clientData of generatedData) {
-            try {
-                const client = await this.createClient({
-                    ...clientData,
-                    tags: Array.from(new Set([...(clientData.tags || []), 'demo'])),
-                    isDemo: true
-                });
-                createdClients.push(client);
-            } catch (error) {
-                console.error('Failed to create demo client:', error, clientData);
-            }
-        }
-        
-        return createdClients;
-    }
-    
-    /**
      * Initialize from storage
      */
     async initialize() {
