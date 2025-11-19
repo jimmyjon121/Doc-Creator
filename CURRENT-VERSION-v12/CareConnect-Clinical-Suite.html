@@ -2749,5 +2749,62 @@ try {
     console.log('No stored programs found');
 }
 </script>
+
+<!-- Session Management & Data Persistence Scripts -->
+<script src="js/auth/login-robust.js"></script>
+<script src="js/data-persistence.js"></script>
+
+<script>
+// Initialize session check on page load
+(function() {
+    'use strict';
+    
+    // Check if user is logged in
+    const checkSession = () => {
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const loginExpires = parseInt(localStorage.getItem('loginExpires') || '0', 10);
+        const now = Date.now();
+        
+        if (!isLoggedIn || (loginExpires && now > loginExpires)) {
+            console.log('🔐 Session expired or not logged in, redirecting to login...');
+            // Clear expired session
+            if (loginExpires && now > loginExpires) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('username');
+                localStorage.removeItem('fullName');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('loginExpires');
+            }
+            // Redirect to login page or show login screen
+            if (window.location.pathname !== '/login.html') {
+                window.location.href = 'login.html';
+            }
+        } else {
+            console.log('✅ Valid session found, user authenticated');
+            // Refresh TTL on page load
+            if (window.refreshLoginSessionTTL) {
+                window.refreshLoginSessionTTL();
+            }
+        }
+    };
+    
+    // Check session immediately
+    checkSession();
+    
+    // Also check periodically (every minute)
+    setInterval(checkSession, 60000);
+    
+    // Listen for storage changes (in case user logs out in another tab)
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'isLoggedIn' && e.newValue !== 'true') {
+            console.log('🔐 User logged out in another tab, redirecting...');
+            window.location.href = 'login.html';
+        }
+    });
+    
+    console.log('🔒 Session management initialized');
+})();
+</script>
+
 </body>
 </html>

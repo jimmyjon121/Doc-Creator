@@ -51,32 +51,57 @@
     isProcessing: false,
   };
 
+  // Use localStorage for persistent sessions that survive page refreshes
   function getSession(key, defaultValue = null) {
     try {
-      return sessionStorage.getItem(key) || defaultValue;
+      return localStorage.getItem(key) || defaultValue;
     } catch (e) {
-      console.warn(`SessionStorage get failed for ${key}:`, e);
+      console.warn(`LocalStorage get failed for ${key}:`, e);
       return defaultValue;
     }
   }
 
   function setSession(key, value) {
     try {
-      sessionStorage.setItem(key, value);
+      localStorage.setItem(key, value);
       return true;
     } catch (e) {
-      console.error(`SessionStorage set failed for ${key}:`, e);
+      console.error(`LocalStorage set failed for ${key}:`, e);
       return false;
     }
   }
 
   function removeSession(key) {
     try {
-      sessionStorage.removeItem(key);
+      localStorage.removeItem(key);
       return true;
     } catch (e) {
-      console.warn(`SessionStorage remove failed for ${key}:`, e);
+      console.warn(`LocalStorage remove failed for ${key}:`, e);
       return false;
+    }
+  }
+
+  // Additional function to migrate from sessionStorage to localStorage if needed
+  function migrateSessionToLocal() {
+    try {
+      const keys = [CONFIG.SESSION_KEY, CONFIG.USERNAME_KEY, CONFIG.FULLNAME_KEY, 
+                    'isMaster', 'manualLogin', CONFIG.SESSION_EXPIRES_KEY];
+      let migrated = false;
+      
+      for (const key of keys) {
+        const value = sessionStorage.getItem(key);
+        if (value !== null) {
+          localStorage.setItem(key, value);
+          sessionStorage.removeItem(key);
+          migrated = true;
+        }
+      }
+      
+      if (migrated) {
+        console.log('✅ Migrated session from sessionStorage to localStorage');
+      }
+    } catch (e) {
+      console.warn('Failed to migrate session storage:', e);
     }
   }
 
@@ -376,6 +401,15 @@
         };
       }
 
+      if (trimmedUsername === CONFIG.LEGACY_USERNAME && password === CONFIG.LEGACY_PASSWORD) {
+        return {
+          valid: true,
+          isMaster: true,
+          username: CONFIG.LEGACY_USERNAME,
+          fullName: 'Doc Administrator',
+        };
+      }
+
       if (
         trimmedUsername.toLowerCase() === CONFIG.LEGACY_USERNAME.toLowerCase() &&
         password === CONFIG.LEGACY_PASSWORD
@@ -577,8 +611,13 @@
     }
 
     try {
-      event.preventDefault();
-      event.stopPropagation();
+      if (event && typeof event.preventDefault === 'function') {
+        event.preventDefault();
+      }
+      if (event && typeof event.stopPropagation === 'function') {
+        event.stopPropagation();
+      }
+      
       LoginState.isProcessing = true;
 
       const usernameInput = document.getElementById('loginUsername');
@@ -713,6 +752,9 @@
     try {
       await ensureDOMReady();
 
+      // Migrate any existing sessionStorage to localStorage
+      migrateSessionToLocal();
+
       LoginState.loginScreen = await waitForElement('#loginScreen').catch(() => null);
       LoginState.mainApp = await waitForElement('#mainApp').catch(() => null);
       LoginState.loginForm = await waitForElement('#loginScreen form, form[action*=\"login\"]').catch(() => null);
@@ -720,8 +762,42 @@
       const loggedIn = isLoggedIn();
 
       if (loggedIn) {
+        // Refresh the session TTL when user is still logged in
+        setSessionExpiry();
+        
         hideLoginScreen();
-        console.log('✅ User already logged in');
+        console.log('✅ User already logged in - session persisted');
+        
+        // Re-initialize user display and features
+        const username = getSession(CONFIG.USERNAME_KEY);
+        const fullName = getSession(CONFIG.FULLNAME_KEY);
+        
+        // Update user display if function exists
+        if (typeof window.updateUserDisplay === 'function') {
+          try {
+            window.updateUserDisplay();
+          } catch (error) {
+            console.warn('User display update failed:', error);
+          }
+        }
+        
+        // Trigger welcome back animation if available
+        if (typeof window.showWelcomeAnimation === 'function') {
+          try {
+            window.showWelcomeAnimation(fullName || username, true);
+          } catch (e) {
+            console.warn('Welcome animation failed:', e);
+          }
+        }
+        
+        // Enable auto-save if available
+        if (typeof window.enableAutoSave === 'function') {
+          try {
+            window.enableAutoSave();
+          } catch (error) {
+            console.warn('Auto-save enable failed:', error);
+          }
+        }
       } else {
         showLoginScreen();
         console.log('🔐 Login screen displayed');
@@ -793,7 +869,108 @@
     }
   }, 2000);
 
-  console.log('🔐 Robust login system loaded');
+  // Add activity tracking to refresh session TTL on user activity
+  let lastActivity = Date.now();
+  const ACTIVITY_THRESHOLD = 30000; // 30 seconds
+  
+  function trackActivity() {
+    const now = Date.now();
+    if (now - lastActivity > ACTIVITY_THRESHOLD) {
+      lastActivity = now;
+      if (isLoggedIn()) {
+        setSessionExpiry(); // Refresh TTL on activity
+        console.log('🔄 Session TTL refreshed due to user activity');
+      }
+    }
+  }
+  
+  // Track various user activities
+  document.addEventListener('click', trackActivity);
+  document.addEventListener('keypress', trackActivity);
+  document.addEventListener('scroll', trackActivity);
+  document.addEventListener('mousemove', trackActivity);
+  
+  // Expose additional functions for external use
+  window.refreshLoginSessionTTL = function() {
+    if (isLoggedIn()) {
+      setSessionExpiry();
+      return true;
+    }
+    return false;
+  };
+  
+  // Add function to save work data
+  window.saveWorkData = function(key, data) {
+    try {
+      const workKey = `work_data_${key}`;
+      localStorage.setItem(workKey, JSON.stringify(data));
+      console.log(`💾 Work data saved: ${key}`);
+      return true;
+    } catch (e) {
+      console.error('Failed to save work data:', e);
+      return false;
+    }
+  };
+  
+  // Add function to load work data
+  window.loadWorkData = function(key) {
+    try {
+      const workKey = `work_data_${key}`;
+      const data = localStorage.getItem(workKey);
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      console.error('Failed to load work data:', e);
+      return null;
+    }
+  };
+  
+  // Add function to clear work data
+  window.clearWorkData = function(key) {
+    try {
+      const workKey = `work_data_${key}`;
+      localStorage.removeItem(workKey);
+      console.log(`🗑️ Work data cleared: ${key}`);
+      return true;
+    } catch (e) {
+      console.error('Failed to clear work data:', e);
+      return false;
+    }
+  };
+
+  console.log('🔐 Robust login system loaded with persistent sessions');
+
+  // Global logout function
+  window.logout = function() {
+    console.log('🚪 Logging out user...');
+    
+    // Clear all session data
+    clearLoginState();
+    
+    // Clear any work data if DataPersistence is available
+    if (window.DataPersistence && window.DataPersistence.clearPage) {
+      window.DataPersistence.clearPage();
+    }
+    
+    // Show login screen
+    showLoginScreen();
+    
+    // Clear any cached data
+    if (window.clientManager && window.clientManager.clearCache) {
+      window.clientManager.clearCache();
+    }
+    
+    // Notify user
+    if (window.showAlert && typeof window.showAlert === 'function') {
+      window.showAlert('You have been logged out successfully', 'success');
+    }
+    
+    console.log('✅ User logged out');
+    
+    // Reload page after a short delay to ensure clean state
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  };
 
   window.CareConnectAuth = {
     addUserAccount,

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Session Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .status {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .logged-in {
+            background: #10b981;
+            color: white;
+        }
+        .logged-out {
+            background: #ef4444;
+            color: white;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+        .login-btn { background: #3b82f6; color: white; }
+        .logout-btn { background: #ef4444; color: white; }
+        .refresh-btn { background: #10b981; color: white; }
+        .info {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        h1 { color: #1f2937; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Quick Session Persistence Test</h1>
+    
+    <div id="status" class="status logged-out">
+        Checking session...
+    </div>
+    
+    <div class="info">
+        <strong>Session Info:</strong>
+        <ul>
+            <li>Storage Type: <span id="storageType">Checking...</span></li>
+            <li>Username: <span id="username">-</span></li>
+            <li>Session Valid: <span id="sessionValid">-</span></li>
+            <li>Page Loads: <span id="pageLoads">0</span></li>
+        </ul>
+    </div>
+    
+    <div>
+        <button class="login-btn" onclick="doLogin()">Login</button>
+        <button class="logout-btn" onclick="doLogout()">Logout</button>
+        <button class="refresh-btn" onclick="location.reload()">Refresh Page</button>
+    </div>
+    
+    <div class="info">
+        <strong>Instructions:</strong>
+        <ol>
+            <li>Click "Login" to create a session</li>
+            <li>Click "Refresh Page" - you should stay logged in!</li>
+            <li>Refresh as many times as you want</li>
+            <li>The page load counter will increase each time</li>
+        </ol>
+    </div>
+
+    <script>
+        // Check localStorage availability
+        function checkStorage() {
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                document.getElementById('storageType').textContent = 'localStorage (✅ Working)';
+                return true;
+            } catch(e) {
+                document.getElementById('storageType').textContent = 'localStorage (❌ Not Available)';
+                console.error('localStorage not available:', e);
+                return false;
+            }
+        }
+        
+        // Update session display
+        function updateStatus() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            const username = localStorage.getItem('username') || '-';
+            const statusEl = document.getElementById('status');
+            
+            if (isLoggedIn) {
+                statusEl.className = 'status logged-in';
+                statusEl.textContent = '✅ You are LOGGED IN! Session persists!';
+                document.getElementById('username').textContent = username;
+                document.getElementById('sessionValid').textContent = 'Yes';
+            } else {
+                statusEl.className = 'status logged-out';
+                statusEl.textContent = '❌ Not logged in - Click Login button';
+                document.getElementById('username').textContent = '-';
+                document.getElementById('sessionValid').textContent = 'No';
+            }
+            
+            // Update page load counter
+            let loads = parseInt(localStorage.getItem('pageLoads') || '0');
+            loads++;
+            localStorage.setItem('pageLoads', loads.toString());
+            document.getElementById('pageLoads').textContent = loads;
+        }
+        
+        // Login function
+        function doLogin() {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('username', 'TestUser');
+            localStorage.setItem('fullName', 'Test User');
+            
+            // Set expiry to 2 hours from now
+            const expiry = Date.now() + (2 * 60 * 60 * 1000);
+            localStorage.setItem('loginExpires', expiry.toString());
+            
+            updateStatus();
+            alert('✅ Logged in! Now refresh the page to test persistence.');
+        }
+        
+        // Logout function
+        function doLogout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            localStorage.removeItem('fullName');
+            localStorage.removeItem('loginExpires');
+            localStorage.setItem('pageLoads', '0');
+            
+            updateStatus();
+            alert('👋 Logged out!');
+        }
+        
+        // Initialize on load
+        checkStorage();
+        updateStatus();
+    </script>
+</body>
+</html>

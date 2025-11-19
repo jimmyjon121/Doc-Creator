@@ -178,7 +178,7 @@
 
         // Also watch for login state changes
         const checkLoginState = () => {
-            const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
             if (isLoggedIn) {
                 setTimeout(() => initializeOnboarding(), 1000);
             }
