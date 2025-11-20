@@ -56,13 +56,13 @@ class FlightPlanWidget extends DashboardWidget {
         this.showLoading();
         
         try {
-            const data = dashboardManager.cache.priorities;
+            const data = window.dashboardManager?.cache?.priorities;
             if (!data || this.isZonesEmpty(data)) {
                 this.renderEmptyState('No priority alerts yet. Add clients or populate demo data to see this queue.', { showDemoAction: true });
                 return;
             }
             
-            const timeContext = dashboardManager.getTimeAwareGreeting();
+            const timeContext = window.dashboardManager?.getTimeAwareGreeting();
             
             let html = `
                 <div class="flight-plan-widget">
@@ -202,7 +202,7 @@ class JourneyRadarWidget extends DashboardWidget {
         this.showLoading();
         
         try {
-            const data = dashboardManager.cache.journeyData || {};
+            const data = window.dashboardManager?.cache?.journeyData || {};
             const hasClients = Object.values(data).some(list => Array.isArray(list) && list.length > 0);
             if (!hasClients) {
                 this.renderEmptyState('No journey data yet. Add clients or populate demo data to visualize progress.', { showDemoAction: true });

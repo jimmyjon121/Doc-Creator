@@ -13,10 +13,7 @@
         if (window.programsData && window.programsData.length > 0) {
             console.log(`✅ Programs ready: ${window.programsData.length} items`);
             
-            // Ensure aliases are set (redundant but safe)
-            window.programs = window.programs || window.programsData;
-            window.allPrograms = window.allPrograms || window.programsData;
-            window.PROGRAMS = window.PROGRAMS || window.programsData;
+            // LEGACY ALIASES REMOVED - Only use window.programsData
             
             // Trigger UI updates
             updateUI();

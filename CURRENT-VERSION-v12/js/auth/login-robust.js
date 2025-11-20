@@ -51,7 +51,6 @@
     isProcessing: false,
   };
 
-  // Use localStorage for persistent sessions that survive page refreshes
   function getSession(key, defaultValue = null) {
     try {
       return localStorage.getItem(key) || defaultValue;
@@ -78,30 +77,6 @@
     } catch (e) {
       console.warn(`LocalStorage remove failed for ${key}:`, e);
       return false;
-    }
-  }
-
-  // Additional function to migrate from sessionStorage to localStorage if needed
-  function migrateSessionToLocal() {
-    try {
-      const keys = [CONFIG.SESSION_KEY, CONFIG.USERNAME_KEY, CONFIG.FULLNAME_KEY, 
-                    'isMaster', 'manualLogin', CONFIG.SESSION_EXPIRES_KEY];
-      let migrated = false;
-      
-      for (const key of keys) {
-        const value = sessionStorage.getItem(key);
-        if (value !== null) {
-          localStorage.setItem(key, value);
-          sessionStorage.removeItem(key);
-          migrated = true;
-        }
-      }
-      
-      if (migrated) {
-        console.log('✅ Migrated session from sessionStorage to localStorage');
-      }
-    } catch (e) {
-      console.warn('Failed to migrate session storage:', e);
     }
   }
 
@@ -401,15 +376,6 @@
         };
       }
 
-      if (trimmedUsername === CONFIG.LEGACY_USERNAME && password === CONFIG.LEGACY_PASSWORD) {
-        return {
-          valid: true,
-          isMaster: true,
-          username: CONFIG.LEGACY_USERNAME,
-          fullName: 'Doc Administrator',
-        };
-      }
-
       if (
         trimmedUsername.toLowerCase() === CONFIG.LEGACY_USERNAME.toLowerCase() &&
         password === CONFIG.LEGACY_PASSWORD
@@ -529,21 +495,25 @@
         console.warn('Login screen element not found');
         return false;
       }
-      Object.assign(LoginState.loginScreen.style, {
-        display: 'flex',
-        visibility: 'visible',
-        opacity: '1',
-        zIndex: '10000',
-        position: 'fixed',
-        top: '0',
-        left: '0',
-        right: '0',
-        bottom: '0',
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      });
+      // Only modify login screen and main app visibility - don't touch anything else
+      LoginState.loginScreen.style.display = 'flex';
+      LoginState.loginScreen.style.visibility = 'visible';
+      LoginState.loginScreen.style.opacity = '1';
+      LoginState.loginScreen.style.zIndex = '10000';
+      LoginState.loginScreen.style.position = 'fixed';
+      LoginState.loginScreen.style.top = '0';
+      LoginState.loginScreen.style.left = '0';
+      LoginState.loginScreen.style.right = '0';
+      LoginState.loginScreen.style.bottom = '0';
+      // Only set background if not already set (preserve existing styles)
+      if (!LoginState.loginScreen.style.background) {
+        LoginState.loginScreen.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+      }
+      
       if (LoginState.mainApp) {
         LoginState.mainApp.style.display = 'none';
         LoginState.mainApp.style.visibility = 'hidden';
+        // Don't modify any other styles - preserve dashboard/module layouts
       }
       return true;
     } catch (error) {
@@ -557,11 +527,17 @@
       if (LoginState.loginScreen) {
         LoginState.loginScreen.style.display = 'none';
         LoginState.loginScreen.style.visibility = 'hidden';
+        // Don't modify other styles - just hide it
       }
       if (LoginState.mainApp) {
         LoginState.mainApp.style.display = 'block';
         LoginState.mainApp.style.visibility = 'visible';
+        // Only set opacity if it was explicitly set to 0, otherwise preserve existing
+        const currentOpacity = window.getComputedStyle(LoginState.mainApp).opacity;
+        if (currentOpacity === '0' || LoginState.mainApp.style.opacity === '0') {
         LoginState.mainApp.style.opacity = '1';
+        }
+        // Don't modify any other styles - preserve dashboard/module layouts
       }
       return true;
     } catch (error) {
@@ -611,13 +587,8 @@
     }
 
     try {
-      if (event && typeof event.preventDefault === 'function') {
-        event.preventDefault();
-      }
-      if (event && typeof event.stopPropagation === 'function') {
-        event.stopPropagation();
-      }
-      
+      event.preventDefault();
+      event.stopPropagation();
       LoginState.isProcessing = true;
 
       const usernameInput = document.getElementById('loginUsername');
@@ -665,6 +636,12 @@
         setSession(CONFIG.FULLNAME_KEY, result.fullName || result.username);
         setSession('isMaster', result.isMaster ? 'true' : 'false');
         setSession('manualLogin', 'true');
+        
+        // Set user initials for display
+        const fullName = result.fullName || result.username;
+        const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || result.username.slice(0, 2).toUpperCase();
+        setSession('userInitials', initials);
+        
         setSessionExpiry();
         clearRateLimitState();
 
@@ -705,6 +682,17 @@
               console.warn('User display update failed:', error);
             }
           }, 500);
+        }
+
+        // Update user menu if it exists
+        if (typeof window.updateUserMenuInfo === 'function') {
+          setTimeout(() => {
+            try {
+              window.updateUserMenuInfo();
+            } catch (error) {
+              console.warn('User menu update failed:', error);
+            }
+          }, 300);
         }
 
         if (typeof window.enableAutoSave === 'function') {
@@ -748,11 +736,33 @@
     }
   }
 
+  function migrateSessionToLocal() {
+    try {
+      const sessionKeys = [CONFIG.SESSION_KEY, CONFIG.USERNAME_KEY, CONFIG.FULLNAME_KEY, CONFIG.SESSION_EXPIRES_KEY, 'isMaster', 'manualLogin', CONFIG.RATE_LIMIT.ATTEMPTS_KEY, CONFIG.RATE_LIMIT.LOCK_UNTIL_KEY];
+      let migrated = false;
+      
+      sessionKeys.forEach(key => {
+        const sessionValue = sessionStorage.getItem(key);
+        if (sessionValue !== null && localStorage.getItem(key) === null) {
+          localStorage.setItem(key, sessionValue);
+          sessionStorage.removeItem(key);
+          migrated = true;
+        }
+      });
+      
+      if (migrated) {
+        console.log('✅ Migrated session data from sessionStorage to localStorage');
+      }
+    } catch (error) {
+      console.warn('Session migration failed:', error);
+    }
+  }
+
   async function initializeLoginSystem() {
     try {
       await ensureDOMReady();
 
-      // Migrate any existing sessionStorage to localStorage
+      // Migrate any existing sessionStorage data to localStorage
       migrateSessionToLocal();
 
       LoginState.loginScreen = await waitForElement('#loginScreen').catch(() => null);
@@ -762,42 +772,8 @@
       const loggedIn = isLoggedIn();
 
       if (loggedIn) {
-        // Refresh the session TTL when user is still logged in
-        setSessionExpiry();
-        
         hideLoginScreen();
-        console.log('✅ User already logged in - session persisted');
-        
-        // Re-initialize user display and features
-        const username = getSession(CONFIG.USERNAME_KEY);
-        const fullName = getSession(CONFIG.FULLNAME_KEY);
-        
-        // Update user display if function exists
-        if (typeof window.updateUserDisplay === 'function') {
-          try {
-            window.updateUserDisplay();
-          } catch (error) {
-            console.warn('User display update failed:', error);
-          }
-        }
-        
-        // Trigger welcome back animation if available
-        if (typeof window.showWelcomeAnimation === 'function') {
-          try {
-            window.showWelcomeAnimation(fullName || username, true);
-          } catch (e) {
-            console.warn('Welcome animation failed:', e);
-          }
-        }
-        
-        // Enable auto-save if available
-        if (typeof window.enableAutoSave === 'function') {
-          try {
-            window.enableAutoSave();
-          } catch (error) {
-            console.warn('Auto-save enable failed:', error);
-          }
-        }
+        console.log('✅ User already logged in');
       } else {
         showLoginScreen();
         console.log('🔐 Login screen displayed');
@@ -824,10 +800,25 @@
         }
       }
 
+      // Replace any proxy handleLogin with the real implementation
+      if (window.handleLogin && window.handleLogin.__isProxy && Array.isArray(window.handleLogin.__queue)) {
+        // Process any queued login attempts
+        const queuedCalls = window.handleLogin.__queue.splice(0);
+        queuedCalls.forEach(({ event }) => {
+          try {
+            if (event && LoginState.loginForm) {
+              handleLogin(event);
+            }
+          } catch (err) {
+            console.error('Queued login call failed:', err);
+          }
+        });
+      }
+
       window.handleLogin = handleLogin;
       window.isLoggedIn = isLoggedIn;
       LoginState.initialized = true;
-      console.log('✅ Login system initialized');
+      console.log('✅ Login system initialized and ready');
     } catch (error) {
       console.error('❌ Login system initialization failed:', error);
       setTimeout(() => {
@@ -869,109 +860,59 @@
     }
   }, 2000);
 
-  // Add activity tracking to refresh session TTL on user activity
-  let lastActivity = Date.now();
-  const ACTIVITY_THRESHOLD = 30000; // 30 seconds
-  
-  function trackActivity() {
-    const now = Date.now();
-    if (now - lastActivity > ACTIVITY_THRESHOLD) {
-      lastActivity = now;
-      if (isLoggedIn()) {
-        setSessionExpiry(); // Refresh TTL on activity
-        console.log('🔄 Session TTL refreshed due to user activity');
+  console.log('🔐 Robust login system loaded');
+
+  function logout() {
+    try {
+      // Clear login state first
+      clearLoginState();
+      
+      // Clear any encryption state
+      if (window.dataEncryption && typeof window.dataEncryption.clear === 'function') {
+        window.dataEncryption.clear();
       }
+      
+      // Clear form data
+      if (LoginState.loginForm) {
+        const usernameInput = LoginState.loginForm.querySelector('#loginUsername');
+        const passwordInput = LoginState.loginForm.querySelector('#loginPassword');
+        if (usernameInput) usernameInput.value = '';
+        if (passwordInput) passwordInput.value = '';
+      }
+      
+      // Simply show login screen and hide main app - don't modify any other styles
+      // This ensures we don't interfere with dashboard or other module layouts
+      if (LoginState.loginScreen) {
+        LoginState.loginScreen.style.display = 'flex';
+        LoginState.loginScreen.style.visibility = 'visible';
+        LoginState.loginScreen.style.opacity = '1';
+        LoginState.loginScreen.style.zIndex = '10000';
+        LoginState.loginScreen.style.position = 'fixed';
+        LoginState.loginScreen.style.top = '0';
+        LoginState.loginScreen.style.left = '0';
+        LoginState.loginScreen.style.right = '0';
+        LoginState.loginScreen.style.bottom = '0';
+        // Only set background if it's not already set
+        if (!LoginState.loginScreen.style.background) {
+          LoginState.loginScreen.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        }
+      }
+      
+      if (LoginState.mainApp) {
+        LoginState.mainApp.style.display = 'none';
+        LoginState.mainApp.style.visibility = 'hidden';
+        // Don't modify any other styles on mainApp - let it keep its original layout
+      }
+      
+      console.log('✅ Logged out successfully');
+      return true;
+    } catch (error) {
+      console.error('❌ Logout error:', error);
+      return false;
     }
   }
-  
-  // Track various user activities
-  document.addEventListener('click', trackActivity);
-  document.addEventListener('keypress', trackActivity);
-  document.addEventListener('scroll', trackActivity);
-  document.addEventListener('mousemove', trackActivity);
-  
-  // Expose additional functions for external use
-  window.refreshLoginSessionTTL = function() {
-    if (isLoggedIn()) {
-      setSessionExpiry();
-      return true;
-    }
-    return false;
-  };
-  
-  // Add function to save work data
-  window.saveWorkData = function(key, data) {
-    try {
-      const workKey = `work_data_${key}`;
-      localStorage.setItem(workKey, JSON.stringify(data));
-      console.log(`💾 Work data saved: ${key}`);
-      return true;
-    } catch (e) {
-      console.error('Failed to save work data:', e);
-      return false;
-    }
-  };
-  
-  // Add function to load work data
-  window.loadWorkData = function(key) {
-    try {
-      const workKey = `work_data_${key}`;
-      const data = localStorage.getItem(workKey);
-      return data ? JSON.parse(data) : null;
-    } catch (e) {
-      console.error('Failed to load work data:', e);
-      return null;
-    }
-  };
-  
-  // Add function to clear work data
-  window.clearWorkData = function(key) {
-    try {
-      const workKey = `work_data_${key}`;
-      localStorage.removeItem(workKey);
-      console.log(`🗑️ Work data cleared: ${key}`);
-      return true;
-    } catch (e) {
-      console.error('Failed to clear work data:', e);
-      return false;
-    }
-  };
 
-  console.log('🔐 Robust login system loaded with persistent sessions');
-
-  // Global logout function
-  window.logout = function() {
-    console.log('🚪 Logging out user...');
-    
-    // Clear all session data
-    clearLoginState();
-    
-    // Clear any work data if DataPersistence is available
-    if (window.DataPersistence && window.DataPersistence.clearPage) {
-      window.DataPersistence.clearPage();
-    }
-    
-    // Show login screen
-    showLoginScreen();
-    
-    // Clear any cached data
-    if (window.clientManager && window.clientManager.clearCache) {
-      window.clientManager.clearCache();
-    }
-    
-    // Notify user
-    if (window.showAlert && typeof window.showAlert === 'function') {
-      window.showAlert('You have been logged out successfully', 'success');
-    }
-    
-    console.log('✅ User logged out');
-    
-    // Reload page after a short delay to ensure clean state
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-  };
-
+  window.logout = logout;
   window.CareConnectAuth = {
     addUserAccount,
     getUserAccounts,
@@ -980,6 +921,7 @@
     generateSaltHex,
     derivePBKDF2Hash,
     clearLoginState,
+    logout,
     setSessionExpiry,
     getSessionExpiry,
     getRateLimitState,

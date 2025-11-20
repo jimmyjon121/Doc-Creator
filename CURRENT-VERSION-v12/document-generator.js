@@ -545,11 +545,14 @@ window.generateDocument = function(clientId = null, documentType = null) {
     window.documentGenerator.startWorkflow(clientId, documentType);
 };
 
-// Add styles
+// Add styles - Using external CSS file instead of inline
 if (!document.querySelector('#document-generator-styles')) {
-    const styles = document.createElement('style');
-    styles.id = 'document-generator-styles';
-    styles.textContent = `
+    const link = document.createElement('link');
+    link.id = 'document-generator-styles';
+    link.rel = 'stylesheet';
+    link.href = 'css/document-generator.css';
+    document.head.appendChild(link);
+    /* LEGACY INLINE STYLES REMOVED - Now in css/document-generator.css
         /* Document Generator Styles */
         .doc-gen-step {
             padding: 20px;
@@ -866,12 +869,7 @@ if (!document.querySelector('#document-generator-styles')) {
             gap: 8px;
         }
         
-        .action-btn:hover {
-            background: #f9fafb;
-            border-color: var(--ccp-primary-300);
-        }
-    `;
-    document.head.appendChild(styles);
+    */
 }
 
 console.log('✅ Document Generator loaded successfully');

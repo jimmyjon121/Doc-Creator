@@ -45,7 +45,7 @@
                 right: 0;
                 bottom: 0;
                 z-index: 10000;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
                 align-items: center;
                 justify-content: center;
             `;

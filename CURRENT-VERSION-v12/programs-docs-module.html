@@ -58,10 +58,8 @@
             min-height: 100vh;
             font-family: "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
             color: var(--text-strong);
-            background:
-                radial-gradient(circle at 12% 18%, rgba(203, 207, 255, 0.35), transparent 45%),
-                radial-gradient(circle at 88% 8%, rgba(110, 123, 255, 0.22), transparent 52%),
-                linear-gradient(145deg, #ffffff 0%, #F3F4FF 100%);
+            /* LEGACY PURPLE GRADIENT REMOVED - Using clean background */
+            background: #f8f9fa;
         }
 
         /* Removed body::before overlay to prevent foggy appearance */
@@ -830,10 +828,11 @@
         }
 
         .view-toggle button.is-active {
-            background: linear-gradient(135deg, rgba(110, 123, 255, 0.22), rgba(110, 123, 255, 0.05));
+            background: #e2e8f0;
             color: var(--navy-700);
             font-weight: 600;
             transform: translateY(-1px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         .results select {
@@ -1563,9 +1562,8 @@
         }
 
         .builder {
-            background: linear-gradient(160deg, rgba(233, 236, 255, 0.88), rgba(255, 255, 255, 0.94));
-            backdrop-filter: blur(18px);
-            box-shadow: 0 20px 45px rgba(15, 16, 32, 0.22);
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             position: relative;
         }
 
@@ -2179,7 +2177,7 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: linear-gradient(135deg, rgba(110, 123, 255, 0.95), rgba(95, 106, 255, 0.9));
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.95), rgba(139, 92, 246, 0.9));
             color: #fff;
             padding: 12px 18px;
             border-radius: 12px;
@@ -2839,7 +2837,9 @@
 
     <script>
         (function () {
-            const LEGACY_PROGRAMS_FALLBACK = [
+            // Use programs data from main app loader instead of embedded fallback
+            const LEGACY_PROGRAMS_FALLBACK = [];
+            /* Original fallback data commented out - now using v2 data
                 {
                     id: "prg-harbor",
                     name: "Harbor Haven Intensive Outpatient",
@@ -2997,8 +2997,9 @@
                     ]
                 }
             ];
-
-            let PROGRAMS = LEGACY_PROGRAMS_FALLBACK.slice();
+*/
+            // Get programs from the main app's loader
+            let PROGRAMS = window.programsData || window.PROGRAMS || window.programs || [];
             const PROGRAMS_STORAGE_KEY = "ccpro-transformed-programs-v1";
             const PROGRAMS_DATA_STATUS = {
                 loaded: false,
@@ -3147,18 +3148,25 @@
                     return PROGRAMS;
                 }
 
+                // LEGACY LOADER DISABLED - Only use main app's data
+                console.warn('[CLEANUP] Legacy programs loader disabled - using main app data only');
+                
+                // Check if programs are already loaded by main app
+                if (window.programsData && window.programsData.length > 0) {
+                    PROGRAMS = window.programsData;
+                    PROGRAMS.forEach(assignProgramMetadata);
+                    PROGRAMS_DATA_STATUS.loaded = true;
+                    PROGRAMS_DATA_STATUS.source = "main-app";
+                    console.log(`[Programs Module] Using ${PROGRAMS.length} programs from main app`);
+                    return PROGRAMS;
+                }
+
+                // LEGACY LOADING CODE DISABLED - Start of disabled section
+                /* 
                 // Force V2 data loading
                 window.featureFlags = window.featureFlags || {};
                 window.featureFlags.programsV2Data = true;
                 console.log('[V2 Enabled] Feature flag set to true');
-                
-                if (!window.featureFlags?.programsV2Data) {
-                    PROGRAMS = LEGACY_PROGRAMS_FALLBACK.slice();
-                    PROGRAMS.forEach(assignProgramMetadata);
-                    PROGRAMS_DATA_STATUS.loaded = true;
-                    PROGRAMS_DATA_STATUS.source = "fallback:flag-disabled";
-                    return PROGRAMS;
-                }
 
                 const stored = loadProgramsFromStorage();
                 if (stored) {
@@ -3179,11 +3187,22 @@
                         return PROGRAMS;
                     }
                 }
+                */
+                // LEGACY LOADING CODE DISABLED - End of disabled section
 
-                PROGRAMS = LEGACY_PROGRAMS_FALLBACK.slice();
+                // If main app data not available, wait and try again
+                console.error('[CRITICAL] No programs data from main app - waiting...');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                if (window.programsData && window.programsData.length > 0) {
+                    PROGRAMS = window.programsData;
+                } else {
+                    console.error('[CRITICAL] Still no programs data - using empty array');
+                    PROGRAMS = [];
+                }
                 PROGRAMS.forEach(assignProgramMetadata);
                 PROGRAMS_DATA_STATUS.loaded = true;
-                PROGRAMS_DATA_STATUS.source = "fallback";
+                PROGRAMS_DATA_STATUS.source = PROGRAMS.length > 0 ? "main-app-delayed" : "empty";
                 return PROGRAMS;
             }
 

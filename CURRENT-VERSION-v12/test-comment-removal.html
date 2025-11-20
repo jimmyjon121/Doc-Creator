@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Comment Removal</title>
+</head>
+<body>
+    <h1>Testing Comment Block Removal</h1>
+    <button onclick="testOriginal()">Test Original</button>
+    <button onclick="testCleaned()">Test Cleaned</button>
+    <div id="results"></div>
+    
+    <script>
+        // Original code structure
+        function testOriginal() {
+            const LEGACY_PROGRAMS_FALLBACK = [];
+            /* Original fallback data commented out - now using v2 data
+                {
+                    id: "prg-harbor",
+                    name: "Harbor Haven Intensive Outpatient"
+                }
+            ];
+*/
+            // Get programs from the main app's loader
+            let PROGRAMS = window.programsData || [];
+            
+            document.getElementById('results').innerHTML = 
+                'Original: LEGACY_PROGRAMS_FALLBACK length = ' + LEGACY_PROGRAMS_FALLBACK.length + 
+                '<br>PROGRAMS defined: ' + (typeof PROGRAMS !== 'undefined');
+        }
+        
+        // Cleaned version
+        function testCleaned() {
+            const LEGACY_PROGRAMS_FALLBACK = [];
+            // Legacy fallback data removed - now using v2 data
+            
+            // Get programs from the main app's loader
+            let PROGRAMS = window.programsData || [];
+            
+            document.getElementById('results').innerHTML = 
+                'Cleaned: LEGACY_PROGRAMS_FALLBACK length = ' + LEGACY_PROGRAMS_FALLBACK.length + 
+                '<br>PROGRAMS defined: ' + (typeof PROGRAMS !== 'undefined');
+        }
+    </script>
+</body>
+</html>

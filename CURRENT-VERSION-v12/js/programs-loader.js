@@ -65,10 +65,7 @@
     }
     
     function notifyProgramsLoaded() {
-        // Set aliases for compatibility
-        window.programs = window.programsData;
-        window.allPrograms = window.programsData;
-        window.PROGRAMS = window.programsData;
+        // LEGACY ALIASES REMOVED - Only use window.programsData
         
         // Dispatch event
         const event = new CustomEvent('programs-loaded', { detail: { count: window.programsData.length } });

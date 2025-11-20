@@ -1256,8 +1256,8 @@ class SessionManager {
     }
     
     initializeSession() {
-        // Check for existing session
-        const existingSession = sessionStorage.getItem('clinical_session');
+        // Check for existing session - using localStorage for consistency
+        const existingSession = localStorage.getItem('clinical_session');
         if (existingSession) {
             this.currentSession = JSON.parse(existingSession);
             this.resumeSession();
@@ -1364,8 +1364,8 @@ class SessionManager {
     
     saveSession() {
         if (this.currentSession) {
-            // Only save to sessionStorage (clears when browser closes)
-            sessionStorage.setItem('clinical_session', JSON.stringify(this.currentSession));
+            // Using localStorage for consistency across the app
+            localStorage.setItem('clinical_session', JSON.stringify(this.currentSession));
         }
     }
     

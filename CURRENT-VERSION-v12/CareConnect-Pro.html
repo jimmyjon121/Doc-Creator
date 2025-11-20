@@ -32,6 +32,47 @@
     <script src="libs/chart.min.js"></script>
     <script src="libs/d3.v7.min.js"></script>
     
+    <!-- Programs Data Loader - MUST load before other modules -->
+    <script src="js/programs-loader.js"></script>
+    <script src="js/programs-init.js"></script>
+    
+    <!-- Database Management -->
+    <script src="indexed-db-manager.js"></script>
+    
+    <!-- Client Management -->
+    <script src="client-manager.js"></script>
+    
+    <!-- Demo Data Generator (Development Only) -->
+    <script src="js/demo-data.js"></script>
+    
+    <!-- Initialize Client Management System -->
+    <script>
+        (async function() {
+            'use strict';
+            
+            // Initialize database manager
+            window.dbManager = new IndexedDBManager('CareConnectDB', 2);
+            
+            // Initialize database with stores
+            await window.dbManager.init([
+                { name: 'clients', keyPath: 'id' },
+                { name: 'documents', keyPath: 'id' },
+                { name: 'programs', keyPath: 'id' },
+                { name: 'settings', keyPath: 'key' }
+            ]);
+            
+            // Initialize client manager
+            window.clientManager = new ClientManager(window.dbManager);
+            
+            console.log('✅ Client management system initialized');
+            
+            // Dispatch event to notify that client manager is ready
+            window.dispatchEvent(new CustomEvent('clientManagerReady', { 
+                detail: { clientManager: window.clientManager } 
+            }));
+        })();
+    </script>
+    
     <!-- Enhanced Features Scripts -->
     <script>
         // Global error handler to prevent white screen
@@ -210,15 +251,18 @@
         
         // Load core scripts
         const scripts = [
-            'feature-flags.js',
-            'performance-monitor.js', 
-            'indexed-db-manager.js',
-            'intelligent-matching.js',
-            'multi-client-workflow.js',
-            'advanced-filters.js',
-            'client-manager.js',
+            // UNUSED FILES REMOVED (never instantiated or called):
+            // 'feature-flags.js',
+            // 'performance-monitor.js',
+            // 'intelligent-matching.js',
+            // 'multi-client-workflow.js',
+            // 'advanced-filters.js',
+            // 'morning-review-dashboard.js',
+            
+            // ACTIVE FILES:
+            // 'indexed-db-manager.js', // DUPLICATE: Already loaded in <head>
+            // 'client-manager.js', // DUPLICATE: Already loaded in <head>
             'tracker-engine.js',
-            'morning-review-dashboard.js',
             'tracker-timeline.js',
             'tracker-bulk-update.js',
             'tracker-aftercare-cascade.js',
@@ -237,7 +281,7 @@
             const dashboardScripts = [
                 'dashboard-manager.js',
                 'dashboard-widgets.js',
-                'enhancements/onboarding-integration.js'
+                // 'enhancements/onboarding-integration.js' // REMOVED: Unused
             ];
             return Promise.all(dashboardScripts.map(src => loadScript(src)));
         }).then(() => {
@@ -1390,50 +1434,6 @@ window.initializeEnhancedFeatures ??= function initializeEnhancedFeatures() {
     return window.__enhancedFeaturesPromise;
 };
 
-// Fix for missing initializeClientSelector function
-window.initializeClientSelector ??= async () => {
-    console.log('✅ Client selector initialized (fallback)');
-    
-    if (window.__enhancedFeaturesPromise) {
-        try {
-            await window.__enhancedFeaturesPromise;
-        } catch (error) {
-            console.error('Enhanced features failed to initialize:', error);
-        }
-    }
-    
-    let attempts = 10;
-    while (!window.clientManager && attempts > 0) {
-        await new Promise(resolve => setTimeout(resolve, 300));
-        attempts--;
-    }
-    
-    const selector = document.getElementById('clientSelector');
-    if (!selector || !window.clientManager) {
-        console.log('Client manager not available, using manual entry');
-        const selectorContainer = document.getElementById('clientSelectorContainer');
-        const manualContainer = document.getElementById('manualEntryContainer');
-        selectorContainer?.style.setProperty('display', 'none');
-        manualContainer?.style.setProperty('display', 'block');
-        return;
-    }
-    
-    try {
-        const clients = await window.clientManager.getAllClients();
-        selector.innerHTML = '<option value="">Select a client...</option>';
-        
-        clients.forEach(client => {
-            const option = document.createElement('option');
-            option.value = client.id;
-            option.textContent = `${client.initials} - ${client.kipuId || 'No ID'}`;
-            selector.appendChild(option);
-        });
-    } catch (err) {
-        console.error('Failed to load clients:', err);
-        selector.innerHTML = '<option value="">No clients available</option>';
-    }
-};
-
 // Fix for database initialization issues
 document.addEventListener('DOMContentLoaded', () => {
     // Ensure programs are loaded
@@ -1471,37 +1471,8 @@ if (window.location.protocol === 'file:') {
     }
 }
 
-// Login screen helper function
-const ensureLoginScreenVisible = () => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const loginScreen = document.getElementById('loginScreen');
-    const mainApp = document.getElementById('mainApp');
-    
-    if (!isLoggedIn && loginScreen && mainApp) {
-        console.log('🔧 Showing login screen');
-        
-        // Apply login screen styles
-        Object.assign(loginScreen.style, {
-            display: 'flex',
-            visibility: 'visible',
-            opacity: '1',
-            zIndex: '10000',
-            position: 'fixed',
-            left: '0',
-            top: '0',
-            right: '0',
-            bottom: '0'
-        });
-        
-        mainApp.style.display = 'none';
-        return true;
-    }
-    return false;
-};
-
-// Ensure login screen is visible on load
-window.addEventListener('load', ensureLoginScreenVisible);
-document.addEventListener('DOMContentLoaded', ensureLoginScreenVisible);
+// Login screen visibility is now managed entirely by login-robust.js
+// Removed conflicting ensureLoginScreenVisible function to prevent conflicts
 
 console.log('✅ Bugfixes applied');
 
@@ -1855,182 +1826,69 @@ console.log('CareConnect Pro - Enhanced Version Loaded');
 
 console.log('🔐 Login fix applied');
 
-// Early proxy: ensure handleLogin always exists and queues attempts until ready
-// Define handleLogin function if it doesn't exist
-// Run immediately, not waiting for DOMContentLoaded
+// Simple proxy for handleLogin - ensures form's onsubmit works before login-robust.js loads
+// login-robust.js will replace this with the full implementation
 (function() {
-    const existing = typeof window.handleLogin === 'function' ? window.handleLogin : null;
-    const isProxy = Boolean(existing && existing.__ccHandleLoginProxy);
-
-    if (existing && !isProxy) {
-        console.log('✅ handleLogin already defined');
+    'use strict';
+    
+    // If handleLogin already exists and is not our proxy, don't override
+    if (typeof window.handleLogin === 'function' && !window.handleLogin.__isProxy) {
         return;
     }
-
-    console.log('🔐 Creating handleLogin function');
-
-    const queue = isProxy && Array.isArray(existing.__queue) ? existing.__queue : [];
-
-    const realHandleLogin = async function(eventOrUsername, password) {
-        try {
-            let username, pwd;
-            
-            // Handle both event object and direct username/password
-            if (eventOrUsername && typeof eventOrUsername === 'object' && eventOrUsername.preventDefault) {
-                // Event object passed
-                eventOrUsername.preventDefault();
-                const form = eventOrUsername.target || eventOrUsername.currentTarget;
-                const usernameInput = form.querySelector('input[type="text"], input[name="username"], #loginUsername');
-                const passwordInput = form.querySelector('input[type="password"], input[name="password"], #loginPassword');
-                
-                if (!usernameInput || !passwordInput) {
-                    // Try global selectors as fallback
-                    username = document.querySelector('#loginUsername, input[type="text"]')?.value || '';
-                    pwd = document.querySelector('#loginPassword, input[type="password"]')?.value || '';
-                } else {
-                    username = usernameInput.value.trim();
-                    pwd = passwordInput.value;
-                }
-            } else {
-                // Direct username/password passed
-                username = String(eventOrUsername || '').trim();
-                pwd = String(password || '');
-            }
-            
-            // Clear any previous error
-            const errorDiv = document.getElementById('loginError');
-            if (errorDiv) {
-                errorDiv.style.display = 'none';
-                errorDiv.textContent = '';
-            }
-            
-            // Validate inputs
-            if (!username || !pwd) {
-                const errorMsg = 'Please enter both username and password';
-                if (errorDiv) {
-                    errorDiv.textContent = errorMsg;
-                    errorDiv.style.display = 'block';
-                } else {
-                    alert(errorMsg);
-                }
-                return false;
-            }
-            
-            // Validate credentials
-            const registry = window.ccAccountRegistry;
-            const accounts = registry ? registry.load() : [];
-            const normalizedUsername = username.toLowerCase();
-            const account = accounts.find(acc => acc.username.toLowerCase() === normalizedUsername);
-
-            if (!account || account.password !== pwd) {
-                const errorMsg = 'Invalid username or password';
-                if (errorDiv) {
-                    errorDiv.textContent = errorMsg;
-                    errorDiv.style.display = 'block';
-                } else {
-                    alert(errorMsg);
-                }
-                return false;
-            }
-
-            const fullName = account.fullName || account.username;
-            const initials = registry && typeof registry.getInitials === 'function'
-                ? registry.getInitials(fullName)
-                : (fullName || account.username).slice(0, 2).toUpperCase();
-
-            // Successful login
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('username', account.username);
-            localStorage.setItem('userRole', account.role || 'user');
-            localStorage.setItem('fullName', fullName);
-            localStorage.setItem('userInitials', initials);
-            localStorage.setItem('manualLogin', 'true');
-            
-            console.log('✅ Login successful:', account.username);
-            
-            // Hide login screen and show main app
-            const loginScreen = document.getElementById('loginScreen');
-            const mainApp = document.getElementById('mainApp');
-            
-            if (loginScreen) {
-                loginScreen.style.display = 'none';
-                loginScreen.style.visibility = 'hidden';
-            }
-            
-            if (mainApp) {
-                mainApp.style.display = 'block';
-                mainApp.style.visibility = 'visible';
-            }
-            
-            // Update user profile button if it exists
-            const userProfileBtn = document.getElementById('userProfileBtn');
-            if (userProfileBtn) {
-                const usernameDisplay = userProfileBtn.querySelector('.username-display');
-                if (usernameDisplay) {
-                    usernameDisplay.textContent = account.username;
-                }
-            }
-
-            const displayFullName = document.getElementById('displayFullName');
-            if (displayFullName) {
-                displayFullName.textContent = fullName;
-            }
-
-            const displayUsername = document.getElementById('displayUsername');
-            if (displayUsername) {
-                displayUsername.textContent = `@${account.username}`;
-            }
-
-            const userInitials = document.getElementById('userInitials');
-            if (userInitials) {
-                userInitials.textContent = initials;
-            }
-
-            const userAvatar = document.getElementById('userAvatar');
-            if (userAvatar) {
-                userAvatar.textContent = initials;
-            }
-            
-            return true;
-        } catch (error) {
-            console.error('❌ Login error:', error);
-            const errorDiv = document.getElementById('loginError');
-            const errorMsg = 'An error occurred during login. Please try again.';
-            if (errorDiv) {
-                errorDiv.textContent = errorMsg;
-                errorDiv.style.display = 'block';
-            } else {
-                alert(errorMsg);
-            }
-            return false;
+    
+    // Create a simple proxy that queues calls until login-robust.js loads
+    const proxyQueue = [];
+    const proxyHandleLogin = function(event) {
+        // If login-robust.js has loaded and set the real handleLogin, use it
+        if (typeof window.CareConnectAuth !== 'undefined' && 
+            typeof window.handleLogin === 'function' && 
+            window.handleLogin !== proxyHandleLogin &&
+            !window.handleLogin.__isProxy) {
+            return window.handleLogin(event);
         }
+        
+        // Otherwise, prevent default and queue the call
+        if (event && typeof event.preventDefault === 'function') {
+            event.preventDefault();
+        }
+        
+        // Queue for when login-robust.js loads
+        proxyQueue.push({ event, timestamp: Date.now() });
+        
+        // Try to initialize login system if it hasn't loaded yet
+        if (typeof window.CareConnectAuth === 'undefined') {
+            console.log('⏳ Login system loading, queuing login attempt...');
+        }
+        
+        return false;
     };
-
-    realHandleLogin.__ccHandleLoginReady = true;
-
-    if (isProxy) {
-        existing.__impl = realHandleLogin;
-        existing.__isReady = true;
-        window.handleLogin = existing;
-    } else {
-        window.handleLogin = realHandleLogin;
-    }
-
-    if (Array.isArray(queue) && queue.length) {
-        const queuedCalls = queue.splice(0, queue.length);
-        queuedCalls.forEach(entry => {
-            if (!entry) return;
-            setTimeout(() => {
+    
+    proxyHandleLogin.__isProxy = true;
+    proxyHandleLogin.__queue = proxyQueue;
+    
+    window.handleLogin = proxyHandleLogin;
+    
+    // Process queued calls when login-robust.js loads
+    const checkForLoginSystem = setInterval(() => {
+        if (typeof window.CareConnectAuth !== 'undefined' && 
+            typeof window.handleLogin === 'function' && 
+            window.handleLogin !== proxyHandleLogin &&
+            !window.handleLogin.__isProxy) {
+            clearInterval(checkForLoginSystem);
+            // Process queued calls
+            proxyQueue.forEach(({ event }) => {
                 try {
-                    realHandleLogin.apply(entry.context || window, entry.args || []);
+                    window.handleLogin(event);
                 } catch (err) {
-                    console.error('Queued login attempt failed:', err);
+                    console.error('Queued login call failed:', err);
                 }
-            }, 0);
-        });
-    }
-
-    console.log('✅ handleLogin function created');
+            });
+            proxyQueue.length = 0;
+        }
+    }, 100);
+    
+    // Stop checking after 10 seconds
+    setTimeout(() => clearInterval(checkForLoginSystem), 10000);
 })();
 
 
@@ -15242,15 +15100,13 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                     
                     // Apply inline styles to override parent containers
                     const applyFullViewportStyles = () => {
-                        // Apply purple gradient background to html and body
-                        const gradientBg = 
-                            'radial-gradient(circle at 12% 18%, rgba(203, 207, 255, 0.35), transparent 45%), ' +
-                            'radial-gradient(circle at 88% 8%, rgba(110, 123, 255, 0.22), transparent 52%), ' +
-                            'linear-gradient(145deg, #ffffff 0%, #F3F4FF 100%)';
+                        // Apply clean white/gray background for modern look
+                        // The purple gradient (legacy) has been removed as requested
+                        const cleanBg = '#f8f9fa'; // Standard dashboard background
                         
-                        document.documentElement.style.background = gradientBg;
+                        document.documentElement.style.background = cleanBg;
                         document.documentElement.style.minHeight = '100vh';
-                        document.body.style.background = gradientBg;
+                        document.body.style.background = cleanBg;
                         document.body.style.minHeight = '100vh';
                         
                         // Override .container
@@ -18392,7 +18248,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             const dashboardScripts = [
                 'dashboard-manager.js',
                 'dashboard-widgets.js',
-                'enhancements/onboarding-integration.js'
+                // 'enhancements/onboarding-integration.js' // REMOVED: Unused
             ];
             return Promise.all(dashboardScripts.map(src => loadScript(src)));
         }).then(() => {
@@ -19630,50 +19486,6 @@ window.initializeEnhancedFeatures ??= function initializeEnhancedFeatures() {
     return window.__enhancedFeaturesPromise;
 };
 
-// Fix for missing initializeClientSelector function
-window.initializeClientSelector ??= async () => {
-    console.log('✅ Client selector initialized (fallback)');
-    
-    if (window.__enhancedFeaturesPromise) {
-        try {
-            await window.__enhancedFeaturesPromise;
-        } catch (error) {
-            console.error('Enhanced features failed to initialize:', error);
-        }
-    }
-    
-    let attempts = 10;
-    while (!window.clientManager && attempts > 0) {
-        await new Promise(resolve => setTimeout(resolve, 300));
-        attempts--;
-    }
-    
-    const selector = document.getElementById('clientSelector');
-    if (!selector || !window.clientManager) {
-        console.log('Client manager not available, using manual entry');
-        const selectorContainer = document.getElementById('clientSelectorContainer');
-        const manualContainer = document.getElementById('manualEntryContainer');
-        selectorContainer?.style.setProperty('display', 'none');
-        manualContainer?.style.setProperty('display', 'block');
-        return;
-    }
-    
-    try {
-        const clients = await window.clientManager.getAllClients();
-        selector.innerHTML = '<option value="">Select a client...</option>';
-        
-        clients.forEach(client => {
-            const option = document.createElement('option');
-            option.value = client.id;
-            option.textContent = `${client.initials} - ${client.kipuId || 'No ID'}`;
-            selector.appendChild(option);
-        });
-    } catch (err) {
-        console.error('Failed to load clients:', err);
-        selector.innerHTML = '<option value="">No clients available</option>';
-    }
-};
-
 // Fix for database initialization issues
 document.addEventListener('DOMContentLoaded', () => {
     // Ensure programs are loaded
@@ -19711,37 +19523,8 @@ if (window.location.protocol === 'file:') {
     }
 }
 
-// Login screen helper function
-const ensureLoginScreenVisible = () => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const loginScreen = document.getElementById('loginScreen');
-    const mainApp = document.getElementById('mainApp');
-    
-    if (!isLoggedIn && loginScreen && mainApp) {
-        console.log('🔧 Showing login screen');
-        
-        // Apply login screen styles
-        Object.assign(loginScreen.style, {
-            display: 'flex',
-            visibility: 'visible',
-            opacity: '1',
-            zIndex: '10000',
-            position: 'fixed',
-            left: '0',
-            top: '0',
-            right: '0',
-            bottom: '0'
-        });
-        
-        mainApp.style.display = 'none';
-        return true;
-    }
-    return false;
-};
-
-// Ensure login screen is visible on load
-window.addEventListener('load', ensureLoginScreenVisible);
-document.addEventListener('DOMContentLoaded', ensureLoginScreenVisible);
+// Login screen visibility is now managed entirely by login-robust.js
+// Removed conflicting ensureLoginScreenVisible function to prevent conflicts
 
 console.log('✅ Bugfixes applied');
 
@@ -33630,15 +33413,13 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                     
                     // Apply inline styles to override parent containers
                     const applyFullViewportStyles = () => {
-                        // Apply purple gradient background to html and body
-                        const gradientBg = 
-                            'radial-gradient(circle at 12% 18%, rgba(203, 207, 255, 0.35), transparent 45%), ' +
-                            'radial-gradient(circle at 88% 8%, rgba(110, 123, 255, 0.22), transparent 52%), ' +
-                            'linear-gradient(145deg, #ffffff 0%, #F3F4FF 100%)';
+                        // Apply clean white/gray background for modern look
+                        // The purple gradient (legacy) has been removed as requested
+                        const cleanBg = '#f8f9fa'; // Standard dashboard background
                         
-                        document.documentElement.style.background = gradientBg;
+                        document.documentElement.style.background = cleanBg;
                         document.documentElement.style.minHeight = '100vh';
-                        document.body.style.background = gradientBg;
+                        document.body.style.background = cleanBg;
                         document.body.style.minHeight = '100vh';
                         
                         // Override .container
@@ -40248,7 +40029,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         }
 
         .history-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
             padding: 20px;
             position: sticky;
@@ -40304,7 +40085,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         .stat-value {
             font-size: 32px;
             font-weight: bold;
-            color: #667eea;
+            color: #6366f1;
         }
 
         @keyframes spin {
@@ -41239,6 +41020,136 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         .login-btn:active {
             transform: translateY(-1px) !important;
         }
+        
+        /* User Menu Dropdown Styles */
+        .user-menu {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            min-width: 240px;
+            z-index: 10001;
+            overflow: hidden;
+            animation: slideDown 0.2s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .user-menu-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .user-menu-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .user-menu-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .user-menu-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .user-menu-username {
+            font-size: 13px;
+            opacity: 0.9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .user-menu-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 8px 0;
+        }
+        
+        .user-menu-item {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border: none;
+            background: none;
+            text-align: left;
+            font-size: 14px;
+            color: #1a202c;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .user-menu-item:hover {
+            background: #f7fafc;
+        }
+        
+        .user-menu-item:active {
+            background: #edf2f7;
+        }
+        
+        .user-menu-icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        /* User profile button styles */
+        .user-profile-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .user-profile-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+        
+        .user-profile-btn:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
@@ -41251,28 +41162,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
     <!-- END AUTO-LOGIN (DISABLED) -->
     
     
-                <!-- Prominent Map Toggle Button -->
-                <button id="mainMapToggle" onclick="toggleImmersiveMap()" style="
-                    position: fixed;
-                    bottom: 30px;
-                    right: 30px;
-                    width: 60px;
-                    height: 60px;
-                    border-radius: 50%;
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    border: none;
-                    color: white;
-                    font-size: 24px;
-                    cursor: pointer;
-                    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-                    z-index: 9999;
-                    transition: all 0.3s;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                ">
-                    <span id="mapToggleIcon">🗺️</span>
-                </button>
+                <!-- LEGACY MAP TOGGLE BUTTON REMOVED - Non-functional, used old purple gradient -->
     
     <!-- Login Screen -->
     <div id="loginScreen" class="auth-screen">
@@ -41436,6 +41326,22 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         </div>
         <div class="app-header__section" id="appSectionHeader"></div>
     </header>
+    
+    <!-- User Menu Dropdown -->
+    <div id="userMenu" class="user-menu" style="display: none;" role="menu" aria-label="User menu">
+        <div class="user-menu-header">
+            <div class="user-menu-avatar" id="userMenuInitials">?</div>
+            <div class="user-menu-info">
+                <div class="user-menu-name" id="userMenuName">User</div>
+                <div class="user-menu-username" id="userMenuUsername">@username</div>
+            </div>
+        </div>
+        <div class="user-menu-divider"></div>
+        <button type="button" class="user-menu-item" onclick="handleLogout()" role="menuitem">
+            <span class="user-menu-icon">🚪</span>
+            <span>Sign Out</span>
+        </button>
+    </div>
     
     <div class="app-drawer-overlay" id="appNavOverlay" tabindex="-1" aria-hidden="true"></div>
     <nav class="app-drawer" id="appNavDrawer" aria-hidden="true" aria-label="Primary navigation">
@@ -43517,35 +43423,94 @@ if (!document.querySelector('#morning-review-badge-styles')) {
     <script src="js/data-persistence.js"></script>
     <script src="session-fix.js"></script>
     
+    <!-- User Menu Functions -->
     <script>
-    // Override session checking to use localStorage instead of sessionStorage
-    (function() {
-        'use strict';
-        console.log('🔄 Session persistence override activated');
-        
-        // Migrate any existing sessionStorage to localStorage on page load
-        const sessionKeys = ['isLoggedIn', 'username', 'fullName', 'userRole', 'isMaster', 'loginExpires'];
-        let migrated = false;
-        
-        sessionKeys.forEach(key => {
-            const sessionValue = sessionStorage.getItem(key);
-            if (sessionValue !== null && localStorage.getItem(key) === null) {
-                localStorage.setItem(key, sessionValue);
-                sessionStorage.removeItem(key);
-                migrated = true;
-                console.log(`Migrated ${key} from sessionStorage to localStorage`);
+        (function() {
+            'use strict';
+            
+            let userMenuOpen = false;
+            const userMenu = document.getElementById('userMenu');
+            const userProfileBtn = document.getElementById('userProfileBtn');
+            
+            // Toggle user menu
+            window.toggleUserMenu = function() {
+                if (!userMenu || !userProfileBtn) return;
+                
+                userMenuOpen = !userMenuOpen;
+                
+                if (userMenuOpen) {
+                    userMenu.style.display = 'block';
+                    userProfileBtn.setAttribute('aria-expanded', 'true');
+                    updateUserMenuInfo();
+                } else {
+                    userMenu.style.display = 'none';
+                    userProfileBtn.setAttribute('aria-expanded', 'false');
+                }
+            };
+            
+            // Update user menu with current user info
+            window.updateUserMenuInfo = function() {
+                if (!userMenu) return;
+                
+                const username = localStorage.getItem('username') || 'User';
+                const fullName = localStorage.getItem('fullName') || username;
+                const initials = localStorage.getItem('userInitials') || username.slice(0, 2).toUpperCase();
+                
+                const menuInitials = document.getElementById('userMenuInitials');
+                const menuName = document.getElementById('userMenuName');
+                const menuUsername = document.getElementById('userMenuUsername');
+                const headerInitials = document.getElementById('userInitials');
+                
+                if (menuInitials) menuInitials.textContent = initials;
+                if (menuName) menuName.textContent = fullName;
+                if (menuUsername) menuUsername.textContent = '@' + username;
+                if (headerInitials) headerInitials.textContent = initials;
+            };
+            
+            // Handle logout
+            window.handleLogout = function() {
+                if (typeof window.logout === 'function') {
+                    window.logout();
+                    userMenuOpen = false;
+                    if (userMenu) userMenu.style.display = 'none';
+                    if (userProfileBtn) userProfileBtn.setAttribute('aria-expanded', 'false');
+                } else {
+                    console.error('Logout function not available');
+                }
+            };
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (userMenuOpen && userMenu && userProfileBtn) {
+                    if (!userMenu.contains(event.target) && !userProfileBtn.contains(event.target)) {
+                        userMenuOpen = false;
+                        userMenu.style.display = 'none';
+                        userProfileBtn.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            });
+            
+            // Update menu info when user logs in
+            if (typeof window.addEventListener !== 'undefined') {
+                window.addEventListener('storage', function(e) {
+                    if (e.key === 'username' || e.key === 'fullName') {
+                        updateUserMenuInfo();
+                    }
+                });
+                
+                // Update on page load if already logged in
+                if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                    setTimeout(updateUserMenuInfo, 500);
+                } else {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        setTimeout(updateUserMenuInfo, 500);
+                    });
+                }
             }
-        });
-        
-        if (migrated) {
-            console.log('✅ Session data migrated to persistent storage');
-        }
-        
-        // Ensure we're using the right storage for login checks
-        const actualIsLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        console.log('Login status from localStorage:', actualIsLoggedIn);
-        
-    })();
+        })();
     </script>
+    
+    <!-- Session migration is handled by login-robust.js -->
+    <!-- No additional migration script needed - login-robust.js is the single source of truth -->
 </body>
 </html>
