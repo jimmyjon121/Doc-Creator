@@ -28,7 +28,7 @@ class DashboardWidget {
     renderEmptyState(message, options = {}) {
         if (!this.container) return;
         const actionHtml = options.showDemoAction
-            ? `<button type="button" class="widget-empty__action" onclick="window.populateDemoClients && window.populateDemoClients()">Populate demo data</button>`
+            ? `<button type="button" class="widget-empty__action" onclick="window.populateDemoClients && window.populateDemoClients(50)">Populate demo data</button>`
             : '';
         this.container.innerHTML = `
             <div class="widget-empty">

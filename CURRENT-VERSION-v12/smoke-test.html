@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConnect Pro - Comprehensive Smoke Test</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f3f4f6;
+        }
+        h1 {
+            color: #1f2937;
+            border-bottom: 3px solid #6366f1;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .test-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #e5e7eb;
+        }
+        .test-item.pass {
+            border-left-color: #10b981;
+            background: #f0fdf4;
+        }
+        .test-item.fail {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .test-item.running {
+            border-left-color: #f59e0b;
+            background: #fefce8;
+        }
+        .test-name {
+            flex: 1;
+            font-weight: 500;
+        }
+        .test-status {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .test-status.pass {
+            background: #10b981;
+            color: white;
+        }
+        .test-status.fail {
+            background: #ef4444;
+            color: white;
+        }
+        .test-status.running {
+            background: #f59e0b;
+            color: white;
+        }
+        button {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #4f46e5;
+        }
+        .summary {
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .log {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        .log-entry {
+            margin: 2px 0;
+        }
+        .log-error {
+            color: #ef4444;
+        }
+        .log-success {
+            color: #10b981;
+        }
+        .log-warning {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔬 CareConnect Pro - Comprehensive Smoke Test</h1>
+    
+    <div class="summary">
+        <h2>Test Summary</h2>
+        <p>Total Tests: <span id="totalTests">0</span></p>
+        <p>Passed: <span id="passedTests" style="color: #10b981;">0</span></p>
+        <p>Failed: <span id="failedTests" style="color: #ef4444;">0</span></p>
+        <p>Coverage: <span id="coverage">0%</span></p>
+    </div>
+
+    <div style="margin: 20px 0;">
+        <button onclick="runAllTests()">🚀 Run All Tests</button>
+        <button onclick="generateTestData()">📊 Generate Test Data</button>
+        <button onclick="clearAllData()">🗑️ Clear All Data</button>
+        <button onclick="clearLog()">📝 Clear Log</button>
+    </div>
+
+    <div class="test-section">
+        <h3>1. Database & Storage Tests</h3>
+        <div id="dbTests"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Client Management Tests</h3>
+        <div id="clientTests"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Dashboard Tests</h3>
+        <div id="dashboardTests"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. UI Component Tests</h3>
+        <div id="uiTests"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>5. Data Flow Tests</h3>
+        <div id="flowTests"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Test Log</h3>
+        <div id="testLog" class="log"></div>
+    </div>
+
+    <!-- Load all required scripts from parent app -->
+    <script src="indexed-db-manager.js"></script>
+    <script src="client-manager.js"></script>
+    <script src="houses-manager.js"></script>
+    <script src="milestones-manager.js"></script>
+    <script src="aftercare-manager.js"></script>
+    <script src="dashboard-manager.js"></script>
+    <script src="dashboard-widgets.js"></script>
+    <script src="js/demo-data.js"></script>
+
+    <script>
+        let testResults = {
+            total: 0,
+            passed: 0,
+            failed: 0
+        };
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('testLog');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            entry.innerHTML = `[${timestamp}] `;
+            
+            if (type === 'error') {
+                entry.innerHTML += `<span class="log-error">${message}</span>`;
+            } else if (type === 'success') {
+                entry.innerHTML += `<span class="log-success">${message}</span>`;
+            } else if (type === 'warning') {
+                entry.innerHTML += `<span class="log-warning">${message}</span>`;
+            } else {
+                entry.innerHTML += message;
+            }
+            
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '';
+        }
+
+        function updateSummary() {
+            document.getElementById('totalTests').textContent = testResults.total;
+            document.getElementById('passedTests').textContent = testResults.passed;
+            document.getElementById('failedTests').textContent = testResults.failed;
+            const coverage = testResults.total > 0 
+                ? Math.round((testResults.passed / testResults.total) * 100) 
+                : 0;
+            document.getElementById('coverage').textContent = coverage + '%';
+        }
+
+        function createTestItem(name, containerId) {
+            const container = document.getElementById(containerId);
+            const item = document.createElement('div');
+            item.className = 'test-item running';
+            item.id = 'test-' + name.replace(/\s+/g, '-').toLowerCase();
+            item.innerHTML = `
+                <span class="test-name">${name}</span>
+                <span class="test-status running">Running</span>
+            `;
+            container.appendChild(item);
+            testResults.total++;
+            updateSummary();
+            return item;
+        }
+
+        function updateTestStatus(testId, passed, message = '') {
+            const item = document.getElementById(testId);
+            if (!item) return;
+            
+            item.className = `test-item ${passed ? 'pass' : 'fail'}`;
+            const status = item.querySelector('.test-status');
+            status.className = `test-status ${passed ? 'pass' : 'fail'}`;
+            status.textContent = passed ? 'Pass' : 'Fail';
+            
+            if (passed) {
+                testResults.passed++;
+                log(`✅ ${item.querySelector('.test-name').textContent}`, 'success');
+            } else {
+                testResults.failed++;
+                log(`❌ ${item.querySelector('.test-name').textContent}: ${message}`, 'error');
+            }
+            updateSummary();
+        }
+
+        async function runDatabaseTests() {
+            log('Starting Database Tests...', 'warning');
+            
+            // Test 1: Initialize IndexedDB
+            const test1 = createTestItem('Initialize IndexedDB', 'dbTests');
+            try {
+                window.dbManager = new IndexedDBManager('CareConnectTestDB', 2);
+                await window.dbManager.init([
+                    { name: 'clients', keyPath: 'id' },
+                    { name: 'documents', keyPath: 'id' },
+                    { name: 'programs', keyPath: 'id' },
+                    { name: 'settings', keyPath: 'key' }
+                ]);
+                updateTestStatus(test1.id, true);
+            } catch (error) {
+                updateTestStatus(test1.id, false, error.message);
+            }
+
+            // Test 2: Store and retrieve data
+            const test2 = createTestItem('Store and Retrieve Data', 'dbTests');
+            try {
+                const testData = { id: 'test123', value: 'test' };
+                await window.dbManager.put('settings', testData);
+                const retrieved = await window.dbManager.get('settings', 'test123');
+                updateTestStatus(test2.id, retrieved && retrieved.value === 'test');
+            } catch (error) {
+                updateTestStatus(test2.id, false, error.message);
+            }
+
+            // Test 3: Initialize Houses
+            const test3 = createTestItem('Initialize Houses', 'dbTests');
+            try {
+                await window.dbManager.initializeHouses();
+                const houses = await window.dbManager.getHouses();
+                updateTestStatus(test3.id, houses && houses.length > 0);
+            } catch (error) {
+                updateTestStatus(test3.id, false, error.message);
+            }
+        }
+
+        async function runClientTests() {
+            log('Starting Client Management Tests...', 'warning');
+            
+            // Test 1: Initialize ClientManager
+            const test1 = createTestItem('Initialize ClientManager', 'clientTests');
+            try {
+                window.clientManager = new ClientManager(window.dbManager);
+                updateTestStatus(test1.id, true);
+            } catch (error) {
+                updateTestStatus(test1.id, false, error.message);
+            }
+
+            // Test 2: Create a test client
+            const test2 = createTestItem('Create Test Client', 'clientTests');
+            try {
+                const testClient = await window.clientManager.createClient({
+                    initials: 'TC',
+                    kipuId: 'TEST001',
+                    houseId: 'house_nest',
+                    admissionDate: new Date().toISOString().split('T')[0],
+                    caseManagerInitials: 'JH',
+                    clinicalCoachInitials: 'JH',
+                    primaryTherapistInitials: 'JH',
+                    familyAmbassadorPrimaryInitials: 'JH',
+                    familyAmbassadorSecondaryInitials: 'JH',
+                    tags: ['test'],
+                    notes: 'Test client for smoke test'
+                });
+                window.testClientId = testClient.id;
+                updateTestStatus(test2.id, testClient && testClient.id);
+            } catch (error) {
+                updateTestStatus(test2.id, false, error.message);
+            }
+
+            // Test 3: Retrieve client
+            const test3 = createTestItem('Retrieve Client', 'clientTests');
+            try {
+                const client = await window.clientManager.getClient(window.testClientId);
+                updateTestStatus(test3.id, client && client.initials === 'TC');
+            } catch (error) {
+                updateTestStatus(test3.id, false, error.message);
+            }
+
+            // Test 4: Get all clients
+            const test4 = createTestItem('Get All Clients', 'clientTests');
+            try {
+                const clients = await window.clientManager.getAllClients();
+                updateTestStatus(test4.id, Array.isArray(clients));
+            } catch (error) {
+                updateTestStatus(test4.id, false, error.message);
+            }
+
+            // Test 5: Get clients by house
+            const test5 = createTestItem('Get Clients by House', 'clientTests');
+            try {
+                const houseClients = await window.clientManager.getClientsByHouse('house_nest', true);
+                updateTestStatus(test5.id, Array.isArray(houseClients));
+            } catch (error) {
+                updateTestStatus(test5.id, false, error.message);
+            }
+
+            // Test 6: Get discharged clients
+            const test6 = createTestItem('Get Discharged Clients', 'clientTests');
+            try {
+                const discharged = await window.clientManager.getDischargedClients();
+                updateTestStatus(test6.id, Array.isArray(discharged));
+            } catch (error) {
+                updateTestStatus(test6.id, false, error.message);
+            }
+        }
+
+        async function runDashboardTests() {
+            log('Starting Dashboard Tests...', 'warning');
+            
+            // Test 1: Initialize DashboardManager
+            const test1 = createTestItem('Initialize DashboardManager', 'dashboardTests');
+            try {
+                window.dashboardManager = new DashboardManager();
+                await window.dashboardManager.initialize();
+                updateTestStatus(test1.id, window.dashboardManager.initialized);
+            } catch (error) {
+                updateTestStatus(test1.id, false, error.message);
+            }
+
+            // Test 2: Load Dashboard Data
+            const test2 = createTestItem('Load Dashboard Data', 'dashboardTests');
+            try {
+                await window.dashboardManager.loadDashboardData();
+                updateTestStatus(test2.id, true);
+            } catch (error) {
+                updateTestStatus(test2.id, false, error.message);
+            }
+
+            // Test 3: Get Relevant Clients
+            const test3 = createTestItem('Get Relevant Clients', 'dashboardTests');
+            try {
+                const clients = await window.dashboardManager.getRelevantClients();
+                updateTestStatus(test3.id, Array.isArray(clients));
+            } catch (error) {
+                updateTestStatus(test3.id, false, error.message);
+            }
+
+            // Test 4: Initialize Dashboard Widgets
+            const test4 = createTestItem('Initialize Dashboard Widgets', 'dashboardTests');
+            try {
+                window.dashboardWidgets = new DashboardWidgets();
+                await window.dashboardWidgets.initialize();
+                updateTestStatus(test4.id, true);
+            } catch (error) {
+                updateTestStatus(test4.id, false, error.message);
+            }
+        }
+
+        async function runUITests() {
+            log('Starting UI Component Tests...', 'warning');
+            
+            // Test 1: Check ccConfig
+            const test1 = createTestItem('Check ccConfig', 'uiTests');
+            try {
+                window.ccConfig = window.ccConfig || {};
+                window.ccConfig.demoMode = true;
+                window.ccConfig.currentUser = { initials: 'JH', role: 'Coach', isAdmin: false };
+                updateTestStatus(test1.id, window.ccConfig.currentUser.initials === 'JH');
+            } catch (error) {
+                updateTestStatus(test1.id, false, error.message);
+            }
+
+            // Test 2: Check HousesManager
+            const test2 = createTestItem('Initialize HousesManager', 'uiTests');
+            try {
+                window.housesManager = new HousesManager(window.dbManager);
+                await window.housesManager.initialize();
+                const houses = window.housesManager.getActiveHouses();
+                updateTestStatus(test2.id, houses.length > 0);
+            } catch (error) {
+                updateTestStatus(test2.id, false, error.message);
+            }
+
+            // Test 3: Check MilestonesManager
+            const test3 = createTestItem('Initialize MilestonesManager', 'uiTests');
+            try {
+                window.milestonesManager = new MilestonesManager(window.dbManager);
+                updateTestStatus(test3.id, true);
+            } catch (error) {
+                updateTestStatus(test3.id, false, error.message);
+            }
+
+            // Test 4: Check AftercareManager
+            const test4 = createTestItem('Initialize AftercareManager', 'uiTests');
+            try {
+                window.aftercareManager = new AftercareManager(window.dbManager);
+                updateTestStatus(test4.id, true);
+            } catch (error) {
+                updateTestStatus(test4.id, false, error.message);
+            }
+        }
+
+        async function runDataFlowTests() {
+            log('Starting Data Flow Tests...', 'warning');
+            
+            // Test 1: Generate Demo Data
+            const test1 = createTestItem('Generate 20 Demo Clients', 'flowTests');
+            try {
+                // Clear first
+                const clients = await window.clientManager.getAllClients();
+                for (const client of clients) {
+                    await window.clientManager.deleteClient(client.id);
+                }
+                
+                // Generate new
+                const generated = await window.DemoDataGenerator.generateDemoClients(20);
+                updateTestStatus(test1.id, generated && generated.length === 20);
+            } catch (error) {
+                updateTestStatus(test1.id, false, error.message);
+            }
+
+            // Test 2: Verify Dashboard Shows All Clients
+            const test2 = createTestItem('Dashboard Shows All Clients', 'flowTests');
+            try {
+                const dashboardClients = await window.dashboardManager.getRelevantClients();
+                updateTestStatus(test2.id, dashboardClients.length === 20);
+            } catch (error) {
+                updateTestStatus(test2.id, false, error.message);
+            }
+
+            // Test 3: Verify House Distribution
+            const test3 = createTestItem('Verify House Distribution', 'flowTests');
+            try {
+                const houses = window.housesManager.getActiveHouses();
+                let totalInHouses = 0;
+                for (const house of houses) {
+                    const houseClients = await window.clientManager.getClientsByHouse(house.id, true);
+                    totalInHouses += houseClients.length;
+                    log(`House ${house.name}: ${houseClients.length} clients`);
+                }
+                // Some clients might be pre-admission (no house) or discharged
+                updateTestStatus(test3.id, totalInHouses > 0);
+            } catch (error) {
+                updateTestStatus(test3.id, false, error.message);
+            }
+
+            // Test 4: Verify Stage Distribution
+            const test4 = createTestItem('Verify Stage Distribution', 'flowTests');
+            try {
+                const allClients = await window.clientManager.getAllClients();
+                const stages = {
+                    'pre-admission': 0,
+                    'early': 0,
+                    'mid': 0,
+                    'late': 0,
+                    'discharged': 0
+                };
+                
+                for (const client of allClients) {
+                    if (client._demoStage) {
+                        stages[client._demoStage]++;
+                    }
+                }
+                
+                log(`Stage distribution: ${JSON.stringify(stages)}`);
+                updateTestStatus(test4.id, Object.values(stages).reduce((a, b) => a + b, 0) === 20);
+            } catch (error) {
+                updateTestStatus(test4.id, false, error.message);
+            }
+
+            // Test 5: Verify Coach Assignment
+            const test5 = createTestItem('Verify Coach Assignment', 'flowTests');
+            try {
+                const allClients = await window.clientManager.getAllClients();
+                const coachClients = allClients.filter(c => 
+                    c.caseManagerInitials === 'JH' ||
+                    c.clinicalCoachInitials === 'JH' ||
+                    c.familyAmbassadorPrimaryInitials === 'JH'
+                );
+                updateTestStatus(test5.id, coachClients.length === 20);
+            } catch (error) {
+                updateTestStatus(test5.id, false, error.message);
+            }
+        }
+
+        async function runAllTests() {
+            // Reset counters
+            testResults = { total: 0, passed: 0, failed: 0 };
+            
+            // Clear test containers
+            document.getElementById('dbTests').innerHTML = '';
+            document.getElementById('clientTests').innerHTML = '';
+            document.getElementById('dashboardTests').innerHTML = '';
+            document.getElementById('uiTests').innerHTML = '';
+            document.getElementById('flowTests').innerHTML = '';
+            
+            clearLog();
+            log('🚀 Starting Comprehensive Smoke Test...', 'warning');
+            
+            await runDatabaseTests();
+            await runClientTests();
+            await runDashboardTests();
+            await runUITests();
+            await runDataFlowTests();
+            
+            log('🏁 Test Suite Complete!', 'warning');
+            log(`Results: ${testResults.passed}/${testResults.total} tests passed`, 
+                testResults.failed === 0 ? 'success' : 'error');
+        }
+
+        async function generateTestData() {
+            log('Generating test data...', 'warning');
+            try {
+                const count = prompt('How many test clients to generate?', '20');
+                if (!count) return;
+                
+                const generated = await window.DemoDataGenerator.generateDemoClients(parseInt(count));
+                log(`Generated ${generated.length} test clients`, 'success');
+            } catch (error) {
+                log(`Failed to generate test data: ${error.message}`, 'error');
+            }
+        }
+
+        async function clearAllData() {
+            if (!confirm('Clear all test data?')) return;
+            
+            log('Clearing all data...', 'warning');
+            try {
+                const clients = await window.clientManager.getAllClients();
+                for (const client of clients) {
+                    await window.clientManager.deleteClient(client.id);
+                }
+                log('All data cleared', 'success');
+            } catch (error) {
+                log(`Failed to clear data: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run tests on load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Smoke Test Suite Ready', 'success');
+            log('Click "Run All Tests" to begin comprehensive testing', 'warning');
+        });
+    </script>
+</body>
+</html>

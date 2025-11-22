@@ -105,16 +105,8 @@ class ClientManager {
                 includeAtHome: clientData.preferences?.includeAtHome || false,
                 includeAlumni: clientData.preferences?.includeAlumni || false,
                 documentType: clientData.preferences?.documentType || 'options' // options, plans
-            },
-            
-            // Task tracking + compliance scaffolding
-            taskState: clientData.taskState || {},
-            asamEpisodes: clientData.asamEpisodes || [],
-            complianceFlags: clientData.complianceFlags || {}
+            }
         };
-        
-        // Ensure task schema defaults are applied
-        this.ensureTaskSchema(client);
         
         // Validate
         if (!client.initials || client.initials.length < 2) {
@@ -137,10 +129,9 @@ class ClientManager {
         // Validate Kipu ID format if needed (add specific format rules here)
         // Example: if (!/^\d{6,10}$/.test(client.kipuId)) { ... }
         
-        // House assignment is optional for pre-admission clients
-        // if (!client.houseId) {
-        //     throw new Error('House assignment is required');
-        // }
+        if (!client.houseId) {
+            throw new Error('House assignment is required');
+        }
         
         // Validate discharge date is not before admission date
         if (client.dischargeDate && client.admissionDate) {
@@ -213,9 +204,6 @@ class ClientManager {
             lastModified: new Date().toISOString()
         };
         
-        // Re-sync task schema after updates (handles new tasks + due changes)
-        this.ensureTaskSchema(updatedClient);
-        
         // Save
         await this.dbManager.put(this.storeName, updatedClient);
         
@@ -258,28 +246,6 @@ class ClientManager {
     async getActiveClients() {
         const allClients = await this.getAllClients();
         return allClients.filter(c => c.status === 'active');
-    }
-    
-    /**
-     * Get discharged clients
-     */
-    async getDischargedClients() {
-        const allClients = await this.getAllClients();
-        return allClients.filter(c => c.status === 'discharged');
-    }
-    
-    /**
-     * Get clients by house
-     */
-    async getClientsByHouse(houseId, activeOnly = true) {
-        const allClients = await this.getAllClients();
-        let filtered = allClients.filter(c => c.houseId === houseId);
-        
-        if (activeOnly) {
-            filtered = filtered.filter(c => c.status === 'active');
-        }
-        
-        return filtered;
     }
     
     /**
@@ -917,7 +883,7 @@ class ClientManager {
         
         return stats;
     }
-    
+
     /**
      * Initialize from storage
      */
@@ -956,228 +922,6 @@ class ClientManager {
                 console.error('Error in client listener:', error);
             }
         });
-    }
-
-    /**
-     * Public helper to ensure task schema defaults are applied
-     * Returns true if client.taskState was modified
-     */
-    ensureTaskSchema(client) {
-        return this.syncTaskSchema(client);
-    }
-
-    getTaskSchema() {
-        if (typeof window === 'undefined') return null;
-        return window.TaskSchema || null;
-    }
-
-    syncTaskSchema(client) {
-        const schema = this.getTaskSchema();
-        if (!client) return false;
-        if (!schema || !schema.tasks) {
-            client.taskState = client.taskState || {};
-            return false;
-        }
-
-        const now = new Date().toISOString();
-        if (!client.taskState || typeof client.taskState !== 'object') {
-            client.taskState = {};
-        }
-
-        let changed = false;
-
-        Object.entries(schema.tasks).forEach(([taskId, config]) => {
-            const existing = client.taskState[taskId];
-            const defaults = this.buildTaskRecord(client, taskId, config, now);
-            const merged = {
-                ...defaults,
-                ...(existing || {}),
-                id: taskId
-            };
-
-            const recalculatedDue = this.calculateTaskDueDate(client, config, merged);
-            if (recalculatedDue !== merged.dueDate) {
-                merged.dueDate = recalculatedDue;
-            }
-
-            if (config.dependsOn && config.dependsOn.length > 0) {
-                const locked = config.dependsOn.some(depId => {
-                    const dependency = client.taskState[depId];
-                    return !dependency || !dependency.completed;
-                });
-                if (locked !== merged.locked) {
-                    merged.locked = locked;
-                }
-            }
-
-            if (config.legacyField && client[config.legacyField]) {
-                if (!merged.completed) {
-                    merged.completed = true;
-                    changed = true;
-                }
-                if (merged.status !== 'complete') {
-                    merged.status = 'complete';
-                    changed = true;
-                }
-                merged.completedDate = merged.completedDate || client[config.legacyDateField] || now;
-            }
-
-            if (config.legacyField && !client[config.legacyField] && merged.completed && merged.status === 'complete') {
-                client[config.legacyField] = true;
-                client[config.legacyDateField] = merged.completedDate || now;
-            }
-
-            if (!existing || JSON.stringify(existing) !== JSON.stringify(merged)) {
-                changed = true;
-            }
-
-            client.taskState[taskId] = merged;
-        });
-
-        // Remove tasks that no longer exist in schema
-        Object.keys(client.taskState).forEach(taskId => {
-            if (!schema.tasks[taskId]) {
-                delete client.taskState[taskId];
-                changed = true;
-            }
-        });
-
-        return changed;
-    }
-
-    buildTaskRecord(client, taskId, config, timestamp) {
-        return {
-            id: taskId,
-            status: 'pending',
-            completed: false,
-            completedDate: null,
-            assignedTo: this.resolveDefaultOwner(client, config?.defaultOwnerRole),
-            dueDate: this.calculateTaskDueDate(client, config),
-            locked: Array.isArray(config?.dependsOn) && config.dependsOn.length > 0,
-            notes: '',
-            evidence: [],
-            lastUpdated: timestamp,
-            history: []
-        };
-    }
-
-    resolveDefaultOwner(client, role) {
-        if (!role) return client.caseManagerInitials || '';
-        const map = {
-            caseManager: client.caseManagerInitials,
-            clinicalCoach: client.clinicalCoachInitials,
-            primaryTherapist: client.primaryTherapistInitials,
-            familyAmbassadorPrimary: client.familyAmbassadorPrimaryInitials,
-            familyAmbassadorSecondary: client.familyAmbassadorSecondaryInitials,
-            admissions: 'ADMS'
-        };
-        return (map[role] || client.caseManagerInitials || client.clinicalCoachInitials || '').toUpperCase();
-    }
-
-    calculateTaskDueDate(client, config, currentState = null) {
-        if (!config || !config.due) return currentState?.dueDate || null;
-        const due = config.due;
-
-        const addDaysSafe = (dateString, days = 0) => {
-            if (!dateString) return null;
-            return this.addDays(dateString, days);
-        };
-
-        switch (due.type) {
-            case 'afterAdmission':
-                return addDaysSafe(client.admissionDate, due.days || 0);
-            case 'beforeDischarge':
-                if (!client.dischargeDate) return null;
-                return addDaysSafe(client.dischargeDate, -(due.days || 0));
-            case 'afterTaskComplete':
-                if (!due.task || !client.taskState?.[due.task]?.completedDate) return null;
-                return addDaysSafe(client.taskState[due.task].completedDate, due.days || 0);
-            case 'afterEpisodeStart': {
-                const episode = this.getActiveAsamEpisode(client);
-                const baseDate = episode
-                    ? (episode.continuedFromDate || episode.startDate)
-                    : client.admissionDate || null;
-                return addDaysSafe(baseDate, due.days || 0);
-            }
-            case 'afterLocChange': {
-                const episode = this.getMostRecentAsamEpisode(client);
-                const locDate = episode?.changeDate || episode?.startDate;
-                return addDaysSafe(locDate, due.days || 0);
-            }
-            case 'atAdmission':
-                return client.admissionDate || null;
-            default:
-                return currentState?.dueDate || null;
-        }
-    }
-
-    getActiveAsamEpisode(client) {
-        if (!client?.asamEpisodes || client.asamEpisodes.length === 0) return null;
-        return client.asamEpisodes.find(ep => !ep.endDate) || null;
-    }
-
-    getMostRecentAsamEpisode(client) {
-        if (!client?.asamEpisodes || client.asamEpisodes.length === 0) return null;
-        return client.asamEpisodes[client.asamEpisodes.length - 1];
-    }
-
-    addDays(dateInput, days = 0) {
-        if (!dateInput && dateInput !== 0) return null;
-        const date = new Date(dateInput);
-        if (Number.isNaN(date.getTime())) return null;
-        const result = new Date(date);
-        result.setDate(result.getDate() + days);
-        return result.toISOString().split('T')[0];
-    }
-
-    /**
-     * Record an ASAM / Level-of-Care episode (admission or step-down)
-     * This is called AFTER insurance-facing ASAM work is completed in Kipu.
-     * We only track LOC, change date, MH primary flag, and optional Kipu doc reference.
-     */
-    async recordAsamEpisode(clientId, episodeInput) {
-        const client = await this.getClient(clientId);
-        if (!client) {
-            throw new Error('Client not found');
-        }
-
-        const episodes = Array.isArray(client.asamEpisodes) ? [...client.asamEpisodes] : [];
-        const todayStr = new Date().toISOString().split('T')[0];
-        const changeDate = episodeInput.changeDate || todayStr;
-        const levelOfCare = episodeInput.levelOfCare || 'UNKNOWN';
-        const isMhPrimary = Boolean(episodeInput.isMhPrimary);
-        const kipuDocId = episodeInput.kipuDocId || null;
-        const notes = episodeInput.notes || '';
-
-        // Close any active episode
-        const active = episodes.find(ep => !ep.endDate);
-        if (active) {
-            active.endDate = changeDate;
-            if (levelOfCare && !active.nextLevel) {
-                active.nextLevel = levelOfCare;
-            }
-        }
-
-        // Determine source
-        const source = episodeInput.source || (episodes.length === 0 ? 'admission' : 'stepDownEmail');
-
-        // Create new episode starting on the LOC change date
-        const newEpisode = {
-            id: 'episode_' + Date.now(),
-            levelOfCare,
-            startDate: changeDate,
-            endDate: null,
-            source,
-            isMhPrimary,
-            kipuDocId,
-            notes
-        };
-
-        episodes.push(newEpisode);
-
-        // Persist episodes; updateClient will re-sync task schema so ASAM due dates update
-        const updatedClient = await this.updateClient(clientId, { asamEpisodes: episodes });
-        return updatedClient;
     }
 }
 

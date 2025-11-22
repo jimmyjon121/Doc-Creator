@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Final Integration Test - Autonomous Verification</title>
+    <style>
+        body { 
+            font-family: 'Courier New', monospace; 
+            background: #0a0a0a; 
+            color: #00ff00; 
+            padding: 20px;
+            margin: 0;
+        }
+        h1 { 
+            color: #00ffff; 
+            text-shadow: 0 0 10px #00ffff;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .test-section {
+            background: #1a1a1a;
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .pass { color: #00ff00; font-weight: bold; }
+        .fail { color: #ff0000; font-weight: bold; }
+        .warning { color: #ffff00; }
+        .info { color: #00ffff; }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #00ffff;
+            box-shadow: 0 0 10px #00ffff;
+        }
+        #results {
+            margin-top: 20px;
+            padding: 20px;
+            background: #0d0d0d;
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+        }
+        .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 FINAL INTEGRATION TEST - FULL AUTONOMOUS VERIFICATION</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="runFullTest()">🔥 RUN COMPLETE TEST SUITE</button>
+        <button onclick="generateAndVerify()">📊 Generate 20 & Verify</button>
+        <button onclick="clearAll()">🗑️ Clear Everything</button>
+    </div>
+    
+    <div id="results"></div>
+    
+    <!-- Load all required scripts -->
+    <script src="indexed-db-manager.js"></script>
+    <script src="client-manager.js"></script>
+    <script src="houses-manager.js"></script>
+    <script src="dashboard-manager.js"></script>
+    <script src="dashboard-widgets.js"></script>
+    <script src="js/demo-data.js"></script>
+    <script src="cm-tracker.js"></script>
+    
+    <script>
+        const results = document.getElementById('results');
+        
+        function log(msg, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = type;
+            entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            results.appendChild(entry);
+            results.scrollTop = results.scrollHeight;
+            console.log(msg);
+        }
+        
+        function clear() {
+            results.innerHTML = '';
+        }
+        
+        // Set up config
+        window.ccConfig = {
+            demoMode: true,
+            currentUser: { initials: 'JH', role: 'Coach', isAdmin: false }
+        };
+        
+        async function initializeSystem() {
+            log('Initializing system...', 'info');
+            
+            // Initialize DB
+            window.dbManager = new IndexedDBManager('FinalTestDB', 2);
+            await window.dbManager.init([
+                { name: 'clients', keyPath: 'id' },
+                { name: 'houses', keyPath: 'id' },
+                { name: 'documents', keyPath: 'id' },
+                { name: 'settings', keyPath: 'key' }
+            ]);
+            await window.dbManager.initializeHouses();
+            
+            // Initialize managers
+            window.clientManager = new ClientManager(window.dbManager);
+            window.housesManager = new HousesManager(window.dbManager);
+            await window.housesManager.initialize();
+            window.dashboardManager = new DashboardManager();
+            await window.dashboardManager.initialize();
+            
+            log('✅ System initialized', 'pass');
+        }
+        
+        async function clearAll() {
+            clear();
+            log('Clearing all data...', 'warning');
+            
+            try {
+                const clients = await window.clientManager.getAllClients();
+                for (const client of clients) {
+                    await window.clientManager.deleteClient(client.id);
+                }
+                log(`✅ Cleared ${clients.length} clients`, 'pass');
+            } catch (e) {
+                log(`❌ Clear failed: ${e.message}`, 'fail');
+            }
+        }
+        
+        async function generateAndVerify() {
+            clear();
+            log('=== GENERATE & VERIFY 20 CLIENTS ===', 'info');
+            
+            await initializeSystem();
+            await clearAll();
+            
+            log('Generating 20 demo clients...', 'info');
+            
+            try {
+                const generated = await window.DemoDataGenerator.generateDemoClients(20);
+                log(`✅ Generated ${generated.length} clients`, generated.length === 20 ? 'pass' : 'fail');
+                
+                // Verify in ClientManager
+                const allClients = await window.clientManager.getAllClients();
+                log(`ClientManager has ${allClients.length} clients`, allClients.length === 20 ? 'pass' : 'fail');
+                
+                // Verify in Dashboard
+                const dashboardClients = await window.dashboardManager.getRelevantClients();
+                log(`Dashboard shows ${dashboardClients.length} clients`, dashboardClients.length === 20 ? 'pass' : 'fail');
+                
+                // Test CM Tracker
+                log('Testing CM Tracker render...', 'info');
+                
+                // Create a test container
+                const testContainer = document.createElement('div');
+                testContainer.id = 'clients';
+                document.body.appendChild(testContainer);
+                
+                await window.initializeCMTracker();
+                
+                // Count rendered clients
+                const renderedCards = testContainer.querySelectorAll('.client-card').length;
+                log(`CM Tracker rendered ${renderedCards} client cards`, renderedCards === 20 ? 'pass' : 'fail');
+                
+                // Verify house distribution
+                const houses = testContainer.querySelectorAll('.house-section');
+                log(`Found ${houses.length} house sections`, 'info');
+                
+                // Clean up
+                testContainer.remove();
+                
+                // Summary
+                const allPass = generated.length === 20 && 
+                              allClients.length === 20 && 
+                              dashboardClients.length === 20 && 
+                              renderedCards === 20;
+                
+                if (allPass) {
+                    log('', 'info');
+                    log('🎉 ALL TESTS PASSED! DATA FLOW IS COMPLETE!', 'pass');
+                    log('✅ Demo generation works', 'pass');
+                    log('✅ ClientManager stores all data', 'pass');
+                    log('✅ Dashboard displays all clients', 'pass');
+                    log('✅ CM Tracker renders all clients', 'pass');
+                } else {
+                    log('', 'info');
+                    log('⚠️ SOME TESTS FAILED', 'fail');
+                    log('Check the counts above to see where data is lost', 'warning');
+                }
+                
+            } catch (e) {
+                log(`❌ Test failed: ${e.message}`, 'fail');
+                console.error(e);
+            }
+        }
+        
+        async function runFullTest() {
+            clear();
+            log('🚀 RUNNING FULL INTEGRATION TEST SUITE', 'info');
+            log('=====================================', 'info');
+            
+            await initializeSystem();
+            
+            // Test 1: Clear existing data
+            log('\n📝 Test 1: Clear Existing Data', 'info');
+            await clearAll();
+            
+            // Test 2: Generate exactly 20 clients
+            log('\n📝 Test 2: Generate Exactly 20 Clients', 'info');
+            let generated = [];
+            try {
+                generated = await window.DemoDataGenerator.generateDemoClients(20);
+                log(`Generated: ${generated.length}/20`, generated.length === 20 ? 'pass' : 'fail');
+            } catch (e) {
+                log(`Generation failed: ${e.message}`, 'fail');
+            }
+            
+            // Test 3: Verify storage
+            log('\n📝 Test 3: Verify Storage', 'info');
+            const stored = await window.clientManager.getAllClients();
+            log(`Stored in DB: ${stored.length}/20`, stored.length === 20 ? 'pass' : 'fail');
+            
+            // Test 4: Verify retrieval methods
+            log('\n📝 Test 4: Test Retrieval Methods', 'info');
+            
+            const active = await window.clientManager.getActiveClients();
+            log(`Active clients: ${active.length}`, 'info');
+            
+            const discharged = await window.clientManager.getDischargedClients();
+            log(`Discharged clients: ${discharged.length}`, 'info');
+            
+            // Test 5: House distribution
+            log('\n📝 Test 5: House Distribution', 'info');
+            const houses = ['house_nest', 'house_cove', 'house_hedge', 'house_arbor', 'house_grove'];
+            let totalInHouses = 0;
+            
+            for (const houseId of houses) {
+                const houseClients = await window.clientManager.getClientsByHouse(houseId, true);
+                log(`${houseId}: ${houseClients.length} clients`, 'info');
+                totalInHouses += houseClients.length;
+            }
+            
+            const preAdmission = stored.filter(c => !c.houseId).length;
+            log(`Pre-admission: ${preAdmission} clients`, 'info');
+            log(`Total accounted: ${totalInHouses + preAdmission}/20`, 
+                (totalInHouses + preAdmission) === 20 ? 'pass' : 'fail');
+            
+            // Test 6: Dashboard integration
+            log('\n📝 Test 6: Dashboard Integration', 'info');
+            const dashClients = await window.dashboardManager.getRelevantClients();
+            log(`Dashboard sees: ${dashClients.length}/20`, dashClients.length === 20 ? 'pass' : 'fail');
+            
+            // Test 7: CM Tracker rendering
+            log('\n📝 Test 7: CM Tracker Rendering', 'info');
+            const testDiv = document.createElement('div');
+            testDiv.id = 'clients';
+            document.body.appendChild(testDiv);
+            
+            await window.initializeCMTracker();
+            
+            const cards = testDiv.querySelectorAll('.client-card').length;
+            log(`Rendered cards: ${cards}/20`, cards === 20 ? 'pass' : 'fail');
+            
+            testDiv.remove();
+            
+            // Final summary
+            log('\n=====================================', 'info');
+            log('FINAL SUMMARY', 'info');
+            log('=====================================', 'info');
+            
+            const issues = [];
+            if (generated.length !== 20) issues.push('Generation incomplete');
+            if (stored.length !== 20) issues.push('Storage incomplete');
+            if (dashClients.length !== 20) issues.push('Dashboard filtering issue');
+            if (cards !== 20) issues.push('Rendering incomplete');
+            
+            if (issues.length === 0) {
+                log('✅ ALL SYSTEMS OPERATIONAL!', 'pass');
+                log('The application is fully wired and working correctly!', 'pass');
+            } else {
+                log('⚠️ Issues found:', 'fail');
+                issues.forEach(issue => log(`  - ${issue}`, 'fail'));
+            }
+        }
+        
+        // Auto-run on load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('Test suite ready. Click a button to begin.', 'info');
+        });
+    </script>
+</body>
+</html>

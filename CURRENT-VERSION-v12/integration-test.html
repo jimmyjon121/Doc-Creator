@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CareConnect Integration Test - Autonomous</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #0f0; }
+        .fail { color: #f00; }
+        .pass { color: #0f0; }
+        .info { color: #ff0; }
+        pre { white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>CareConnect Integration Test - Full Autonomous Run</h1>
+    <pre id="output"></pre>
+    
+    <!-- Load all dependencies -->
+    <script src="indexed-db-manager.js"></script>
+    <script src="client-manager.js"></script>
+    <script src="houses-manager.js"></script>
+    <script src="milestones-manager.js"></script>
+    <script src="aftercare-manager.js"></script>
+    <script src="dashboard-manager.js"></script>
+    <script src="dashboard-widgets.js"></script>
+    <script src="js/demo-data.js"></script>
+    
+    <script>
+        const output = document.getElementById('output');
+        const log = (msg, type = 'info') => {
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = `[${new Date().toISOString().split('T')[1].split('.')[0]}] ${msg}`;
+            output.appendChild(line);
+            console.log(msg);
+        };
+
+        // Set up environment
+        window.ccConfig = {
+            demoMode: true,
+            currentUser: { initials: 'JH', role: 'Coach', isAdmin: false }
+        };
+
+        async function runFullIntegrationTest() {
+            log('🚀 STARTING FULL INTEGRATION TEST', 'info');
+            let totalTests = 0;
+            let passedTests = 0;
+            let issues = [];
+
+            try {
+                // Phase 1: Initialize Database
+                log('\n=== PHASE 1: DATABASE INITIALIZATION ===', 'info');
+                
+                totalTests++;
+                try {
+                    window.dbManager = new IndexedDBManager('CareConnectIntegrationTestDB', 2);
+                    await window.dbManager.init([
+                        { name: 'clients', keyPath: 'id' },
+                        { name: 'documents', keyPath: 'id' },
+                        { name: 'programs', keyPath: 'id' },
+                        { name: 'settings', keyPath: 'key' },
+                        { name: 'houses', keyPath: 'id' }
+                    ]);
+                    log('✅ Database initialized', 'pass');
+                    passedTests++;
+                } catch (e) {
+                    log(`❌ Database init failed: ${e.message}`, 'fail');
+                    issues.push(`Database: ${e.message}`);
+                }
+
+                // Initialize houses
+                totalTests++;
+                try {
+                    await window.dbManager.initializeHouses();
+                    log('✅ Houses initialized', 'pass');
+                    passedTests++;
+                } catch (e) {
+                    log(`❌ Houses init failed: ${e.message}`, 'fail');
+                    issues.push(`Houses: ${e.message}`);
+                }
+
+                // Phase 2: Initialize Managers
+                log('\n=== PHASE 2: MANAGER INITIALIZATION ===', 'info');
+                
+                totalTests++;
+                try {
+                    window.clientManager = new ClientManager(window.dbManager);
+                    log('✅ ClientManager initialized', 'pass');
+                    passedTests++;
+                } catch (e) {
+                    log(`❌ ClientManager init failed: ${e.message}`, 'fail');
+                    issues.push(`ClientManager: ${e.message}`);
+                }
+
+                totalTests++;
+                try {
+                    window.housesManager = new HousesManager(window.dbManager);
+                    await window.housesManager.initialize();
+                    log('✅ HousesManager initialized', 'pass');
+                    passedTests++;
+                } catch (e) {
+                    log(`❌ HousesManager init failed: ${e.message}`, 'fail');
+                    issues.push(`HousesManager: ${e.message}`);
+                }
+
+                totalTests++;
+                try {
+                    window.dashboardManager = new DashboardManager();
+                    await window.dashboardManager.initialize();
+                    log('✅ DashboardManager initialized', 'pass');
+                    passedTests++;
+                } catch (e) {
+                    log(`❌ DashboardManager init failed: ${e.message}`, 'fail');
+                    issues.push(`DashboardManager: ${e.message}`);
+                }
+
+                // Phase 3: Clear existing data
+                log('\n=== PHASE 3: CLEARING EXISTING DATA ===', 'info');
+                
+                totalTests++;
+                try {
+                    const existingClients = await window.clientManager.getAllClients();
+                    for (const client of existingClients) {
+                        await window.clientManager.deleteClient(client.id);
+                    }
+                    log(`✅ Cleared ${existingClients.length} existing clients`, 'pass');
+                    passedTests++;
+                } catch (e) {
+                    log(`❌ Clear data failed: ${e.message}`, 'fail');
+                    issues.push(`Clear: ${e.message}`);
+                }
+
+                // Phase 4: Generate Demo Data
+                log('\n=== PHASE 4: GENERATING 20 DEMO CLIENTS ===', 'info');
+                
+                totalTests++;
+                let generatedClients = [];
+                try {
+                    generatedClients = await window.DemoDataGenerator.generateDemoClients(20);
+                    log(`✅ Generated ${generatedClients.length} clients`, 'pass');
+                    if (generatedClients.length !== 20) {
+                        log(`⚠️  WARNING: Expected 20 clients, got ${generatedClients.length}`, 'fail');
+                        issues.push(`Only ${generatedClients.length}/20 clients created`);
+                    } else {
+                        passedTests++;
+                    }
+                } catch (e) {
+                    log(`❌ Demo generation failed: ${e.message}`, 'fail');
+                    issues.push(`Generation: ${e.message}`);
+                }
+
+                // Phase 5: Verify Data in ClientManager
+                log('\n=== PHASE 5: VERIFYING CLIENT MANAGER DATA ===', 'info');
+                
+                totalTests++;
+                try {
+                    const allClients = await window.clientManager.getAllClients();
+                    log(`ClientManager has ${allClients.length} clients`, allClients.length === 20 ? 'pass' : 'fail');
+                    if (allClients.length === 20) {
+                        passedTests++;
+                    } else {
+                        issues.push(`ClientManager: ${allClients.length}/20 clients`);
+                    }
+                } catch (e) {
+                    log(`❌ ClientManager verification failed: ${e.message}`, 'fail');
+                    issues.push(`ClientManager verify: ${e.message}`);
+                }
+
+                // Test getActiveClients
+                totalTests++;
+                try {
+                    const activeClients = await window.clientManager.getActiveClients();
+                    log(`Active clients: ${activeClients.length}`, 'info');
+                    passedTests++;
+                } catch (e) {
+                    log(`❌ getActiveClients failed: ${e.message}`, 'fail');
+                    issues.push(`getActiveClients: ${e.message}`);
+                }
+
+                // Test getDischargedClients
+                totalTests++;
+                try {
+                    const dischargedClients = await window.clientManager.getDischargedClients();
+                    log(`Discharged clients: ${dischargedClients.length}`, 'info');
+                    passedTests++;
+                } catch (e) {
+                    log(`❌ getDischargedClients failed: ${e.message}`, 'fail');
+                    issues.push(`getDischargedClients: ${e.message}`);
+                }
+
+                // Phase 6: Verify House Distribution
+                log('\n=== PHASE 6: VERIFYING HOUSE DISTRIBUTION ===', 'info');
+                
+                const houses = window.housesManager.getActiveHouses();
+                let totalInHouses = 0;
+                
+                for (const house of houses) {
+                    totalTests++;
+                    try {
+                        const houseClients = await window.clientManager.getClientsByHouse(house.id, true);
+                        log(`House ${house.name}: ${houseClients.length} clients`, 'info');
+                        totalInHouses += houseClients.length;
+                        passedTests++;
+                    } catch (e) {
+                        log(`❌ House ${house.name} query failed: ${e.message}`, 'fail');
+                        issues.push(`House ${house.name}: ${e.message}`);
+                    }
+                }
+                
+                log(`Total clients in houses: ${totalInHouses}`, totalInHouses > 0 ? 'pass' : 'fail');
+                
+                // Phase 7: Verify Dashboard Data
+                log('\n=== PHASE 7: VERIFYING DASHBOARD DATA ===', 'info');
+                
+                totalTests++;
+                try {
+                    const dashboardClients = await window.dashboardManager.getRelevantClients();
+                    log(`Dashboard shows ${dashboardClients.length} clients`, dashboardClients.length === 20 ? 'pass' : 'fail');
+                    if (dashboardClients.length === 20) {
+                        passedTests++;
+                    } else {
+                        issues.push(`Dashboard: ${dashboardClients.length}/20 clients`);
+                    }
+                } catch (e) {
+                    log(`❌ Dashboard verification failed: ${e.message}`, 'fail');
+                    issues.push(`Dashboard: ${e.message}`);
+                }
+
+                // Phase 8: Verify Coach Assignment
+                log('\n=== PHASE 8: VERIFYING COACH ASSIGNMENTS ===', 'info');
+                
+                totalTests++;
+                try {
+                    const allClients = await window.clientManager.getAllClients();
+                    const coachClients = allClients.filter(c => 
+                        c.caseManagerInitials === 'JH' ||
+                        c.clinicalCoachInitials === 'JH' ||
+                        c.familyAmbassadorPrimaryInitials === 'JH'
+                    );
+                    log(`Clients assigned to JH: ${coachClients.length}/20`, coachClients.length === 20 ? 'pass' : 'fail');
+                    if (coachClients.length === 20) {
+                        passedTests++;
+                    } else {
+                        issues.push(`Coach assignment: ${coachClients.length}/20`);
+                    }
+                } catch (e) {
+                    log(`❌ Coach verification failed: ${e.message}`, 'fail');
+                    issues.push(`Coach: ${e.message}`);
+                }
+
+                // Phase 9: Test Individual Client Data
+                log('\n=== PHASE 9: TESTING INDIVIDUAL CLIENT DATA ===', 'info');
+                
+                totalTests++;
+                try {
+                    const allClients = await window.clientManager.getAllClients();
+                    if (allClients.length > 0) {
+                        const testClient = allClients[0];
+                        log(`Sample client: ${testClient.initials} (${testClient.kipuId})`, 'info');
+                        log(`  House: ${testClient.houseId || 'None'}`, 'info');
+                        log(`  Case Manager: ${testClient.caseManagerInitials || 'None'}`, 'info');
+                        log(`  Status: ${testClient.status || 'Unknown'}`, 'info');
+                        
+                        // Verify required fields
+                        const hasRequiredFields = 
+                            testClient.initials && 
+                            testClient.kipuId && 
+                            testClient.caseManagerInitials;
+                        
+                        if (hasRequiredFields) {
+                            log('✅ Client has required fields', 'pass');
+                            passedTests++;
+                        } else {
+                            log('❌ Client missing required fields', 'fail');
+                            issues.push('Missing required client fields');
+                        }
+                    }
+                } catch (e) {
+                    log(`❌ Individual client test failed: ${e.message}`, 'fail');
+                    issues.push(`Client data: ${e.message}`);
+                }
+
+                // Final Report
+                log('\n' + '='.repeat(60), 'info');
+                log('INTEGRATION TEST COMPLETE', 'info');
+                log('='.repeat(60), 'info');
+                
+                const percentage = Math.round((passedTests / totalTests) * 100);
+                log(`Tests Run: ${totalTests}`, 'info');
+                log(`Tests Passed: ${passedTests}`, passedTests === totalTests ? 'pass' : 'fail');
+                log(`Tests Failed: ${totalTests - passedTests}`, totalTests - passedTests > 0 ? 'fail' : 'pass');
+                log(`Success Rate: ${percentage}%`, percentage === 100 ? 'pass' : 'fail');
+                
+                if (issues.length > 0) {
+                    log('\n❌ ISSUES FOUND:', 'fail');
+                    issues.forEach(issue => {
+                        log(`  - ${issue}`, 'fail');
+                    });
+                    
+                    // Diagnose the root cause
+                    log('\n🔍 ROOT CAUSE ANALYSIS:', 'info');
+                    if (issues.some(i => i.includes('20 clients'))) {
+                        log('  → Demo data generation is not creating all requested clients', 'fail');
+                        log('  → Likely cause: Validation errors or retry logic not working', 'fail');
+                    }
+                    if (issues.some(i => i.includes('Coach assignment'))) {
+                        log('  → Clients not being assigned to current coach', 'fail');
+                        log('  → Check ccConfig.currentUser setup', 'fail');
+                    }
+                    if (issues.some(i => i.includes('House'))) {
+                        log('  → House distribution issues', 'fail');
+                        log('  → Check house IDs match between demo-data and houses-manager', 'fail');
+                    }
+                } else {
+                    log('\n✅ ALL INTEGRATION TESTS PASSED!', 'pass');
+                    log('The application is fully connected and working correctly.', 'pass');
+                }
+
+            } catch (error) {
+                log(`\n💥 FATAL ERROR: ${error.message}`, 'fail');
+                log(error.stack, 'fail');
+            }
+        }
+
+        // Auto-run on load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(runFullIntegrationTest, 1000);
+        });
+    </script>
+</body>
+</html>

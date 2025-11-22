@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix Logout Issue - Direct Test</title>
+    <script>
+        (function enforceDevOnlyTool() {
+            const allowedHosts = ['', 'localhost', '127.0.0.1'];
+            if (!allowedHosts.includes(window.location.hostname)) {
+                document.documentElement.innerHTML = '<main style="font-family: -apple-system,BlinkMacSystemFont,\\'Segoe UI\\',sans-serif;padding:2rem;text-align:center;"><h1>Dev Tool Disabled</h1><p>This troubleshooting page is only available in local development.</p></main>';
+                throw new Error('fix-logout-issue.html is dev-only');
+            }
+        })();
+    </script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        .status {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .logged-in {
+            background: #10b981;
+            color: white;
+        }
+        .logged-out {
+            background: #ef4444;
+            color: white;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+        }
+        .btn-login { background: #667eea; }
+        .btn-logout { background: #ef4444; }
+        .btn-refresh { background: #10b981; }
+        .btn-fix { background: #f59e0b; }
+        .storage-info {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 20px 0;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 4px solid #667eea;
+            background: #f9fafb;
+        }
+        .pass { border-left-color: #10b981; background: #ecfdf5; }
+        .fail { border-left-color: #ef4444; background: #fef2f2; }
+        .highlight {
+            background: #fef3c7;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔧 Direct Fix for Logout Issue</h1>
+        
+        <div id="status" class="status logged-out">
+            Checking session...
+        </div>
+        
+        <div id="storageInfo" class="storage-info">
+            Loading storage info...
+        </div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="btn-fix" onclick="applyFix()">🔧 Apply Permanent Fix</button>
+            <button class="btn-login" onclick="doLogin()">🔑 Login</button>
+            <button class="btn-logout" onclick="doLogout()">🚪 Logout</button>
+            <button class="btn-refresh" onclick="location.reload()">🔄 Refresh Page</button>
+        </div>
+        
+        <div id="testResults" style="margin-top: 20px;">
+            <!-- Test results will appear here -->
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>📋 Instructions</h2>
+        <ol>
+            <li><strong>Click "Apply Permanent Fix"</strong> - This sets up persistent session storage</li>
+            <li><strong>Click "Login"</strong> - This creates a session</li>
+            <li><strong>Click "Refresh Page"</strong> - You should STAY logged in!</li>
+            <li>Refresh as many times as you want - session persists!</li>
+        </ol>
+        
+        <h3>🚨 If Still Logging Out:</h3>
+        <ul>
+            <li>Clear browser cache completely (Ctrl+Shift+Delete)</li>
+            <li>Try in incognito/private mode</li>
+            <li>Check browser console (F12) for errors</li>
+        </ul>
+    </div>
+
+    <script>
+        let refreshCount = 0;
+        
+        function updateStatus() {
+            const statusEl = document.getElementById('status');
+            const storageEl = document.getElementById('storageInfo');
+            
+            // Check both storages
+            const localLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            const sessionLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+            
+            // Get all relevant keys
+            const localKeys = ['isLoggedIn', 'username', 'fullName', 'loginExpires'].map(key => {
+                const value = localStorage.getItem(key);
+                return `${key}: ${value || 'null'}`;
+            });
+            
+            const sessionKeys = ['isLoggedIn', 'username', 'fullName'].map(key => {
+                const value = sessionStorage.getItem(key);
+                return `${key}: ${value || 'null'}`;
+            });
+            
+            // Update storage info display
+            storageEl.innerHTML = `
+                <strong>localStorage (Persistent):</strong><br>
+                ${localKeys.join('<br>')}
+                <br><br>
+                <strong>sessionStorage (Temporary):</strong><br>
+                ${sessionKeys.join('<br>')}
+                <br><br>
+                <strong>Refresh Count:</strong> ${refreshCount}
+            `;
+            
+            // Update status
+            if (localLoggedIn) {
+                statusEl.className = 'status logged-in';
+                statusEl.innerHTML = '✅ LOGGED IN (localStorage) - Session Persists!';
+            } else if (sessionLoggedIn) {
+                statusEl.className = 'status logged-out';
+                statusEl.innerHTML = '⚠️ LOGGED IN (sessionStorage only) - Will lose on refresh!';
+            } else {
+                statusEl.className = 'status logged-out';
+                statusEl.innerHTML = '❌ NOT LOGGED IN';
+            }
+            
+            // Track refreshes
+            refreshCount = parseInt(localStorage.getItem('test_refreshes') || '0');
+            refreshCount++;
+            localStorage.setItem('test_refreshes', refreshCount.toString());
+            
+            runTests();
+        }
+        
+        function applyFix() {
+            console.log('Applying permanent fix...');
+            
+            // Migrate from sessionStorage to localStorage
+            const keys = ['isLoggedIn', 'username', 'fullName', 'userRole', 'isMaster'];
+            let migrated = false;
+            
+            keys.forEach(key => {
+                const sessionValue = sessionStorage.getItem(key);
+                if (sessionValue !== null) {
+                    localStorage.setItem(key, sessionValue);
+                    console.log(`Migrated ${key}: ${sessionValue}`);
+                    migrated = true;
+                }
+            });
+            
+            // If currently logged in via sessionStorage, make it permanent
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                localStorage.setItem('isLoggedIn', 'true');
+                
+                // Set expiry
+                const expiry = Date.now() + (2 * 60 * 60 * 1000); // 2 hours
+                localStorage.setItem('loginExpires', expiry.toString());
+                
+                alert('✅ Fix applied! Your session is now persistent. Try refreshing the page!');
+            } else {
+                alert('ℹ️ Fix ready. Now click Login to create a persistent session.');
+            }
+            
+            updateStatus();
+        }
+        
+        function doLogin() {
+            // Set in BOTH storages for compatibility
+            const userData = {
+                isLoggedIn: 'true',
+                username: 'TestUser',
+                fullName: 'Test User',
+                userRole: 'admin',
+                isMaster: 'true',
+                manualLogin: 'true'
+            };
+            
+            // Save to localStorage (persistent)
+            Object.keys(userData).forEach(key => {
+                localStorage.setItem(key, userData[key]);
+            });
+            
+            // Set expiry
+            const expiry = Date.now() + (2 * 60 * 60 * 1000);
+            localStorage.setItem('loginExpires', expiry.toString());
+            
+            // Also set in sessionStorage for backward compatibility
+            Object.keys(userData).forEach(key => {
+                sessionStorage.setItem(key, userData[key]);
+            });
+            
+            updateStatus();
+            alert('✅ Logged in with PERSISTENT session! Now refresh the page to test.');
+        }
+        
+        function doLogout() {
+            // Clear both storages
+            ['isLoggedIn', 'username', 'fullName', 'userRole', 'isMaster', 'loginExpires', 'manualLogin'].forEach(key => {
+                localStorage.removeItem(key);
+                sessionStorage.removeItem(key);
+            });
+            
+            // Reset counter
+            localStorage.setItem('test_refreshes', '0');
+            
+            updateStatus();
+            alert('👋 Logged out from both storages.');
+        }
+        
+        function runTests() {
+            const results = document.getElementById('testResults');
+            const tests = [
+                {
+                    name: 'localStorage Available',
+                    test: () => {
+                        try {
+                            localStorage.setItem('test', 'test');
+                            localStorage.removeItem('test');
+                            return true;
+                        } catch (e) {
+                            return false;
+                        }
+                    }
+                },
+                {
+                    name: 'localStorage has login data',
+                    test: () => localStorage.getItem('isLoggedIn') !== null
+                },
+                {
+                    name: 'Session is persistent',
+                    test: () => localStorage.getItem('isLoggedIn') === 'true'
+                },
+                {
+                    name: 'Session has TTL',
+                    test: () => {
+                        const expiry = localStorage.getItem('loginExpires');
+                        return expiry !== null && parseInt(expiry) > Date.now();
+                    }
+                },
+                {
+                    name: 'Page has been refreshed',
+                    test: () => refreshCount > 1
+                }
+            ];
+            
+            results.innerHTML = '<h3>Test Results:</h3>';
+            tests.forEach(test => {
+                const passed = test.test();
+                const div = document.createElement('div');
+                div.className = `test-result ${passed ? 'pass' : 'fail'}`;
+                div.innerHTML = `${passed ? '✅' : '❌'} ${test.name}`;
+                results.appendChild(div);
+            });
+        }
+        
+        // Check for the real app's storage usage
+        function checkAppStorage() {
+            console.log('=== App Storage Check ===');
+            console.log('localStorage keys:', Object.keys(localStorage));
+            console.log('sessionStorage keys:', Object.keys(sessionStorage));
+            
+            // Check if the app is using the wrong storage
+            if (sessionStorage.getItem('isLoggedIn') && !localStorage.getItem('isLoggedIn')) {
+                console.warn('⚠️ App is using sessionStorage instead of localStorage!');
+                console.log('Run applyFix() to migrate to persistent storage.');
+            }
+        }
+        
+        // Initialize
+        updateStatus();
+        checkAppStorage();
+        
+        // Auto-apply fix if session exists in sessionStorage but not localStorage
+        if (sessionStorage.getItem('isLoggedIn') === 'true' && localStorage.getItem('isLoggedIn') !== 'true') {
+            console.log('Auto-migrating session to localStorage...');
+            applyFix();
+        }
+    </script>
+</body>
+</html>

@@ -11,7 +11,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CareConnect Pro v12.4 - REVAMPED PROFILE</title>
+    <title>CareConnect Pro v4.1.0 - Professional Aftercare Document Builder</title>
     
     <!-- Content Security Policy for enhanced security -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org https://c.tile.openstreetmap.org https://tile.openstreetmap.fr https://a.tile.openstreetmap.fr https://b.tile.openstreetmap.fr https://c.tile.openstreetmap.fr https://server.arcgisonline.com https://services.arcgisonline.com https://*.opentopomap.org https://*.basemaps.cartocdn.com; font-src 'self' data:; connect-src 'self' https://nominatim.openstreetmap.org https://tile.openstreetmap.org https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org https://c.tile.openstreetmap.org https://tile.openstreetmap.fr https://a.tile.openstreetmap.fr https://b.tile.openstreetmap.fr https://c.tile.openstreetmap.fr https://server.arcgisonline.com https://services.arcgisonline.com https://*.opentopomap.org https://*.basemaps.cartocdn.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
@@ -22,8 +22,6 @@
     <script src="libs/jspdf.umd.min.js"></script>
     <script src="libs/html2canvas.min.js"></script>
     
-    <link rel="stylesheet" href="css/client-profile.css">
-    <link rel="stylesheet" href="css/app-layout.css">
     
     <!-- Enhanced Features Libraries -->
     <script src="libs/jquery-3.6.0.min.js"></script>
@@ -40,22 +38,12 @@
     
     <!-- Database Management -->
     <script src="indexed-db-manager.js"></script>
-
-    <!-- Task Schema & Services -->
-    <script src="configs/task-schema.js"></script>
     
     <!-- Client Management -->
     <script src="client-manager.js"></script>
-    <script src="js/task-service.js"></script>
     
     <!-- Demo Data Generator (Development Only) -->
     <script src="js/demo-data.js"></script>
-    
-    <!-- CM Tracker for Clients Tab -->
-    <script src="cm-tracker.js"></script>
-
-    <!-- Client Profile Manager (Modern Modal) -->
-    <script src="client-profile-manager.js"></script>
     
     <!-- Initialize Client Management System -->
     <script>
@@ -75,21 +63,12 @@
             
             // Initialize client manager
             window.clientManager = new ClientManager(window.dbManager);
-
-            // Initialize task service (ensures TaskSchema state is populated)
-            if (typeof ClientTaskService !== 'undefined') {
-                window.taskService = new ClientTaskService(window.clientManager, window.TaskSchema);
-                await window.taskService.initialize();
-            }
             
             console.log('✅ Client management system initialized');
             
             // Dispatch event to notify that client manager is ready
             window.dispatchEvent(new CustomEvent('clientManagerReady', { 
-                detail: { 
-                    clientManager: window.clientManager,
-                    taskService: window.taskService
-                } 
+                detail: { clientManager: window.clientManager } 
             }));
         })();
     </script>
@@ -152,16 +131,8 @@
         if (typeof window.ccConfig.demoMode === 'undefined') {
             // Default: demo mode on for local development only
             const host = window.location.hostname;
-            const isLocalHost = host === 'localhost' || host === '127.0.0.1';
-            const isFileProtocol = window.location.protocol === 'file:';
-            window.ccConfig.demoMode = isLocalHost || isFileProtocol;
+            window.ccConfig.demoMode = (host === 'localhost' || host === '127.0.0.1');
         }
-        // Set current user for development (single profile for dev work)
-        window.ccConfig.currentUser = {
-            initials: 'JH',
-            role: 'Coach',
-            isAdmin: false
-        };
         // Dev helper docs: see DEV-TOOLS.md for reset/test workflows.
 
         // Debug logging flag (default controlled by ?debug=1 or localStorage `cc-debug`)
@@ -286,11 +257,11 @@
             // 'intelligent-matching.js',
             // 'multi-client-workflow.js',
             // 'advanced-filters.js',
+            // 'morning-review-dashboard.js',
             
             // ACTIVE FILES:
             // 'indexed-db-manager.js', // DUPLICATE: Already loaded in <head>
             // 'client-manager.js', // DUPLICATE: Already loaded in <head>
-            'morning-review-dashboard.js',
             'tracker-engine.js',
             'tracker-timeline.js',
             'tracker-bulk-update.js',
@@ -2146,334 +2117,11 @@ console.log('🔐 Login fix applied');
     };
     
     // Global functions for modal actions
-    window.__registerQuickUpdateModal = window.__registerQuickUpdateModal || function registerQuickUpdateModal() {
-        if (window.openBulkUpdate && window.openBulkUpdate.__isModernQuickUpdate) {
-            return;
-        }
-
-        const quickUpdateSections = [
-            { id: 'admission', title: 'Admission & Assessment', subtitle: '48-Hour Critical Window', tasks: ['needsAssessment', 'healthPhysical'] },
-            { id: 'clinical', title: 'Clinical Assessments', subtitle: 'Baseline screeners', tasks: ['gadCompleted', 'phqCompleted', 'satisfactionSurvey'] },
-            { id: 'aftercare', title: 'Aftercare Planning', subtitle: 'Sequence to discharge readiness', tasks: ['aftercareThreadSent', 'optionsDocUploaded', 'dischargePacketUploaded', 'referralClosureCorrespondence'] },
-            { id: 'asam', title: 'ASAM & LOC Readiness', subtitle: 'Insurance compliance checkpoints', tasks: ['asamAdmission', 'asamContinued', 'asamStepDown', 'dischargeASAM'] }
-        ];
-
-        const criticalTasks = new Set(['needsAssessment', 'healthPhysical', 'aftercareThreadSent', 'optionsDocUploaded', 'asamAdmission', 'asamContinued', 'asamStepDown']);
-
-        const formatDate = (value) => {
-            if (!value) return 'No due date';
-            const date = new Date(value);
-            if (Number.isNaN(date.getTime())) return value;
-            return date.toLocaleDateString();
-        };
-
-        const calculateDaysInCare = (client) => {
-            if (!client.admissionDate) return 0;
-            const admission = new Date(client.admissionDate);
-            const now = client.dischargeDate ? new Date(client.dischargeDate) : new Date();
-            return Math.max(0, Math.floor((now - admission) / (1000 * 60 * 60 * 24)));
-        };
-
-        const getTaskMetadata = (client, taskId) => {
-            const schema = window.TaskSchema?.tasks?.[taskId];
-            if (!schema) return null;
-            const record = client.taskState?.[taskId] || {};
-            let status = { state: record.completed ? 'complete' : 'pending', severity: 'low' };
-            if (window.taskService) {
-                status = window.taskService.evaluateTaskStatus(record);
-            }
-            return {
-                schema,
-                record,
-                status,
-                isCritical: criticalTasks.has(taskId)
-            };
-        };
-
-        const renderStatusPill = (status, completed) => {
-            const state = completed ? 'complete' : status?.state || 'pending';
-            const map = {
-                complete: { text: 'Complete', cls: 'status-complete' },
-                overdue: { text: 'Overdue', cls: 'status-overdue' },
-                dueSoon: { text: 'Due Soon', cls: 'status-due' },
-                pending: { text: 'Pending', cls: 'status-pending' }
-            };
-            const pill = map[state] || map.pending;
-            return `<span class="quick-status-pill ${pill.cls}">${pill.text}</span>`;
-        };
-
-        const buildDueLabel = (status, record, schema) => {
-            if (status?.state === 'overdue') {
-                const days = Math.abs(status.days ?? 0);
-                return `Overdue${days ? ` ${days}d` : ''}`;
-            }
-            if (status?.state === 'dueSoon') {
-                const days = status.days ?? 0;
-                return `Due in ${days}d`;
-            }
-            if (record?.dueDate) {
-                return `Due ${formatDate(record.dueDate)}`;
-            }
-            return schema?.due?.type === 'atAdmission' ? 'Record at admission' : 'No due date';
-        };
-
-        window.openBulkUpdate = async (clientId) => {
-            if (!window.taskService) {
-                window.showNotification?.('Task service not ready yet', 'warning') || alert('Task service not ready yet.');
-                return;
-            }
-
-            try {
-                const client = await window.clientManager.getClient(clientId);
-                if (!client) {
-                    window.showNotification?.('Client not found', 'error') || alert('Client not found');
-                    return;
-                }
-
-                const refreshedState = await window.taskService.getClientTaskState(clientId);
-                if (refreshedState) {
-                    client.taskState = refreshedState;
-                }
-
-                const buildSection = (section) => {
-                    const tasks = section.tasks
-                        .map(taskId => {
-                            const meta = getTaskMetadata(client, taskId);
-                            if (!meta) return '';
-                            const { schema, record, status, isCritical } = meta;
-                            const dueLabel = buildDueLabel(status, record, schema);
-                            const stateClass = record.completed ? 'is-complete'
-                                : status.state === 'overdue' ? 'is-overdue'
-                                : status.state === 'dueSoon' ? 'is-due-soon'
-                                : 'is-pending';
-                            return `
-                                <label class="quick-task ${stateClass}"
-                                    data-task-id="${taskId}"
-                                    data-complete="${record.completed ? 'true' : 'false'}"
-                                    data-overdue="${status.state === 'overdue'}"
-                                    data-critical="${isCritical}">
-                                    <input type="checkbox"
-                                        class="quick-task-checkbox"
-                                        data-task-id="${taskId}"
-                                        ${record.completed ? 'checked' : ''}>
-                                    <div class="quick-task-body">
-                                        <div class="quick-task-top">
-                                            <span class="quick-task-title">${schema.label}</span>
-                                            ${renderStatusPill(status, record.completed)}
-                                        </div>
-                                        <div class="quick-task-meta">
-                                            <span>${schema.description || 'Tracked milestone'}</span>
-                                            <span class="quick-task-due">${dueLabel}</span>
-                                        </div>
-                                    </div>
-                                </label>
-                            `;
-                        })
-                        .filter(Boolean)
-                        .join('');
-
-                    if (!tasks) return '';
-
-                    return `
-                        <div class="quick-section">
-                            <div class="quick-section-header">
-                                <div>
-                                    <div class="quick-section-title">${section.title}</div>
-                                    <div class="quick-section-subtitle">${section.subtitle}</div>
-                                </div>
-                            </div>
-                            <div class="quick-task-list">
-                                ${tasks}
-                            </div>
-                        </div>
-                    `;
-                };
-
-                const modal = document.createElement('div');
-                modal.className = 'quick-update-overlay';
-                const sectionsHtml = quickUpdateSections.map(section => buildSection(section)).join('');
-                modal.innerHTML = `
-                    <div class="quick-update-modal">
-                        <div class="quick-update-header">
-                            <div>
-                                <p class="quick-update-label">Quick Update</p>
-                                <h3 class="quick-update-title">${client.fullName || client.initials}</h3>
-                                <p class="quick-update-meta">${client.kipuId || 'No Kipu ID'} · Day ${calculateDaysInCare(client)}</p>
-                            </div>
-                            <button class="quick-update-close" aria-label="Close">×</button>
-                        </div>
-                        <div class="quick-update-filters">
-                            <button class="quick-filter-btn is-active" data-filter="all">All Tasks</button>
-                            <button class="quick-filter-btn" data-filter="incomplete">Incomplete</button>
-                            <button class="quick-filter-btn" data-filter="overdue">Overdue</button>
-                            <button class="quick-filter-btn" data-filter="critical">Critical</button>
-                        </div>
-                        <div class="quick-update-content">
-                            ${sectionsHtml || '<p class="quick-empty-state">No tasks configured.</p>'}
-                        </div>
-                        <div class="quick-update-footer">
-                            <div class="pending-count"><span id="pending-count">0</span> changes pending</div>
-                            <div class="quick-footer-actions">
-                                <button class="btn-secondary quick-select">Select All</button>
-                                <button class="btn-secondary quick-clear">Clear All</button>
-                                <button class="btn-primary quick-save">Save Changes</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                document.body.appendChild(modal);
-
-                const overlay = modal;
-                const pendingCountEl = modal.querySelector('#pending-count');
-                const saveBtn = modal.querySelector('.quick-save');
-                const selectBtn = modal.querySelector('.quick-select');
-                const clearBtn = modal.querySelector('.quick-clear');
-                const closeBtn = modal.querySelector('.quick-update-close');
-                const filterBtns = modal.querySelectorAll('.quick-filter-btn');
-                const taskRows = modal.querySelectorAll('.quick-task');
-                const checkboxes = modal.querySelectorAll('.quick-task-checkbox');
-                const originalValues = {};
-                let pendingChanges = {};
-
-                const updatePendingCount = () => {
-                    pendingCountEl.textContent = Object.keys(pendingChanges).length;
-                };
-
-                const closeModal = () => {
-                    overlay.remove();
-                };
-
-                const applyFilter = (filter) => {
-                    taskRows.forEach(row => {
-                        const isComplete = row.dataset.complete === 'true';
-                        const isOverdue = row.dataset.overdue === 'true';
-                        const isCritical = row.dataset.critical === 'true';
-                        let show = true;
-                        switch (filter) {
-                            case 'incomplete':
-                                show = !isComplete;
-                                break;
-                            case 'overdue':
-                                show = isOverdue;
-                                break;
-                            case 'critical':
-                                show = isCritical;
-                                break;
-                            default:
-                                show = true;
-                        }
-                        row.style.display = show ? '' : 'none';
-                    });
-                };
-
-                filterBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        filterBtns.forEach(b => b.classList.remove('is-active'));
-                        btn.classList.add('is-active');
-                        applyFilter(btn.dataset.filter);
-                    });
-                });
-
-                checkboxes.forEach(box => {
-                    const taskId = box.dataset.taskId;
-                    originalValues[taskId] = box.checked;
-                    box.addEventListener('change', () => {
-                        const row = box.closest('.quick-task');
-                        row.dataset.complete = box.checked ? 'true' : 'false';
-                        if (box.checked === originalValues[taskId]) {
-                            delete pendingChanges[taskId];
-                        } else {
-                            pendingChanges[taskId] = box.checked;
-                        }
-                        updatePendingCount();
-                    });
-                });
-
-                selectBtn.addEventListener('click', () => {
-                    checkboxes.forEach(box => {
-                        box.checked = true;
-                        const taskId = box.dataset.taskId;
-                        const row = box.closest('.quick-task');
-                        row.dataset.complete = 'true';
-                        if (originalValues[taskId] !== true) {
-                            pendingChanges[taskId] = true;
-                        } else {
-                            delete pendingChanges[taskId];
-                        }
-                    });
-                    updatePendingCount();
-                });
-
-                clearBtn.addEventListener('click', () => {
-                    checkboxes.forEach(box => {
-                        box.checked = false;
-                        const taskId = box.dataset.taskId;
-                        const row = box.closest('.quick-task');
-                        row.dataset.complete = 'false';
-                        if (originalValues[taskId] !== false) {
-                            pendingChanges[taskId] = false;
-                        } else {
-                            delete pendingChanges[taskId];
-                        }
-                    });
-                    updatePendingCount();
-                });
-
-                saveBtn.addEventListener('click', async () => {
-                    const entries = Object.entries(pendingChanges);
-                    if (entries.length === 0) {
-                        window.showNotification?.('No changes to save', 'info') || alert('No changes to save.');
-                        return;
-                    }
-
-                    saveBtn.disabled = true;
-                    saveBtn.textContent = 'Saving...';
-                    try {
-                        for (const [taskId, value] of entries) {
-                            await window.taskService.updateTask(client.id, taskId, {
-                                completed: value,
-                                status: value ? 'complete' : 'pending'
-                            });
-                        }
-                        window.showNotification?.('Checklist updated', 'success') || alert('Checklist updated');
-                        if (window.dashboardManager?.loadData) {
-                            window.dashboardManager.loadData();
-                        }
-                        closeModal();
-                    } catch (error) {
-                        console.error('[QuickUpdate] Save error', error);
-                        window.showNotification?.('Failed to save changes', 'error') || alert('Failed to save changes.');
-                    } finally {
-                        saveBtn.disabled = false;
-                        saveBtn.textContent = 'Save Changes';
-                    }
-                });
-
-                closeBtn.addEventListener('click', closeModal);
-                overlay.addEventListener('click', (e) => {
-                    if (e.target === overlay) {
-                        closeModal();
-                    }
-                });
-
-                document.addEventListener('keydown', function escListener(evt) {
-                    if (evt.key === 'Escape') {
-                        closeModal();
-                        document.removeEventListener('keydown', escListener);
-                    }
-                });
-
-            } catch (error) {
-                console.error('[QuickUpdate] Failed to open modal:', error);
-                window.showNotification?.('Unable to open Quick Update', 'error') || alert('Unable to open Quick Update.');
-            }
-        };
-
-        window.openBulkUpdate.__isModernQuickUpdate = true;
+    window.openBulkUpdate = async (clientId) => {
+        // This will be implemented in the bulk update phase
+        console.log('[TrackerUI] Bulk update requested for client:', clientId);
+        alert('Bulk update feature coming soon!');
     };
-
-    window.__registerQuickUpdateModal();
     
     window.openTrackerTimeline = async (clientId) => {
         try {
@@ -16452,12 +16100,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         // View client details with modern design
         // NOTE: Accepts either a client ID (string) or a full client object
         async function viewClientDetails(clientOrId) {
-            // REDIRECT TO NEW MANAGER
-            if (window.clientProfileManager) {
-                const id = typeof clientOrId === 'string' ? clientOrId : clientOrId.id;
-                window.clientProfileManager.open(id);
-                return;
-            }
             try {
                 let clientId = null;
                 let client = null;
@@ -19600,67 +19242,51 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         }
     };
 
-    window.populateDemoClients = async function(count) {
+    window.populateDemoClients = async function(count = 50) {
         // In non-demo mode, treat this as a no-op to prevent accidental demo data in production
         if (!window.ccConfig?.demoMode) {
             window.showNotification('Demo data is disabled in this environment.', 'info');
             return;
         }
         
-        // Ensure the new DemoDataGenerator is available
-        const generator = window.DemoDataGenerator;
-        if (!generator) {
+        console.log('populateDemoClients called with count:', count);
+        
+        // Wait for ClientManager to be ready
+        let retries = 10;
+        while (!window.clientManager && retries > 0) {
+            console.log('Waiting for ClientManager to initialize...');
+            await new Promise(resolve => setTimeout(resolve, 500));
+            retries--;
+        }
+        
+        // Check if demo data generator is available
+        if (!window.demoDataGenerator) {
             console.error('Demo data generator not available');
             window.showNotification('Demo data generator not loaded', 'error');
             return;
         }
         
+        if (!window.clientManager?.generateDemoClients) {
+            console.error('ClientManager.generateDemoClients not available');
+            window.showNotification('Client manager not ready', 'error');
+            return;
+        }
+        
+        const confirmed = window.confirm(
+            `Populate demo clients?\n\nThis will remove existing demo clients and create ${count} fresh records for testing.`
+        );
+        if (!confirmed) return;
+        
         try {
-            // Ensure client manager is ready before proceeding
-            if (!window.clientManager) {
-                console.warn('⚠️ Client manager not ready yet - waiting...');
-                // Wait up to 5 seconds for client manager
-                let waited = 0;
-                while (!window.clientManager && waited < 5000) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    waited += 100;
-                }
-                if (!window.clientManager) {
-                    throw new Error('Client manager failed to initialize. Please refresh the page and try again.');
-                }
-            }
-            
-            // If a numeric count is passed (e.g., header button / auto-populate),
-            // use the non-interactive reset API so there is no extra prompt.
-            // If no count is passed, fall back to the interactive prompt in demo-data.js.
-            if (typeof count === 'number' && !Number.isNaN(count)) {
-                console.log('populateDemoClients (non-interactive) called with count:', count);
-                window.showNotification(`🎭 Creating ${count} demo clients…`, 'info');
-                
-                const ok = await generator.resetDemoData(count);
-                if (!ok) {
-                    throw new Error('Demo generator reported a failure - check console for details');
-                }
-                
-                window.showNotification(`✅ Successfully created ${count} demo clients!`, 'success');
-            } else {
-                // Fallback: use the interactive flow defined in demo-data.js
-                // This already includes comprehensive refresh logic
-                console.log('populateDemoClients (interactive) called');
-                await generator.populateDemoClients();
-                // populateDemoClients handles its own refresh, so we're done
-                return;
-            }
-            
-            // For non-interactive mode, do comprehensive refresh
-            console.log('🔄 Performing comprehensive UI refresh after demo data generation...');
-            
-            // Wait a moment for data to settle in IndexedDB
-            await new Promise(resolve => setTimeout(resolve, 500));
+            window.showNotification('🎭 Creating demo clients…', 'info');
+            console.log('Calling clientManager.generateDemoClients...');
+            const created = await window.clientManager.generateDemoClients(count);
+            console.log('Created clients:', created);
+            window.showNotification(`✅ Added ${created.length} demo clients`, 'success');
             
             // Force dashboard refresh
             if (window.dashboardManager) {
-                console.log('Refreshing dashboard manager...');
+                console.log('Refreshing dashboard...');
                 await window.dashboardManager.refreshDashboard();
             }
             
@@ -19669,31 +19295,26 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 await initializeDashboard(true);
             }
             
-            // Refresh widgets directly
+            // Also refresh widgets directly
             if (window.dashboardWidgets?.renderAll) {
-                console.log('Re-rendering dashboard widgets...');
+                console.log('Re-rendering widgets...');
                 await window.dashboardWidgets.renderAll();
             }
-        
-            // Refresh CM Tracker regardless of which tab is active
-            // so data is ready when user switches to Clients tab
-            if (typeof initializeCMTracker === 'function') {
-                console.log('Re-initializing CM Tracker...');
-                await initializeCMTracker();
+
+            // If the Clients tab is active, refresh the CM Tracker view too
+            const clientsTab = document.getElementById('clientsTab');
+            if (clientsTab && clientsTab.classList.contains('active')) {
+                if (typeof initializeCMTracker === 'function') {
+                    console.log('Re-initializing CM Tracker after demo populate...');
+                    await initializeCMTracker();
+                } else if (typeof initializeClientTracker === 'function') {
+                    console.log('Re-initializing legacy client tracker after demo populate...');
+                    initializeClientTracker();
+                }
             }
-            
-            // Emit events for any other listeners
-            if (window.eventBus) {
-                window.eventBus.emit('clients:updated');
-                window.eventBus.emit('dashboard:refresh');
-            }
-            
-            console.log('✅ Comprehensive refresh complete');
         } catch (error) {
             console.error('Failed to generate demo clients:', error);
-            console.error('Error stack:', error.stack);
-            const errorMsg = error.message || 'Unknown error occurred';
-            window.showNotification('Failed to generate demo clients: ' + errorMsg, 'error');
+            window.showNotification('Failed to generate demo clients: ' + error.message, 'error');
         }
     };
     
@@ -20809,9 +20430,11 @@ console.log('🔐 Login fix applied');
     };
     
     // Global functions for modal actions
-    if (window.__registerQuickUpdateModal) {
-        window.__registerQuickUpdateModal();
-    }
+    window.openBulkUpdate = async (clientId) => {
+        // This will be implemented in the bulk update phase
+        console.log('[TrackerUI] Bulk update requested for client:', clientId);
+        alert('Bulk update feature coming soon!');
+    };
     
     window.openTrackerTimeline = async (clientId) => {
         try {
@@ -34790,12 +34413,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         // View client details with modern design
         // NOTE: Accepts either a client ID (string) or a full client object
         async function viewClientDetails(clientOrId) {
-            // REDIRECT TO NEW MANAGER
-            if (window.clientProfileManager) {
-                const id = typeof clientOrId === 'string' ? clientOrId : clientOrId.id;
-                window.clientProfileManager.open(id);
-                return;
-            }
             try {
                 let clientId = null;
                 let client = null;
@@ -36985,11 +36602,11 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             }
         });
 
-        // if ("serviceWorker" in navigator) {
-        //     navigator.serviceWorker.register("service-worker.js")
-        //         .then(reg => console.log("Service Worker registered:", reg.scope))
-        //         .catch(err => console.log("Service Worker registration failed:", err));
-        // }
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("service-worker.js")
+                .then(reg => console.log("Service Worker registered:", reg.scope))
+                .catch(err => console.log("Service Worker registration failed:", err));
+        }
     </script>
     
     
@@ -41766,16 +41383,12 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                     <div class="section-header__content">
                         <div>
                             <p class="section-eyebrow">Coach overview</p>
-                            <div class="section-header__title">
-                                Dashboard
-                                <span class="version-badge" style="background:#6366f1;color:white;padding:2px 6px;border-radius:4px;font-size:10px;vertical-align:middle;margin-left:8px;">v12.4</span>
-                            </div>
+                            <div class="section-header__title">Dashboard</div>
                         </div>
                         <div class="section-status">Live updates</div>
                     </div>
                     <div class="section-header__actions">
-                        <button type="button" class="section-chip is-primary" data-demo-only="true" onclick="window.populateDemoClients && window.populateDemoClients()" title="Generate demo clients (you'll be prompted for count)">🎲 Generate Demo Data</button>
-                        <button type="button" class="section-chip" data-demo-only="true" onclick="window.clearDemoData && window.clearDemoData()" title="Clear all demo client data">🗑️ Clear Demo Data</button>
+                        <button type="button" class="section-chip is-primary" data-demo-only="true" onclick="window.populateDemoClients && window.populateDemoClients(50)">Populate Demo Data</button>
                         <button type="button" class="section-chip" onclick="window.refreshDashboard && window.refreshDashboard(true)">Refresh</button>
                         <button type="button" class="section-chip" onclick="window.showSelectionPanel && window.showSelectionPanel()">Show Docs Panel</button>
                     </div>
@@ -43516,8 +43129,28 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                                 await dashboardManager.loadDashboardData();
                             }
                             
-                            // Note: Auto-population of demo data has been removed per user request
-                            // Users must manually generate demo data using the "Generate Demo Data" button
+                            // Check if we have any clients, if not and in demo mode, auto-populate demo data
+                            if (window.clientManager && window.ccConfig?.demoMode) {
+                                const clients = await window.clientManager.getAllClients();
+                                console.log('Current client count:', clients.length);
+                                
+                                if (clients.length === 0) {
+                                    console.log('No clients found in dev mode, auto-populating demo data...');
+                                    
+                                    // Auto-populate demo data
+                                    if (window.demoDataGenerator && window.clientManager.generateDemoClients) {
+                                        try {
+                                            const created = await window.clientManager.generateDemoClients(40);
+                                            console.log('✅ Auto-populated', created.length, 'demo clients');
+                                            
+                                            // Reload dashboard data after creating clients
+                                            await dashboardManager.loadDashboardData();
+                                        } catch (error) {
+                                            console.error('Failed to auto-populate demo data:', error);
+                                        }
+                                    }
+                                }
+                            }
                             
                             if (!dashboardWidgetsInitialized) {
                                 await window.dashboardWidgets.initialize();
@@ -43548,39 +43181,36 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                             return;
                         }
 
-                        console.log('Forcing demo data creation via DemoDataGenerator...');
+                        console.log('Forcing demo data creation...');
                         
-                        if (!window.DemoDataGenerator) {
-                            console.error('DemoDataGenerator not available');
-                            window.showNotification('Demo data tools are not ready yet.', 'error');
+                        if (!window.clientManager || !window.demoDataGenerator) {
+                            console.error('Required components not loaded');
                             return;
                         }
                         
                         try {
-                            const ok = await window.DemoDataGenerator.resetDemoData(40);
-                            if (!ok) {
-                                throw new Error('DemoDataGenerator.resetDemoData returned false');
+                            // Clear existing demo clients first
+                            const existingClients = await window.clientManager.getAllClients();
+                            const demoClients = existingClients.filter(c => c.isDemo);
+                            
+                            for (const client of demoClients) {
+                                await window.clientManager.deleteClient(client.id);
                             }
+                            console.log('Cleared', demoClients.length, 'existing demo clients');
+                            
+                            // Create new demo clients
+                            const created = await window.clientManager.generateDemoClients(40);
+                            console.log('✅ Created', created.length, 'new demo clients');
                             
                             // Force complete dashboard refresh
-                            if (window.dashboardManager) {
-                                await dashboardManager.refreshDashboard();
-                            }
-                            if (typeof initializeDashboard === 'function') {
-                                await initializeDashboard(true);
-                            }
-                            if (window.dashboardWidgets?.renderAll) {
-                                await window.dashboardWidgets.renderAll();
-                            }
-                            if (typeof updateDashboardShell === 'function') {
-                                updateDashboardShell();
-                            }
+                            await dashboardManager.initialize();
+                            await dashboardManager.loadDashboardData();
+                            await window.dashboardWidgets.renderAll();
+                            updateDashboardShell();
                             
-                            window.showNotification('✅ Dashboard refreshed with demo data', 'success');
                             console.log('✅ Dashboard refreshed with demo data');
                         } catch (error) {
                             console.error('Failed to force demo data:', error);
-                            window.showNotification('Failed to generate demo clients: ' + error.message, 'error');
                         }
                     };
                     
@@ -43602,10 +43232,10 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                         updateDashboardShell();
                     };
                     
-                    // Set dashboard as default workspace on page load
+                    // Set programs as default on page load
                     document.addEventListener('DOMContentLoaded', function() {
-                        // Always start on the Dashboard to avoid mixed \"dashboard + programs\" layouts
-                        const defaultTab = 'dashboard';
+                        // Start with Programs tab as default
+                        const defaultTab = 'programs';
                         
                         // Initially hide the selection panel
                         const selectionPanel = document.querySelector('.selection-panel');
