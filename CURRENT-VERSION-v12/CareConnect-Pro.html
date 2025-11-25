@@ -16119,42 +16119,46 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             }
         }
         
-        // View client details with modern design
+        // View client details - Redirect to modern Client Profile Manager
         // NOTE: Accepts either a client ID (string) or a full client object
         async function viewClientDetails(clientOrId) {
+            // Extract client ID
+            let clientId = null;
+            if (typeof clientOrId === 'string') {
+                clientId = clientOrId;
+            } else if (clientOrId && typeof clientOrId === 'object') {
+                clientId = clientOrId.id;
+            }
+            
+            // Guard against invalid IDs
+            if (!clientId) {
+                console.error('viewClientDetails called without a valid clientId:', clientOrId);
+                showAlert('Client not found', 'error');
+                return;
+            }
+            
+            // Use the modern Client Profile Manager
+            if (window.clientProfileManager && typeof window.clientProfileManager.open === 'function') {
+                window.clientProfileManager.open(clientId);
+                return;
+            }
+            
+            // Fallback: show notification if profile manager not available
+            console.warn('Client Profile Manager not available, falling back to legacy view');
+            showAlert('Loading client profile...', 'info');
+            
+            // Legacy fallback - basic info only
             try {
-                let clientId = null;
-                let client = null;
-                
-                // Support being called with either an ID or a client object
-                if (typeof clientOrId === 'string') {
-                    clientId = clientOrId;
-                } else if (clientOrId && typeof clientOrId === 'object') {
-                    clientId = clientOrId.id;
-                    client = clientOrId;
-                }
-                
-                // Guard against invalid IDs (prevents IndexedDB DataError)
-                if (!clientId) {
-                    console.error('viewClientDetails called without a valid clientId:', clientOrId);
-                    showAlert('Client not found', 'error');
-                    return;
-                }
-                
-                // Load client from ClientManager if we weren't given the full object
-                if (!client) {
-                    client = await window.clientManager.getClient(clientId);
-                }
-                
+                const client = await window.clientManager.getClient(clientId);
                 if (!client) {
                     showAlert('Client not found', 'error');
                     return;
                 }
                 
-                // Get related data
-                const house = housesManager.getHouseById(client.houseId);
-                const milestones = await milestonesManager.getClientMilestones(client.id);
-                const aftercareOptions = await aftercareManager.getClientAftercareOptions(client.id);
+                // Get related data for legacy fallback
+                const house = housesManager?.getHouseById?.(client.houseId);
+                const milestones = await milestonesManager?.getClientMilestones?.(client.id) || [];
+                const aftercareOptions = await aftercareManager?.getClientAftercareOptions?.(client.id) || [];
                 const daysInCare = window.clientManager.calculateDaysInCare(client);
                 const hoursElapsed = window.clientManager.calculateHoursElapsed(client);
                 
@@ -34320,42 +34324,46 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             }
         }
         
-        // View client details with modern design
+        // View client details - Redirect to modern Client Profile Manager
         // NOTE: Accepts either a client ID (string) or a full client object
         async function viewClientDetails(clientOrId) {
+            // Extract client ID
+            let clientId = null;
+            if (typeof clientOrId === 'string') {
+                clientId = clientOrId;
+            } else if (clientOrId && typeof clientOrId === 'object') {
+                clientId = clientOrId.id;
+            }
+            
+            // Guard against invalid IDs
+            if (!clientId) {
+                console.error('viewClientDetails called without a valid clientId:', clientOrId);
+                showAlert('Client not found', 'error');
+                return;
+            }
+            
+            // Use the modern Client Profile Manager
+            if (window.clientProfileManager && typeof window.clientProfileManager.open === 'function') {
+                window.clientProfileManager.open(clientId);
+                return;
+            }
+            
+            // Fallback: show notification if profile manager not available
+            console.warn('Client Profile Manager not available, falling back to legacy view');
+            showAlert('Loading client profile...', 'info');
+            
+            // Legacy fallback - basic info only
             try {
-                let clientId = null;
-                let client = null;
-                
-                // Support being called with either an ID or a client object
-                if (typeof clientOrId === 'string') {
-                    clientId = clientOrId;
-                } else if (clientOrId && typeof clientOrId === 'object') {
-                    clientId = clientOrId.id;
-                    client = clientOrId;
-                }
-                
-                // Guard against invalid IDs (prevents IndexedDB DataError)
-                if (!clientId) {
-                    console.error('viewClientDetails called without a valid clientId:', clientOrId);
-                    showAlert('Client not found', 'error');
-                    return;
-                }
-                
-                // Load client from ClientManager if we weren't given the full object
-                if (!client) {
-                    client = await window.clientManager.getClient(clientId);
-                }
-                
+                const client = await window.clientManager.getClient(clientId);
                 if (!client) {
                     showAlert('Client not found', 'error');
                     return;
                 }
                 
-                // Get related data
-                const house = housesManager.getHouseById(client.houseId);
-                const milestones = await milestonesManager.getClientMilestones(client.id);
-                const aftercareOptions = await aftercareManager.getClientAftercareOptions(client.id);
+                // Get related data for legacy fallback
+                const house = housesManager?.getHouseById?.(client.houseId);
+                const milestones = await milestonesManager?.getClientMilestones?.(client.id) || [];
+                const aftercareOptions = await aftercareManager?.getClientAftercareOptions?.(client.id) || [];
                 const daysInCare = window.clientManager.calculateDaysInCare(client);
                 const hoursElapsed = window.clientManager.calculateHoursElapsed(client);
                 
