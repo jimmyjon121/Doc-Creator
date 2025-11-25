@@ -25165,20 +25165,20 @@ console.log('ðŸ” Login fix applied');
         </button>
     </div>
     
-    <!-- History Panel -->
-    <div class="history-panel" id="historyPanel">
+    <!-- History Panel (hidden by default) -->
+    <div class="history-panel" id="historyPanel" style="display: none; position: fixed; right: -400px; top: 0; z-index: 9999;">
         <div class="history-header">
             <h3>Document History</h3>
-            <button onclick="toggleHistory()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">âœ•</button>
+            <button onclick="toggleHistory()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">✕</button>
         </div>
         <div id="historyContent"></div>
     </div>
     
-    <!-- Comparison View -->
-    <div class="comparison-view" id="comparisonView">
+    <!-- Comparison View (hidden by default) -->
+    <div class="comparison-view" id="comparisonView" style="display: none; position: fixed; z-index: 9999;">
         <div class="comparison-header">
             <h3>Program Comparison</h3>
-            <button onclick="closeComparison()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">âœ•</button>
+            <button onclick="closeComparison()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">✕</button>
         </div>
         <div class="comparison-content" id="comparisonContent"></div>
     </div>
