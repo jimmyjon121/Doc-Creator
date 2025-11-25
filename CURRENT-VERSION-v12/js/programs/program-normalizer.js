@@ -242,6 +242,116 @@
   }
 
   // ============================================================================
+  // CLINICAL ENRICHMENT
+  // ============================================================================
+
+  /**
+   * Extracts clinical enrichment (diagnoses, modalities, flags) from free-text fields
+   * to produce a richer normalized view even when the JSON is sparse.
+   * This never mutates the raw data.
+   * @param {Object} rawProgram
+   * @returns {{ diagnoses: string[]|null, modalities: string[]|null, flags: { treatsASD: boolean, treatsSUD: boolean, highAcuityMH: boolean } }}
+   */
+  function enrichClinical(rawProgram) {
+    const textBuckets = [];
+
+    if (typeof rawProgram.summary === 'string') textBuckets.push(rawProgram.summary);
+    if (typeof rawProgram.overview === 'string') textBuckets.push(rawProgram.overview);
+    if (Array.isArray(rawProgram.features)) textBuckets.push(rawProgram.features.join(' '));
+    if (Array.isArray(rawProgram.tags)) textBuckets.push(rawProgram.tags.join(' '));
+
+    const fullText = textBuckets.join(' ').toLowerCase();
+
+    /** @type {string[]} */
+    const diagnoses = [];
+    /** @type {string[]} */
+    const modalities = [];
+
+    const flags = {
+      treatsASD: rawProgram.treatsASD === true,
+      treatsSUD: rawProgram.treatsSUD === true,
+      highAcuityMH: rawProgram.highAcuityMH === true,
+    };
+
+    // --- Diagnoses ---
+    if (/depression|mood disorder|mood disorders/.test(fullText)) {
+      diagnoses.push('Depression / Mood Disorders');
+    }
+    if (/anxiety|panic/.test(fullText)) {
+      diagnoses.push('Anxiety Disorders');
+    }
+    if (/trauma|ptsd|post-traumatic/.test(fullText)) {
+      diagnoses.push('Trauma / PTSD');
+    }
+    if (/\badhd\b|attention[-\s]?deficit/.test(fullText)) {
+      diagnoses.push('ADHD / Attention');
+    }
+    if (/autism|asd|neurodivergent|neurodevelopmental/.test(fullText)) {
+      diagnoses.push('Autism Spectrum / Neurodivergent');
+      flags.treatsASD = true;
+    }
+    if (/eating disorder|anorexia|bulimia|binge eating/.test(fullText)) {
+      diagnoses.push('Eating Disorders');
+    }
+    if (/substance|chemical dependency|sud|addiction/.test(fullText)) {
+      diagnoses.push('Substance Use / Dual Diagnosis');
+      flags.treatsSUD = true;
+    }
+    if (/bipolar/.test(fullText)) {
+      diagnoses.push('Bipolar Disorder');
+    }
+    if (/psychosis|psychotic/.test(fullText)) {
+      diagnoses.push('Psychosis Risk');
+      flags.highAcuityMH = true;
+    }
+    if (/self-harm|self harm|suicidal|suicide risk/.test(fullText)) {
+      diagnoses.push('Self-Harm / Suicidality');
+      flags.highAcuityMH = true;
+    }
+
+    // --- Modalities ---
+    if (/cbt\b|cognitive behavioral/.test(fullText)) {
+      modalities.push('CBT');
+    }
+    if (/dbt\b|dialectical behavior/.test(fullText)) {
+      modalities.push('DBT');
+    }
+    if (/emdr/.test(fullText)) {
+      modalities.push('EMDR');
+    }
+    if (/\bact\b|acceptance and commitment/.test(fullText)) {
+      modalities.push('ACT');
+    }
+    if (/family therapy|family work|parent coaching|parent support/.test(fullText)) {
+      modalities.push('Family Therapy / Parent Work');
+    }
+    if (/group therapy|process group/.test(fullText)) {
+      modalities.push('Group Therapy');
+    }
+    if (/individual therapy|one-on-one/.test(fullText)) {
+      modalities.push('Individual Therapy');
+    }
+    if (/equine/.test(fullText)) {
+      modalities.push('Equine Therapy');
+    }
+    if (/experiential|adventure|outdoor/.test(fullText)) {
+      modalities.push('Adventure / Experiential');
+    }
+    if (/12[-\s]?step|twelve[-\s]?step/.test(fullText)) {
+      modalities.push('12-Step Integration');
+    }
+
+    const uniqDiagnoses = diagnoses.length ? Array.from(new Set(diagnoses)) : null;
+    const uniqModalities = modalities.length ? Array.from(new Set(modalities)) : null;
+
+    return {
+      diagnoses: uniqDiagnoses,
+      modalities: uniqModalities,
+      flags,
+    };
+  }
+
+  // ============================================================================
   // MAIN NORMALIZATION FUNCTION
   // ============================================================================
 
@@ -255,6 +365,7 @@
     const contacts = rawProgram.contacts || {};
     const ageRange = parseAgeRange(rawProgram.ageRange);
     const levelOfCare = mapFocusToLOC(rawProgram.focus, rawProgram);
+    const clinical = enrichClinical(rawProgram);
     
     /** @type {UiProgram} */
     const program = {
@@ -289,13 +400,24 @@
       lgbtqAffirming: rawProgram.lgbtqAffirming === true,
       transAffirming: rawProgram.transAffirming === true,
       genderInclusiveHousing: rawProgram.genderInclusiveHousing === true,
-      treatsASD: rawProgram.treatsASD === true,
-      treatsSUD: rawProgram.treatsSUD === true,
-      highAcuityMH: rawProgram.highAcuityMH === true,
+      // Use enriched flags as a fallback if explicit booleans are not set
+      treatsASD: rawProgram.treatsASD === true || clinical.flags.treatsASD === true,
+      treatsSUD: rawProgram.treatsSUD === true || clinical.flags.treatsSUD === true,
+      highAcuityMH: rawProgram.highAcuityMH === true || clinical.flags.highAcuityMH === true,
       
       // === CLINICAL DETAIL ===
-      diagnosesServed: Array.isArray(rawProgram.diagnosesServed) ? rawProgram.diagnosesServed : null,
-      modalities: Array.isArray(rawProgram.modalities) ? rawProgram.modalities : null,
+      diagnosesServed: Array.isArray(rawProgram.diagnosesServed) && rawProgram.diagnosesServed.length
+        ? Array.from(new Set([
+            ...rawProgram.diagnosesServed,
+            ...(clinical.diagnoses || []),
+          ]))
+        : (clinical.diagnoses || null),
+      modalities: Array.isArray(rawProgram.modalities) && rawProgram.modalities.length
+        ? Array.from(new Set([
+            ...rawProgram.modalities,
+            ...(clinical.modalities || []),
+          ]))
+        : (clinical.modalities || null),
       exclusions: Array.isArray(rawProgram.exclusions) ? rawProgram.exclusions : null,
       
       // === ACADEMICS ===

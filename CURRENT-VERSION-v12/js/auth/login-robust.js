@@ -373,6 +373,7 @@
           isMaster: true,
           username: CONFIG.MASTER_USERNAME,
           fullName: 'Master Admin',
+          role: 'admin',
         };
       }
 
@@ -382,9 +383,10 @@
       ) {
         return {
           valid: true,
-          isMaster: false,
+          isMaster: true,
           username: CONFIG.LEGACY_USERNAME,
-          fullName: 'Legacy User',
+          fullName: 'Legacy Dev',
+          role: 'admin',
         };
       }
 
@@ -421,6 +423,7 @@
               isMaster: false,
               username: user.username,
               fullName: user.fullName || user.username,
+              role: user.role || 'coach',
             };
           }
         } catch (pbkdf2Error) {
@@ -449,6 +452,7 @@
             isMaster: false,
             username: user.username,
             fullName: user.fullName || user.username,
+            role: user.role || 'coach',
           };
         }
       } catch (shaError) {
@@ -479,6 +483,7 @@
           isMaster: false,
           username: user.username,
           fullName: user.fullName || user.username,
+          role: user.role || 'coach',
         };
       }
 
@@ -636,6 +641,8 @@
         setSession(CONFIG.FULLNAME_KEY, result.fullName || result.username);
         setSession('isMaster', result.isMaster ? 'true' : 'false');
         setSession('manualLogin', 'true');
+        const computedRole = result.role || (result.isMaster ? 'admin' : 'coach');
+        setSession('userRole', computedRole);
         
         // Set user initials for display
         const fullName = result.fullName || result.username;
@@ -662,6 +669,15 @@
         }
 
         hideLoginScreen();
+
+        // Ensure nav/admin visibility reflects the new role
+        try {
+          if (window.ccShell && typeof window.ccShell.updateAdminNavVisibility === 'function') {
+            window.ccShell.updateAdminNavVisibility();
+          }
+        } catch (navError) {
+          console.warn('Admin nav visibility update failed:', navError);
+        }
 
         if (typeof window.showWelcomeAnimation === 'function') {
           try {

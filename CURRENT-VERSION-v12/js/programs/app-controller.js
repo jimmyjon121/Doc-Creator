@@ -21,6 +21,7 @@
     currentClient: null,
     builderOpen: true,
     mapInitialized: false,
+    programsRendered: false,
   };
 
   // ============================================================================
@@ -94,11 +95,64 @@
     
     bindEvents();
     
-    // Wait for programs to load
+    // Set up event listeners FIRST (before trying to init)
+    window.addEventListener('ccprograms:loaded', () => {
+      console.log('📦 ccprograms:loaded event received');
+      tryInitPrograms();
+    });
+    
+    window.addEventListener('programs-loaded', () => {
+      console.log('📦 programs-loaded event received');
+      // Give ccPrograms time to initialize after the event
+      setTimeout(tryInitPrograms, 100);
+    });
+    
+    // Check immediately if ccPrograms is already ready
     if (window.ccPrograms?.isReady) {
+      console.log('✅ ccPrograms already ready at init, rendering immediately...');
       onProgramsReady();
-    } else {
-      window.addEventListener('ccprograms:loaded', onProgramsReady);
+      return; // Skip polling if already ready
+    }
+    
+    // Try to initialize programs after a short delay 
+    // (gives time for programs-loader.js setTimeout to fire the event)
+    setTimeout(tryInitPrograms, 100);
+    
+    // Fallback polling - check every 200ms for up to 4 seconds
+    let attempts = 0;
+    const pollInterval = setInterval(() => {
+      attempts++;
+      if (state.programsRendered || attempts > 20) {
+        clearInterval(pollInterval);
+        if (!state.programsRendered) {
+          console.error('❌ Failed to load programs after 4 seconds');
+          // Last ditch effort - force check everything
+          if (window.programsData?.length > 0) {
+            console.log('🔧 Attempting emergency init with existing data...');
+            if (!window.ccPrograms?.isReady) {
+              window.ccPrograms?.init?.();
+            }
+            setTimeout(tryInitPrograms, 100);
+          }
+        }
+        return;
+      }
+      tryInitPrograms();
+    }, 200);
+  }
+  
+  function tryInitPrograms() {
+    if (state.programsRendered) return;
+    
+    if (window.ccPrograms?.isReady) {
+      console.log('📦 ccPrograms ready, initializing...');
+      onProgramsReady();
+    } else if (window.programsData?.length > 0 && !window.ccPrograms?.isReady) {
+      // Data is loaded but ccPrograms hasn't initialized yet - trigger it
+      console.log('📦 Raw data ready, triggering ccPrograms init...');
+      window.ccPrograms?.init?.();
+      // Try again shortly
+      setTimeout(tryInitPrograms, 50);
     }
   }
 
@@ -117,27 +171,63 @@
     document.body.style.overflow = '';
   }
 
-  function onProgramsReady() {
+  async function onProgramsReady() {
+    // Prevent double initialization
+    if (state.programsRendered) {
+      console.log('⚠️ Programs already rendered, skipping...');
+      return;
+    }
+    
     console.log('✅ Programs ready, initializing UI...');
 
-    // Initialize components
-    initFilters();
-    initClientSelector();
-    initPreferencesUI();
+    // Mark as rendered FIRST to prevent re-entry from polling
+    state.programsRendered = true;
+
+    // Initialize components (wrapped in try-catch to prevent one failure from blocking others)
+    try {
+      initFilters();
+    } catch (e) {
+      console.error('❌ Error in initFilters:', e);
+    }
     
-    // Apply preferences
-    const prefs = window.ccPreferences?.get() || {};
-    if (prefs.defaultViewMode) {
-      switchView(prefs.defaultViewMode);
+    try {
+      await initClientSelector();
+    } catch (e) {
+      console.error('❌ Error in initClientSelector:', e);
+    }
+    
+    try {
+      initPreferencesUI();
+    } catch (e) {
+      console.error('❌ Error in initPreferencesUI:', e);
+    }
+    
+    // Always land the user on GRID with data rendered
+    console.log('📊 Forcing initial view to Grid and rendering programs...');
+    try {
+      switchView('grid');
+    } catch (e) {
+      console.error('❌ Error in switchView:', e);
     }
 
-    // Initial render
-    renderPrograms();
-    updateStats();
+    // Safety net: if the grid is still empty shortly after init, run one more render.
+    setTimeout(() => {
+      if (state.currentView === 'grid' && dom.resultsGrid) {
+        const hasCards = dom.resultsGrid.querySelector('.program-card, .umbrella-card');
+        if (!hasCards) {
+          console.log('🔁 Grid still empty after init, re-rendering programs...');
+          renderPrograms();
+        }
+      }
+    }, 150);
 
     // Load any saved draft
-    window.ccDocumentModel?.loadDraft();
-    updateBuilderUI();
+    try {
+      window.ccDocumentModel?.loadDraft();
+      updateBuilderUI();
+    } catch (e) {
+      console.error('❌ Error loading draft:', e);
+    }
 
     console.log('✅ App Controller initialized');
   }
@@ -206,6 +296,17 @@
         tab.addEventListener('click', () => switchClientTab(tab.dataset.tab));
       }
     });
+    
+    // Client context close button
+    document.getElementById('closeClientContext')?.addEventListener('click', () => {
+      dom.clientContext.hidden = true;
+    });
+    
+    // Client ZIP input - update on change
+    document.getElementById('clientZip')?.addEventListener('change', handleClientZipChange);
+    
+    // Client LGBTQ toggle
+    document.getElementById('clientLgbtqToggle')?.addEventListener('click', handleLgbtqToggle);
 
     // Builder tabs
     document.querySelectorAll('.builder-pane__tab').forEach(tab => {
@@ -306,9 +407,27 @@
   // CLIENT SELECTOR
   // ============================================================================
 
-  function initClientSelector() {
-    // Try to get clients from clientManager
-    const clients = window.clientManager?.getAllClients?.() || [];
+  async function initClientSelector() {
+    // Safety check for DOM
+    if (!dom.clientSelector) {
+      console.warn('⚠️ clientSelector DOM element not found');
+      return;
+    }
+    
+    // Try to get clients from clientManager (may be async)
+    let clients = [];
+    try {
+      const result = window.clientManager?.getAllClients?.();
+      // Handle both sync and async returns
+      clients = result instanceof Promise ? await result : result;
+      // Ensure it's an array
+      if (!Array.isArray(clients)) {
+        clients = [];
+      }
+    } catch (e) {
+      console.warn('⚠️ Failed to get clients from clientManager:', e);
+      clients = [];
+    }
     
     dom.clientSelector.innerHTML = '<option value="">Select Client...</option>' +
       clients.map(c => `<option value="${c.id}">${c.initials || 'XX'} - ${c.kipuId || '?'}</option>`).join('');
@@ -319,28 +438,36 @@
     }
   }
 
-  function handleClientChange(e) {
+  async function handleClientChange(e) {
     const clientId = e.target.value;
     
     if (!clientId) {
       state.currentClient = null;
       dom.clientContext.hidden = true;
-      document.getElementById('mapCenterClient').disabled = true;
+      const mapCenterBtn = document.getElementById('mapCenterClient');
+      if (mapCenterBtn) mapCenterBtn.disabled = true;
       return;
     }
 
-    // Get client data
-    let client = window.clientManager?.getClient?.(clientId);
+    // Get client data - handle async clientManager
+    let client = null;
+    try {
+      const result = window.clientManager?.getClient?.(clientId);
+      client = result instanceof Promise ? await result : result;
+    } catch (e) {
+      console.warn('Failed to get client:', e);
+    }
     
-    // Demo client
-    if (clientId === 'demo') {
+    // Demo client fallback (for when no clients exist)
+    if (clientId === 'demo' && !client) {
       client = {
         id: 'demo',
         initials: 'JD',
         kipuId: '12345',
-        houseId: 'NEST',
-        admitDate: new Date(),
+        houseId: 'house_nest',
+        admissionDate: new Date().toISOString().split('T')[0],
         zip: '33101',
+        lgbtqAffirming: false,
       };
     }
 
@@ -350,43 +477,92 @@
       dom.clientContext.hidden = false;
       
       // Update builder
-      dom.builderClient.textContent = `${client.initials || 'XX'} - ${client.kipuId || '?'}`;
+      if (dom.builderClient) {
+        dom.builderClient.textContent = `${client.initials || 'XX'} - ${client.kipuId || '?'}`;
+      }
       
       // Update document model
       window.ccDocumentModel?.setClient(client.id, client.initials);
 
-      // Auto-check NEST alumni if applicable
-      if (client.houseId === 'NEST') {
+      // Auto-check NEST alumni if applicable (check both formats)
+      const isNest = client.houseId === 'NEST' || client.houseId === 'house_nest';
+      if (isNest) {
         const nestCheckbox = document.getElementById('alumniNest');
         if (nestCheckbox) nestCheckbox.checked = true;
       }
 
       // Update map center button
-      document.getElementById('mapCenterClient').disabled = !client.zip;
+      const mapCenterBtn = document.getElementById('mapCenterClient');
+      if (mapCenterBtn) mapCenterBtn.disabled = !client.zip;
 
       // Set home location if ZIP available
       if (client.zip) {
-        window.ccPreferences?.geocodeZip(client.zip).then(coords => {
+        try {
+          const coords = await window.ccPreferences?.geocodeZip(client.zip);
           if (coords) {
             window.ccPrograms?.setHomeLocation(coords.lat, coords.lng, client.zip);
+            // Update city/state display
+            const cityStateEl = document.getElementById('clientCityState');
+            if (cityStateEl && coords.city && coords.state) {
+              cityStateEl.textContent = `${coords.city}, ${coords.state}`;
+            }
             if (state.currentView === 'map') {
               window.ccMapController?.showHomeLocation(coords.lat, coords.lng);
             }
           }
-        });
+        } catch (e) {
+          console.warn('Failed to geocode ZIP:', e);
+        }
       }
     }
   }
 
   function updateClientContext(client) {
-    document.getElementById('clientInitials').textContent = client.initials || '--';
-    document.getElementById('clientKipuId').textContent = client.kipuId || '--';
-    document.getElementById('clientHouse').textContent = client.houseId || '--';
-    document.getElementById('clientAdmitDate').textContent = client.admitDate 
-      ? new Date(client.admitDate).toLocaleDateString() 
-      : '--';
-    document.getElementById('clientZip').value = client.zip || '';
-    document.getElementById('clientCityState').textContent = '--'; // Would need geocoding
+    // Profile tab
+    const initialsEl = document.getElementById('clientInitials');
+    if (initialsEl) initialsEl.textContent = client.initials || '--';
+    
+    const kipuIdEl = document.getElementById('clientKipuId');
+    if (kipuIdEl) kipuIdEl.textContent = client.kipuId || '--';
+    
+    const houseEl = document.getElementById('clientHouse');
+    if (houseEl) {
+      // Format house ID nicely (house_nest -> NEST)
+      const houseDisplay = client.houseId 
+        ? client.houseId.replace('house_', '').toUpperCase() 
+        : '--';
+      houseEl.textContent = houseDisplay;
+    }
+    
+    const admitDateEl = document.getElementById('clientAdmitDate');
+    if (admitDateEl) {
+      // Handle both admitDate and admissionDate field names
+      const dateValue = client.admitDate || client.admissionDate;
+      admitDateEl.textContent = dateValue 
+        ? new Date(dateValue).toLocaleDateString() 
+        : '--';
+    }
+    
+    // Location tab
+    const zipEl = document.getElementById('clientZip');
+    if (zipEl) zipEl.value = client.zip || '';
+    
+    const cityStateEl = document.getElementById('clientCityState');
+    if (cityStateEl) {
+      if (client.homeCity && client.homeState) {
+        cityStateEl.textContent = `${client.homeCity}, ${client.homeState}`;
+      } else {
+        cityStateEl.textContent = '--';
+      }
+    }
+    
+    // Identity tab
+    const lgbtqToggle = document.getElementById('clientLgbtqToggle');
+    if (lgbtqToggle) {
+      const isLgbtq = client.lgbtqAffirming === true;
+      lgbtqToggle.setAttribute('aria-checked', isLgbtq ? 'true' : 'false');
+      lgbtqToggle.classList.toggle('is-active', isLgbtq);
+    }
   }
 
   function switchClientTab(tabId) {
@@ -396,6 +572,53 @@
     document.querySelectorAll('.client-context__panel').forEach(p => {
       p.hidden = p.dataset.panel !== tabId;
     });
+  }
+  
+  async function handleClientZipChange(e) {
+    const zip = e.target.value?.trim();
+    if (!state.currentClient || !zip || zip.length !== 5) return;
+    
+    // Update client state
+    state.currentClient.zip = zip;
+    
+    // Geocode and update map
+    try {
+      const coords = await window.ccPreferences?.geocodeZip(zip);
+      if (coords) {
+        window.ccPrograms?.setHomeLocation(coords.lat, coords.lng, zip);
+        
+        // Update city/state display
+        const cityStateEl = document.getElementById('clientCityState');
+        if (cityStateEl && coords.city && coords.state) {
+          cityStateEl.textContent = `${coords.city}, ${coords.state}`;
+        }
+        
+        // Update map if visible
+        if (state.currentView === 'map') {
+          window.ccMapController?.showHomeLocation(coords.lat, coords.lng);
+        }
+        
+        // Enable map center button
+        const mapCenterBtn = document.getElementById('mapCenterClient');
+        if (mapCenterBtn) mapCenterBtn.disabled = false;
+      }
+    } catch (e) {
+      console.warn('Failed to geocode ZIP:', e);
+    }
+  }
+  
+  function handleLgbtqToggle(e) {
+    const toggle = e.currentTarget;
+    const isActive = toggle.getAttribute('aria-checked') === 'true';
+    const newState = !isActive;
+    
+    toggle.setAttribute('aria-checked', newState ? 'true' : 'false');
+    toggle.classList.toggle('is-active', newState);
+    
+    // Update client state
+    if (state.currentClient) {
+      state.currentClient.lgbtqAffirming = newState;
+    }
   }
 
   // ============================================================================
@@ -440,9 +663,13 @@
 
   function renderPrograms() {
     const programs = getFilteredPrograms();
+    console.log(`📊 renderPrograms: Found ${programs.length} programs for view "${state.currentView}"`);
+    
     const sorted = sortPrograms(programs);
 
-    dom.emptyState.hidden = sorted.length > 0;
+    if (dom.emptyState) {
+      dom.emptyState.hidden = sorted.length > 0;
+    }
 
     if (state.currentView === 'grid') {
       renderGrid(sorted);
@@ -476,46 +703,116 @@
     card.className = 'program-card';
     card.dataset.programId = program.id;
 
-    const locBadges = program.levelOfCare.map(loc => 
-      `<span class="loc-badge loc-badge--${loc.toLowerCase().replace(/\s+/g, '-')}">${loc}</span>`
-    ).join('');
+    const locColor = window.ccMapIcons?.colors[program.primaryLOC] || '#6E7BFF';
+    
+    // Primary LOC badge only in hero
+    const primaryBadge = `<span class="loc-badge loc-badge--${program.primaryLOC.toLowerCase().replace(/\s+/g, '-')}">${program.primaryLOC}</span>`;
+
+    // Format badge
+    const formatBadge = program.format[0] !== 'Onsite' 
+      ? `<span class="format-badge format-badge--${program.format[0].toLowerCase()}">${program.format[0]}</span>` 
+      : '';
 
     const distance = program.distanceMiles !== null 
-      ? ` • ${program.distanceMiles} mi` 
+      ? `<span class="program-card__distance">${program.distanceMiles} mi</span>` 
       : '';
 
-    const lgbtqIndicator = program.lgbtqAffirming 
-      ? '<span class="program-card__lgbtq" title="LGBTQ+ Affirming">🏳️‍🌈</span>' 
+    // Identity indicators
+    const identityBadges = [];
+    if (program.lgbtqAffirming) identityBadges.push('<span class="identity-badge" title="LGBTQ+ Affirming">🏳️‍🌈</span>');
+    if (program.transAffirming) identityBadges.push('<span class="identity-badge" title="Trans Affirming">🏳️‍⚧️</span>');
+    const identityHtml = identityBadges.length > 0 ? `<div class="program-card__identity">${identityBadges.join('')}</div>` : '';
+
+    // Clinical flags as small icons
+    const flagIcons = [];
+    if (program.treatsASD) flagIcons.push('<span title="Treats ASD">🧩</span>');
+    if (program.treatsSUD) flagIcons.push('<span title="Treats SUD">💊</span>');
+    if (program.highAcuityMH) flagIcons.push('<span title="High Acuity">⚡</span>');
+    const flagsHtml = flagIcons.length > 0 ? `<div class="program-card__flags">${flagIcons.join('')}</div>` : '';
+
+    // Age range
+    const ageRange = (program.ageMin || program.ageMax) 
+      ? `<span class="program-card__age">Ages ${program.ageMin || '?'}-${program.ageMax || '?'}</span>` 
       : '';
 
+    // Hero style - LOC colored gradient
     const heroStyle = program.heroImageUrl 
-      ? `background-image: url('${program.heroImageUrl}'); background-size: cover;`
-      : `background: linear-gradient(135deg, ${window.ccMapIcons?.colors[program.primaryLOC] || '#6E7BFF'} 0%, #1F2145 100%);`;
+      ? `background-image: linear-gradient(to bottom, transparent 40%, rgba(15,16,32,0.9)), url('${program.heroImageUrl}'); background-size: cover; background-position: center;`
+      : `background: linear-gradient(135deg, ${locColor} 0%, ${locColor}99 50%, #1a1b2e 100%);`;
+
+    // Smart tags - show modalities or diagnoses, color coded
+    const smartTags = [];
+    if (program.modalities && program.modalities.length > 0) {
+      program.modalities.slice(0, 2).forEach(m => smartTags.push({ text: m, type: 'modality' }));
+    }
+    if (program.diagnosesServed && program.diagnosesServed.length > 0 && smartTags.length < 3) {
+      program.diagnosesServed.slice(0, 3 - smartTags.length).forEach(d => smartTags.push({ text: d, type: 'dx' }));
+    }
+    if (smartTags.length === 0 && program.tags) {
+      program.tags.slice(0, 3).forEach(t => smartTags.push({ text: t, type: 'tag' }));
+    }
+    const tagsHtml = smartTags.map(t => `<span class="smart-tag smart-tag--${t.type}">${t.text}</span>`).join('');
+
+    // Check if in compare list
+    const isComparing = state.compareList.includes(program.id);
 
     card.innerHTML = `
       <div class="program-card__hero" style="${heroStyle}">
-        <div class="program-card__badges">${locBadges}</div>
-        ${lgbtqIndicator}
+        <div class="program-card__hero-top">
+          ${primaryBadge}
+          ${formatBadge}
+        </div>
+        ${identityHtml}
+        <div class="program-card__hero-bottom">
+          <h3 class="program-card__name">${program.name}</h3>
+          <div class="program-card__meta">
+            <span class="program-card__location">📍 ${program.city}, ${program.state}</span>
+            ${distance}
+            ${ageRange}
+          </div>
+        </div>
       </div>
       <div class="program-card__content">
-        <h3 class="program-card__name">${program.name}</h3>
-        <p class="program-card__location">${program.city}, ${program.state}${distance}</p>
         <p class="program-card__summary">${program.summary || 'No description available.'}</p>
         <div class="program-card__tags">
-          ${(program.tags || []).slice(0, 3).map(t => `<span class="tag">${t}</span>`).join('')}
+          ${tagsHtml}
+          ${flagsHtml}
         </div>
       </div>
       <div class="program-card__actions">
-        <button class="btn btn-add btn--sm" data-action="add">Add to Plan</button>
-        <button class="btn btn--icon btn--ghost" data-action="compare" title="Compare">⚖️</button>
-        <button class="btn btn--icon btn--ghost" data-action="details" title="Details">→</button>
+        <button class="card-btn card-btn--primary" data-action="add">
+          <span>+ Add</span>
+        </button>
+        <button class="card-btn card-btn--icon ${isComparing ? 'card-btn--active' : ''}" data-action="compare" title="Compare">
+          ⚖️
+        </button>
+        <button class="card-btn card-btn--icon card-btn--arrow" data-action="details" title="View Details">
+          →
+        </button>
       </div>
     `;
 
+    // Click on card (not buttons) opens profile
+    card.addEventListener('click', (e) => {
+      if (!e.target.closest('.card-btn')) {
+        openProfile(program);
+      }
+    });
+
     // Event handlers
-    card.querySelector('[data-action="details"]').addEventListener('click', () => openProfile(program));
-    card.querySelector('[data-action="add"]').addEventListener('click', () => quickAdd(program));
-    card.querySelector('[data-action="compare"]').addEventListener('click', () => toggleCompare(program));
+    card.querySelector('[data-action="details"]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      openProfile(program);
+    });
+    card.querySelector('[data-action="add"]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      quickAdd(program);
+    });
+    card.querySelector('[data-action="compare"]').addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleCompare(program);
+      e.target.closest('.card-btn').classList.toggle('card-btn--active');
+    });
 
     return card;
   }
@@ -527,44 +824,90 @@
 
     const children = window.ccPrograms?.getChildren(program.id) || [];
     const childLocs = new Set();
-    children.forEach(c => c.levelOfCare.forEach(loc => childLocs.add(loc)));
+    const childStates = new Set();
+    children.forEach(c => {
+      c.levelOfCare.forEach(loc => childLocs.add(loc));
+      if (c.state) childStates.add(c.state);
+    });
 
-    const locBadges = [...childLocs].map(loc => 
+    const locBadges = [...childLocs].slice(0, 4).map(loc => 
       `<span class="loc-badge loc-badge--${loc.toLowerCase().replace(/\s+/g, '-')}">${loc}</span>`
     ).join('');
 
-    const childList = children.slice(0, 5).map(c => 
-      `<li data-program-id="${c.id}">${c.city}, ${c.state} - ${c.primaryLOC}</li>`
+    const statesList = [...childStates].slice(0, 5).join(', ');
+    const moreStates = childStates.size > 5 ? ` +${childStates.size - 5}` : '';
+
+    // Group children by state
+    const childrenByState = {};
+    children.forEach(c => {
+      if (!childrenByState[c.state]) childrenByState[c.state] = [];
+      childrenByState[c.state].push(c);
+    });
+
+    const childList = Object.entries(childrenByState).slice(0, 4).map(([state, progs]) => 
+      `<div class="umbrella-location" data-state="${state}">
+        <span class="umbrella-location__state">${state}</span>
+        <span class="umbrella-location__count">${progs.length} location${progs.length > 1 ? 's' : ''}</span>
+      </div>`
     ).join('');
 
     card.innerHTML = `
-      <div class="umbrella-card__header">
-        ${program.logoUrl ? `<img src="${program.logoUrl}" class="umbrella-card__logo" alt="">` : ''}
-        <div class="umbrella-card__info">
-          <h3>${program.name}</h3>
-          <span class="umbrella-card__count">${children.length} locations</span>
+      <div class="umbrella-card__hero">
+        <div class="umbrella-card__brand">
+          ${program.logoUrl 
+            ? `<img src="${program.logoUrl}" class="umbrella-card__logo" alt="" onerror="this.style.display='none'">` 
+            : '<div class="umbrella-card__icon">🏢</div>'}
+          <div class="umbrella-card__title">
+            <span class="umbrella-card__label">NETWORK</span>
+            <h3>${program.name}</h3>
+          </div>
+        </div>
+        <div class="umbrella-card__stats">
+          <div class="umbrella-stat">
+            <span class="umbrella-stat__value">${children.length}</span>
+            <span class="umbrella-stat__label">Locations</span>
+          </div>
+          <div class="umbrella-stat">
+            <span class="umbrella-stat__value">${childLocs.size}</span>
+            <span class="umbrella-stat__label">LOC Types</span>
+          </div>
         </div>
       </div>
-      <div class="umbrella-card__badges">${locBadges}</div>
-      <p class="umbrella-card__summary">${program.summary || ''}</p>
-      <details class="umbrella-card__children">
-        <summary>View ${children.length} locations</summary>
-        <ul>${childList}${children.length > 5 ? `<li>...and ${children.length - 5} more</li>` : ''}</ul>
-      </details>
+      <div class="umbrella-card__content">
+        <div class="umbrella-card__badges">${locBadges}</div>
+        <p class="umbrella-card__summary">${program.summary || 'Network of treatment programs.'}</p>
+        <div class="umbrella-card__coverage">
+          <span class="umbrella-coverage__label">Coverage:</span>
+          <span class="umbrella-coverage__states">${statesList}${moreStates}</span>
+        </div>
+        <div class="umbrella-card__locations">
+          ${childList}
+        </div>
+      </div>
       <div class="umbrella-card__actions">
-        <button class="btn btn--secondary btn--sm" data-action="details">View Network</button>
+        <button class="card-btn card-btn--primary" data-action="details">
+          <span>Explore Network →</span>
+        </button>
       </div>
     `;
 
-    // Child click handlers
-    card.querySelectorAll('.umbrella-card__children li[data-program-id]').forEach(li => {
-      li.addEventListener('click', () => {
-        const child = window.ccPrograms?.byId(li.dataset.programId);
-        if (child) openProfile(child);
+    // Click handlers
+    card.querySelector('[data-action="details"]').addEventListener('click', () => openProfile(program));
+    
+    // Location click - expand to show children
+    card.querySelectorAll('.umbrella-location').forEach(loc => {
+      loc.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const state = loc.dataset.state;
+        const stateChildren = childrenByState[state];
+        if (stateChildren && stateChildren.length === 1) {
+          openProfile(stateChildren[0]);
+        } else {
+          // Filter to this state's children
+          openProfile(program);
+        }
       });
     });
-
-    card.querySelector('[data-action="details"]').addEventListener('click', () => openProfile(program));
 
     return card;
   }
@@ -774,7 +1117,30 @@
   // ============================================================================
 
   function getFilteredPrograms() {
-    return window.ccPrograms?.filter(state.filters) || [];
+    // Safety check - if ccPrograms not ready, return empty
+    if (!window.ccPrograms?.isReady) {
+      console.warn('⚠️ getFilteredPrograms called but ccPrograms not ready');
+      return [];
+    }
+
+    // If no filters applied, return all programs
+    const hasFilters = Object.keys(state.filters).some(key => {
+      const val = state.filters[key];
+      if (Array.isArray(val)) return val.length > 0;
+      if (typeof val === 'object') return Object.keys(val).length > 0;
+      return val !== undefined && val !== null && val !== '';
+    });
+
+    if (!hasFilters) {
+      // Return all programs (excluding umbrella children for cleaner display)
+      const programs = window.ccPrograms.getDisplayList(false);
+      console.log(`📋 getFilteredPrograms (no filters): returning ${programs.length} programs`);
+      return programs;
+    }
+
+    const filtered = window.ccPrograms.filter(state.filters);
+    console.log(`📋 getFilteredPrograms (with filters): returning ${filtered.length} programs`);
+    return filtered;
   }
 
   function handleFilterChange() {

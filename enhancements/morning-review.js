@@ -54,19 +54,42 @@
     }
     
     /**
-     * Check if we should auto-show morning review
+     * Check if we should auto-show morning or afternoon review
+     * Morning: 8:00 AM - first login of the day after 8am
+     * Afternoon: 3:30 PM - day review, once per day
      */
     function checkAutoShowMorningReview() {
-        const hour = new Date().getHours();
-        const lastShown = localStorage.getItem('lastMorningReviewDate');
-        const today = new Date().toDateString();
+        const now = new Date();
+        const hour = now.getHours();
+        const minutes = now.getMinutes();
+        const today = now.toDateString();
         
-        // Show automatically once per day in the morning (6am - 10am)
-        if (hour >= 6 && hour <= 10 && lastShown !== today) {
-            // Wait for dashboard to load
+        const lastMorningShown = localStorage.getItem('lastMorningReviewDate');
+        const lastAfternoonShown = localStorage.getItem('lastAfternoonReviewDate');
+        
+        // Morning review: Show once per day, starting at 8am (until noon)
+        // Only shows on first login after 8am if not already shown today
+        if (hour >= 8 && hour < 12 && lastMorningShown !== today) {
+            // Set localStorage IMMEDIATELY to prevent multiple triggers on refresh
+            localStorage.setItem('lastMorningReviewDate', today);
+            // Wait for dashboard to load before showing
             setTimeout(() => {
-                window.morningReview.renderMorningReview();
-                localStorage.setItem('lastMorningReviewDate', today);
+                if (window.morningReview) {
+                    window.morningReview.renderMorningReview();
+                }
+            }, 3000);
+        }
+        
+        // Afternoon/Day review: Show once per day at 3:30 PM (15:30) or after
+        // Only shows on first login after 3:30pm if not already shown today
+        if (hour >= 15 && (hour > 15 || minutes >= 30) && lastAfternoonShown !== today) {
+            // Set localStorage IMMEDIATELY to prevent multiple triggers on refresh
+            localStorage.setItem('lastAfternoonReviewDate', today);
+            // Wait for dashboard to load before showing
+            setTimeout(() => {
+                if (window.morningReview) {
+                    window.morningReview.renderMorningReview();
+                }
             }, 3000);
         }
     }

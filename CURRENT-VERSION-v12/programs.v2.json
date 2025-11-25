@@ -2235,25 +2235,30 @@
     "lgbtqAffirming": null,
     "transAffirming": null,
     "genderInclusiveHousing": null,
-    "treatsASD": null,
-    "treatsSUD": null,
+    "treatsASD": false,
+    "treatsSUD": false,
     "highAcuityMH": false,
     "diagnosesServed": [
+      "Autism Spectrum",
       "Intellectual Disabilities",
-      "Developmental Disabilities"
+      "Developmental Disabilities",
+      "Learning Disabilities",
+      "Physical Disabilities"
     ],
     "modalities": [
-      "Social Skills Training",
       "Life Skills Training",
+      "Social Skills Groups",
       "Vocational Training",
-      "Peer Support"
+      "Recreational Programming",
+      "Mentorship",
+      "Academic Support"
     ],
     "exclusions": null,
     "academics": null,
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "(754) 800-1770",
-      "email": "Office@friendshipfl.org",
+      "phone": null,
+      "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
@@ -2596,24 +2601,30 @@
     "lgbtqAffirming": null,
     "transAffirming": null,
     "genderInclusiveHousing": null,
-    "treatsASD": null,
-    "treatsSUD": null,
+    "treatsASD": false,
+    "treatsSUD": false,
     "highAcuityMH": false,
     "diagnosesServed": [
+      "Autism Spectrum",
       "Intellectual Disabilities",
-      "Developmental Disabilities"
+      "Developmental Disabilities",
+      "Learning Disabilities",
+      "Physical Disabilities"
     ],
     "modalities": [
-      "Social Skills Training",
       "Life Skills Training",
-      "Peer Support"
+      "Social Skills Groups",
+      "Vocational Training",
+      "Recreational Programming",
+      "Mentorship",
+      "Academic Support"
     ],
     "exclusions": null,
     "academics": null,
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "(754) 800-1770",
-      "email": "Office@friendshipfl.org",
+      "phone": "(954) 558-7269",
+      "email": "dassy@sdfriendshipcircle.com",
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
@@ -2953,17 +2964,30 @@
     "lgbtqAffirming": null,
     "transAffirming": null,
     "genderInclusiveHousing": null,
-    "treatsASD": null,
-    "treatsSUD": null,
-    "highAcuityMH": null,
-    "diagnosesServed": null,
-    "modalities": null,
+    "treatsASD": false,
+    "treatsSUD": false,
+    "highAcuityMH": false,
+    "diagnosesServed": [
+      "Autism Spectrum",
+      "Intellectual Disabilities",
+      "Developmental Disabilities",
+      "Learning Disabilities",
+      "Physical Disabilities"
+    ],
+    "modalities": [
+      "Life Skills Training",
+      "Social Skills Groups",
+      "Vocational Training",
+      "Recreational Programming",
+      "Mentorship",
+      "Academic Support"
+    ],
     "exclusions": null,
     "academics": null,
     "insuranceAccepted": null,
     "admissions": {
-      "phone": null,
-      "email": null,
+      "phone": "(954) 558-7269",
+      "email": "dassy@sdfriendshipcircle.com",
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
@@ -3303,17 +3327,30 @@
     "lgbtqAffirming": null,
     "transAffirming": null,
     "genderInclusiveHousing": null,
-    "treatsASD": null,
-    "treatsSUD": null,
-    "highAcuityMH": null,
-    "diagnosesServed": null,
-    "modalities": null,
+    "treatsASD": false,
+    "treatsSUD": false,
+    "highAcuityMH": false,
+    "diagnosesServed": [
+      "Autism Spectrum",
+      "Intellectual Disabilities",
+      "Developmental Disabilities",
+      "Learning Disabilities",
+      "Physical Disabilities"
+    ],
+    "modalities": [
+      "Life Skills Training",
+      "Social Skills Groups",
+      "Vocational Training",
+      "Recreational Programming",
+      "Mentorship",
+      "Academic Support"
+    ],
     "exclusions": null,
     "academics": null,
     "insuranceAccepted": null,
     "admissions": {
-      "phone": null,
-      "email": null,
+      "phone": "(954) 970-9551",
+      "email": "floridafriendshipcircle@gmail.com",
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
@@ -5668,28 +5705,17 @@
     "treatsSUD": true,
     "highAcuityMH": true,
     "diagnosesServed": [
-      "Substance Use Disorders",
       "Depression",
-      "Anxiety Disorders",
-      "Mood Disorders",
-      "Trauma/PTSD",
-      "Suicidal Behaviors",
-      "Co-occurring Disorders"
+      "Anxiety",
+      "Bipolar",
+      "Eating Disorders",
+      "Substance Use"
     ],
     "modalities": [
-      "DBT",
-      "CBT",
-      "Motivational Interviewing",
-      "12-Step",
-      "Individual Therapy",
-      "Group Therapy",
       "Family Therapy",
-      "MAT",
-      "TMS",
-      "Art Therapy",
-      "Music Therapy",
-      "Horticulture Therapy",
-      "Psychiatric Services"
+      "Psychiatric Services",
+      "Group Therapy",
+      "Individual Therapy"
     ],
     "exclusions": null,
     "academics": null,
@@ -5698,18 +5724,17 @@
       "Blue Cross Blue Shield",
       "Cigna",
       "Optum",
-      "Medicaid (IL)",
-      "Most major medical insurance"
+      "Most major insurance"
     ],
     "admissions": {
-      "phone": "866-784-3021",
+      "phone": "(866) 784-3021",
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.rosecrance.org/wp-content/themes/rosecrance/assets/img/logo.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -6040,30 +6065,22 @@
     "genderInclusiveHousing": null,
     "treatsASD": null,
     "treatsSUD": true,
-    "highAcuityMH": true,
+    "highAcuityMH": false,
     "diagnosesServed": [
-      "Substance Use Disorders",
       "Depression",
-      "Anxiety Disorders",
-      "Mood Disorders",
-      "Trauma/PTSD",
-      "Suicidal Behaviors",
-      "Co-occurring Disorders"
+      "Anxiety",
+      "Bipolar",
+      "Substance Use"
     ],
     "modalities": [
-      "DBT",
-      "CBT",
-      "Motivational Interviewing",
-      "12-Step",
       "Individual Therapy",
       "Group Therapy",
       "Family Therapy",
-      "MAT",
-      "TMS",
-      "Art Therapy",
-      "Music Therapy",
-      "Horticulture Therapy",
-      "Psychiatric Services"
+      "Medication Management",
+      "Psychiatric Services",
+      "IOP",
+      "Medication-Assisted Treatment",
+      "Interventions"
     ],
     "exclusions": null,
     "academics": null,
@@ -6072,18 +6089,17 @@
       "Blue Cross Blue Shield",
       "Cigna",
       "Optum",
-      "Medicaid (IL)",
-      "Most major medical insurance"
+      "Most major insurance"
     ],
     "admissions": {
-      "phone": "866-784-3021",
+      "phone": "(872) 328-7237",
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.rosecrance.org/wp-content/themes/rosecrance/assets/img/logo.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -6413,51 +6429,22 @@
     "transAffirming": null,
     "genderInclusiveHousing": null,
     "treatsASD": null,
-    "treatsSUD": true,
-    "highAcuityMH": true,
-    "diagnosesServed": [
-      "Substance Use Disorders",
-      "Depression",
-      "Anxiety Disorders",
-      "Mood Disorders",
-      "Trauma/PTSD",
-      "Suicidal Behaviors",
-      "Co-occurring Disorders"
-    ],
-    "modalities": [
-      "DBT",
-      "CBT",
-      "Motivational Interviewing",
-      "12-Step",
-      "Individual Therapy",
-      "Group Therapy",
-      "Family Therapy",
-      "MAT",
-      "TMS",
-      "Art Therapy",
-      "Music Therapy",
-      "Horticulture Therapy",
-      "Psychiatric Services"
-    ],
+    "treatsSUD": null,
+    "highAcuityMH": null,
+    "diagnosesServed": null,
+    "modalities": null,
     "exclusions": null,
     "academics": null,
-    "insuranceAccepted": [
-      "Aetna",
-      "Blue Cross Blue Shield",
-      "Cigna",
-      "Optum",
-      "Medicaid (IL)",
-      "Most major medical insurance"
-    ],
+    "insuranceAccepted": null,
     "admissions": {
-      "phone": "866-784-3021",
+      "phone": null,
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.rosecrance.org/wp-content/themes/rosecrance/assets/img/logo.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -6787,51 +6774,22 @@
     "transAffirming": null,
     "genderInclusiveHousing": null,
     "treatsASD": null,
-    "treatsSUD": true,
-    "highAcuityMH": true,
-    "diagnosesServed": [
-      "Substance Use Disorders",
-      "Depression",
-      "Anxiety Disorders",
-      "Mood Disorders",
-      "Trauma/PTSD",
-      "Suicidal Behaviors",
-      "Co-occurring Disorders"
-    ],
-    "modalities": [
-      "DBT",
-      "CBT",
-      "Motivational Interviewing",
-      "12-Step",
-      "Individual Therapy",
-      "Group Therapy",
-      "Family Therapy",
-      "MAT",
-      "TMS",
-      "Art Therapy",
-      "Music Therapy",
-      "Horticulture Therapy",
-      "Psychiatric Services"
-    ],
+    "treatsSUD": null,
+    "highAcuityMH": null,
+    "diagnosesServed": null,
+    "modalities": null,
     "exclusions": null,
     "academics": null,
-    "insuranceAccepted": [
-      "Aetna",
-      "Blue Cross Blue Shield",
-      "Cigna",
-      "Optum",
-      "Medicaid (IL)",
-      "Most major medical insurance"
-    ],
+    "insuranceAccepted": null,
     "admissions": {
-      "phone": "866-784-3021",
+      "phone": null,
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.rosecrance.org/wp-content/themes/rosecrance/assets/img/logo.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -7161,51 +7119,22 @@
     "transAffirming": null,
     "genderInclusiveHousing": null,
     "treatsASD": null,
-    "treatsSUD": true,
-    "highAcuityMH": true,
-    "diagnosesServed": [
-      "Substance Use Disorders",
-      "Depression",
-      "Anxiety Disorders",
-      "Mood Disorders",
-      "Trauma/PTSD",
-      "Suicidal Behaviors",
-      "Co-occurring Disorders"
-    ],
-    "modalities": [
-      "DBT",
-      "CBT",
-      "Motivational Interviewing",
-      "12-Step",
-      "Individual Therapy",
-      "Group Therapy",
-      "Family Therapy",
-      "MAT",
-      "TMS",
-      "Art Therapy",
-      "Music Therapy",
-      "Horticulture Therapy",
-      "Psychiatric Services"
-    ],
+    "treatsSUD": null,
+    "highAcuityMH": null,
+    "diagnosesServed": null,
+    "modalities": null,
     "exclusions": null,
     "academics": null,
-    "insuranceAccepted": [
-      "Aetna",
-      "Blue Cross Blue Shield",
-      "Cigna",
-      "Optum",
-      "Medicaid (IL)",
-      "Most major medical insurance"
-    ],
+    "insuranceAccepted": null,
     "admissions": {
-      "phone": "866-784-3021",
+      "phone": null,
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.rosecrance.org/wp-content/themes/rosecrance/assets/img/logo.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -7634,34 +7563,23 @@
     "genderInclusiveHousing": null,
     "treatsASD": true,
     "treatsSUD": false,
-    "highAcuityMH": true,
+    "highAcuityMH": false,
     "diagnosesServed": [
-      "Autism Spectrum Disorder",
-      "Emotional Disabilities",
+      "Autism Spectrum",
       "Intellectual Disabilities",
-      "Multiple Disabilities",
-      "Specific Learning Disabilities",
-      "Speech or Language Impairments",
-      "Behavioral Disabilities",
-      "Developmental Delay",
-      "Other Health Impairments"
+      "Developmental Disabilities",
+      "ODD/Conduct",
+      "ADHD",
+      "Learning Disabilities"
     ],
     "modalities": [
       "Special Education",
-      "Therapeutic Services",
+      "Life Skills Training",
       "Vocational Training",
-      "Daily Living Skills",
-      "Speech Therapy",
-      "Occupational Therapy"
+      "Behavioral Support"
     ],
     "exclusions": null,
-    "academics": {
-      "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
-      "specialEducation": true,
-      "gradeLevels": "K-12"
-    },
+    "academics": null,
     "insuranceAccepted": null,
     "admissions": {
       "phone": "410-938-3000",
@@ -7671,7 +7589,7 @@
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.sheppardpratt.org/wp-content/themes/sheppardpratt/assets/img/logo-sheppard-pratt.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -8147,44 +8065,40 @@
     "genderInclusiveHousing": null,
     "treatsASD": true,
     "treatsSUD": false,
-    "highAcuityMH": true,
+    "highAcuityMH": false,
     "diagnosesServed": [
-      "Autism Spectrum Disorder",
-      "Emotional Disabilities",
+      "Autism Spectrum",
       "Intellectual Disabilities",
-      "Multiple Disabilities",
-      "Specific Learning Disabilities",
-      "Speech or Language Impairments",
-      "Behavioral Disabilities",
-      "Developmental Delay",
-      "Other Health Impairments"
+      "Developmental Disabilities",
+      "Learning Disabilities",
+      "ODD/Conduct",
+      "ADHD",
+      "Speech/Language Disorders"
     ],
     "modalities": [
       "Special Education",
-      "Therapeutic Services",
+      "Life Skills Training",
       "Vocational Training",
-      "Daily Living Skills",
-      "Speech Therapy",
-      "Occupational Therapy"
+      "Behavioral Support"
     ],
     "exclusions": null,
     "academics": {
       "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
+      "creditsTransferable": null,
+      "diplomaGranting": null,
       "specialEducation": true,
       "gradeLevels": "K-12"
     },
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "410-938-3000",
+      "phone": "410-861-5540",
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.sheppardpratt.org/wp-content/themes/sheppardpratt/assets/img/logo-sheppard-pratt.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -8660,44 +8574,38 @@
     "genderInclusiveHousing": null,
     "treatsASD": true,
     "treatsSUD": false,
-    "highAcuityMH": true,
+    "highAcuityMH": false,
     "diagnosesServed": [
-      "Autism Spectrum Disorder",
-      "Emotional Disabilities",
+      "Autism Spectrum",
       "Intellectual Disabilities",
-      "Multiple Disabilities",
-      "Specific Learning Disabilities",
-      "Speech or Language Impairments",
-      "Behavioral Disabilities",
-      "Developmental Delay",
-      "Other Health Impairments"
+      "Developmental Disabilities",
+      "ODD/Conduct",
+      "ADHD"
     ],
     "modalities": [
       "Special Education",
-      "Therapeutic Services",
+      "Life Skills Training",
       "Vocational Training",
-      "Daily Living Skills",
-      "Speech Therapy",
-      "Occupational Therapy"
+      "Behavioral Support"
     ],
     "exclusions": null,
     "academics": {
       "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
+      "creditsTransferable": null,
+      "diplomaGranting": null,
       "specialEducation": true,
       "gradeLevels": "K-12"
     },
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "410-938-3000",
+      "phone": "410-527-0001",
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.sheppardpratt.org/wp-content/themes/sheppardpratt/assets/img/logo-sheppard-pratt.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -9173,44 +9081,38 @@
     "genderInclusiveHousing": null,
     "treatsASD": true,
     "treatsSUD": false,
-    "highAcuityMH": true,
+    "highAcuityMH": false,
     "diagnosesServed": [
-      "Autism Spectrum Disorder",
-      "Emotional Disabilities",
+      "Autism Spectrum",
       "Intellectual Disabilities",
-      "Multiple Disabilities",
-      "Specific Learning Disabilities",
-      "Speech or Language Impairments",
-      "Behavioral Disabilities",
-      "Developmental Delay",
-      "Other Health Impairments"
+      "Developmental Disabilities",
+      "Learning Disabilities",
+      "ADHD"
     ],
     "modalities": [
       "Special Education",
-      "Therapeutic Services",
+      "Life Skills Training",
       "Vocational Training",
-      "Daily Living Skills",
-      "Speech Therapy",
-      "Occupational Therapy"
+      "Behavioral Support"
     ],
     "exclusions": null,
     "academics": {
       "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
+      "creditsTransferable": null,
+      "diplomaGranting": null,
       "specialEducation": true,
-      "gradeLevels": "K-12"
+      "gradeLevels": "6-12"
     },
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "410-938-3000",
+      "phone": "301-258-4534",
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.sheppardpratt.org/wp-content/themes/sheppardpratt/assets/img/logo-sheppard-pratt.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -9686,44 +9588,38 @@
     "genderInclusiveHousing": null,
     "treatsASD": true,
     "treatsSUD": false,
-    "highAcuityMH": true,
+    "highAcuityMH": false,
     "diagnosesServed": [
-      "Autism Spectrum Disorder",
-      "Emotional Disabilities",
+      "Autism Spectrum",
       "Intellectual Disabilities",
-      "Multiple Disabilities",
-      "Specific Learning Disabilities",
-      "Speech or Language Impairments",
-      "Behavioral Disabilities",
-      "Developmental Delay",
-      "Other Health Impairments"
+      "Developmental Disabilities",
+      "ODD/Conduct",
+      "ADHD"
     ],
     "modalities": [
       "Special Education",
-      "Therapeutic Services",
+      "Life Skills Training",
       "Vocational Training",
-      "Daily Living Skills",
-      "Speech Therapy",
-      "Occupational Therapy"
+      "Behavioral Support"
     ],
     "exclusions": null,
     "academics": {
       "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
+      "creditsTransferable": null,
+      "diplomaGranting": null,
       "specialEducation": true,
       "gradeLevels": "K-12"
     },
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "410-938-3000",
+      "phone": "301-777-2520",
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.sheppardpratt.org/wp-content/themes/sheppardpratt/assets/img/logo-sheppard-pratt.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -10197,46 +10093,23 @@
     "lgbtqAffirming": null,
     "transAffirming": null,
     "genderInclusiveHousing": null,
-    "treatsASD": true,
-    "treatsSUD": false,
-    "highAcuityMH": true,
-    "diagnosesServed": [
-      "Autism Spectrum Disorder",
-      "Emotional Disabilities",
-      "Intellectual Disabilities",
-      "Multiple Disabilities",
-      "Specific Learning Disabilities",
-      "Speech or Language Impairments",
-      "Behavioral Disabilities",
-      "Developmental Delay",
-      "Other Health Impairments"
-    ],
-    "modalities": [
-      "Special Education",
-      "Therapeutic Services",
-      "Vocational Training",
-      "Daily Living Skills",
-      "Speech Therapy",
-      "Occupational Therapy"
-    ],
+    "treatsASD": null,
+    "treatsSUD": null,
+    "highAcuityMH": null,
+    "diagnosesServed": null,
+    "modalities": null,
     "exclusions": null,
-    "academics": {
-      "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
-      "specialEducation": true,
-      "gradeLevels": "K-12"
-    },
+    "academics": null,
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "410-938-3000",
+      "phone": null,
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.sheppardpratt.org/wp-content/themes/sheppardpratt/assets/img/logo-sheppard-pratt.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -10712,44 +10585,36 @@
     "genderInclusiveHousing": null,
     "treatsASD": true,
     "treatsSUD": false,
-    "highAcuityMH": true,
+    "highAcuityMH": false,
     "diagnosesServed": [
-      "Autism Spectrum Disorder",
-      "Emotional Disabilities",
+      "Autism Spectrum",
       "Intellectual Disabilities",
-      "Multiple Disabilities",
-      "Specific Learning Disabilities",
-      "Speech or Language Impairments",
-      "Behavioral Disabilities",
-      "Developmental Delay",
-      "Other Health Impairments"
+      "Developmental Disabilities"
     ],
     "modalities": [
       "Special Education",
-      "Therapeutic Services",
+      "Life Skills Training",
       "Vocational Training",
-      "Daily Living Skills",
-      "Speech Therapy",
-      "Occupational Therapy"
+      "Behavioral Support"
     ],
     "exclusions": null,
     "academics": {
       "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
+      "creditsTransferable": null,
+      "diplomaGranting": null,
       "specialEducation": true,
       "gradeLevels": "K-12"
     },
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "410-938-3000",
-      "email": null,
-      "contactName": null,
+      "phone": "240-667-1423",
+      "email": "SPLanhamSchool@sheppardpratt.org",
+      "contactName": "Donna Smikle",
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.sheppardpratt.org/wp-content/themes/sheppardpratt/assets/img/logo-sheppard-pratt.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -11225,44 +11090,38 @@
     "genderInclusiveHousing": null,
     "treatsASD": true,
     "treatsSUD": false,
-    "highAcuityMH": true,
+    "highAcuityMH": false,
     "diagnosesServed": [
-      "Autism Spectrum Disorder",
-      "Emotional Disabilities",
-      "Intellectual Disabilities",
-      "Multiple Disabilities",
-      "Specific Learning Disabilities",
-      "Speech or Language Impairments",
-      "Behavioral Disabilities",
-      "Developmental Delay",
-      "Other Health Impairments"
+      "Autism Spectrum",
+      "Developmental Disabilities",
+      "ADHD",
+      "Anxiety",
+      "Depression"
     ],
     "modalities": [
       "Special Education",
-      "Therapeutic Services",
+      "Life Skills Training",
       "Vocational Training",
-      "Daily Living Skills",
-      "Speech Therapy",
-      "Occupational Therapy"
+      "Behavioral Support"
     ],
     "exclusions": null,
     "academics": {
       "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
+      "creditsTransferable": null,
+      "diplomaGranting": null,
       "specialEducation": true,
-      "gradeLevels": "K-12"
+      "gradeLevels": "1-5"
     },
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "410-938-3000",
-      "email": null,
+      "phone": "443-462-2826",
+      "email": "SPAnneArundelSchools@sheppardpratt.org",
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.sheppardpratt.org/wp-content/themes/sheppardpratt/assets/img/logo-sheppard-pratt.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -11738,44 +11597,38 @@
     "genderInclusiveHousing": null,
     "treatsASD": true,
     "treatsSUD": false,
-    "highAcuityMH": true,
+    "highAcuityMH": false,
     "diagnosesServed": [
-      "Autism Spectrum Disorder",
-      "Emotional Disabilities",
-      "Intellectual Disabilities",
-      "Multiple Disabilities",
-      "Specific Learning Disabilities",
-      "Speech or Language Impairments",
-      "Behavioral Disabilities",
-      "Developmental Delay",
-      "Other Health Impairments"
+      "Autism Spectrum",
+      "Bipolar",
+      "Depression",
+      "Mood Disorders",
+      "Developmental Disabilities"
     ],
     "modalities": [
       "Special Education",
-      "Therapeutic Services",
+      "Life Skills Training",
       "Vocational Training",
-      "Daily Living Skills",
-      "Speech Therapy",
-      "Occupational Therapy"
+      "Behavioral Support"
     ],
     "exclusions": null,
     "academics": {
       "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
+      "creditsTransferable": null,
+      "diplomaGranting": null,
       "specialEducation": true,
       "gradeLevels": "K-12"
     },
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "410-938-3000",
-      "email": null,
-      "contactName": null,
+      "phone": "301-933-3451",
+      "email": "SPRockvilleSchool@sheppardpratt.org",
+      "contactName": "Mark Hajjar",
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.sheppardpratt.org/wp-content/themes/sheppardpratt/assets/img/logo-sheppard-pratt.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -12048,63 +11901,36 @@
         "lastMigrated": "2025-11-03T01:34:48.260Z"
       }
     },
-    "lgbtqAffirming": true,
-    "transAffirming": true,
+    "lgbtqAffirming": null,
+    "transAffirming": null,
     "genderInclusiveHousing": null,
     "treatsASD": null,
     "treatsSUD": true,
-    "highAcuityMH": true,
+    "highAcuityMH": null,
     "diagnosesServed": [
-      "Depression",
-      "Anxiety Disorders",
-      "Bipolar Disorder",
+      "Substance Use",
       "Borderline Personality Disorder",
       "OCD",
+      "Anxiety",
+      "Depression",
       "Trauma/PTSD",
-      "Eating Disorders",
-      "Addiction",
+      "Bipolar",
       "Schizophrenia",
-      "Self-Harm",
-      "Suicidal Ideation"
+      "Eating Disorders"
     ],
-    "modalities": [
-      "DBT",
-      "CBT",
-      "Individual Therapy",
-      "Group Therapy",
-      "Family Therapy",
-      "Psychiatric Services",
-      "Medication Management",
-      "Exposure Response Prevention (ERP)",
-      "Residential Treatment"
-    ],
+    "modalities": null,
     "exclusions": null,
-    "academics": {
-      "accreditedSchool": true,
-      "creditsTransferable": null,
-      "diplomaGranting": false,
-      "specialEducation": true,
-      "gradeLevels": null
-    },
-    "insuranceAccepted": [
-      "Blue Cross Blue Shield",
-      "Aetna",
-      "Cigna",
-      "United Healthcare",
-      "Harvard Pilgrim",
-      "Tufts",
-      "Medicare",
-      "Out-of-network"
-    ],
+    "academics": null,
+    "insuranceAccepted": null,
     "admissions": {
-      "phone": "617-855-3141",
+      "phone": null,
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.mcleanhospital.org/themes/mclean/logo.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -12448,63 +12274,28 @@
         "lastMigrated": "2025-11-03T01:34:48.260Z"
       }
     },
-    "lgbtqAffirming": true,
-    "transAffirming": true,
+    "lgbtqAffirming": null,
+    "transAffirming": null,
     "genderInclusiveHousing": null,
     "treatsASD": null,
-    "treatsSUD": true,
-    "highAcuityMH": true,
-    "diagnosesServed": [
-      "Depression",
-      "Anxiety Disorders",
-      "Bipolar Disorder",
-      "Borderline Personality Disorder",
-      "OCD",
-      "Trauma/PTSD",
-      "Eating Disorders",
-      "Addiction",
-      "Schizophrenia",
-      "Self-Harm",
-      "Suicidal Ideation"
-    ],
+    "treatsSUD": null,
+    "highAcuityMH": null,
+    "diagnosesServed": null,
     "modalities": [
-      "DBT",
-      "CBT",
-      "Individual Therapy",
-      "Group Therapy",
-      "Family Therapy",
-      "Psychiatric Services",
-      "Medication Management",
-      "Exposure Response Prevention (ERP)",
-      "Residential Treatment"
+      "DBT"
     ],
     "exclusions": null,
-    "academics": {
-      "accreditedSchool": true,
-      "creditsTransferable": null,
-      "diplomaGranting": false,
-      "specialEducation": true,
-      "gradeLevels": null
-    },
-    "insuranceAccepted": [
-      "Blue Cross Blue Shield",
-      "Aetna",
-      "Cigna",
-      "United Healthcare",
-      "Harvard Pilgrim",
-      "Tufts",
-      "Medicare",
-      "Out-of-network"
-    ],
+    "academics": null,
+    "insuranceAccepted": null,
     "admissions": {
-      "phone": "617-855-3141",
+      "phone": null,
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.mcleanhospital.org/themes/mclean/logo.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -12848,63 +12639,26 @@
         "lastMigrated": "2025-11-03T01:34:48.260Z"
       }
     },
-    "lgbtqAffirming": true,
-    "transAffirming": true,
+    "lgbtqAffirming": null,
+    "transAffirming": null,
     "genderInclusiveHousing": null,
     "treatsASD": null,
-    "treatsSUD": true,
-    "highAcuityMH": true,
-    "diagnosesServed": [
-      "Depression",
-      "Anxiety Disorders",
-      "Bipolar Disorder",
-      "Borderline Personality Disorder",
-      "OCD",
-      "Trauma/PTSD",
-      "Eating Disorders",
-      "Addiction",
-      "Schizophrenia",
-      "Self-Harm",
-      "Suicidal Ideation"
-    ],
-    "modalities": [
-      "DBT",
-      "CBT",
-      "Individual Therapy",
-      "Group Therapy",
-      "Family Therapy",
-      "Psychiatric Services",
-      "Medication Management",
-      "Exposure Response Prevention (ERP)",
-      "Residential Treatment"
-    ],
+    "treatsSUD": null,
+    "highAcuityMH": null,
+    "diagnosesServed": null,
+    "modalities": null,
     "exclusions": null,
-    "academics": {
-      "accreditedSchool": true,
-      "creditsTransferable": null,
-      "diplomaGranting": false,
-      "specialEducation": true,
-      "gradeLevels": null
-    },
-    "insuranceAccepted": [
-      "Blue Cross Blue Shield",
-      "Aetna",
-      "Cigna",
-      "United Healthcare",
-      "Harvard Pilgrim",
-      "Tufts",
-      "Medicare",
-      "Out-of-network"
-    ],
+    "academics": null,
+    "insuranceAccepted": null,
     "admissions": {
-      "phone": "617-855-3141",
+      "phone": null,
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.mcleanhospital.org/themes/mclean/logo.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -13248,63 +13002,26 @@
         "lastMigrated": "2025-11-03T01:34:48.260Z"
       }
     },
-    "lgbtqAffirming": true,
-    "transAffirming": true,
+    "lgbtqAffirming": null,
+    "transAffirming": null,
     "genderInclusiveHousing": null,
     "treatsASD": null,
-    "treatsSUD": true,
-    "highAcuityMH": true,
-    "diagnosesServed": [
-      "Depression",
-      "Anxiety Disorders",
-      "Bipolar Disorder",
-      "Borderline Personality Disorder",
-      "OCD",
-      "Trauma/PTSD",
-      "Eating Disorders",
-      "Addiction",
-      "Schizophrenia",
-      "Self-Harm",
-      "Suicidal Ideation"
-    ],
-    "modalities": [
-      "DBT",
-      "CBT",
-      "Individual Therapy",
-      "Group Therapy",
-      "Family Therapy",
-      "Psychiatric Services",
-      "Medication Management",
-      "Exposure Response Prevention (ERP)",
-      "Residential Treatment"
-    ],
+    "treatsSUD": null,
+    "highAcuityMH": null,
+    "diagnosesServed": null,
+    "modalities": null,
     "exclusions": null,
-    "academics": {
-      "accreditedSchool": true,
-      "creditsTransferable": null,
-      "diplomaGranting": false,
-      "specialEducation": true,
-      "gradeLevels": null
-    },
-    "insuranceAccepted": [
-      "Blue Cross Blue Shield",
-      "Aetna",
-      "Cigna",
-      "United Healthcare",
-      "Harvard Pilgrim",
-      "Tufts",
-      "Medicare",
-      "Out-of-network"
-    ],
+    "academics": null,
+    "insuranceAccepted": null,
     "admissions": {
-      "phone": "617-855-3141",
+      "phone": null,
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.mcleanhospital.org/themes/mclean/logo.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -13629,43 +13346,27 @@
     },
     "lgbtqAffirming": null,
     "transAffirming": null,
-    "genderInclusiveHousing": false,
-    "treatsASD": true,
-    "treatsSUD": false,
-    "highAcuityMH": true,
-    "diagnosesServed": [
-      "Behavioral Disorders",
-      "Emotional Disabilities",
-      "Developmental Disabilities",
-      "Intellectual Disabilities",
-      "Autism Spectrum Disorder"
-    ],
+    "genderInclusiveHousing": null,
+    "treatsASD": null,
+    "treatsSUD": null,
+    "highAcuityMH": null,
+    "diagnosesServed": null,
     "modalities": [
-      "Residential Treatment",
-      "Individual Therapy",
-      "Family Therapy",
-      "Psychiatric Services",
-      "Medication Management",
-      "Therapeutic Milieu"
+      "Medication-Assisted Treatment",
+      "Positive Behavioral Supports"
     ],
     "exclusions": null,
-    "academics": {
-      "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
-      "specialEducation": true,
-      "gradeLevels": "K-12"
-    },
+    "academics": null,
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "978-355-4541",
-      "email": "koconnor@stetsonschool.org",
-      "contactName": "Kathy O Connor - Admissions Coordinator",
-      "avgResponseTime": "24 hours",
+      "phone": "508-755-2340",
+      "email": null,
+      "contactName": null,
+      "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.sevenhills.org/hubfs/SevenHills_April2021/Images/shfa_logo.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -14061,43 +13762,40 @@
     },
     "lgbtqAffirming": null,
     "transAffirming": null,
-    "genderInclusiveHousing": false,
+    "genderInclusiveHousing": null,
     "treatsASD": true,
-    "treatsSUD": false,
-    "highAcuityMH": true,
+    "treatsSUD": null,
+    "highAcuityMH": null,
     "diagnosesServed": [
-      "Behavioral Disorders",
-      "Emotional Disabilities",
+      "Autism Spectrum",
       "Developmental Disabilities",
-      "Intellectual Disabilities",
-      "Autism Spectrum Disorder"
+      "Trauma/PTSD"
     ],
     "modalities": [
-      "Residential Treatment",
-      "Individual Therapy",
-      "Family Therapy",
-      "Psychiatric Services",
-      "Medication Management",
-      "Therapeutic Milieu"
+      "CBT",
+      "Psychoeducation",
+      "Psychodynamic Therapy",
+      "Behavioral Therapy",
+      "Psychiatric Services"
     ],
     "exclusions": null,
     "academics": {
       "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
+      "creditsTransferable": null,
+      "diplomaGranting": null,
       "specialEducation": true,
-      "gradeLevels": "K-12"
+      "gradeLevels": null
     },
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "978-355-4541",
+      "phone": "978-355-4541 ext. 4139",
       "email": "koconnor@stetsonschool.org",
-      "contactName": "Kathy O Connor - Admissions Coordinator",
-      "avgResponseTime": "24 hours",
+      "contactName": "Kathy O'Connor",
+      "avgResponseTime": "Within 24 hours",
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.sevenhills.org/hubfs/SevenHills_April2021/Images/shfa_logo.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -14493,43 +14191,24 @@
     },
     "lgbtqAffirming": null,
     "transAffirming": null,
-    "genderInclusiveHousing": false,
-    "treatsASD": true,
-    "treatsSUD": false,
-    "highAcuityMH": true,
-    "diagnosesServed": [
-      "Behavioral Disorders",
-      "Emotional Disabilities",
-      "Developmental Disabilities",
-      "Intellectual Disabilities",
-      "Autism Spectrum Disorder"
-    ],
-    "modalities": [
-      "Residential Treatment",
-      "Individual Therapy",
-      "Family Therapy",
-      "Psychiatric Services",
-      "Medication Management",
-      "Therapeutic Milieu"
-    ],
+    "genderInclusiveHousing": null,
+    "treatsASD": null,
+    "treatsSUD": null,
+    "highAcuityMH": null,
+    "diagnosesServed": null,
+    "modalities": null,
     "exclusions": null,
-    "academics": {
-      "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
-      "specialEducation": true,
-      "gradeLevels": "K-12"
-    },
+    "academics": null,
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "978-355-4541",
-      "email": "koconnor@stetsonschool.org",
-      "contactName": "Kathy O Connor - Admissions Coordinator",
-      "avgResponseTime": "24 hours",
+      "phone": null,
+      "email": null,
+      "contactName": null,
+      "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.sevenhills.org/hubfs/SevenHills_April2021/Images/shfa_logo.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -14925,43 +14604,24 @@
     },
     "lgbtqAffirming": null,
     "transAffirming": null,
-    "genderInclusiveHousing": false,
-    "treatsASD": true,
-    "treatsSUD": false,
-    "highAcuityMH": true,
-    "diagnosesServed": [
-      "Behavioral Disorders",
-      "Emotional Disabilities",
-      "Developmental Disabilities",
-      "Intellectual Disabilities",
-      "Autism Spectrum Disorder"
-    ],
-    "modalities": [
-      "Residential Treatment",
-      "Individual Therapy",
-      "Family Therapy",
-      "Psychiatric Services",
-      "Medication Management",
-      "Therapeutic Milieu"
-    ],
+    "genderInclusiveHousing": null,
+    "treatsASD": null,
+    "treatsSUD": null,
+    "highAcuityMH": null,
+    "diagnosesServed": null,
+    "modalities": null,
     "exclusions": null,
-    "academics": {
-      "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
-      "specialEducation": true,
-      "gradeLevels": "K-12"
-    },
+    "academics": null,
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "978-355-4541",
-      "email": "koconnor@stetsonschool.org",
-      "contactName": "Kathy O Connor - Admissions Coordinator",
-      "avgResponseTime": "24 hours",
+      "phone": null,
+      "email": null,
+      "contactName": null,
+      "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.sevenhills.org/hubfs/SevenHills_April2021/Images/shfa_logo.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -15357,43 +15017,24 @@
     },
     "lgbtqAffirming": null,
     "transAffirming": null,
-    "genderInclusiveHousing": false,
-    "treatsASD": true,
-    "treatsSUD": false,
-    "highAcuityMH": true,
-    "diagnosesServed": [
-      "Behavioral Disorders",
-      "Emotional Disabilities",
-      "Developmental Disabilities",
-      "Intellectual Disabilities",
-      "Autism Spectrum Disorder"
-    ],
-    "modalities": [
-      "Residential Treatment",
-      "Individual Therapy",
-      "Family Therapy",
-      "Psychiatric Services",
-      "Medication Management",
-      "Therapeutic Milieu"
-    ],
+    "genderInclusiveHousing": null,
+    "treatsASD": null,
+    "treatsSUD": null,
+    "highAcuityMH": null,
+    "diagnosesServed": null,
+    "modalities": null,
     "exclusions": null,
-    "academics": {
-      "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
-      "specialEducation": true,
-      "gradeLevels": "K-12"
-    },
+    "academics": null,
     "insuranceAccepted": null,
     "admissions": {
-      "phone": "978-355-4541",
-      "email": "koconnor@stetsonschool.org",
-      "contactName": "Kathy O Connor - Admissions Coordinator",
-      "avgResponseTime": "24 hours",
+      "phone": null,
+      "email": null,
+      "contactName": null,
+      "avgResponseTime": null,
       "transportProvided": null
     },
     "heroImageUrl": null,
-    "logoUrl": "https://www.sevenhills.org/hubfs/SevenHills_April2021/Images/shfa_logo.svg",
+    "logoUrl": null,
     "galleryUrls": null,
     "virtualTourUrl": null
   },
@@ -15766,37 +15407,20 @@
     "lgbtqAffirming": null,
     "transAffirming": null,
     "genderInclusiveHousing": null,
-    "treatsASD": true,
-    "treatsSUD": false,
-    "highAcuityMH": true,
+    "treatsASD": null,
+    "treatsSUD": null,
+    "highAcuityMH": null,
     "diagnosesServed": [
-      "Severe Trauma",
-      "Emotional Disturbances",
-      "Behavioral Disorders",
-      "Dysregulation",
-      "Anxiety",
-      "Depression",
-      "PTSD"
+      "Trauma/PTSD"
     ],
     "modalities": [
-      "Trauma-Informed Care",
-      "Residential Treatment",
-      "Individual Therapy",
-      "Family Therapy",
-      "Community-Based Services",
-      "Foster Care Support"
+      "Trauma-informed Care"
     ],
     "exclusions": null,
-    "academics": {
-      "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
-      "specialEducation": true,
-      "gradeLevels": "K-12"
-    },
+    "academics": null,
     "insuranceAccepted": null,
     "admissions": {
-      "phone": null,
+      "phone": "802-658-0040",
       "email": null,
       "contactName": null,
       "avgResponseTime": null,
@@ -16247,37 +15871,16 @@
     "lgbtqAffirming": null,
     "transAffirming": null,
     "genderInclusiveHousing": null,
-    "treatsASD": true,
-    "treatsSUD": false,
-    "highAcuityMH": true,
-    "diagnosesServed": [
-      "Severe Trauma",
-      "Emotional Disturbances",
-      "Behavioral Disorders",
-      "Dysregulation",
-      "Anxiety",
-      "Depression",
-      "PTSD"
-    ],
-    "modalities": [
-      "Trauma-Informed Care",
-      "Residential Treatment",
-      "Individual Therapy",
-      "Family Therapy",
-      "Community-Based Services",
-      "Foster Care Support"
-    ],
+    "treatsASD": null,
+    "treatsSUD": null,
+    "highAcuityMH": null,
+    "diagnosesServed": null,
+    "modalities": null,
     "exclusions": null,
-    "academics": {
-      "accreditedSchool": true,
-      "creditsTransferable": true,
-      "diplomaGranting": true,
-      "specialEducation": true,
-      "gradeLevels": "K-12"
-    },
+    "academics": null,
     "insuranceAccepted": null,
     "admissions": {
-      "phone": null,
+      "phone": "802-658-0040",
       "email": null,
       "contactName": null,
       "avgResponseTime": null,

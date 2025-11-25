@@ -3851,19 +3851,42 @@ if (false) {
     }
     
     /**
-     * Check if we should auto-show morning review
+     * Check if we should auto-show morning or afternoon review
+     * Morning: 8:00 AM - first login of the day after 8am
+     * Afternoon: 3:30 PM - day review, once per day
      */
     function checkAutoShowMorningReview() {
-        const hour = new Date().getHours();
-        const lastShown = localStorage.getItem('lastMorningReviewDate');
-        const today = new Date().toDateString();
+        const now = new Date();
+        const hour = now.getHours();
+        const minutes = now.getMinutes();
+        const today = now.toDateString();
         
-        // Show automatically once per day in the morning (6am - 10am)
-        if (hour >= 6 && hour <= 10 && lastShown !== today) {
-            // Wait for dashboard to load
+        const lastMorningShown = localStorage.getItem('lastMorningReviewDate');
+        const lastAfternoonShown = localStorage.getItem('lastAfternoonReviewDate');
+        
+        // Morning review: Show once per day, starting at 8am (until noon)
+        // Only shows on first login after 8am if not already shown today
+        if (hour >= 8 && hour < 12 && lastMorningShown !== today) {
+            // Set localStorage IMMEDIATELY to prevent multiple triggers on refresh
+            localStorage.setItem('lastMorningReviewDate', today);
+            // Wait for dashboard to load before showing
             setTimeout(() => {
-                window.morningReview.renderMorningReview();
-                localStorage.setItem('lastMorningReviewDate', today);
+                if (window.morningReview) {
+                    window.morningReview.renderMorningReview();
+                }
+            }, 3000);
+        }
+        
+        // Afternoon/Day review: Show once per day at 3:30 PM (15:30) or after
+        // Only shows on first login after 3:30pm if not already shown today
+        if (hour >= 15 && (hour > 15 || minutes >= 30) && lastAfternoonShown !== today) {
+            // Set localStorage IMMEDIATELY to prevent multiple triggers on refresh
+            localStorage.setItem('lastAfternoonReviewDate', today);
+            // Wait for dashboard to load before showing
+            setTimeout(() => {
+                if (window.morningReview) {
+                    window.morningReview.renderMorningReview();
+                }
             }, 3000);
         }
     }
@@ -14633,13 +14656,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             display: flex !important;
         }
         
-        /* Hide legacy elements when module is loaded */
-        body.programs-docs-v2-active .legacy-programs-wrapper,
-        body.programs-docs-v2-active #programsDocsError,
-        body.programs-docs-v2-active #programsDocsLoader {
-            display: none !important;
-        }
-        
         /* Make sure the module content fills the container */
         .programs-docs-container > * {
             width: 100%;
@@ -14848,54 +14864,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             font-size: 0.8rem !important;
             min-height: auto !important;
             height: auto !important;
-        }
-
-        .legacy-programs-wrapper {
-            margin-top: 24px;
-        }
-
-        .legacy-programs-notice {
-            padding: 20px;
-            border: 1px dashed rgba(110, 123, 255, 0.35);
-            border-radius: 16px;
-            background: white;
-            color: #48508A;
-        }
-
-        .legacy-programs-notice h4 {
-            margin: 0 0 8px 0;
-            color: #0F1020;
-            font-size: 16px;
-        }
-
-        .legacy-programs-notice p {
-            margin: 0;
-            font-size: 14px;
-        }
-
-        .legacy-programs-fallback {
-            margin-top: 16px;
-            border: 1px solid rgba(110, 123, 255, 0.18);
-            border-radius: 18px;
-            background: rgba(233, 236, 255, 0.25);
-            box-shadow: 0 12px 32px rgba(15, 16, 32, 0.08);
-            overflow: hidden;
-        }
-
-        .legacy-programs-frame {
-            width: 100%;
-            min-height: 720px;
-            border: 0;
-            background: white;
-        }
-
-        .legacy-programs-disclaimer {
-            margin: 0;
-            padding: 12px 18px 16px;
-            font-size: 13px;
-            color: #48508A;
-            background: rgba(233, 236, 255, 0.65);
-            border-top: 1px solid rgba(110, 123, 255, 0.18);
         }
 
         body.programs-docs-v2-active .selection-panel {
@@ -15395,8 +15363,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             // Legacy fallback – assume module lives under dist/
             return 'dist/programs-docs-module.html';
         })();
-        let programsDocsLegacyNoticeShown = false;
-
         function shouldUseProgramsDocs() {
             try {
                 if (window.featureFlags && typeof window.featureFlags.isEnabled === 'function') {
@@ -15419,11 +15385,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 
             if (!container || !loader) {
                 console.warn('Programs & Docs container missing from shell.');
-                return false;
-            }
-
-            if (!shouldUseProgramsDocs()) {
-                revealLegacyProgramsNotice('feature-disabled');
                 return false;
             }
 
@@ -15696,9 +15657,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                             errorParagraph.textContent = friendlyMessage;
                         }
                     }
-                    revealLegacyProgramsNotice('load-error');
-                    // document.body.classList.remove('programs-docs-v2-active');
-                    // document.documentElement.classList.remove('programs-docs-v2-active');
                     throw error;
                 }
             })();
@@ -15717,45 +15675,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         
         // Make retry function globally available
         window.retryProgramsDocsMount = retryProgramsDocsMount;
-
-        function toggleLegacyPrograms(show) {
-            const wrapper = document.getElementById('legacyProgramsWrapper');
-            if (!wrapper) return;
-            if (show) {
-                revealLegacyProgramsNotice('manual-request');
-                initializeLegacyProgramsModule();
-            } else {
-                wrapper.hidden = true;
-            }
-        }
-
-        function revealLegacyProgramsNotice(reason) {
-            const wrapper = document.getElementById('legacyProgramsWrapper');
-            const errorEl = document.getElementById('programsDocsError');
-            if (!wrapper) return;
-
-            if (!wrapper.dataset.rendered) {
-                wrapper.innerHTML = `
-                    <div class="legacy-programs-notice">
-                        <h4>Legacy Programs experience</h4>
-                        <p>The updated Programs &amp; Docs module is currently unavailable (${reason}). Disable the <code>programsV2Core</code> feature flag or contact support for assistance.</p>
-                    </div>
-                `;
-                wrapper.dataset.rendered = 'true';
-            }
-
-            wrapper.hidden = false;
-            if (errorEl) {
-                errorEl.hidden = false;
-            }
-            programsDocsLegacyNoticeShown = true;
-            // document.body.classList.remove('programs-docs-v2-active');
-            // document.documentElement.classList.remove('programs-docs-v2-active');
-            initializeLegacyProgramsModule();
-        }
-
-        // Legacy switchTab function removed - using the main one defined later in the file
-        // This ensures all tab switching goes through the unified implementation
         
         // Quick add client
         async function quickAddClient() {
@@ -23470,6 +23389,14 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 <span class="app-drawer__icon">👥</span>
                 <span>Clients</span>
             </button>
+            <button type="button"
+                    class="app-drawer__item app-drawer__item--admin"
+                    data-nav-target="admin"
+                    aria-hidden="true"
+                    style="display:none;">
+                <span class="app-drawer__icon">⚙️</span>
+                <span>Admin</span>
+            </button>
         </div>
     </nav>
     <script>
@@ -23484,6 +23411,22 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 activeSection: null,
                 lastFocus: null
             };
+
+            function getCurrentUserRole() {
+                const raw = (localStorage.getItem('userRole') || '').toLowerCase();
+                const isMaster = localStorage.getItem('isMaster') === 'true';
+                if (isMaster && raw !== 'admin') return 'admin';
+                return raw || 'coach';
+            }
+
+            function updateAdminNavVisibility() {
+                const adminButton = state.navDrawer?.querySelector('.app-drawer__item--admin');
+                if (!adminButton) return;
+                const role = getCurrentUserRole();
+                const isAdminLike = role === 'admin' || role === 'supervisor';
+                adminButton.style.display = isAdminLike ? '' : 'none';
+                adminButton.setAttribute('aria-hidden', isAdminLike ? 'false' : 'true');
+            }
 
             const templates = {
                 dashboard: `
@@ -23540,6 +23483,18 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 `,
                 'programs': `
                     <!-- Programs section uses its own toolbar, so hide this header -->
+                `,
+                admin: `
+                    <div class="section-header__content">
+                        <div>
+                            <p class="section-eyebrow">Configuration &amp; Insights</p>
+                            <div class="section-header__title">Admin Command Center</div>
+                        </div>
+                        <div class="section-status">Local-only controls</div>
+                    </div>
+                    <div class="section-header__actions">
+                        <button type="button" class="section-chip" onclick="window.adminManager && window.adminManager.refresh()">Refresh</button>
+                    </div>
                 `,
                 default: `
                     <div class="section-header__content">
@@ -23681,13 +23636,15 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 openNav,
                 closeNav,
                 toggleNav,
-                updateTopOffset
+                updateTopOffset,
+                updateAdminNavVisibility
             };
 
             const initialTab = localStorage.getItem('lastActiveTab') || 'programs';
             setActiveNavItem(initialTab);
             setSectionState(initialTab === 'programs' ? 'programs-loading' : initialTab);
             window.__pendingInitialTab = initialTab;
+            updateAdminNavVisibility();
             updateTopOffset();
         })();
     </script>
@@ -24247,6 +24204,203 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             background: rgba(255, 255, 255, 0.12);
         }
 
+        .admin-container {
+            padding: 24px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .admin-header h1 {
+            margin: 0;
+            font-size: 1.6rem;
+        }
+
+        .admin-header__actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .admin-widgets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .admin-widget {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 12px 30px rgba(15, 16, 32, 0.08);
+        }
+
+        .admin-widget--large {
+            grid-column: span 2;
+        }
+
+        .admin-widget--wide {
+            grid-column: span 3;
+        }
+
+        .admin-widget__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .admin-widget__header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .admin-badge--phi-high {
+            background: rgba(239, 68, 68, 0.08);
+            color: #b91c1c;
+        }
+
+        .admin-badge--phi-medium {
+            background: rgba(245, 158, 11, 0.08);
+            color: #92400e;
+        }
+
+        .admin-badge--phi-low {
+            background: rgba(16, 185, 129, 0.08);
+            color: #047857;
+        }
+
+        .admin-badge--phi-none {
+            background: rgba(59, 130, 246, 0.08);
+            color: #1d4ed8;
+        }
+
+        .admin-toggle-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .admin-toggle-card__top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .admin-toggle-card__title {
+            font-weight: 600;
+        }
+
+        .admin-toggle-card__desc {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .admin-toggle-card__meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .admin-widget__footer {
+            margin-top: 12px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .admin-table th,
+        .admin-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+        }
+
+        .admin-table th {
+            background: #f9fafb;
+            font-weight: 600;
+        }
+
+        .severity-badge {
+            display: inline-flex;
+            padding: 2px 6px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .severity-badge--low {
+            background: #ecfdf5;
+            color: #047857;
+        }
+
+        .severity-badge--medium {
+            background: #fffbeb;
+            color: #92400e;
+        }
+
+        .severity-badge--high {
+            background: #fef2f2;
+            color: #b91c1c;
+        }
+
+        .admin-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+        }
+
+        .admin-filters select,
+        .admin-filters input {
+            font-size: 0.8rem;
+            padding: 4px 6px;
+        }
+
+        .report-generator select {
+            width: 100%;
+        }
+
+        @media (max-width: 1024px) {
+            .admin-widget--large,
+            .admin-widget--wide {
+                grid-column: span 1;
+            }
+        }
+
         body.app-nav-open .app-drawer {
             transform: translateX(0);
         }
@@ -24801,7 +24955,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 </div>
                 
                 <script>
-                    const __CC_VALID_TABS = ['dashboard', 'programs', 'clients'];
+                    const __CC_VALID_TABS = ['dashboard', 'programs', 'clients', 'admin'];
                     (function setupTabPersistence() {
                         const hashTab = getTabFromHash();
                         const storedTab = getStoredTab();
@@ -24816,14 +24970,9 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                         const today = new Date().toISOString().slice(0, 10);
                         const lastLoginKey = 'lastLoginDate';
                         if (localStorage.getItem(lastLoginKey) !== today) {
+                            // Keep tracking last login date, but do NOT auto-open Morning Review here.
+                            // Time-based auto-launch is handled by the morning-review enhancement script.
                             localStorage.setItem(lastLoginKey, today);
-                            window.addEventListener('load', () => {
-                                setTimeout(() => {
-                                    if (window.morningReview && typeof window.morningReview.renderMorningReview === 'function') {
-                                        window.morningReview.renderMorningReview();
-                                    }
-                                }, 1500);
-                            }, { once: true });
                         }
                     })();
 
@@ -24842,6 +24991,17 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                         try {
                             console.log('Switching to tab:', tab);
                             console.trace('Tab switch called from:');
+
+                            if (tab === 'admin') {
+                                const role = (localStorage.getItem('userRole') || '').toLowerCase();
+                                const isMaster = localStorage.getItem('isMaster') === 'true';
+                                const isAdminLike = role === 'admin' || role === 'supervisor' || isMaster;
+                                if (!isAdminLike) {
+                                    (window.showNotification && window.showNotification('Admin tools are limited to admin or supervisor accounts.', 'warning'))
+                                        || alert('Admin tools are limited to admin or supervisor accounts.');
+                                    return;
+                                }
+                            }
                             
                             // Don't block manual tab switches - only auto-switches at load
                             // if (window.blockTabSwitches && tab !== 'clients' && tab !== 'dashboard') {
@@ -25093,6 +25253,36 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                                     }
                                 } catch (cmInitError) {
                                     console.error('Error initializing client tracker:', cmInitError);
+                                }
+                            } else if (tab === 'admin') {
+                                document.body.classList.remove('dashboard-active');
+
+                                if (tabElement) {
+                                    tabElement.style.display = 'block';
+                                    tabElement.style.visibility = 'visible';
+                                    tabElement.style.opacity = '1';
+                                }
+
+                                const selectionPanel = document.querySelector('.selection-panel');
+                                if (selectionPanel) {
+                                    selectionPanel.style.display = 'none';
+                                    selectionPanel.style.visibility = 'hidden';
+                                }
+
+                                const mainContent = document.querySelector('.main-content');
+                                if (mainContent) {
+                                    mainContent.style.gridTemplateColumns = '1fr';
+                                    mainContent.style.maxWidth = '100%';
+                                }
+
+                                if (window.adminManager) {
+                                    const manager = window.adminManager;
+                                    const isInitialized = manager.state && manager.state.initialized;
+                                    if (!isInitialized && typeof manager.initialize === 'function') {
+                                        manager.initialize().catch(console.error);
+                                    } else if (typeof manager.refresh === 'function') {
+                                        Promise.resolve(manager.refresh()).catch(console.error);
+                                    }
                                 }
                             }
                         } catch (error) {
@@ -25417,7 +25607,8 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                         }, 100);
 
                         // Launch Morning Review if it's the first login of the day
-                        if (showMorningReview) {
+                        // (Disabled: handled by time-based auto-launch in morning-review enhancement)
+                        if (false && showMorningReview) {
                             setTimeout(() => {
                                 if (window.morningReview && window.morningReview.renderMorningReview) {
                                     window.morningReview.renderMorningReview();
@@ -25534,13 +25725,11 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                     <div id="programsDocsContainer" class="programs-docs-container" hidden></div>
                     <div id="programsDocsError" class="programs-docs-error" hidden role="alert">
                         <h3>Programs workspace unavailable</h3>
-                        <p>Please retry loading or switch back to the legacy module if needed.</p>
+                        <p>Please retry loading or refresh the page if the issue persists.</p>
                         <div class="programs-docs-error-actions">
                             <button type="button" class="btn btn-primary" onclick="retryProgramsDocsMount()">Retry load</button>
-                            <button type="button" class="btn" onclick="toggleLegacyPrograms(true)">Open legacy Programs view</button>
                         </div>
                     </div>
-                    <div id="legacyProgramsWrapper" class="legacy-programs-wrapper" hidden aria-live="polite"></div>
                 </div> <!-- End of programsTab -->
                 
                 <!-- Clients Tab Content -->
@@ -25583,6 +25772,28 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                         
                     </div>
                 </div> <!-- End of clientsTab -->
+
+                <!-- Admin Tab Content -->
+                <div id="adminTab" class="tab-content" style="display:none;">
+                    <div class="admin-container">
+                        <header class="admin-header">
+                            <h1>Admin Command Center</h1>
+                            <div class="admin-header__actions">
+                                <button id="refreshAdminBtn" class="section-chip" type="button">
+                                    🔄 Refresh
+                                </button>
+                            </div>
+                        </header>
+
+                        <div class="admin-widgets-grid">
+                            <div class="admin-widget admin-widget--large" id="featureTogglesWidget"></div>
+                            <div class="admin-widget" id="analyticsWidget"></div>
+                            <div class="admin-widget admin-widget--wide" id="auditLogWidget"></div>
+                            <div class="admin-widget" id="systemStatusWidget"></div>
+                            <div class="admin-widget" id="usageReportsWidget"></div>
+                        </div>
+                    </div>
+                </div> <!-- End of adminTab -->
                 
             </div>
             
@@ -25594,6 +25805,480 @@ if (!document.querySelector('#morning-review-badge-styles')) {
     <!-- Programs Data Loader - Load before other scripts -->
     <script src="js/programs-loader.js"></script>
     <script src="js/programs-init.js"></script>
+
+    <!-- Feature Flags (Admin Command Center) -->
+    <script>
+        (function () {
+            'use strict';
+
+            const STORAGE_KEY = 'careconnect-feature-toggles';
+
+            const DEFAULT_CONFIG = {
+                version: 1,
+                lastModified: null,
+                modules: {
+                    'map-view': {
+                        enabled: true,
+                        label: 'Map View',
+                        description: 'Geographic visualization of programs',
+                        phiRisk: 'none',
+                        dependencies: []
+                    },
+                    'comparison-view': {
+                        enabled: true,
+                        label: 'Program Comparison',
+                        description: 'Side-by-side program comparisons',
+                        phiRisk: 'none',
+                        dependencies: []
+                    },
+                    'client-context': {
+                        enabled: true,
+                        label: 'Client Context (PHI)',
+                        description: 'Client initials, IDs, and case linking',
+                        phiRisk: 'high',
+                        dependencies: []
+                    },
+                    'at-home-resources': {
+                        enabled: true,
+                        label: 'At-Home Resources',
+                        description: 'At-home supports lane and scenario in builder',
+                        phiRisk: 'low',
+                        dependencies: []
+                    },
+                    'programs-module': {
+                        enabled: true,
+                        label: 'Programs & Docs',
+                        description: 'Entire programs workspace',
+                        phiRisk: 'medium',
+                        dependencies: ['map-view', 'comparison-view']
+                    },
+                    'document-export': {
+                        enabled: true,
+                        label: 'Document Export',
+                        description: 'PDF/HTML document generation and download',
+                        phiRisk: 'high',
+                        dependencies: []
+                    },
+                    'dashboard-widgets': {
+                        enabled: true,
+                        label: 'Dashboard Widgets',
+                        description: 'Mission control widgets',
+                        phiRisk: 'low',
+                        dependencies: []
+                    }
+                }
+            };
+
+            let config = null;
+
+            function clone(obj) {
+                return JSON.parse(JSON.stringify(obj));
+            }
+
+            function loadFromStorage() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (!raw) return null;
+                    const parsed = JSON.parse(raw);
+                    if (!parsed || typeof parsed !== 'object') return null;
+                    if (parsed.version !== DEFAULT_CONFIG.version) return null;
+                    return parsed;
+                } catch (e) {
+                    console.warn('[featureFlags] Failed to parse stored config:', e);
+                    return null;
+                }
+            }
+
+            function getConfig() {
+                if (!config) {
+                    const stored = loadFromStorage();
+                    if (stored && stored.modules) {
+                        const merged = clone(DEFAULT_CONFIG);
+                        Object.keys(stored.modules).forEach(key => {
+                            if (merged.modules[key]) {
+                                merged.modules[key].enabled = !!stored.modules[key].enabled;
+                            } else {
+                                merged.modules[key] = stored.modules[key];
+                            }
+                        });
+                        merged.lastModified = stored.lastModified || null;
+                        config = merged;
+                    } else {
+                        config = clone(DEFAULT_CONFIG);
+                    }
+                }
+                return config;
+            }
+
+            function persist() {
+                if (!config) return;
+                config.lastModified = new Date().toISOString();
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+                } catch (e) {
+                    console.warn('[featureFlags] Failed to persist config:', e);
+                }
+            }
+
+            function isEnabledInternal(flagId, visited) {
+                const cfg = getConfig();
+                const flag = cfg.modules[flagId];
+                if (!flag) return false;
+                if (!flag.enabled) return false;
+                if (!flag.dependencies || !flag.dependencies.length) return true;
+
+                visited = visited || new Set();
+                if (visited.has(flagId)) return false;
+                visited.add(flagId);
+
+                return flag.dependencies.every(dep => isEnabledInternal(dep, visited));
+            }
+
+            function applyProgramsVisibility() {
+                const enabled = window.featureFlags.isEnabled('programs-module');
+                const navButtons = document.querySelectorAll('[data-nav-target="programs"]');
+                navButtons.forEach(btn => {
+                    btn.style.display = enabled ? '' : 'none';
+                    btn.setAttribute('aria-hidden', enabled ? 'false' : 'true');
+                });
+                const tabElement = document.getElementById('programsTab');
+                if (tabElement && !enabled) {
+                    if (tabElement.classList.contains('active') && typeof window.switchTab === 'function') {
+                        window.switchTab('dashboard');
+                    }
+                    tabElement.style.display = 'none';
+                }
+            }
+
+            function applyMapAndCompareVisibility() {
+                const mapEnabled = window.featureFlags.isEnabled('map-view');
+                const compareEnabled = window.featureFlags.isEnabled('comparison-view');
+
+                const mapButton = document.querySelector('.view-controls__mode[data-view="map"]');
+                const compareButton = document.querySelector('.view-controls__mode[data-view="compare"]');
+                const resultsMap = document.getElementById('resultsMap');
+                const resultsCompare = document.getElementById('resultsCompare');
+                const comparisonView = document.getElementById('comparisonView');
+
+                if (mapButton) mapButton.style.display = mapEnabled ? '' : 'none';
+                if (resultsMap) {
+                    resultsMap.hidden = !mapEnabled;
+                    if (!mapEnabled) resultsMap.style.display = 'none';
+                }
+
+                if (compareButton) compareButton.style.display = compareEnabled ? '' : 'none';
+                if (resultsCompare) {
+                    resultsCompare.hidden = !compareEnabled;
+                    if (!compareEnabled) resultsCompare.style.display = 'none';
+                }
+                if (comparisonView && !compareEnabled) {
+                    comparisonView.style.display = 'none';
+                }
+            }
+
+            function applyClientContextVisibility() {
+                const enabled = window.featureFlags.isEnabled('client-context');
+                const contextAside = document.getElementById('clientContext');
+                const toolbarClient = document.querySelector('.toolbar__client');
+                if (contextAside) {
+                    if (!enabled) {
+                        contextAside.hidden = true;
+                        contextAside.style.display = 'none';
+                    } else {
+                        contextAside.hidden = false;
+                        contextAside.style.display = '';
+                    }
+                }
+                if (toolbarClient) {
+                    toolbarClient.style.display = enabled ? '' : 'none';
+                }
+            }
+
+            function applyAtHomeResourcesVisibility() {
+                const enabled = window.featureFlags.isEnabled('at-home-resources');
+                const atHomeTab = document.querySelector('.builder-pane__tab[data-scenario="at-home"]');
+                const atHomePhase = document.getElementById('phaseAtHome')
+                    ? document.getElementById('phaseAtHome').closest('.builder-phase')
+                    : null;
+                const atHomeDropdownItem = document.querySelector('#addToPlanDropdown [data-phase="atHome"]');
+
+                [atHomeTab, atHomePhase, atHomeDropdownItem].forEach(el => {
+                    if (!el) return;
+                    el.style.display = enabled ? '' : 'none';
+                });
+            }
+
+            function applyDocumentExportVisibility() {
+                const enabled = window.featureFlags.isEnabled('document-export');
+                const exportBtn = document.getElementById('exportBtn');
+                const openKipu = document.getElementById('openKipu');
+                const downloadFiles = document.getElementById('downloadFiles');
+                const markUploaded = document.getElementById('markUploaded');
+
+                const buttons = [exportBtn, openKipu, downloadFiles, markUploaded];
+                buttons.forEach(btn => {
+                    if (!btn) return;
+                    btn.disabled = !enabled;
+                });
+            }
+
+            function applyDashboardWidgetsVisibility() {
+                const enabled = window.featureFlags.isEnabled('dashboard-widgets');
+                const widgets = document.querySelectorAll('.dashboard-widget');
+                const quickActions = document.getElementById('quickActionsWidget');
+
+                widgets.forEach(widget => {
+                    widget.style.display = enabled ? '' : 'none';
+                });
+                if (quickActions) {
+                    quickActions.style.display = enabled ? '' : 'none';
+                }
+            }
+
+            function resolveDependenciesOnToggle(flagId, enabled) {
+                const cfg = getConfig();
+                if (flagId === 'programs-module' && !enabled) {
+                    ['map-view', 'comparison-view'].forEach(child => {
+                        if (cfg.modules[child]) {
+                            cfg.modules[child].enabled = false;
+                        }
+                    });
+                }
+                if ((flagId === 'map-view' || flagId === 'comparison-view') && enabled) {
+                    if (cfg.modules['programs-module']) {
+                        cfg.modules['programs-module'].enabled = true;
+                    }
+                }
+            }
+
+            window.featureFlags = {
+                load() {
+                    getConfig();
+                    return config;
+                },
+
+                save(newConfig) {
+                    if (newConfig) {
+                        config = newConfig;
+                    } else {
+                        getConfig();
+                    }
+                    persist();
+                    return config;
+                },
+
+                isEnabled(flagId) {
+                    return isEnabledInternal(flagId);
+                },
+
+                toggle(flagId, nextState) {
+                    const cfg = getConfig();
+                    const mod = cfg.modules[flagId];
+                    if (!mod) return false;
+
+                    const enabled = typeof nextState === 'boolean'
+                        ? nextState
+                        : !mod.enabled;
+
+                    mod.enabled = enabled;
+                    resolveDependenciesOnToggle(flagId, enabled);
+                    persist();
+
+                    try {
+                        this.applyToUI();
+                    } catch (e) {
+                        console.warn('[featureFlags] applyToUI failed after toggle:', e);
+                    }
+
+                    return true;
+                },
+
+                getAll() {
+                    return clone(getConfig().modules);
+                },
+
+                applyToUI() {
+                    try {
+                        applyProgramsVisibility();
+                        applyMapAndCompareVisibility();
+                        applyClientContextVisibility();
+                        applyAtHomeResourcesVisibility();
+                        applyDocumentExportVisibility();
+                        applyDashboardWidgetsVisibility();
+                    } catch (e) {
+                        console.warn('[featureFlags] applyToUI error:', e);
+                    }
+                },
+
+                reset() {
+                    config = clone(DEFAULT_CONFIG);
+                    persist();
+                    this.applyToUI();
+                }
+            };
+
+            window.addEventListener('DOMContentLoaded', function () {
+                try {
+                    window.featureFlags.load();
+                    window.featureFlags.applyToUI();
+                } catch (e) {
+                    console.warn('[featureFlags] Initialization failed:', e);
+                }
+            });
+        })();
+    </script>
+
+    <!-- Admin Manager (renders Admin Command Center widgets) -->
+    <script>
+        window.adminManager = (function () {
+            'use strict';
+
+            const state = {
+                initialized: false
+            };
+
+            function getRiskBadge(phiRisk) {
+                switch (phiRisk) {
+                    case 'high': return 'admin-badge admin-badge--phi-high';
+                    case 'medium': return 'admin-badge admin-badge--phi-medium';
+                    case 'low': return 'admin-badge admin-badge--phi-low';
+                    default: return 'admin-badge admin-badge--phi-none';
+                }
+            }
+
+            function renderFeatureTogglesWidget() {
+                const host = document.getElementById('featureTogglesWidget');
+                if (!host) return;
+                const flags = window.featureFlags ? window.featureFlags.getAll() : {};
+                const entries = Object.entries(flags);
+
+                let html = `
+                    <div class="admin-widget__header">
+                        <h3>Feature Toggles</h3>
+                    </div>
+                `;
+
+                if (!entries.length) {
+                    html += '<p>No feature flags defined.</p>';
+                    host.innerHTML = html;
+                    return;
+                }
+
+                html += '<div>';
+                entries.forEach(([id, mod]) => {
+                    html += `
+                        <div class="admin-toggle-card" data-flag-id="${id}">
+                            <div class="admin-toggle-card__top">
+                                <div>
+                                    <div class="admin-toggle-card__title">${mod.label || id}</div>
+                                    <div class="admin-toggle-card__desc">${mod.description || ''}</div>
+                                </div>
+                                <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.8rem;">
+                                    <span>${mod.enabled ? 'On' : 'Off'}</span>
+                                    <input type="checkbox" ${mod.enabled ? 'checked' : ''} data-flag-toggle="${id}">
+                                </label>
+                            </div>
+                            <div class="admin-toggle-card__meta">
+                                <span class="${getRiskBadge(mod.phiRisk)}">PHI: ${String(mod.phiRisk || 'none').toUpperCase()}</span>
+                                ${mod.dependencies && mod.dependencies.length
+                                    ? `<span>Depends on: ${mod.dependencies.join(', ')}</span>`
+                                    : '<span>No dependencies</span>'}
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `
+                    </div>
+                    <div class="admin-widget__footer">
+                        <button type="button" class="section-chip" id="resetFeatureFlagsBtn">Reset to Defaults</button>
+                        <button type="button" class="section-chip is-primary" id="applyFeatureFlagsBtn">Apply Changes</button>
+                    </div>
+                `;
+
+                host.innerHTML = html;
+
+                host.addEventListener('change', (event) => {
+                    const input = event.target;
+                    if (!(input instanceof HTMLInputElement)) return;
+                    const flagId = input.getAttribute('data-flag-toggle');
+                    if (!flagId || !window.featureFlags) return;
+                    try {
+                        window.featureFlags.toggle(flagId, input.checked);
+                        showNotification(`Feature "${flagId}" set to ${input.checked ? 'ON' : 'OFF'}`, 'success');
+                    } catch (e) {
+                        console.error('[adminManager] toggle failed:', e);
+                        showNotification('Failed to toggle feature.', 'error');
+                    }
+                }, { once: true });
+
+                const resetBtn = document.getElementById('resetFeatureFlagsBtn');
+                const applyBtn = document.getElementById('applyFeatureFlagsBtn');
+                if (resetBtn) {
+                    resetBtn.onclick = function () {
+                        try {
+                            window.featureFlags?.reset();
+                            renderFeatureTogglesWidget();
+                            showNotification('Feature flags reset to defaults.', 'success');
+                        } catch (e) {
+                            console.error('[adminManager] reset flags failed:', e);
+                            showNotification('Failed to reset feature flags.', 'error');
+                        }
+                    };
+                }
+                if (applyBtn) {
+                    applyBtn.onclick = function () {
+                        try {
+                            window.featureFlags?.applyToUI();
+                            showNotification('Feature flags applied.', 'success');
+                        } catch (e) {
+                            console.error('[adminManager] apply flags failed:', e);
+                            showNotification('Failed to apply feature flags.', 'error');
+                        }
+                    };
+                }
+            }
+
+            function renderPlaceholderWidget(id, title, bodyHtml) {
+                const host = document.getElementById(id);
+                if (!host) return;
+                host.innerHTML = `
+                    <div class="admin-widget__header">
+                        <h3>${title}</h3>
+                    </div>
+                    <div>${bodyHtml}</div>
+                `;
+            }
+
+            async function initialize() {
+                if (state.initialized) return;
+
+                renderFeatureTogglesWidget();
+                renderPlaceholderWidget('analyticsWidget', 'Analytics Overview', '<p>Analytics service wiring is in progress.</p>');
+                renderPlaceholderWidget('auditLogWidget', 'Audit Log', '<p>Audit log viewer is in progress.</p>');
+                renderPlaceholderWidget('systemStatusWidget', 'System Status', '<p>System stats widget is in progress.</p>');
+                renderPlaceholderWidget('usageReportsWidget', 'Usage Reports', '<p>Usage report generator is in progress.</p>');
+
+                const refreshBtn = document.getElementById('refreshAdminBtn');
+                if (refreshBtn) {
+                    refreshBtn.onclick = () => {
+                        window.adminManager.refresh().catch(console.error);
+                    };
+                }
+
+                state.initialized = true;
+            }
+
+            async function refresh() {
+                renderFeatureTogglesWidget();
+            }
+
+            return {
+                state,
+                initialize,
+                refresh
+            };
+        })();
+    </script>
 
     <!-- Session Management & Data Persistence Scripts - MUST BE LOADED LAST -->
     <script src="js/auth/login-robust.js"></script>

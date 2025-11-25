@@ -549,14 +549,16 @@
     }, 10);
   });
 
-  // Also check if data is already loaded
+  // Also check if data is already loaded (handles race condition where
+  // programs-loader.js runs before this script sets up event listeners)
   if (window.programsData && window.programsData.length > 0) {
-    // Dependencies might not be ready yet, wait a bit
+    // Dependencies might not be ready yet, wait a bit longer to ensure
+    // all module scripts have loaded and app-controller is ready
     setTimeout(() => {
       if (!ccPrograms.isReady) {
         ccPrograms.init();
       }
-    }, 100);
+    }, 150);
   }
 
   // ============================================================================

@@ -126,6 +126,13 @@
             // Get current coach initials for development (assign all demo clients to current user)
             const currentCoachInitials = window.ccConfig?.currentUser?.initials || 'JH';
             
+            // Sample ZIP codes from different regions for variety
+            const sampleZips = ['33101', '90210', '10001', '60601', '75201', '98101', '02101', '85001', '30301', '19101'];
+            const randomZip = sampleZips[Math.floor(Math.random() * sampleZips.length)];
+            
+            // LGBTQ+ affirming needs (randomly assign ~20% of clients)
+            const lgbtqAffirming = Math.random() < 0.2;
+            
             return {
                 initials: initials,
                 kipuId: `KIPU${String(1000 + index).padStart(4, '0')}`,
@@ -138,6 +145,14 @@
                 intakeScheduledDate: intakeScheduledDate ? intakeScheduledDate.toISOString().split('T')[0] : null,
                 insuranceVerified: stage !== 'pre-admission',
                 bedAssignment: admissionDate ? `Room${Math.floor(Math.random() * 10) + 1}` : null,
+                
+                // Location data (for Programs & Docs map filtering)
+                zip: randomZip,
+                homeCity: null, // Would be geocoded from ZIP
+                homeState: null,
+                
+                // Identity data (for Programs & Docs filtering)
+                lgbtqAffirming: lgbtqAffirming,
                 
                 // Care team (using correct field names that match ClientManager)
                 // For development, assign all to current coach so they show up in "My Clients"

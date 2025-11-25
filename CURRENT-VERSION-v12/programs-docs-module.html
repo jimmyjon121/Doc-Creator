@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CareConnect Pro — Programs & Document Creator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConnect Pro — Programs & Document Creator</title>
   
   <!-- Styles -->
   <link rel="stylesheet" href="libs/leaflet.css">
@@ -18,8 +18,8 @@
     .marker-cluster-large { background-color: rgba(110, 123, 255, 0.6); }
     .marker-cluster-large div { background-color: rgba(110, 123, 255, 0.8); }
     .marker-cluster {
-      border-radius: 50%;
-      text-align: center;
+            border-radius: 50%;
+            text-align: center;
       color: white;
       font-weight: bold;
     }
@@ -28,15 +28,15 @@
       height: 30px;
       margin-left: 5px;
       margin-top: 5px;
-      border-radius: 50%;
+            border-radius: 50%;
       line-height: 30px;
     }
     /* Tooltip override */
     .cc-map-tooltip {
-      padding: 8px 12px;
+            padding: 8px 12px;
       font-family: var(--font-sans, system-ui);
-    }
-  </style>
+        }
+    </style>
 </head>
 <body class="programs-module">
 
@@ -44,17 +44,17 @@
        TOOLBAR
        ============================================ -->
   <header class="toolbar">
-    <div class="toolbar__brand">
+        <div class="toolbar__brand">
       <span style="font-size: 24px; margin-right: 8px;">📋</span>
       Programs & Docs
-    </div>
+            </div>
     
-    <div class="toolbar__search">
+        <div class="toolbar__search">
       <svg class="toolbar__search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
       </svg>
       <input type="search" id="globalSearch" class="toolbar__search-input" placeholder="Search programs...">
-    </div>
+        </div>
     
     <div class="toolbar__client">
       <label class="toolbar__client-label" style="font-size: 12px; color: var(--neutral-500); margin-right: 8px;">Client:</label>
@@ -63,15 +63,15 @@
       </select>
     </div>
     
-    <div class="toolbar__actions">
+        <div class="toolbar__actions">
       <button id="toggleBuilderBtn" class="toolbar__btn" title="Toggle Document Builder">
         📝
       </button>
       <button id="preferencesBtn" class="toolbar__btn" title="Preferences">
         ⚙️
-      </button>
-    </div>
-  </header>
+                </button>
+        </div>
+    </header>
 
   <!-- ============================================
        CLIENT CONTEXT PANEL
@@ -80,7 +80,7 @@
     <div class="client-context__header">
       <span class="client-context__title">Client Context</span>
       <button id="closeClientContext" class="btn btn--ghost btn--sm">✕</button>
-    </div>
+                </div>
     
     <div class="client-context__tabs">
       <button class="client-context__tab client-context__tab--active" data-tab="profile">Profile</button>
@@ -88,7 +88,7 @@
       <button class="client-context__tab" data-tab="identity">Identity</button>
       <button class="client-context__tab client-context__tab--disabled" data-tab="clinical" title="Requires backend">Clinical</button>
       <button class="client-context__tab client-context__tab--disabled" data-tab="insurance" title="Requires backend">Insurance</button>
-    </div>
+                </div>
     
     <div class="client-context__content" id="clientContextContent">
       <!-- Profile Tab (default) -->
@@ -96,41 +96,41 @@
         <div class="client-context__field">
           <label class="client-context__label">Initials</label>
           <span class="client-context__value" id="clientInitials">--</span>
-        </div>
+                </div>
         <div class="client-context__field">
           <label class="client-context__label">Kipu ID</label>
           <span class="client-context__value" id="clientKipuId">--</span>
-        </div>
+                </div>
         <div class="client-context__field">
           <label class="client-context__label">House</label>
           <span class="client-context__value" id="clientHouse">--</span>
-        </div>
+            </div>
         <div class="client-context__field">
           <label class="client-context__label">Admission Date</label>
           <span class="client-context__value" id="clientAdmitDate">--</span>
-        </div>
-      </div>
+                </div>
+            </div>
       
       <!-- Location Tab -->
       <div class="client-context__panel" data-panel="location" hidden>
         <div class="client-context__field">
           <label class="client-context__label">Home ZIP Code</label>
           <input type="text" id="clientZip" class="client-context__input" placeholder="12345" maxlength="5" pattern="[0-9]{5}">
-        </div>
+                    </div>
         <div class="client-context__field">
           <label class="client-context__label">City / State</label>
           <span class="client-context__value" id="clientCityState">--</span>
-        </div>
-      </div>
+                    </div>
+                </div>
       
       <!-- Identity Tab -->
       <div class="client-context__panel" data-panel="identity" hidden>
         <div class="client-context__field" style="flex-direction: row; align-items: center; gap: 12px;">
           <label class="client-context__label" style="margin: 0;">LGBTQ+ Affirming Needs</label>
           <button id="clientLgbtqToggle" class="preferences-field__toggle" role="switch" aria-checked="false"></button>
-        </div>
-      </div>
-    </div>
+            </div>
+                    </div>
+                            </div>
   </aside>
 
   <!-- ============================================
@@ -143,7 +143,7 @@
       <div class="filter-rail__header">
         <h2 class="filter-rail__title">Filters</h2>
         <button id="clearAllFilters" class="filter-rail__clear">Clear All</button>
-      </div>
+                </div>
       
       <!-- LOC Filter -->
       <div class="filter-group">
@@ -153,8 +153,8 @@
         </div>
         <div id="locFilters">
           <!-- Populated by JS -->
+            </div>
         </div>
-      </div>
       
       <!-- Format Filter -->
       <div class="filter-group">
@@ -166,17 +166,17 @@
           <label class="filter-checkbox">
             <input type="checkbox" class="filter-checkbox__input" data-filter="format" value="Onsite">
             <span class="filter-checkbox__label">Onsite</span>
-          </label>
+                        </label>
           <label class="filter-checkbox">
             <input type="checkbox" class="filter-checkbox__input" data-filter="format" value="Virtual">
             <span class="filter-checkbox__label">Virtual</span>
-          </label>
+                        </label>
           <label class="filter-checkbox">
             <input type="checkbox" class="filter-checkbox__input" data-filter="format" value="Hybrid">
             <span class="filter-checkbox__label">Hybrid</span>
-          </label>
-        </div>
-      </div>
+                        </label>
+                    </div>
+            </div>
       
       <!-- State Filter -->
       <div class="filter-group">
@@ -186,20 +186,20 @@
         </div>
         <select id="stateFilter" class="filter-select" multiple size="5">
           <!-- Populated by JS -->
-        </select>
-      </div>
+                            </select>
+                    </div>
       
       <!-- Age Range Filter -->
       <div class="filter-group">
         <div class="filter-group__header">
           <h3 class="filter-group__title">Age Range</h3>
-        </div>
+            </div>
         <div class="filter-range">
           <input type="number" id="ageMin" class="filter-range__input" placeholder="Min" min="0" max="100">
           <span class="filter-range__separator">to</span>
           <input type="number" id="ageMax" class="filter-range__input" placeholder="Max" min="0" max="100">
-        </div>
-      </div>
+                    </div>
+            </div>
       
       <!-- Clinical Flags Filter -->
       <div class="filter-group">
@@ -211,15 +211,15 @@
           <label class="filter-checkbox">
             <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="lgbtq">
             <span class="filter-checkbox__label">LGBTQ+ Affirming</span>
-          </label>
+                        </label>
           <label class="filter-checkbox">
             <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="trans">
             <span class="filter-checkbox__label">Trans Affirming</span>
-          </label>
+                        </label>
           <label class="filter-checkbox">
             <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="asd">
             <span class="filter-checkbox__label">Treats ASD</span>
-          </label>
+                        </label>
           <label class="filter-checkbox">
             <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="sud">
             <span class="filter-checkbox__label">Treats SUD</span>
@@ -227,15 +227,15 @@
           <label class="filter-checkbox">
             <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="highAcuity">
             <span class="filter-checkbox__label">High Acuity MH</span>
-          </label>
-        </div>
+                        </label>
+                    </div>
       </div>
       
       <div class="filter-rail__footer">
         <p class="filter-rail__stats">
           Showing <strong id="resultsCount">0</strong> of <strong id="totalCount">0</strong> programs
         </p>
-      </div>
+            </div>
     </aside>
     
     <!-- RESULTS AREA -->
@@ -258,8 +258,8 @@
             <option value="state">State</option>
             <option value="distance">Distance</option>
           </select>
-        </div>
-      </div>
+                                </div>
+                                </div>
       
       <!-- Grid View (Default) -->
       <div id="resultsGrid" class="results-grid">
@@ -268,27 +268,27 @@
           <div class="empty-state__icon">🔍</div>
           <h3 class="empty-state__title">No programs found</h3>
           <p class="empty-state__text">Try adjusting your filters or search term.</p>
-        </div>
-      </div>
+                                </div>
+                                </div>
       
       <!-- Rows View -->
       <div id="resultsRows" class="results-rows" hidden>
         <table class="results-table">
-          <thead>
-            <tr>
+                                <thead>
+                                    <tr>
               <th data-sort="name">Name</th>
               <th data-sort="location">Location</th>
               <th data-sort="loc">LOC</th>
               <th data-sort="format">Format</th>
               <th data-sort="age">Age</th>
               <th>Actions</th>
-            </tr>
-          </thead>
+                                    </tr>
+                                </thead>
           <tbody id="resultsTableBody">
             <!-- Rows populated by JS -->
-          </tbody>
-        </table>
-      </div>
+                                </tbody>
+                            </table>
+                                </div>
       
       <!-- Compare View -->
       <div id="resultsCompare" class="compare-view" hidden>
@@ -296,9 +296,9 @@
           <div class="empty-state__icon">⚖️</div>
           <h3 class="empty-state__title">Select programs to compare</h3>
           <p class="empty-state__text">Add up to 4 programs to compare side-by-side.</p>
-        </div>
+                                </div>
         <!-- Compare columns populated by JS -->
-      </div>
+                            </div>
       
       <!-- Map View -->
       <div id="resultsMap" class="results-map" hidden>
@@ -310,28 +310,28 @@
           <div class="map-radius__modes">
             <button class="map-radius__mode map-radius__mode--active" data-mode="local">Local (At-Home/OP)</button>
             <button class="map-radius__mode" data-mode="primary">Primary (Residential)</button>
-          </div>
+                        </div>
           <div class="map-radius__presets" id="radiusPresets">
             <!-- Populated based on mode -->
-          </div>
+                        </div>
           <input type="range" id="radiusSlider" class="map-radius__slider" min="10" max="500" value="50">
           <div class="map-radius__value"><span id="radiusValue">50</span> miles</div>
-        </div>
+                    </div>
         
         <!-- Map Legend -->
         <div class="map-legend" id="mapLegend">
           <div class="map-legend__header">
             <span class="map-legend__title">Legend</span>
             <button class="map-legend__toggle" id="toggleLegend">−</button>
-          </div>
+                        </div>
           <div class="map-legend__items" id="legendItems">
             <!-- Populated by JS -->
-          </div>
+                                </div>
           <div class="map-legend__footer">
             <button class="btn btn--sm btn--ghost" id="showAllLoc">Show All</button>
             <button class="btn btn--sm btn--ghost" id="hideAllLoc">Hide All</button>
-          </div>
-        </div>
+                            </div>
+                            </div>
         
         <!-- Map Controls -->
         <div class="map-controls">
@@ -341,8 +341,8 @@
           <button class="map-controls__btn" id="mapCenterClient" title="Center on Client" disabled>📍</button>
           <button class="map-controls__btn" id="mapToggleTiles" title="Toggle Light/Dark">☀️</button>
           <button class="map-controls__btn" id="mapFullscreen" title="Fullscreen">⛶</button>
-        </div>
-      </div>
+                                </div>
+                            </div>
     </section>
     
     <!-- BUILDER PANE -->
@@ -353,8 +353,8 @@
           <div>
             <button id="minimizeBuilder" class="btn btn--ghost btn--icon-sm">−</button>
             <button id="closeBuilder" class="btn btn--ghost btn--icon-sm">✕</button>
-          </div>
-        </div>
+                                </div>
+                            </div>
         
         <div class="builder-pane__meta">
           <div class="builder-pane__meta-item">
@@ -363,38 +363,38 @@
               <option value="aftercare-options">Aftercare Options</option>
               <option value="aftercare-plan">Aftercare Plan</option>
             </select>
-          </div>
+                                </div>
           <div class="builder-pane__meta-item">
             <span class="builder-pane__meta-label">Client</span>
             <span class="builder-pane__meta-value" id="builderClient">--</span>
-          </div>
-        </div>
+                            </div>
+                                </div>
         
         <div class="builder-pane__status" id="builderStatus">
           Status: No draft
-        </div>
+                            </div>
       </div>
       
       <div class="builder-pane__tabs">
         <button class="builder-pane__tab builder-pane__tab--active" data-scenario="primary">Primary</button>
         <button class="builder-pane__tab" data-scenario="admin-discharge">Admin Discharge</button>
         <button class="builder-pane__tab" data-scenario="at-home">At-Home</button>
-      </div>
+                                    </div>
       
       <div class="builder-pane__content" id="builderContent">
         <!-- Phase: Stabilize -->
         <div class="builder-phase">
           <div class="builder-phase__header">
-            <div>
+                                    <div>
               <span class="builder-phase__title">STABILIZE</span>
               <span class="builder-phase__subtitle">(0-7 days)</span>
-            </div>
+                                    </div>
             <button class="builder-phase__add" data-phase="stabilize">+ Add</button>
-          </div>
+                                    </div>
           <div class="builder-phase__content" id="phaseStabilize" data-phase="stabilize">
             <div class="builder-phase__empty">Drag programs here</div>
-          </div>
-        </div>
+                                    </div>
+                                    </div>
         
         <!-- Phase: Bridge -->
         <div class="builder-phase">
@@ -402,12 +402,12 @@
             <div>
               <span class="builder-phase__title">BRIDGE</span>
               <span class="builder-phase__subtitle">(Week 2-4)</span>
-            </div>
+                                    </div>
             <button class="builder-phase__add" data-phase="bridge">+ Add</button>
-          </div>
+                                    </div>
           <div class="builder-phase__content" id="phaseBridge" data-phase="bridge">
             <div class="builder-phase__empty">Drag programs here</div>
-          </div>
+                        </div>
         </div>
         
         <!-- Phase: Sustain -->
@@ -416,25 +416,25 @@
             <div>
               <span class="builder-phase__title">SUSTAIN</span>
               <span class="builder-phase__subtitle">(30+ days)</span>
-            </div>
+                            </div>
             <button class="builder-phase__add" data-phase="sustain">+ Add</button>
-          </div>
+                        </div>
           <div class="builder-phase__content" id="phaseSustain" data-phase="sustain">
             <div class="builder-phase__empty">Drag programs here</div>
-          </div>
-        </div>
+                    </div>
+                    </div>
         
         <!-- Phase: At-Home -->
         <div class="builder-phase">
           <div class="builder-phase__header">
             <div>
               <span class="builder-phase__title">AT-HOME SUPPORTS</span>
-            </div>
+                            </div>
             <button class="builder-phase__add" data-phase="atHome">+ Add</button>
-          </div>
+                        </div>
           <div class="builder-phase__content" id="phaseAtHome" data-phase="atHome">
             <div class="builder-phase__empty">Drag programs here</div>
-          </div>
+                        </div>
         </div>
         
         <!-- Alumni Services -->
@@ -453,15 +453,15 @@
               <input type="checkbox" id="alumniNest" class="filter-checkbox__input">
               <span class="filter-checkbox__label">NEST Alumni (Fri)</span>
             </label>
-          </div>
-        </div>
-      </div>
+                                    </div>
+                                </div>
+                                    </div>
       
       <div class="builder-pane__footer">
         <button id="saveDraftBtn" class="btn btn--secondary">Save Draft</button>
         <button id="previewBtn" class="btn btn--secondary">Preview</button>
         <button id="exportBtn" class="btn btn--primary">Export</button>
-      </div>
+                                </div>
     </aside>
   </main>
 
@@ -476,13 +476,13 @@
         <div class="profile-modal__hero-content">
           <h1 class="profile-modal__name" id="profileName">Program Name</h1>
           <div class="profile-modal__meta" id="profileMeta"></div>
-        </div>
-      </div>
+                                    </div>
+                                </div>
       
       <!-- Scrollable Content - NO TABS -->
       <div class="profile-modal__content" id="profileContent">
         <!-- Full profile content populated by JS -->
-      </div>
+                            </div>
       
       <!-- Sticky Footer Actions -->
       <div class="profile-modal__footer">
@@ -494,14 +494,14 @@
               <button class="dropdown-item" data-phase="bridge">→ Bridge (Week 2-4)</button>
               <button class="dropdown-item" data-phase="sustain">→ Sustain (30+ days)</button>
               <button class="dropdown-item" data-phase="atHome">→ At-Home Supports</button>
-            </div>
-          </div>
+                                </div>
+                            </div>
           <button id="profileCompare" class="btn btn--secondary btn--lg">⚖️ Compare</button>
-        </div>
+                                </div>
         <button id="closeProfileBtn" class="btn btn--ghost">Close</button>
-      </div>
-    </div>
-  </div>
+                                </div>
+                            </div>
+                        </div>
 
   <!-- ============================================
        PREFERENCES MODAL
@@ -511,17 +511,17 @@
       <div class="preferences-modal__header">
         <h2 class="preferences-modal__title">Preferences</h2>
         <button id="closePreferences" class="btn btn--ghost btn--icon-sm">✕</button>
-      </div>
+                        </div>
       
       <div class="preferences-modal__content" id="preferencesContent">
         <!-- Populated by JS -->
-      </div>
+                        </div>
       
       <div class="preferences-modal__footer">
         <button id="resetPreferences" class="btn btn--ghost">Reset to Defaults</button>
         <button id="savePreferences" class="btn btn--primary">Save</button>
-      </div>
-    </div>
+                            </div>
+                        </div>
   </div>
 
   <!-- ============================================
@@ -542,13 +542,13 @@
           <li>Upload to Kipu under the CM tab</li>
           <li>Name the file: <strong id="kipuFileName">--</strong></li>
         </ol>
-      </div>
+                        </div>
       
       <div class="kipu-modal__actions">
         <button id="openKipu" class="btn btn--primary">Open Kipu</button>
         <button id="downloadFiles" class="btn btn--secondary">Download</button>
         <button id="markUploaded" class="btn btn--ghost">Mark as Uploaded</button>
-      </div>
+                    </div>
     </div>
   </div>
 

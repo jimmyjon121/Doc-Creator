@@ -6,7 +6,7 @@
 class IndexedDBManager {
     constructor() {
         this.dbName = 'CareConnectPro';
-        this.version = 4; // Increment version for enhanced CM tracker
+        this.version = 5; // Increment version for audit log and enhanced analytics
         this.db = null;
         this.stores = {
             programs: 'programs',
@@ -15,6 +15,7 @@ class IndexedDBManager {
             filters: 'filters',
             documents: 'documents',
             analytics: 'analytics',
+            auditLog: 'auditLog', // New: HIPAA-compliant audit trail
             mapTiles: 'mapTiles',
             clients: 'clients', // Enhanced for CM tracking
             houses: 'houses', // New: residential houses

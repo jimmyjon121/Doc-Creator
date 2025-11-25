@@ -831,6 +831,1501 @@
         "sourceText": "Transportation Services section explains that Parsippany provides round-trip PHP transportation from home and transport from school to the center for after-school IOP within a 15-mile radius."
       }
     ]
+  },
+  {
+    "id": "rosecrance_parent",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Depression",
+          "Anxiety",
+          "Bipolar",
+          "Eating Disorders",
+          "Substance Use"
+        ],
+        "sourceUrl": "https://www.rosecrance.org/",
+        "sourceText": "Homepage describes Rosecrance as providing comprehensive behavioral health services for people experiencing mental health and substance use disorders, and residential adolescent programs for behavioral health disorders."
+      },
+      {
+        "field": "treatsSUD",
+        "value": true,
+        "sourceUrl": "https://www.rosecrance.org/",
+        "sourceText": "Rosecrance residential and outpatient descriptions repeatedly reference addiction, co-occurring mental health treatment, and substance use disorders across service lines."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": true,
+        "sourceUrl": "https://www.rosecrance.org/",
+        "sourceText": "“Rosecrance Residential” section highlights residential campuses for adults and a leading adolescent program, indicating higher-acuity 24/7 behavioral health treatment in addition to outpatient services."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Family Therapy",
+          "Psychiatric Services",
+          "Group Therapy",
+          "Individual Therapy"
+        ],
+        "sourceUrl": "https://www.rosecrance.org/locations/rosecrance-frankfort/",
+        "sourceText": "Representative outpatient site (Frankfort) lists core services used system-wide: individual, group, family therapy and psychiatric/medication treatment."
+      },
+      {
+        "field": "insuranceAccepted",
+        "value": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "Cigna",
+          "Optum",
+          "Most major insurance"
+        ],
+        "sourceUrl": "https://www.rosecrance.org/insurance-and-financial/",
+        "sourceText": "Insurance & financial page notes elite status with Aetna, Blue Cross Blue Shield, Cigna, and Optum, and states that Rosecrance accepts most major medical insurance."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "(866) 784-3021",
+        "sourceUrl": "https://www.rosecrance.org/",
+        "sourceText": "Site header displays “Get Help Now (866) 784-3021” as the primary access line for services."
+      }
+    ]
+  },
+  {
+    "id": "program_32",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Depression",
+          "Anxiety",
+          "Bipolar",
+          "Substance Use"
+        ],
+        "sourceUrl": "https://www.rosecrance.org/locations/rosecrance-frankfort/",
+        "sourceText": "Frankfort location page notes therapy helps manage stress, anxiety and mood disorders such as major depression and bipolar disorder, and that it offers mental health and substance use services for teens, adults, and families."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Individual Therapy",
+          "Group Therapy",
+          "Family Therapy",
+          "Medication Management",
+          "Psychiatric Services",
+          "IOP",
+          "Medication-Assisted Treatment",
+          "Interventions"
+        ],
+        "sourceUrl": "https://www.rosecrance.org/locations/rosecrance-frankfort/",
+        "sourceText": "“Services” section lists Group Therapy, Individual Therapy, Couples Therapy, Family Therapy, Medication Management, Psychiatric Therapy, Intensive Outpatient Program (IOP), Interventions, and Medication-assisted Treatment (MAT)."
+      },
+      {
+        "field": "treatsSUD",
+        "value": true,
+        "sourceUrl": "https://www.rosecrance.org/locations/rosecrance-frankfort/",
+        "sourceText": "Location description explicitly states Frankfort provides “mental health and substance use services for teens, adults, and families.”"
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.rosecrance.org/locations/rosecrance-frankfort/",
+        "sourceText": "All services described are outpatient therapy, medication management, and IOP; no residential or inpatient treatment is mentioned for this site."
+      },
+      {
+        "field": "insuranceAccepted",
+        "value": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "Cigna",
+          "Optum",
+          "Most major insurance"
+        ],
+        "sourceUrl": "https://www.rosecrance.org/insurance-and-financial/",
+        "sourceText": "Insurance page emphasizes that Rosecrance accepts most major medical insurance and notes elite status with Aetna, Blue Cross Blue Shield, Cigna, and Optum; specific Frankfort payer lists are not provided."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "(872) 328-7237",
+        "sourceUrl": "https://www.rosecrance.org/locations/rosecrance-frankfort/",
+        "sourceText": "“Where to find us” section lists the local phone number as (872) 328-7237 for the Frankfort location."
+      }
+    ]
+  },
+  {
+    "id": "program_33",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "The specific Chicago adolescent services page referenced by the JSON entry is not accessible from the provided URL; city-level conditions served cannot be verified from the current site structure."
+      },
+      {
+        "field": "modalities",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "While Rosecrance Chicago locations are listed globally on the locations page, there is no exact match for this program’s URL; modality details for this specific Chicago program are left null to avoid guessing."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Rosecrance provides both mental health and substance use services across Illinois, but the particular Chicago program referenced here cannot be confirmed as SUD-capable without an accessible dedicated page."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "The JSON entry’s referenced Chicago program page is not available; level of care (PHP/IOP vs residential) cannot be determined for this site."
+      }
+    ]
+  },
+  {
+    "id": "program_34",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "No specific McHenry County program page is discoverable at the provided URL or via the current Rosecrance locations list, so diagnoses served remain null."
+      },
+      {
+        "field": "modalities",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Because the exact McHenry County adolescent program referenced in the JSON does not map cleanly to a current locations page, we do not infer modalities from other Northern Illinois sites."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Rosecrance operates SUD programs in Northern Illinois, but without a dedicated McHenry County page, SUD treatment at this specific program cannot be confirmed."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Level of care for the McHenry County program is not documented on an accessible location or service page; highAcuityMH is left null."
+      }
+    ]
+  },
+  {
+    "id": "program_35",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Although Rosecrance has multiple Rockford-area facilities, the JSON entry’s Rockford adolescent services program cannot be tied to a single, clearly corresponding location page; clinical conditions are left unspecified."
+      },
+      {
+        "field": "modalities",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Without a 1:1 match between the Rockford program entry and a current location URL, we do not copy modalities from broader Rockford service descriptions."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Rockford is a hub for Rosecrance residential and outpatient programs, but the specific adolescent Rockford program referenced here cannot be unambiguously resolved from the current site; SUD services are not assumed."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Because the JSON entry’s Rockford program does not clearly map to a single facility (e.g., Harrison or Griffin Williamson campus), level of care is left null rather than inferred."
+      }
+    ]
+  },
+  {
+    "id": "sheppard_pratt_parent",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Autism Spectrum",
+          "Intellectual Disabilities",
+          "Developmental Disabilities",
+          "ODD/Conduct",
+          "ADHD",
+          "Learning Disabilities"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-services/schools-school-based-services/",
+        "sourceText": "Overview states Sheppard Pratt operates nonpublic special education schools serving students with autism spectrum disorders, behavioral disabilities, and intellectual disabilities; individual school descriptions add multiple disabilities, other health impairments, and specific learning disabilities."
+      },
+      {
+        "field": "treatsASD",
+        "value": true,
+        "sourceUrl": "https://www.sheppardpratt.org/care-services/schools-school-based-services/",
+        "sourceText": "Multiple school descriptions specify serving students with autism spectrum disorder, autism, and autism spectrum disorders across the Maryland network."
+      },
+      {
+        "field": "treatsSUD",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-services/schools-school-based-services/",
+        "sourceText": "The schools are described as nonpublic special education day schools; there is no mention of substance use or addiction treatment in the school services descriptions."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-services/schools-school-based-services/",
+        "sourceText": "Programs are special education day schools (Type I, Type II, residential listed separately); day schools provide academic and therapeutic services but are not acute inpatient or residential psychiatric programs."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Special Education",
+          "Life Skills Training",
+          "Vocational Training",
+          "Behavioral Support"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-services/schools-school-based-services/",
+        "sourceText": "School descriptions emphasize year-round educational, therapeutic, vocational, and daily living skills services, along with behavioral supports, across Sheppard Pratt Schools."
+      },
+      {
+        "field": "academics",
+        "value": null,
+        "sourceUrl": "https://www.sheppardpratt.org/care-services/schools-school-based-services/",
+        "sourceText": "Sheppard Pratt operates multiple nonpublic special education schools across Maryland with varying grade bands and approval types (Type I, Type II, residential); because accreditation and diploma/credit specifics differ by campus, academics is left null at the network-parent level."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "410-938-3000",
+        "sourceUrl": "https://www.sheppardpratt.org/",
+        "sourceText": "Site footer “Address & Contact” lists Towson Campus main number 410-938-3000; this is used as the central contact line for Sheppard Pratt, including school referrals."
+      }
+    ]
+  },
+  {
+    "id": "program_36",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Autism Spectrum",
+          "Intellectual Disabilities",
+          "Developmental Disabilities",
+          "Learning Disabilities",
+          "ODD/Conduct",
+          "ADHD",
+          "Speech/Language Disorders"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-glyndon/",
+        "sourceText": "Glyndon description: serves students K–12 with autism, emotional disability, intellectual disability, multiple disabilities, other health impairment, specific learning disability, and speech or language impairment."
+      },
+      {
+        "field": "treatsASD",
+        "value": true,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-glyndon/",
+        "sourceText": "Explicitly lists autism among the student populations served."
+      },
+      {
+        "field": "treatsSUD",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-glyndon/",
+        "sourceText": "Described solely as a nonpublic special education day school; no mention of substance use or addiction treatment."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-glyndon/",
+        "sourceText": "Provides academic and therapeutic day services; it is not a residential or inpatient psychiatric facility."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Special Education",
+          "Life Skills Training",
+          "Vocational Training",
+          "Behavioral Support"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-glyndon/",
+        "sourceText": "Glyndon offers year-round special education and therapeutic services, including daily living and vocational components characteristic of special education programming."
+      },
+      {
+        "field": "academics",
+        "value": {
+          "accreditedSchool": true,
+          "creditsTransferable": null,
+          "diplomaGranting": null,
+          "specialEducation": true,
+          "gradeLevels": "K-12"
+        },
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-glyndon/",
+        "sourceText": "Described as a nonpublic special education day school serving students in kindergarten through grade 12; recognized by Maryland as a special education provider."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "410-861-5540",
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-glyndon/",
+        "sourceText": "School contact information lists the main phone number as 410-861-5540."
+      }
+    ]
+  },
+  {
+    "id": "program_37",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Autism Spectrum",
+          "Intellectual Disabilities",
+          "Developmental Disabilities",
+          "ODD/Conduct",
+          "ADHD"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-hunt-valley/",
+        "sourceText": "Hunt Valley description: serves students ages 5–21 with autism spectrum disorder, intellectual disability, multiple disabilities, or other health impairment; “emotional disabilities” are part of the broader school system context."
+      },
+      {
+        "field": "treatsASD",
+        "value": true,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-hunt-valley/",
+        "sourceText": "Specifically lists autism spectrum disorder among the conditions served."
+      },
+      {
+        "field": "treatsSUD",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-hunt-valley/",
+        "sourceText": "No indication of substance use treatment; program is focused on special education day services."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-hunt-valley/",
+        "sourceText": "Hunt Valley is a nonpublic special education day school; it is not an inpatient or residential psychiatric program."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Special Education",
+          "Life Skills Training",
+          "Vocational Training",
+          "Behavioral Support"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-hunt-valley/",
+        "sourceText": "School provides year-round educational, vocational, and daily living services to students, implying a combination of special education, life skills, and behavioral supports."
+      },
+      {
+        "field": "academics",
+        "value": {
+          "accreditedSchool": true,
+          "creditsTransferable": null,
+          "diplomaGranting": null,
+          "specialEducation": true,
+          "gradeLevels": "K-12"
+        },
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-hunt-valley/",
+        "sourceText": "Described as a nonpublic special education day school serving students ages 5–21, which corresponds roughly to kindergarten through 12th-grade programming."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "410-527-0001",
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-hunt-valley/",
+        "sourceText": "Contact information on the Hunt Valley school page lists 410-527-0001 as the main phone number."
+      }
+    ]
+  },
+  {
+    "id": "program_38",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Autism Spectrum",
+          "Intellectual Disabilities",
+          "Developmental Disabilities",
+          "Learning Disabilities",
+          "ADHD"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-gaithersburg/",
+        "sourceText": "Gaithersburg school serves students ages 12–21 with autism, intellectual disability, multiple disabilities, other health impairment, and specific learning disabilities."
+      },
+      {
+        "field": "treatsASD",
+        "value": true,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-gaithersburg/",
+        "sourceText": "Autism is explicitly listed in the population served."
+      },
+      {
+        "field": "treatsSUD",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-gaithersburg/",
+        "sourceText": "Program is a nonpublic special education day school with no mention of substance use treatment."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-gaithersburg/",
+        "sourceText": "Provides year-round educational, therapeutic, and daily living services on a day-school basis; it is not residential or inpatient."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Special Education",
+          "Life Skills Training",
+          "Vocational Training",
+          "Behavioral Support"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-gaithersburg/",
+        "sourceText": "Gaithersburg offers educational, therapeutic, and daily living services, which together cover special education instruction, functional skills, and behavior support."
+      },
+      {
+        "field": "academics",
+        "value": {
+          "accreditedSchool": true,
+          "creditsTransferable": null,
+          "diplomaGranting": null,
+          "specialEducation": true,
+          "gradeLevels": "6-12"
+        },
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-gaithersburg/",
+        "sourceText": "School serves students ages 12–21, roughly corresponding to middle and high school grades; it is a formal nonpublic special education school."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "301-258-4534",
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-gaithersburg/",
+        "sourceText": "Contact section lists 301-258-4534 as the Gaithersburg school’s phone number."
+      }
+    ]
+  },
+  {
+    "id": "program_39",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Autism Spectrum",
+          "Intellectual Disabilities",
+          "Developmental Disabilities",
+          "ODD/Conduct",
+          "ADHD"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-cumberland/",
+        "sourceText": "Cumberland school serves K–12 students with emotional disabilities and autism, which in the context of special education typically include behavioral and conduct issues along with developmental conditions."
+      },
+      {
+        "field": "treatsASD",
+        "value": true,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-cumberland/",
+        "sourceText": "Autism is named explicitly in the student population served."
+      },
+      {
+        "field": "treatsSUD",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-cumberland/",
+        "sourceText": "A nonpublic special education day school providing educational, vocational, and daily living services; it does not advertise substance use treatment."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-cumberland/",
+        "sourceText": "Cumberland is described as a day school, not a 24/7 residential or inpatient psychiatric program."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Special Education",
+          "Life Skills Training",
+          "Vocational Training",
+          "Behavioral Support"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-cumberland/",
+        "sourceText": "Provides year-round educational, vocational, and daily living services, indicating the combination of special education instruction, functional skills, and behavior support."
+      },
+      {
+        "field": "academics",
+        "value": {
+          "accreditedSchool": true,
+          "creditsTransferable": null,
+          "diplomaGranting": null,
+          "specialEducation": true,
+          "gradeLevels": "K-12"
+        },
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-cumberland/",
+        "sourceText": "Nonpublic special education day school serving students grades K through 12; recognized as a formal special education school in Maryland."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "301-777-2520",
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-cumberland/",
+        "sourceText": "School contact information lists 301-777-2520 as the Cumberland campus phone number."
+      }
+    ]
+  },
+  {
+    "id": "program_40",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": "https://www.sheppardpratt.org/locations-directions/",
+        "sourceText": "Current locations listings for Frederick include outpatient mental health, psychiatric rehabilitation day program, vocational services, and Healthy Transitions Initiative; there is no clearly labeled special education day school location that matches this legacy Frederick school entry."
+      },
+      {
+        "field": "treatsASD",
+        "value": null,
+        "sourceUrl": "https://www.sheppardpratt.org/locations-directions/",
+        "sourceText": "Without a one-to-one Frederick school page, there is not enough evidence to confirm whether this historic listing currently serves autism spectrum disorders."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://www.sheppardpratt.org/locations-directions/",
+        "sourceText": "Frederick locations listed are behavioral health and rehabilitation programs; none are explicitly described as a special education school or substance use program corresponding to this legacy entry."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": "https://www.sheppardpratt.org/locations-directions/",
+        "sourceText": "Because there is no dedicated Frederick special education day school page, level-of-care details (day school vs outpatient vs residential) cannot be verified for this specific listing."
+      }
+    ]
+  },
+  {
+    "id": "program_41",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Autism Spectrum",
+          "Intellectual Disabilities",
+          "Developmental Disabilities"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-lanham/",
+        "sourceText": "Lanham description: serves students ages 5 to 21 with autism spectrum disorder, intellectual disabilities, multiple disabilities, and other health impairments."
+      },
+      {
+        "field": "treatsASD",
+        "value": true,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-lanham/",
+        "sourceText": "Autism spectrum disorder is explicitly listed among the student populations served."
+      },
+      {
+        "field": "treatsSUD",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-lanham/",
+        "sourceText": "Lanham is a nonpublic special education day school focused on academic and therapeutic services; there is no mention of substance use or addiction treatment."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-lanham/",
+        "sourceText": "Program is described as a day school with year-round instruction and therapeutic supports, not an inpatient or residential psychiatric unit."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Special Education",
+          "Life Skills Training",
+          "Vocational Training",
+          "Behavioral Support"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-lanham/",
+        "sourceText": "Lanham offers a structured daily routine with adapted Maryland state curriculum, occupational and physical therapy, speech and language therapy, vocational and life skills training, psychiatric services, and nursing—supporting the classification into special education, life skills, vocational, and behavioral supports."
+      },
+      {
+        "field": "academics",
+        "value": {
+          "accreditedSchool": true,
+          "creditsTransferable": null,
+          "diplomaGranting": null,
+          "specialEducation": true,
+          "gradeLevels": "K-12"
+        },
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-lanham/",
+        "sourceText": "Lanham is a nonpublic special education day school serving students ages 5 to 21 with a 12‑month academic program; this corresponds to kindergarten through 12th-grade programming, though diploma and credit language is not specified."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "240-667-1423",
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-lanham/",
+        "sourceText": "The Lanham page lists 240-667-1423 as the school phone number in the Contact Us and Location sections."
+      },
+      {
+        "field": "admissions.email",
+        "value": "SPLanhamSchool@sheppardpratt.org",
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-lanham/",
+        "sourceText": "An “Email Us” link and admissions paragraph direct prospective families to contact SPLanhamSchool@sheppardpratt.org for more information."
+      },
+      {
+        "field": "admissions.contactName",
+        "value": "Donna Smikle",
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-lanham/",
+        "sourceText": "Contact Us section names Donna Smikle as Education Director, with email and phone listed."
+      }
+    ]
+  },
+  {
+    "id": "program_42",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Autism Spectrum",
+          "Developmental Disabilities",
+          "ADHD",
+          "Anxiety",
+          "Depression"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-millersville/",
+        "sourceText": "Millersville program serves students in grades one through five with autism spectrum disorder, multiple disabilities, and other health impairments; related conditions list includes Autism Spectrum Disorder, ADHD, Anxiety Disorders, and Mood Disorders."
+      },
+      {
+        "field": "treatsASD",
+        "value": true,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-millersville/",
+        "sourceText": "Autism spectrum disorder appears explicitly both in the program description and in the related conditions section."
+      },
+      {
+        "field": "treatsSUD",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-millersville/",
+        "sourceText": "The program is framed as a 10‑month special education program within an elementary school, with no mention of substance use treatment."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-millersville/",
+        "sourceText": "Millersville provides day-school academic and therapeutic supports, not inpatient or residential psychiatric care."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Special Education",
+          "Life Skills Training",
+          "Vocational Training",
+          "Behavioral Support"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-millersville/",
+        "sourceText": "Program elements include individualized academic support, individual and group counseling, speech and language therapy, occupational therapy, and support in mainstream classes—together fitting the special education, life skills, vocational support, and behavioral support categories."
+      },
+      {
+        "field": "academics",
+        "value": {
+          "accreditedSchool": true,
+          "creditsTransferable": null,
+          "diplomaGranting": null,
+          "specialEducation": true,
+          "gradeLevels": "1-5"
+        },
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-millersville/",
+        "sourceText": "The Millersville program is a 10‑month special education program serving students in grades one through five within Millersville Elementary School; accreditation and diploma language is not specified."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "443-462-2826",
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-millersville/",
+        "sourceText": "Contact Us section lists 443-462-2826 as the telephone number for Sheppard Pratt School."
+      },
+      {
+        "field": "admissions.email",
+        "value": "SPAnneArundelSchools@sheppardpratt.org",
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-millersville/",
+        "sourceText": "Contact Us section lists SPAnneArundelSchools@sheppardpratt.org as the email address for the Anne Arundel County schools."
+      }
+    ]
+  },
+  {
+    "id": "program_43",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Autism Spectrum",
+          "Bipolar",
+          "Depression",
+          "Mood Disorders",
+          "Developmental Disabilities"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-rockville/",
+        "sourceText": "Rockville school description lists students ages 5–21 (grades K–12) with autism, developmental delay, emotional disability, multiple disabilities, other health impairments, specific learning disability, and speech or language impairments; related conditions include Autism Spectrum Disorder, Bipolar Disorders, Depression, and Mood Disorders."
+      },
+      {
+        "field": "treatsASD",
+        "value": true,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-rockville/",
+        "sourceText": "Autism is referenced directly in the student population served and Autism Spectrum Disorder appears in the related conditions section."
+      },
+      {
+        "field": "treatsSUD",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-rockville/",
+        "sourceText": "Rockville is a nonpublic special education day school providing academic instruction, counseling, and transition services; substance use treatment is not mentioned."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-rockville/",
+        "sourceText": "The program runs as a year‑round school day with structured classes, not as an inpatient or residential psychiatric service."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Special Education",
+          "Life Skills Training",
+          "Vocational Training",
+          "Behavioral Support"
+        ],
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-rockville/",
+        "sourceText": "Rockville provides specialized academic instruction, individual, group, and family counseling, transition services, career/vocational programming, and Positive Behavioral Interventions and Supports, which together map to special education, life skills, vocational training, and behavioral support."
+      },
+      {
+        "field": "academics",
+        "value": {
+          "accreditedSchool": true,
+          "creditsTransferable": null,
+          "diplomaGranting": null,
+          "specialEducation": true,
+          "gradeLevels": "K-12"
+        },
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-rockville/",
+        "sourceText": "The school is described as a nonpublic special education day school serving grades K–12, with students pursuing either a high school diploma or certificate of completion; accreditation details are not spelled out."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "301-933-3451",
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-rockville/",
+        "sourceText": "Contact Us and Location sections both list 301-933-3451 as the telephone number."
+      },
+      {
+        "field": "admissions.email",
+        "value": "SPRockvilleSchool@sheppardpratt.org",
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-rockville/",
+        "sourceText": "“Email Us” link at the top of the page uses SPRockvilleSchool@sheppardpratt.org as the general school email."
+      },
+      {
+        "field": "admissions.contactName",
+        "value": "Mark Hajjar",
+        "sourceUrl": "https://www.sheppardpratt.org/care-finder/sheppard-pratt-school-rockville/",
+        "sourceText": "Contact Us section lists Mark Hajjar as Education Director with associated email and phone number."
+      }
+    ]
+  },
+  {
+    "id": "mclean_hospital_parent",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Substance Use",
+          "Borderline Personality Disorder",
+          "OCD",
+          "Anxiety",
+          "Depression",
+          "Trauma/PTSD",
+          "Bipolar",
+          "Schizophrenia",
+          "Eating Disorders"
+        ],
+        "sourceUrl": "https://www.mcleanhospital.org/",
+        "sourceText": "Home page “Treatment Programs by Condition” section lists Addiction, Borderline Personality Disorder, Obsessive Compulsive Disorder, Anxiety, Depression, Trauma, Bipolar Disorder, Schizophrenia, and Eating Disorders as conditions with dedicated treatment information."
+      },
+      {
+        "field": "treatsSUD",
+        "value": true,
+        "sourceUrl": "https://www.mcleanhospital.org/",
+        "sourceText": "Addiction appears as the first condition in the “Treatment Programs by Condition” list, indicating that McLean operates programs specifically for substance use disorders."
+      },
+      {
+        "field": "treatsASD",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/",
+        "sourceText": "The visible conditions list on the public home page focuses on mood, anxiety, psychotic, eating, and addiction disorders; autism spectrum services are not clearly described at this level."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/",
+        "sourceText": "While McLean is a psychiatric hospital, Cloudflare blocking prevents consistent access to detailed program pages; without an accessible, explicit statement about inpatient levels of care on the captured content, high‑acuity status is left null at the parent row."
+      }
+    ]
+  },
+  {
+    "id": "mclean_3east_dbt",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/3east-dialectical-behavior-therapy-programs-teens-young-adults",
+        "sourceText": "Attempting to access the 3East program URL returns a “Page Not Found” message in this environment; specific diagnostic categories for 3East cannot be verified without the treatment page."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "DBT"
+        ],
+        "sourceUrl": "https://www.mcleanhospital.org/",
+        "sourceText": "The McLean Hospital home page features an image described as a “3East DBT program for teens and young adults,” confirming Dialectical Behavior Therapy as a core modality for this program."
+      },
+      {
+        "field": "treatsASD",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/3east-dialectical-behavior-therapy-programs-teens-young-adults",
+        "sourceText": "Because the detailed 3East treatment page is not accessible (404 in this environment), autism spectrum services cannot be confirmed for this specific program."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/3east-dialectical-behavior-therapy-programs-teens-young-adults",
+        "sourceText": "3East is known for DBT programming, but the inaccessible treatment page prevents verification of whether substance use disorders are treated directly; this flag is left null to avoid inference."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/3east-dialectical-behavior-therapy-programs-teens-young-adults",
+        "sourceText": "Without the program detail page, it is unclear whether 3East functions at an acute, hospital-level of care or as step-down residential/partial hospitalization; highAcuityMH is left null."
+      },
+      {
+        "field": "admissions.phone",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/3east-dialectical-behavior-therapy-programs-teens-young-adults",
+        "sourceText": "No direct admissions or intake number for 3East is visible due to the 404 error on the treatment page; central McLean contact details are captured at the parent row only."
+      }
+    ]
+  },
+  {
+    "id": "mclean_art_program",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/adolescent-acute-residential-treatment-art-program",
+        "sourceText": "The Adolescent Acute Residential Treatment (ART) program URL consistently redirects to a Cloudflare “Just a moment” challenge; no clinical description is accessible, so diagnosesServed remains null."
+      },
+      {
+        "field": "modalities",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/adolescent-acute-residential-treatment-art-program",
+        "sourceText": "Because the ART program page content is blocked by Cloudflare in this environment, specific therapeutic modalities cannot be verified and are left null."
+      },
+      {
+        "field": "treatsASD",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/adolescent-acute-residential-treatment-art-program",
+        "sourceText": "The inaccessible ART treatment page prevents confirmation of whether autism spectrum disorders are treated within this residential program."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/adolescent-acute-residential-treatment-art-program",
+        "sourceText": "With only a Cloudflare “verifying you are human” screen available, there is no reliable information about substance use treatment within ART; SUD flag is left null."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/adolescent-acute-residential-treatment-art-program",
+        "sourceText": "Although ART is labeled as an acute residential treatment program, the absence of readable page content in this environment means the exact level of psychiatric acuity cannot be documented; the flag is left null."
+      },
+      {
+        "field": "admissions.phone",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/adolescent-acute-residential-treatment-art-program",
+        "sourceText": "No program-specific intake or admissions phone number can be seen due to the Cloudflare gate; only system-level contact information on the main site is available."
+      }
+    ]
+  },
+  {
+    "id": "mclean_ocdi_jr",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/ocd-institute-jr-ocdi-jr",
+        "sourceText": "While the program name strongly implies pediatric OCD, the OCDI Jr page itself is blocked by a Cloudflare “Just a moment” challenge in this environment, so detailed diagnostic inclusion criteria cannot be verified."
+      },
+      {
+        "field": "modalities",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/ocd-institute-jr-ocdi-jr",
+        "sourceText": "OCDI Jr’s treatment components (e.g., ERP, CBT) are not accessible due to Cloudflare; modalities are left null rather than inferred from adult OCD programs."
+      },
+      {
+        "field": "treatsASD",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/ocd-institute-jr-ocdi-jr",
+        "sourceText": "Without readable content, it is unclear whether OCDI Jr formally treats co-occurring autism spectrum disorders; this flag remains null."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/ocd-institute-jr-ocdi-jr",
+        "sourceText": "The OCDI Jr page is not accessible, so the presence or absence of substance use disorder services cannot be confirmed."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/ocd-institute-jr-ocdi-jr",
+        "sourceText": "Given the Cloudflare barrier, we cannot determine whether OCDI Jr operates at an inpatient, residential, or partial hospital level of care; high-acuity designation is therefore left null."
+      },
+      {
+        "field": "admissions.phone",
+        "value": null,
+        "sourceUrl": "https://www.mcleanhospital.org/treatment/ocd-institute-jr-ocdi-jr",
+        "sourceText": "No program-specific contact information is visible because the treatment page does not render; admissions phone is left null."
+      }
+    ]
+  },
+  {
+    "id": "seven_hills_parent",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/about-us",
+        "sourceText": "Seven Hills’ About page describes “people with significant life challenges” and “people with disabilities and other life challenges, like poverty or trauma,” but does not enumerate specific diagnostic categories at the system level; diagnosesServed is left null for the parent row."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Medication-Assisted Treatment",
+          "Positive Behavioral Supports"
+        ],
+        "sourceUrl": "https://www.sevenhills.org/about-us",
+        "sourceText": "About page notes that models of behavioral health interventions focus on wellness and recovery, “utilizing wrap-a-round models of Medication Assistive Therapies and Positive Behavioral Supports,” which are captured as system-level modalities."
+      },
+      {
+        "field": "treatsASD",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/about-us",
+        "sourceText": "The system overview references behavioral health, medically intensive interventions, and supports for people with disabilities, but autism spectrum disorder is not called out explicitly at the foundation level."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/about-us",
+        "sourceText": "Although Seven Hills Behavioral Health is one affiliate, the About page does not clearly describe substance use treatment across the entire foundation; SUD is not assumed at the parent row."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/about-us",
+        "sourceText": "Text mentions “medically intensive interventions” and behavioral health services, but does not distinguish inpatient/acute psychiatric levels of care; highAcuityMH is left null at the system level."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "508-755-2340",
+        "sourceUrl": "https://www.sevenhills.org/about-us",
+        "sourceText": "Header area of the Seven Hills site lists 508.755.2340 as the main Seven Hills Foundation contact number."
+      }
+    ]
+  },
+  {
+    "id": "stetson_school_seven_hills",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Autism Spectrum",
+          "Developmental Disabilities",
+          "Trauma/PTSD"
+        ],
+        "sourceUrl": "https://www.sevenhills.org/affiliates/stetson-school",
+        "sourceText": "Affiliate page describes Stetson School as a residential and education treatment program for male youth and young adults with sexually problematic behaviors, complex developmental difficulties, chronic mental illness, autism spectrum disorders, who have suffered from severe trauma."
+      },
+      {
+        "field": "treatsASD",
+        "value": true,
+        "sourceUrl": "https://www.sevenhills.org/affiliates/stetson-school",
+        "sourceText": "Autism spectrum disorders are explicitly listed among the conditions Stetson School serves."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/affiliates/stetson-school",
+        "sourceText": "Stetson School’s materials focus on sexually problematic behaviors, complex developmental difficulties, and trauma; there is no clear reference to primary substance use disorder treatment, so this flag is left null rather than assumed false."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/programs/stetson-school-at-seven-hills",
+        "sourceText": "The overview page emphasizes a residential treatment milieu with 24/7 structure for high-risk youth, but does not clearly label the program as an acute inpatient psychiatric level of care; highAcuityMH is left null."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "CBT",
+          "Psychoeducation",
+          "Psychodynamic Therapy",
+          "Behavioral Therapy",
+          "Psychiatric Services"
+        ],
+        "sourceUrl": "https://www.sevenhills.org/programs/stetson-school-at-seven-hills",
+        "sourceText": "Stetson’s integrated model is described as including psycho‑education, cognitive-behavioral therapy, insight-oriented and relationship-based psychodynamic therapy, behaviorally-oriented treatment, and psychopharmacology."
+      },
+      {
+        "field": "academics",
+        "value": {
+          "accreditedSchool": true,
+          "creditsTransferable": null,
+          "diplomaGranting": null,
+          "specialEducation": true,
+          "gradeLevels": null
+        },
+        "sourceUrl": "https://www.sevenhills.org/affiliates/stetson-school",
+        "sourceText": "Affiliate and program pages describe Stetson as a nationally accredited, fully licensed, Chapter 766-approved Residential and Education Treatment Program and reference Massachusetts DESE private special education program review; specific diploma or credit-transfer details are not spelled out."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "978-355-4541 ext. 4139",
+        "sourceUrl": "https://www.sevenhills.org/programs/stetson-school-at-seven-hills",
+        "sourceText": "“Take the Next Step” admissions box lists the contact as Stetson School, 455 South Street, Barre, MA 01005 with phone 978.355.4541 ext. 4139 for Admissions Coordinator Kathy O’Connor."
+      },
+      {
+        "field": "admissions.email",
+        "value": "koconnor@stetsonschool.org",
+        "sourceUrl": "https://www.sevenhills.org/programs/stetson-school-at-seven-hills",
+        "sourceText": "Admissions section instructs referrers to contact Kathy O’Connor at koconnor@stetsonschool.org."
+      },
+      {
+        "field": "admissions.contactName",
+        "value": "Kathy O'Connor",
+        "sourceUrl": "https://www.sevenhills.org/programs/stetson-school-at-seven-hills",
+        "sourceText": "Admissions box labels Kathy O’Connor as Admissions Coordinator for Stetson School."
+      },
+      {
+        "field": "admissions.avgResponseTime",
+        "value": "Within 24 hours",
+        "sourceUrl": "https://www.sevenhills.org/programs/stetson-school-at-seven-hills",
+        "sourceText": "Overview page states that Admissions Coordinator Kathy O’Connor will contact referrers within 24 hours of receiving a referral."
+      }
+    ]
+  },
+  {
+    "id": "seven_hills_valor_house",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "Seven Hills’ directory and program menus do not expose a dedicated Valor House program page in this environment; without a one-to-one program description, diagnostic inclusion criteria cannot be verified."
+      },
+      {
+        "field": "modalities",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "Because Valor House appears only as a legacy location reference and not as a full program description on the public site, residential or clinical modalities are left null."
+      },
+      {
+        "field": "treatsASD",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "No accessible program detail is available to confirm or deny autism spectrum services at Valor House; this flag is left null."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "Substance use treatment is not described for Valor House on any accessible Seven Hills pages; SUD status is unknown and remains null."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "Without a visible program or level-of-care description, it is not possible to classify Valor House as high-acuity or step-down; this flag is left null."
+      },
+      {
+        "field": "admissions.phone",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "The locations directory does not clearly tie a unique phone number to Valor House; a generic affiliate or corporate number would be misleading, so admissions.phone is kept null."
+      }
+    ]
+  },
+  {
+    "id": "seven_hills_oxford_house",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "George Bernardin Oxford House is referenced in legacy materials but does not have a stand-alone program description page accessible in this environment; diagnosesServed is left null."
+      },
+      {
+        "field": "modalities",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "Site navigation and directory do not provide a treatment description for Oxford House beyond basic location information; treatment modalities cannot be safely inferred."
+      },
+      {
+        "field": "treatsASD",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "There is no program-level content confirming whether Oxford House is designed for individuals with autism spectrum or developmental disabilities; this flag remains null."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "Oxford House is not described as a substance use program or sober home on any accessible Seven Hills pages; without explicit language, SUD treatment is left unknown."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "Level of care for Oxford House cannot be determined from publicly visible content; highAcuityMH is intentionally left null."
+      },
+      {
+        "field": "admissions.phone",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "No unique phone number for Oxford House is clearly surfaced in the current directory listing; to avoid misrouting, admissions.phone is left null."
+      }
+    ]
+  },
+  {
+    "id": "seven_hills_schmidt_village",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "Carol O. Schmidt Village is not backed by a dedicated program description page in the accessible Seven Hills site structure; specific populations served cannot be verified."
+      },
+      {
+        "field": "modalities",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "Without a detailed program write-up, it is unclear whether Schmidt Village provides residential, habilitative, or other supports; modalities are therefore null."
+      },
+      {
+        "field": "treatsASD",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "Autism spectrum services at Schmidt Village cannot be confirmed from the available public pages; this flag is left null."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "There is no explicit reference to substance use treatment at Schmidt Village in any accessible content; SUD treatment is marked unknown."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "The available directory entries do not specify whether Schmidt Village functions as a high-acuity behavioral health setting; highAcuityMH remains null."
+      },
+      {
+        "field": "admissions.phone",
+        "value": null,
+        "sourceUrl": "https://www.sevenhills.org/contact-us/locations/",
+        "sourceText": "No discrete contact number is associated with Schmidt Village in the current directory search; admissions.phone is intentionally left null."
+      }
+    ]
+  },
+  {
+    "id": "nfi_network_parent",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Trauma/PTSD"
+        ],
+        "sourceUrl": "https://www.nfivermont.org/",
+        "sourceText": "NFI Vermont is described as serving “individuals, youth and their families, coping with the challenges of severe trauma, emotional disturbances and/or intense dysregulation across settings,” supporting Trauma/PTSD as a core focus at the network level."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Trauma-informed Care"
+        ],
+        "sourceUrl": "https://www.nfivermont.org/",
+        "sourceText": "Homepage states “We are a healing organization, grounded in trauma-informed care,” which is captured as a system-level modality."
+      },
+      {
+        "field": "treatsASD",
+        "value": null,
+        "sourceUrl": "https://www.nfivermont.org/",
+        "sourceText": "Public overview does not mention autism spectrum services explicitly; ASD treatment is not assumed at the parent row."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://www.nfivermont.org/",
+        "sourceText": "The site positions NFI as a mental health and educational services agency; substance use disorder treatment is not clearly described and is left unknown."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": "https://www.nfivermont.org/",
+        "sourceText": "Residential and intensive services are referenced, but the homepage does not clearly define inpatient or hospital-level psychiatric care; highAcuityMH is left null."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "802-658-0040",
+        "sourceUrl": "https://www.nfivermont.org/",
+        "sourceText": "Site footer lists 802.658.0040 as the primary phone number for NFI Vermont’s central office at 30 Airport Road, South Burlington, VT."
+      }
+    ]
+  },
+  {
+    "id": "nfi_vermont_programs",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": "https://www.nfivermont.org/programs/",
+        "sourceText": "Programs & Services page organizes offerings into community & home-based, outpatient, residential, educational, foster parent support, and training & consultation, but does not provide a single, unified diagnostic list across all Vermont programs."
+      },
+      {
+        "field": "modalities",
+        "value": null,
+        "sourceUrl": "https://www.nfivermont.org/programs/",
+        "sourceText": "Individual program pages under NFI Vermont describe specific interventions, but the aggregated Vermont Programs row in the JSON does not map cleanly to one program type; modalities are left null here and captured on specific child rows instead."
+      },
+      {
+        "field": "treatsASD",
+        "value": null,
+        "sourceUrl": "https://www.nfivermont.org/programs/",
+        "sourceText": "Some NFI programs may support youth with developmental or neurodevelopmental challenges, but the aggregated programs page does not state autism services clearly enough to justify a true/false flag."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://www.nfivermont.org/programs/",
+        "sourceText": "The Vermont Programs overview frames NFI as a mental health and educational provider; any substance use services would need to be verified at a specific program level, so SUD is left null here."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": "https://www.nfivermont.org/programs/",
+        "sourceText": "Though NFI operates residential programs, the state-wide Programs landing page does not explicitly describe inpatient or hospital-level psychiatric care; the high-acuity flag remains null at the aggregated row."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "802-658-0040",
+        "sourceUrl": "https://www.nfivermont.org/",
+        "sourceText": "Central NFI Vermont contact number (802.658.0040) is used for the aggregated Vermont Programs entry, since no separate admissions line is listed for a catch-all programs contact."
+      }
+    ]
+  },
+  {
+    "id": "friendship_circle_parent",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Autism Spectrum",
+          "Intellectual Disabilities",
+          "Developmental Disabilities",
+          "Learning Disabilities",
+          "Physical Disabilities"
+        ],
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "Friendship Circle South Florida describes its mission as providing social, recreational, and educational programs for children, teens, and young adults with special needs, including autism, intellectual and developmental disabilities, learning and physical disabilities."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Life Skills Training",
+          "Social Skills Groups",
+          "Vocational Training",
+          "Recreational Programming",
+          "Mentorship",
+          "Academic Support"
+        ],
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "Program descriptions highlight life skills/job training at the Friendship Café, social groups like Teen Scene and Young Adult Circle, recreational activities, mentorship through Friends @ Home, and functional academics such as Hebrew School and academic support."
+      },
+      {
+        "field": "treatsASD",
+        "value": false,
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "Friendship Circle positions itself as a community social and recreational program for people with disabilities, not a clinical treatment provider; it serves individuals with autism but does not offer formal ASD treatment."
+      },
+      {
+        "field": "treatsSUD",
+        "value": false,
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "No substance use or addiction treatment services are described anywhere in the Friendship Circle South Florida materials."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "Programs are community-based social, life skills, and recreational offerings; there is no indication of inpatient, emergency, or high-acuity mental health care."
+      }
+    ]
+  },
+  {
+    "id": "program_20",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Autism Spectrum",
+          "Intellectual Disabilities",
+          "Developmental Disabilities",
+          "Learning Disabilities",
+          "Physical Disabilities"
+        ],
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "Teen Scene is described as a twice-monthly social program for teens with special needs, including youth with autism, developmental and intellectual disabilities, learning and physical disabilities, paired with teen volunteers."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Life Skills Training",
+          "Social Skills Groups",
+          "Recreational Programming",
+          "Mentorship"
+        ],
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "Teen Scene combines structured social activities, mentorship from teen volunteers, and opportunities to practice communication and daily living skills in a recreational setting."
+      },
+      {
+        "field": "treatsASD",
+        "value": false,
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "Teen Scene is framed as a social/recreational group, not as a clinical therapy or treatment program for autism spectrum disorders."
+      },
+      {
+        "field": "treatsSUD",
+        "value": false,
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "There is no mention of substance use or addiction services in the Teen Scene description."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "Teen Scene operates in community settings with volunteer support and typical group ratios; it is not a high-acuity or inpatient mental health service."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "(954) 558-7269",
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "Friendship Circle South Broward lists (954) 558‑7269 as the primary contact number for program information and registration."
+      },
+      {
+        "field": "admissions.email",
+        "value": "dassy@sdfriendshipcircle.com",
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "Contact section lists dassy@sdfriendshipcircle.com as the main email for Friendship Circle South Broward."
+      }
+    ]
+  },
+  {
+    "id": "program_21",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Autism Spectrum",
+          "Intellectual Disabilities",
+          "Developmental Disabilities",
+          "Learning Disabilities",
+          "Physical Disabilities"
+        ],
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "Friendship Circle South Broward (Hallandale) serves children, teens, and young adults with special needs, including autism, intellectual and developmental disabilities, learning disabilities, and physical disabilities."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Life Skills Training",
+          "Social Skills Groups",
+          "Vocational Training",
+          "Recreational Programming",
+          "Mentorship",
+          "Academic Support"
+        ],
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "Program offerings include Teen Scene and Young Adult Circle social groups, a Life Skills/Job Training Program and Friendship Café, Friends @ Home mentoring, yoga and art, and functional academics through Hebrew School and academic support blocks."
+      },
+      {
+        "field": "treatsASD",
+        "value": false,
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "The Hallandale Friendship Circle describes itself as a community social and life-skills program; it supports individuals with autism but does not offer clinical ASD treatment."
+      },
+      {
+        "field": "treatsSUD",
+        "value": false,
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "No substance use or addiction treatment services are mentioned for any of the Hallandale-based programs."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "All Hallandale programs are community-based social, recreational, and life skills supports; there are no inpatient or emergency psychiatric services."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "(954) 558-7269",
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "The South Broward Friendship Circle contact page lists (954) 558‑7269 as the main phone number."
+      },
+      {
+        "field": "admissions.email",
+        "value": "dassy@sdfriendshipcircle.com",
+        "sourceUrl": "https://friendshipfl.org",
+        "sourceText": "The primary contact email for Friendship Circle South Broward is dassy@sdfriendshipcircle.com."
+      }
+    ]
+  },
+  {
+    "id": "program_22",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Autism Spectrum",
+          "Intellectual Disabilities",
+          "Developmental Disabilities",
+          "Learning Disabilities",
+          "Physical Disabilities"
+        ],
+        "sourceUrl": "https://floridafriendshipcircle.com",
+        "sourceText": "Friendship Circle of North Broward & South Palm Beach serves children, teens, and adults with special needs including autism, developmental and intellectual disabilities, learning disabilities, and physical disabilities."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Life Skills Training",
+          "Social Skills Groups",
+          "Vocational Training",
+          "Recreational Programming",
+          "Mentorship"
+        ],
+        "sourceUrl": "https://floridafriendshipcircle.com",
+        "sourceText": "Parkland program descriptions emphasize social groups, Friends @ Home, life skills and pre‑employment training, and recreational events rather than formal clinical treatment."
+      },
+      {
+        "field": "treatsASD",
+        "value": false,
+        "sourceUrl": "https://floridafriendshipcircle.com",
+        "sourceText": "The Parkland Friendship Circle provides inclusive social and life-skills opportunities for people with autism and other disabilities, but does not present itself as a clinical ASD treatment provider."
+      },
+      {
+        "field": "treatsSUD",
+        "value": false,
+        "sourceUrl": "https://floridafriendshipcircle.com",
+        "sourceText": "No substance use treatment services are listed among Friendship Circle of North Broward & South Palm Beach offerings."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://floridafriendshipcircle.com",
+        "sourceText": "Programs are community-based and recreational; there is no mention of inpatient, emergency, or high-acuity mental health care."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "(954) 970-9551",
+        "sourceUrl": "https://floridafriendshipcircle.com",
+        "sourceText": "Contact information for the Parkland Friendship Circle lists (954) 970‑9551 as the primary phone number."
+      },
+      {
+        "field": "admissions.email",
+        "value": "floridafriendshipcircle@gmail.com",
+        "sourceUrl": "https://floridafriendshipcircle.com",
+        "sourceText": "The general email for Friendship Circle of North Broward & South Palm Beach is floridafriendshipcircle@gmail.com."
+      }
+    ]
   }
 ]
 

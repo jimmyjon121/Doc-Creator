@@ -67,14 +67,20 @@
     function notifyProgramsLoaded() {
         // LEGACY ALIASES REMOVED - Only use window.programsData
         
-        // Dispatch event
-        const event = new CustomEvent('programs-loaded', { detail: { count: window.programsData.length } });
-        window.dispatchEvent(event);
-        
-        // Trigger callbacks if they exist
-        if (typeof window.programsLoadedCallback === 'function') {
-            window.programsLoadedCallback();
-        }
+        // Use setTimeout to ensure other scripts have time to load and set up listeners
+        // This is critical because scripts load sequentially and event listeners
+        // in program-core.js need to be registered before this event fires
+        setTimeout(() => {
+            // Dispatch event
+            const event = new CustomEvent('programs-loaded', { detail: { count: window.programsData.length } });
+            window.dispatchEvent(event);
+            console.log('📣 programs-loaded event dispatched');
+            
+            // Trigger callbacks if they exist
+            if (typeof window.programsLoadedCallback === 'function') {
+                window.programsLoadedCallback();
+            }
+        }, 50);
     }
     
     // Start loading
