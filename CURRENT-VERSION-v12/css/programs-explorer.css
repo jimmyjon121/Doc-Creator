@@ -2568,6 +2568,8 @@
 .builder-pane__header {
   padding: var(--space-4);
   border-bottom: 1px solid var(--neutral-200);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  background: white;
 }
 
 .builder-pane__title {
