@@ -762,7 +762,7 @@
     // Hero style - LOC colored gradient
     const heroStyle = program.heroImageUrl 
       ? `background-image: linear-gradient(to bottom, transparent 40%, rgba(15,16,32,0.9)), url('${program.heroImageUrl}'); background-size: cover; background-position: center;`
-      : `background: linear-gradient(135deg, ${locColor} 0%, ${locColor}99 50%, #1a1b2e 100%);`;
+      : `background: linear-gradient(135deg, ${locColor} 0%, #151633 100%);`;
 
     // Smart tags - show modalities or diagnoses, color coded
     const smartTags = [];
