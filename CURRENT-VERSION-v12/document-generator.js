@@ -553,7 +553,7 @@ if (!document.querySelector('#document-generator-styles')) {
     link.href = 'css/document-generator.css';
     document.head.appendChild(link);
     /* LEGACY INLINE STYLES REMOVED - Now in css/document-generator.css
-        Document Generator Styles
+        /* Document Generator Styles */
         .doc-gen-step {
             padding: 20px;
         }
