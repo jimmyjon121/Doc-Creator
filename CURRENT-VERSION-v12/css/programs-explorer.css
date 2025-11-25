@@ -2455,6 +2455,73 @@
   color: var(--neutral-400);
 }
 
+/* Simple List View (for Aftercare Options) */
+.builder-simple-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.builder-simple-list__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--neutral-200);
+}
+
+.builder-simple-list__title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--navy-800);
+}
+
+.builder-simple-list__count {
+  font-size: var(--text-xs);
+  color: var(--neutral-500);
+  background: var(--neutral-100);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.builder-simple-list__content {
+  flex: 1;
+  background: var(--neutral-50);
+  border: 2px dashed var(--neutral-300);
+  border-radius: var(--radius-lg);
+  min-height: 200px;
+  overflow-y: auto;
+  padding: var(--space-3);
+}
+
+.builder-simple-list__content:empty,
+.builder-simple-list__content:has(.builder-simple-list__empty) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.builder-simple-list__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-6);
+  color: var(--neutral-400);
+  font-size: var(--text-sm);
+}
+
+.builder-simple-list__tip {
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  color: var(--navy-700);
+  border-left: 3px solid var(--accent-500);
+}
+
 .builder-item {
   display: flex;
   align-items: flex-start;

@@ -36421,7 +36421,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                             
                             // Use the proper handleLogin function instead
                             if (typeof handleLogin === 'function') {
-                                const event = { preventDefault: () => {}, target: form };
+                                const event = { preventDefault: () => {}, stopPropagation: () => {}, target: form };
                                 handleLogin(event);
                             } else {
                                 alert('Login system not loaded. Please refresh the page.');

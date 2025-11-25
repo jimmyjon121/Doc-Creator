@@ -375,70 +375,91 @@
                             </div>
       </div>
       
-      <div class="builder-pane__tabs">
+      <div class="builder-pane__tabs" style="display: none;">
         <button class="builder-pane__tab builder-pane__tab--active" data-scenario="primary">Primary</button>
         <button class="builder-pane__tab" data-scenario="admin-discharge">Admin Discharge</button>
         <button class="builder-pane__tab" data-scenario="at-home">At-Home</button>
                                     </div>
       
       <div class="builder-pane__content" id="builderContent">
-        <!-- Phase: Stabilize -->
-        <div class="builder-phase">
-          <div class="builder-phase__header">
-                                    <div>
-              <span class="builder-phase__title">STABILIZE</span>
-              <span class="builder-phase__subtitle">(0-7 days)</span>
-                                    </div>
-            <button class="builder-phase__add" data-phase="stabilize">+ Add</button>
-                                    </div>
-          <div class="builder-phase__content" id="phaseStabilize" data-phase="stabilize">
-            <div class="builder-phase__empty">Drag programs here</div>
-                                    </div>
-                                    </div>
         
-        <!-- Phase: Bridge -->
-        <div class="builder-phase">
-          <div class="builder-phase__header">
-            <div>
-              <span class="builder-phase__title">BRIDGE</span>
-              <span class="builder-phase__subtitle">(Week 2-4)</span>
-                                    </div>
-            <button class="builder-phase__add" data-phase="bridge">+ Add</button>
-                                    </div>
-          <div class="builder-phase__content" id="phaseBridge" data-phase="bridge">
-            <div class="builder-phase__empty">Drag programs here</div>
-                        </div>
+        <!-- SIMPLE LIST VIEW (for Aftercare Options) -->
+        <div id="simpleListView" class="builder-simple-list">
+          <div class="builder-simple-list__header">
+            <span class="builder-simple-list__title">Selected Programs</span>
+            <span class="builder-simple-list__count" id="simpleListCount">0 programs</span>
+          </div>
+          <div class="builder-simple-list__content" id="simpleListContent" data-phase="simple">
+            <div class="builder-simple-list__empty">
+              <span style="font-size: 24px; margin-bottom: 8px;">📋</span>
+              <span>Click "+ Add" on any program card to add it here</span>
+            </div>
+          </div>
+          <div class="builder-simple-list__tip">
+            💡 Tip: Add 3-5 programs to give families good options to compare
+          </div>
         </div>
         
-        <!-- Phase: Sustain -->
-        <div class="builder-phase">
-          <div class="builder-phase__header">
-            <div>
-              <span class="builder-phase__title">SUSTAIN</span>
-              <span class="builder-phase__subtitle">(30+ days)</span>
-                            </div>
-            <button class="builder-phase__add" data-phase="sustain">+ Add</button>
-                        </div>
-          <div class="builder-phase__content" id="phaseSustain" data-phase="sustain">
-            <div class="builder-phase__empty">Drag programs here</div>
-                    </div>
-                    </div>
-        
-        <!-- Phase: At-Home -->
-        <div class="builder-phase">
-          <div class="builder-phase__header">
-            <div>
-              <span class="builder-phase__title">AT-HOME SUPPORTS</span>
-                            </div>
-            <button class="builder-phase__add" data-phase="atHome">+ Add</button>
-                        </div>
-          <div class="builder-phase__content" id="phaseAtHome" data-phase="atHome">
-            <div class="builder-phase__empty">Drag programs here</div>
-                        </div>
+        <!-- PHASE VIEW (for Aftercare Plan) - hidden by default -->
+        <div id="phaseView" style="display: none;">
+          <!-- Phase: Stabilize -->
+          <div class="builder-phase">
+            <div class="builder-phase__header">
+              <div>
+                <span class="builder-phase__title">STABILIZE</span>
+                <span class="builder-phase__subtitle">(0-7 days)</span>
+              </div>
+              <button class="builder-phase__add" data-phase="stabilize">+ Add</button>
+            </div>
+            <div class="builder-phase__content" id="phaseStabilize" data-phase="stabilize">
+              <div class="builder-phase__empty">Drag programs here</div>
+            </div>
+          </div>
+          
+          <!-- Phase: Bridge -->
+          <div class="builder-phase">
+            <div class="builder-phase__header">
+              <div>
+                <span class="builder-phase__title">BRIDGE</span>
+                <span class="builder-phase__subtitle">(Week 2-4)</span>
+              </div>
+              <button class="builder-phase__add" data-phase="bridge">+ Add</button>
+            </div>
+            <div class="builder-phase__content" id="phaseBridge" data-phase="bridge">
+              <div class="builder-phase__empty">Drag programs here</div>
+            </div>
+          </div>
+          
+          <!-- Phase: Sustain -->
+          <div class="builder-phase">
+            <div class="builder-phase__header">
+              <div>
+                <span class="builder-phase__title">SUSTAIN</span>
+                <span class="builder-phase__subtitle">(30+ days)</span>
+              </div>
+              <button class="builder-phase__add" data-phase="sustain">+ Add</button>
+            </div>
+            <div class="builder-phase__content" id="phaseSustain" data-phase="sustain">
+              <div class="builder-phase__empty">Drag programs here</div>
+            </div>
+          </div>
+          
+          <!-- Phase: At-Home -->
+          <div class="builder-phase">
+            <div class="builder-phase__header">
+              <div>
+                <span class="builder-phase__title">AT-HOME SUPPORTS</span>
+              </div>
+              <button class="builder-phase__add" data-phase="atHome">+ Add</button>
+            </div>
+            <div class="builder-phase__content" id="phaseAtHome" data-phase="atHome">
+              <div class="builder-phase__empty">Drag programs here</div>
+            </div>
+          </div>
         </div>
         
-        <!-- Alumni Services -->
-        <div class="builder-alumni" id="alumniSection">
+        <!-- Alumni Services (only shown for Aftercare Plan) -->
+        <div class="builder-alumni" id="alumniSection" style="display: none;">
           <div class="builder-alumni__title">Alumni Services</div>
           <div class="builder-alumni__options">
             <label class="filter-checkbox">

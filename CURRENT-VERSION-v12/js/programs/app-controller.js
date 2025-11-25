@@ -474,15 +474,24 @@
     if (client) {
       state.currentClient = client;
       updateClientContext(client);
-      dom.clientContext.hidden = false;
+      // Don't show the client context panel - just update the document builder
+      // User can click a button to see full client context if needed
+      // dom.clientContext.hidden = false;
       
-      // Update builder
+      // Update builder client display
       if (dom.builderClient) {
         dom.builderClient.textContent = `${client.initials || 'XX'} - ${client.kipuId || '?'}`;
       }
       
       // Update document model
       window.ccDocumentModel?.setClient(client.id, client.initials);
+      
+      // Open the document builder panel when client is selected
+      if (!state.builderOpen && dom.builderPane) {
+        state.builderOpen = true;
+        dom.builderPane.classList.remove('hidden');
+        dom.toggleBuilderBtn?.classList.add('toolbar__btn--active');
+      }
 
       // Auto-check NEST alumni if applicable (check both formats)
       const isNest = client.houseId === 'NEST' || client.houseId === 'house_nest';
@@ -1582,7 +1591,21 @@
   }
 
   function quickAdd(program) {
-    window.ccDocumentModel?.addProgram('stabilize', program.id);
+    // Create a draft if one doesn't exist
+    if (!window.ccDocumentModel?.getCurrentDraft()) {
+      const client = state.currentClient;
+      const docType = dom.docTypeSelect?.value || 'aftercare-options';
+      window.ccDocumentModel?.createDraft(
+        docType,
+        client?.id || 'unknown',
+        client?.initials || 'XX'
+      );
+    }
+    
+    // Determine which phase to add to based on document type
+    const docType = dom.docTypeSelect?.value || 'aftercare-options';
+    const phase = docType === 'aftercare-options' ? 'simple' : 'stabilize';
+    window.ccDocumentModel?.addProgram(phase, program.id);
     updateBuilderUI();
   }
 
@@ -1602,15 +1625,20 @@
     if (!draft) {
       dom.builderStatus.textContent = 'Status: No draft';
       clearBuilderPhases();
+      updateSimpleListUI([]);
       return;
     }
 
     dom.builderStatus.textContent = `Status: ${draft.status} • Last saved ${new Date(draft.updatedAt).toLocaleTimeString()}`;
     dom.docTypeSelect.value = draft.type;
 
-    // Update phase contents
+    // Update simple list view (for Aftercare Options)
+    updateSimpleListUI(draft.phases.simple || []);
+
+    // Update phase contents (for Aftercare Plan)
     ['stabilize', 'bridge', 'sustain', 'atHome'].forEach(phase => {
       const container = document.getElementById(`phase${phase.charAt(0).toUpperCase() + phase.slice(1)}`);
+      if (!container) return;
       const programs = draft.phases[phase] || [];
       
       if (programs.length === 0) {
@@ -1643,16 +1671,63 @@
     });
 
     // Update alumni checkboxes
-    document.getElementById('alumniParentFocus').checked = draft.alumni.parentFocusGroup;
-    document.getElementById('alumniProgramming').checked = draft.alumni.alumniProgramming;
-    document.getElementById('alumniNest').checked = draft.alumni.nestAlumni;
+    const alumniParentFocus = document.getElementById('alumniParentFocus');
+    const alumniProgramming = document.getElementById('alumniProgramming');
+    const alumniNest = document.getElementById('alumniNest');
+    if (alumniParentFocus) alumniParentFocus.checked = draft.alumni.parentFocusGroup;
+    if (alumniProgramming) alumniProgramming.checked = draft.alumni.alumniProgramming;
+    if (alumniNest) alumniNest.checked = draft.alumni.nestAlumni;
+  }
+
+  function updateSimpleListUI(programIds) {
+    const container = document.getElementById('simpleListContent');
+    const countEl = document.getElementById('simpleListCount');
+    
+    if (!container) return;
+    
+    if (programIds.length === 0) {
+      container.innerHTML = `
+        <div class="builder-simple-list__empty">
+          <span style="font-size: 24px; margin-bottom: 8px;">📋</span>
+          <span>Click "+ Add" on any program card to add it here</span>
+        </div>
+      `;
+      if (countEl) countEl.textContent = '0 programs';
+    } else {
+      container.innerHTML = programIds.map(id => {
+        const p = window.ccPrograms?.byId(id);
+        if (!p) return '';
+        return `
+          <div class="builder-item" data-program-id="${id}">
+            <span class="builder-item__drag">⋮⋮</span>
+            <div class="builder-item__content">
+              <div class="builder-item__name">${p.name}</div>
+              <div class="builder-item__location">${p.city || 'Virtual'}, ${p.state || ''}</div>
+            </div>
+            <button class="builder-item__remove" data-action="remove-simple">✕</button>
+          </div>
+        `;
+      }).join('');
+      
+      if (countEl) countEl.textContent = `${programIds.length} program${programIds.length !== 1 ? 's' : ''}`;
+      
+      // Bind remove buttons for simple list
+      container.querySelectorAll('[data-action="remove-simple"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const programId = btn.closest('.builder-item').dataset.programId;
+          window.ccDocumentModel?.removeProgram('simple', programId);
+          updateBuilderUI();
+        });
+      });
+    }
   }
 
   function clearBuilderPhases() {
     ['Stabilize', 'Bridge', 'Sustain', 'AtHome'].forEach(phase => {
       const container = document.getElementById(`phase${phase}`);
-      container.innerHTML = '<div class="builder-phase__empty">Drag programs here</div>';
+      if (container) container.innerHTML = '<div class="builder-phase__empty">Drag programs here</div>';
     });
+    updateSimpleListUI([]);
   }
 
   function switchScenario(scenario) {
@@ -1663,11 +1738,21 @@
   }
 
   function handleDocTypeChange() {
-    window.ccDocumentModel?.setDocumentType(dom.docTypeSelect.value);
+    const docType = dom.docTypeSelect.value;
+    window.ccDocumentModel?.setDocumentType(docType);
     
-    // Show/hide alumni section based on type
+    const isAftercarePlan = docType === 'aftercare-plan';
+    
+    // Toggle between simple list view (Aftercare Options) and phase view (Aftercare Plan)
+    const simpleListView = document.getElementById('simpleListView');
+    const phaseView = document.getElementById('phaseView');
+    const scenarioTabs = document.querySelector('.builder-pane__tabs');
     const alumniSection = document.getElementById('alumniSection');
-    alumniSection.style.display = dom.docTypeSelect.value === 'aftercare-plan' ? 'block' : 'none';
+    
+    if (simpleListView) simpleListView.style.display = isAftercarePlan ? 'none' : 'block';
+    if (phaseView) phaseView.style.display = isAftercarePlan ? 'block' : 'none';
+    if (scenarioTabs) scenarioTabs.style.display = isAftercarePlan ? 'flex' : 'none';
+    if (alumniSection) alumniSection.style.display = isAftercarePlan ? 'block' : 'none';
   }
 
   function handleAlumniChange() {

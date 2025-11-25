@@ -133,6 +133,7 @@ https://us06web.zoom.us/j/86864413744`,
       clientInitials: clientInitials || 'XX',
       scenario: 'primary',
       phases: {
+        simple: [],      // For Aftercare Options (simple list)
         stabilize: [],
         bridge: [],
         sustain: [],
@@ -615,13 +616,29 @@ https://us06web.zoom.us/j/86864413744`,
       return lines.join('\n');
     }
 
-    // Primary phases
-    const phases = ['stabilize', 'bridge', 'sustain'];
-    phases.forEach(phase => {
-      const programIds = doc.phases[phase] || [];
-      if (programIds.length === 0) return;
+    // Check if using simple list (Aftercare Options) or phased view (Aftercare Plan)
+    const isAftercarePlan = doc.type === 'aftercare-plan';
+    
+    if (isAftercarePlan) {
+      // Aftercare Plan: Use phased structure
+      const phases = ['stabilize', 'bridge', 'sustain'];
+      phases.forEach(phase => {
+        const programIds = doc.phases[phase] || [];
+        if (programIds.length === 0) return;
 
-      programIds.forEach(id => {
+        programIds.forEach(id => {
+          const program = programs.byId(id);
+          if (!program) return;
+
+          lines.push(generateProgramWriteUp(program, style));
+          lines.push('');
+          lines.push('');
+        });
+      });
+    } else {
+      // Aftercare Options: Use simple list
+      const simplePrograms = doc.phases.simple || [];
+      simplePrograms.forEach(id => {
         const program = programs.byId(id);
         if (!program) return;
 
@@ -629,7 +646,7 @@ https://us06web.zoom.us/j/86864413744`,
         lines.push('');
         lines.push('');
       });
-    });
+    }
 
     // At-Home section
     const atHomePrograms = doc.phases.atHome || [];
@@ -701,6 +718,7 @@ https://us06web.zoom.us/j/86864413744`,
     if (!_currentDraft) return null;
 
     const programCount = 
+      (_currentDraft.phases.simple?.length || 0) +
       (_currentDraft.phases.stabilize?.length || 0) +
       (_currentDraft.phases.bridge?.length || 0) +
       (_currentDraft.phases.sustain?.length || 0) +
