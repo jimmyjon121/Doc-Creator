@@ -391,9 +391,14 @@ class MorningReviewDashboard {
                                         </div>
                                         <div class="batch-title">${batch.itemLabel}</div>
                                         <div class="batch-clients">
-                                            ${batch.clients.map(c => c.initials).join(', ')}
+                                            ${batch.clients.slice(0, 8).map(c => c.initials).join(', ')}
+                                            ${batch.clients.length > 8 ? `<span class="more-clients">+${batch.clients.length - 8} more</span>` : ''}
                                         </div>
-                                        <button class="btn-batch" onclick="morningReview.executeBatch('${batch.itemId}', ${JSON.stringify(batch.clients.map(c => c.id))})">
+                                        <button 
+                                            class="btn-batch" 
+                                            data-item-id="${batch.itemId}" 
+                                            data-client-ids="${batch.clients.map(c => c.id).join(',')}"
+                                            onclick="morningReview.handleBatchClick(this)">
                                             Start Batch
                                         </button>
                                     </div>
@@ -562,17 +567,191 @@ class MorningReviewDashboard {
             window.dashboardManager.refreshDashboard();
         }
     }
-    
+
+    /**
+     * Entry point from the DOM for batch cards.
+     * Safely pulls data attributes and delegates to executeBatch.
+     */
+    handleBatchClick(buttonEl) {
+        if (!buttonEl) return;
+        const itemId = buttonEl.getAttribute('data-item-id');
+        const rawIds = buttonEl.getAttribute('data-client-ids') || '';
+        const clientIds = rawIds.split(',').map(id => id.trim()).filter(Boolean);
+        if (!itemId || clientIds.length === 0) {
+            console.warn('Batch click missing data attributes', { itemId, clientIds });
+            return;
+        }
+        this.executeBatch(itemId, clientIds);
+    }
+
+    /**
+     * Entry point from the DOM for the “Mark Batch Completed” button.
+     */
+    handleBatchConfirm(buttonEl) {
+        if (!buttonEl) return;
+        const itemId = buttonEl.getAttribute('data-item-id');
+        const rawIds = buttonEl.getAttribute('data-client-ids') || '';
+        const clientIds = rawIds.split(',').map(id => id.trim()).filter(Boolean);
+        if (!itemId || clientIds.length === 0) {
+            console.warn('Batch confirm missing data attributes', { itemId, clientIds });
+            return;
+        }
+        this.confirmBatch(itemId, clientIds);
+    }
+
+    /**
+     * Prompt-driven batch flow:
+     *  - Start Batch: opens a confirmation panel with instructions
+     *  - Mark Batch Completed: actually updates CareConnect + refreshes dashboard
+     */
     async executeBatch(itemId, clientIds) {
-        // Open batch completion modal
-        console.log('Execute batch for', itemId, clientIds);
-        // Would implement batch completion UI
+        if (!Array.isArray(clientIds) || clientIds.length === 0) return;
+
+        const requirement = this.trackerEngine?.requirements?.find(r => r.id === itemId) || null;
+        const label = requirement?.label || itemId;
+        const estimatedTime = requirement?.estimatedMinutes || (clientIds.length * 5);
+
+        // Resolve client objects so we can show real initials instead of blank list
+        let resolvedClients = [];
+        if (this.clientManager && typeof this.clientManager.getClient === 'function') {
+            for (const id of clientIds) {
+                try {
+                    // eslint-disable-next-line no-await-in-loop
+                    const client = await this.clientManager.getClient(id);
+                    if (client) {
+                        resolvedClients.push(client);
+                    }
+                } catch (e) {
+                    console.warn('Failed to load client for batch', id, e);
+                }
+            }
+        } else if (this.trackerEngine && Array.isArray(this.trackerEngine.clients)) {
+            resolvedClients = this.trackerEngine.clients.filter(c => clientIds.includes(c.id));
+        }
+
+        const previewClients = resolvedClients.slice(0, 12);
+        const remainingCount = clientIds.length - previewClients.length;
+
+        // Render each client as a pill so initials are highly visible
+        const pillsHtml = previewClients.map(c => {
+            const label = (c.initials || c.fullName || c.id || '').toString().toUpperCase();
+            const house = c.houseId ? ` · ${c.houseId.replace('house_', '')}` : '';
+            return `
+                <span class="batch-client-pill">
+                    <span class="batch-client-pill__initials">${label}</span>
+                    ${house ? `<span class="batch-client-pill__house">${house}</span>` : ''}
+                </span>
+            `;
+        }).join('');
+
+        const moreHtml = remainingCount > 0
+            ? `<span class="batch-client-pill batch-client-pill--more">+${remainingCount} more</span>`
+            : '';
+
+        const clientsPreviewHtml = (pillsHtml || moreHtml)
+            ? `${pillsHtml}${moreHtml}`
+            : '<span class="batch-client-pill batch-client-pill--empty">(client list unavailable)</span>';
+
+        // Build lightweight overlay on top of the existing Morning Review modal
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay morning-batch-modal';
+        overlay.innerHTML = `
+            <div class="modal-content" style="max-width: 620px;">
+                <div class="modal-header">
+                    <h2 style="margin:0;font-size:22px;font-weight:700;color:#111827;">
+                        Start Batch: ${label}
+                    </h2>
+                    <button class="btn-close" onclick="this.closest('.modal-overlay').remove()">×</button>
+                </div>
+                <div class="modal-body" style="font-size:14px;color:#374151;display:flex;flex-direction:column;gap:16px;">
+                    <p style="margin:0;">
+                        This batch will help you complete <strong>${label}</strong> for 
+                        <strong>${clientIds.length} clients</strong> in one focused block (~${estimatedTime} min).
+                    </p>
+                    <ol style="padding-left:20px;margin:0;display:flex;flex-direction:column;gap:6px;">
+                        <li>Go to <strong>Kipu</strong> and complete <strong>${label}</strong> for the clients listed below.</li>
+                        <li>Once finished in Kipu, return here and click <strong>Mark Batch Completed</strong> to reflect it in CareConnect.</li>
+                    </ol>
+                    <div style="background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;padding:10px 12px;font-size:13px;max-height:140px;overflow:auto;">
+                        <div style="font-weight:600;color:#111827;margin-bottom:4px;">Clients in this batch</div>
+                        <div class="batch-client-pill-row">${clientsPreviewHtml}</div>
+                    </div>
+                    <p style="margin:0;font-size:12px;color:#6b7280;">
+                        Note: CareConnect does <strong>not</strong> send anything to insurance or Kipu. 
+                        It simply tracks that these items are documented as complete.
+                    </p>
+                </div>
+                <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px;">
+                    <button class="btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+                    <button 
+                        class="btn-primary"
+                        data-item-id="${itemId}"
+                        data-client-ids="${clientIds.join(',')}"
+                        onclick="morningReview.handleBatchConfirm(this)">
+                        Mark Batch Completed
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+    }
+
+    async confirmBatch(itemId, clientIds) {
+        if (!window.clientManager || !Array.isArray(clientIds) || clientIds.length === 0) return;
+
+        try {
+            const now = new Date().toISOString();
+            for (const clientId of clientIds) {
+                await window.clientManager.updateClient(clientId, {
+                    [itemId]: true,
+                    [`${itemId}Date`]: now
+                });
+            }
+
+            // Refresh dashboard + re-open a fresh morning review
+            if (window.dashboardManager) {
+                await window.dashboardManager.refreshDashboard();
+            }
+
+            // Close any batch modal overlays
+            document.querySelectorAll('.morning-batch-modal').forEach(el => el.remove());
+
+            if (window.showNotification) {
+                window.showNotification(`Marked ${clientIds.length} ${itemId} items complete`, 'success');
+            }
+
+            // Refresh the morning review modal itself so counts/cards disappear immediately
+            const modal = document.querySelector('.morning-review-modal');
+            if (modal) {
+                modal.remove();
+            }
+            this.renderMorningReview();
+        } catch (error) {
+            console.error('Failed to confirm batch', itemId, error);
+            if (window.showNotification) {
+                window.showNotification('Unable to complete batch. Please try again.', 'error');
+            }
+        }
     }
     
     openClient(clientId) {
-        // Close modal and navigate to client
-        document.querySelector('.morning-review-modal').remove();
-        // Would implement client navigation
+        // Close the Morning Review modal
+        const modal = document.querySelector('.morning-review-modal');
+        if (modal) {
+            modal.remove();
+        }
+
+        // Prefer opening the modern client profile
+        if (window.clientProfileManager && typeof window.clientProfileManager.open === 'function') {
+            window.clientProfileManager.open(clientId);
+            return;
+        }
+
+        // Fallback: switch to Clients tab
+        if (window.switchTab) {
+            window.switchTab('clients');
+        }
     }
     
     recordFollowUp(clientId) {
@@ -586,7 +765,84 @@ class MorningReviewDashboard {
     }
     
     printReview() {
-        window.print();
+        const modal = document.querySelector('.morning-review-modal');
+        if (!modal) {
+            console.warn('Morning review modal not available for printing');
+            return;
+        }
+
+        const content = modal.querySelector('.modal-content') || modal;
+        const printWindow = window.open('', '_blank', 'width=1024,height=768');
+
+        if (!printWindow) {
+            window.print();
+            return;
+        }
+
+        const printStyles = `
+            <style>
+                @media print {
+                    * {
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                    }
+                    body {
+                        margin: 0;
+                        background: #f8fafc;
+                        font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+                        color: #111827;
+                    }
+                    .print-wrapper {
+                        max-width: 1024px;
+                        margin: 0 auto;
+                        padding: 24px 32px 48px;
+                    }
+                    .morning-review-modal {
+                        box-shadow: none !important;
+                    }
+                    .modal-footer,
+                    .btn-primary,
+                    .btn-secondary,
+                    .btn-close,
+                    .timeline-reschedule,
+                    .timeline-cta {
+                        display: none !important;
+                    }
+                }
+                body {
+                    margin: 0;
+                    background: #f8fafc;
+                    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+                    color: #111827;
+                }
+                .print-wrapper {
+                    max-width: 1024px;
+                    margin: 0 auto;
+                    padding: 24px 32px 48px;
+                }
+            </style>
+        `;
+
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>CareConnect Morning Review</title>
+                    ${printStyles}
+                </head>
+                <body>
+                    <div class="print-wrapper">
+                        ${content.innerHTML}
+                    </div>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 300);
     }
     
     emailReview() {

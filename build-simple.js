@@ -11,7 +11,7 @@ const crypto = require('crypto');
 
 const CONFIG = {
     version: '4.0.0',
-    originalFile: 'AppsCode-DeluxeCMS.html',
+    originalFile: 'CURRENT-VERSION-v12/CareConnect-Pro.html',
     outputFile: 'dist/CareConnect-Pro.html',
     enhancementsDir: 'enhancements',
     distDir: 'dist'
@@ -69,12 +69,20 @@ class SimpleBuilder {
     copyRequiredFiles() {
         console.log('[COPY] Copying required JavaScript files...');
         
-        // Copy Programs & Docs module file to dist
-        const moduleFile = 'CareConnect-Pro.html';
+        // Copy Programs & Docs module file from CURRENT-VERSION-v12 to dist
+        const moduleFile = 'CURRENT-VERSION-v12/programs-docs-module.html';
         if (fs.existsSync(moduleFile)) {
             const moduleDest = path.join(CONFIG.distDir, 'programs-docs-module.html');
             fs.copyFileSync(moduleFile, moduleDest);
             console.log(`  [OK] Copied ${moduleFile} as programs-docs-module.html`);
+        }
+        
+        // Copy Map 2.0 bundle to dist
+        const mapV2Source = 'CURRENT-VERSION-v12/map-v2-dist';
+        const mapV2Dest = path.join(CONFIG.distDir, 'map-v2-dist');
+        if (fs.existsSync(mapV2Source)) {
+            this.copyDirectory(mapV2Source, mapV2Dest);
+            console.log('  [OK] Copied map-v2-dist folder');
         }
         
         // List of JS files that need to be in dist

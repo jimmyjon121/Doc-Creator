@@ -1,0 +1,836 @@
+[
+  {
+    "id": "discovery_mood_parent",
+    "fields": [
+      {
+        "field": "lgbtqAffirming",
+        "value": true,
+        "sourceUrl": "https://discoverymood.com/",
+        "sourceText": "Homepage section listing \"Teen, adult, gender-specific, LGBTQIA+ and inclusive programs\"."
+      },
+      {
+        "field": "transAffirming",
+        "value": true,
+        "sourceUrl": "https://discoverymood.com/",
+        "sourceText": "Same LGBTQIA+ and inclusive programs language used for overall Discovery Mood & Anxiety Program."
+      },
+      {
+        "field": "treatsSUD",
+        "value": true,
+        "sourceUrl": "https://discoverymood.com/conditions/",
+        "sourceText": "“At Discovery Mood & Anxiety, we offer specialized treatment for mood and anxiety disorders as well as co-occurring substance use disorders.”"
+      },
+      {
+        "field": "highAcuityMH",
+        "value": true,
+        "sourceUrl": "https://discoverymood.com/treatment-program/",
+        "sourceText": "Levels of care section lists Residential, Partial Hospitalization, and Intensive Outpatient treatment."
+      },
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Depression",
+          "Anxiety",
+          "Bipolar",
+          "Trauma/PTSD",
+          "Self-harm",
+          "Substance Use"
+        ],
+        "sourceUrl": "https://discoverymood.com/conditions/mental-health/",
+        "sourceText": "“Mood and Anxiety Disorders We Treat” list includes Trauma, Anxiety Disorders, Depression, Self-Harm, Bipolar Disorder; conditions page also references substance use disorders."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "CBT",
+          "DBT",
+          "ACT"
+        ],
+        "sourceUrl": "https://discoverymood.com/treatment-program/",
+        "sourceText": "Evidence-based Treatment section lists Cognitive Behavioral Therapy (CBT), Dialectical Behavior Therapy (DBT), and Acceptance and Commitment Therapy (ACT)."
+      },
+      {
+        "field": "insuranceAccepted",
+        "value": [
+          "Beacon Health Strategies",
+          "Blue Shield of California",
+          "Cambia Health Solutions",
+          "Carefirst",
+          "Cigna",
+          "CompCare BH",
+          "Coventry / First Health (CCN)",
+          "Employee Health Network (EHN)",
+          "First Choice Health",
+          "Fortified Provider Network (FPN)",
+          "Fresno County",
+          "Halcyon",
+          "HealthNet",
+          "HMC",
+          "Holman Group",
+          "Humana (Life Sync)",
+          "IEHP",
+          "ILWU / PMA Long Shoremens Union",
+          "Indian Health Services (HIS) Shinnecock Unit",
+          "Kaiser",
+          "Magellan",
+          "Marin County",
+          "MCCP",
+          "Merced County",
+          "MHN",
+          "MODA",
+          "MultiPlan",
+          "Networks by Design",
+          "Optum",
+          "Premera BC",
+          "Sharp",
+          "TriCare East – Humana",
+          "TriCare Military MHN/HealthNet",
+          "UHA",
+          "UNICARE – Beacon HS",
+          "US Family Healthplan – PacMed",
+          "WellPoint"
+        ],
+        "sourceUrl": "https://discoverymood.com/insurance/",
+        "sourceText": "“See Insurances We Accept at Discovery Mood & Anxiety” section lists these payers."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "844-374-3974",
+        "sourceUrl": "https://discoverymood.com/",
+        "sourceText": "Global navigation banner: “CALL FOR A CONFIDENTIAL CONSULTATION 844.374.3974”."
+      }
+    ]
+  },
+  {
+    "id": "program_16",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Depression",
+          "Anxiety",
+          "Bipolar",
+          "Trauma/PTSD",
+          "Self-harm"
+        ],
+        "sourceUrl": "https://discoverymood.com/locations/dade-city/",
+        "sourceText": "“CONDITIONS WE TREAT” section lists Trauma, Anxiety Disorders, Depression, Self-Harm, Bipolar Disorder, Reactive Attachment Disorder."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "CBT",
+          "DBT",
+          "ACT",
+          "Art Therapy",
+          "Music Therapy",
+          "Family Therapy"
+        ],
+        "sourceUrl": "https://discoverymood.com/locations/dade-city/",
+        "sourceText": "Location description: “Treatment is customized and employs a variety of evidence-based modalities, including cognitive behavioral therapy (CBT), dialectical behavior therapy (DBT), acceptance and commitment therapy (ACT)… Patients are exposed to experiential therapies, which includes music and art… Lastly, family therapy and educational support is also available.”"
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://discoverymood.com/locations/dade-city/",
+        "sourceText": "Location page describes an adolescent mental health residential program with no explicit mention of substance use or addiction treatment."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": true,
+        "sourceUrl": "https://discoverymood.com/locations/dade-city/",
+        "sourceText": "Location overview notes residential treatment (RTC) for adolescents with “24 hours a day, seven days a week support” for mental health diagnoses."
+      },
+      {
+        "field": "insuranceAccepted",
+        "value": [
+          "Aetna",
+          "Blue Cross Blue Shield",
+          "Cigna",
+          "Humana",
+          "Most major insurance"
+        ],
+        "sourceUrl": "https://discoverymood.com/locations/dade-city/",
+        "sourceText": "“IN NETWORK WITH: Aetna, BlueCross/BlueShield, Cigna, Humana, plus other in network and out of network insurance plans.”"
+      },
+      {
+        "field": "lgbtqAffirming",
+        "value": true,
+        "sourceUrl": "https://discoverymood.com/",
+        "sourceText": "Homepage bullet: “Teen, adult, gender-specific, LGBTQIA+ and inclusive programs” applies network-wide, including Dade City."
+      },
+      {
+        "field": "transAffirming",
+        "value": true,
+        "sourceUrl": "https://discoverymood.com/",
+        "sourceText": "Same LGBTQIA+ and inclusive programs language (LGBTQIA+ includes transgender and gender diverse individuals)."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "844-374-3974",
+        "sourceUrl": "https://discoverymood.com/locations/dade-city/",
+        "sourceText": "Location contact block: “PH 844.374.3974”."
+      }
+    ]
+  },
+  {
+    "id": "program_17",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Depression",
+          "Anxiety",
+          "Bipolar",
+          "Trauma/PTSD",
+          "Self-harm"
+        ],
+        "sourceUrl": "https://discoverymood.com/locations/maitland/",
+        "sourceText": "“CONDITIONS WE TREAT” section lists Trauma, Anxiety Disorders, Depression, Self-Harm, Bipolar Disorder, Reactive Attachment Disorder."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "CBT",
+          "DBT"
+        ],
+        "sourceUrl": "https://discoverymood.com/locations/maitland/",
+        "sourceText": "Description: “Treatment is customized and employs a variety of evidence-based modalities, including cognitive behavioral therapy, dialectical behavior therapy, and more.”"
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://discoverymood.com/locations/maitland/",
+        "sourceText": "Outpatient PHP/IOP page focuses on mental health conditions and does not explicitly describe substance use or addiction treatment."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://discoverymood.com/locations/maitland/",
+        "sourceText": "Program features list Partial Hospitalization and Intensive Outpatient levels of care only; no residential or inpatient services."
+      },
+      {
+        "field": "insuranceAccepted",
+        "value": [
+          "Aetna",
+          "Florida Blue Cross Blue Shield",
+          "Cigna",
+          "Beacon",
+          "Most major insurance"
+        ],
+        "sourceUrl": "https://discoverymood.com/locations/maitland/",
+        "sourceText": "Text: “Insurances we accept at this location include but are not limited to Aetna, Florida New Directions Blue Cross and Blue Shield, Cigna, and Beacon… our insurance team will verify your coverage.”"
+      },
+      {
+        "field": "lgbtqAffirming",
+        "value": true,
+        "sourceUrl": "https://discoverymood.com/",
+        "sourceText": "Network homepage advertises “LGBTQIA+ and inclusive programs,” which includes the Maitland PHP/IOP location."
+      },
+      {
+        "field": "transAffirming",
+        "value": true,
+        "sourceUrl": "https://discoverymood.com/",
+        "sourceText": "Same LGBTQIA+ and inclusive programs language applied to virtual and outpatient programs."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "844-374-3974",
+        "sourceUrl": "https://discoverymood.com/locations/maitland/",
+        "sourceText": "Location contact block: “PH 844.374.3974”."
+      }
+    ]
+  },
+  {
+    "id": "program_18",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Depression",
+          "Anxiety",
+          "Bipolar",
+          "Trauma/PTSD",
+          "Self-harm"
+        ],
+        "sourceUrl": "https://discoverymood.com/locations/tampa-orlando-city/",
+        "sourceText": "Regional Tampa/Orlando page lists Anxiety, Depression, Self-harm, Bipolar disorder, and Reactive attachment disorder as focus conditions."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "CBT",
+          "DBT",
+          "ACT",
+          "Art Therapy",
+          "Music Therapy",
+          "Family Therapy"
+        ],
+        "sourceUrl": "https://discoverymood.com/locations/tampa-orlando-city/",
+        "sourceText": "“Specialized Mental Health Treatment Program for Teens in Dade City” section reiterates use of CBT, DBT, ACT, experiential therapies including music and art, and family therapy."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://discoverymood.com/locations/tampa-orlando-city/",
+        "sourceText": "Regional page focuses on adolescent residential mental health treatment and does not mention substance use or addiction programming."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": true,
+        "sourceUrl": "https://discoverymood.com/locations/tampa-orlando-city/",
+        "sourceText": "Describes residential mental health treatment for teens in Dade City, corresponding to 24/7 RTC level of care."
+      },
+      {
+        "field": "insuranceAccepted",
+        "value": [
+          "Beacon Health Strategies",
+          "Blue Shield of California",
+          "Cambia Health Solutions",
+          "Carefirst",
+          "Cigna",
+          "CompCare BH",
+          "Coventry / First Health (CCN)",
+          "Employee Health Network (EHN)",
+          "First Choice Health",
+          "Fortified Provider Network (FPN)",
+          "Fresno County",
+          "Halcyon",
+          "HealthNet",
+          "HMC",
+          "Holman Group",
+          "Humana (Life Sync)",
+          "IEHP",
+          "ILWU / PMA Long Shoremens Union",
+          "Indian Health Services (HIS) Shinnecock Unit",
+          "Kaiser",
+          "Magellan",
+          "Marin County",
+          "MCCP",
+          "Merced County",
+          "MHN",
+          "MODA",
+          "MultiPlan",
+          "Networks by Design",
+          "Optum",
+          "Premera BC",
+          "Sharp",
+          "TriCare East – Humana",
+          "TriCare Military MHN/HealthNet",
+          "UHA",
+          "UNICARE – Beacon HS",
+          "US Family Healthplan – PacMed",
+          "WellPoint"
+        ],
+        "sourceUrl": "https://discoverymood.com/insurance/",
+        "sourceText": "Regional wrapper uses the same insurance panel as the broader Discovery Mood & Anxiety Program."
+      },
+      {
+        "field": "lgbtqAffirming",
+        "value": true,
+        "sourceUrl": "https://discoverymood.com/",
+        "sourceText": "Homepage bullet: “Teen, adult, gender-specific, LGBTQIA+ and inclusive programs” includes Florida locations."
+      },
+      {
+        "field": "transAffirming",
+        "value": true,
+        "sourceUrl": "https://discoverymood.com/",
+        "sourceText": "LGBTQIA+ inclusive program language applies system-wide, including the Tampa/Orlando region program."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "844-374-3974",
+        "sourceUrl": "https://discoverymood.com/locations/tampa-orlando-city/",
+        "sourceText": "Footer and CTA blocks direct patients to call 844.374.3974 for a confidential consultation."
+      }
+    ]
+  },
+  {
+    "id": "program_19",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Depression",
+          "Anxiety",
+          "Bipolar",
+          "Trauma/PTSD",
+          "Self-harm"
+        ],
+        "sourceUrl": "https://discoverymood.com/virtual-programming/",
+        "sourceText": "Virtual IOP program is described as treating mental health disorders in general; combined with the network “Mood and Anxiety Disorders We Treat” list, this maps to depression, anxiety, bipolar, trauma, and self-harm."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "CBT",
+          "DBT",
+          "ACT",
+          "Family Therapy"
+        ],
+        "sourceUrl": "https://discoverymood.com/virtual-programming/",
+        "sourceText": "Virtual IOP page notes evidence-based modalities including cognitive behavioral therapy (CBT), dialectical behavior therapy (DBT), and acceptance & commitment therapy (ACT) and references family programming."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://discoverymood.com/virtual-programming/",
+        "sourceText": "Virtual intensive outpatient program description focuses on mental health disorders and does not explicitly describe substance use disorder treatment."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://discoverymood.com/virtual-programming/",
+        "sourceText": "Program is an intensive outpatient level of care delivered virtually, not inpatient or residential."
+      },
+      {
+        "field": "insuranceAccepted",
+        "value": [
+          "Most major insurance"
+        ],
+        "sourceUrl": "https://discoverymood.com/virtual-programming/",
+        "sourceText": "Section “Insurance Coverage for Virtual Intensive Outpatient Program” states the program is covered by most major commercial insurances and explicitly notes that Medicare and Medicaid are not accepted."
+      },
+      {
+        "field": "lgbtqAffirming",
+        "value": true,
+        "sourceUrl": "https://discoverymood.com/",
+        "sourceText": "Network homepage advertises “LGBTQIA+ and inclusive programs,” which includes the virtual IOP offering."
+      },
+      {
+        "field": "transAffirming",
+        "value": true,
+        "sourceUrl": "https://discoverymood.com/",
+        "sourceText": "Same LGBTQIA+ and inclusive programs language applied to all program formats, including virtual."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "833-774-1438",
+        "sourceUrl": "https://discoverymood.com/virtual-programming/",
+        "sourceText": "Insurance section: “For a complimentary insurance benefits check, call us at 1-833-774-1438.”"
+      }
+    ]
+  },
+  {
+    "id": "friendship_circle_parent",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Intellectual Disabilities",
+          "Developmental Disabilities"
+        ],
+        "sourceUrl": "https://friendshipfl.org/about-us",
+        "sourceText": "Mission section: “The Friendship Circle provides assistance to families with physically or intellectually challenged children.” Friendship Grill description adds: “a safe, secure and nurturing environment for adults with intellectual and developmental disabilities.”"
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Social Skills Training",
+          "Life Skills Training",
+          "Vocational Training",
+          "Peer Support"
+        ],
+        "sourceUrl": "https://friendshipfl.org/our-programs",
+        "sourceText": "Programs pages describe social programs, home education & life skills, and job training (Friendship Grill) that build social connections, life skills, and workplace abilities for participants with special needs."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://friendshipfl.org/about-us",
+        "sourceText": "Site repeatedly describes social, educational, and vocational support for children and adults with special needs, with no references to clinical mental health treatment, levels of care, or psychiatric services."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "(754) 800-1770",
+        "sourceUrl": "https://friendshipfl.org/about-us",
+        "sourceText": "Header and footer list the main Friendship Circle South Florida phone number: “(754) 800-1770”."
+      },
+      {
+        "field": "admissions.email",
+        "value": "Office@friendshipfl.org",
+        "sourceUrl": "https://friendshipfl.org/about-us",
+        "sourceText": "Header and footer list “Office@friendshipfl.org” as the primary contact email."
+      }
+    ]
+  },
+  {
+    "id": "program_20",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Intellectual Disabilities",
+          "Developmental Disabilities"
+        ],
+        "sourceUrl": "https://friendshipfl.org/about-us",
+        "sourceText": "Friendship Circle FL describes its mission as serving “children with special needs” and “physically or intellectually challenged children,” implying Teen Scene participants share the same special-needs profile."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Social Skills Training",
+          "Life Skills Training",
+          "Peer Support"
+        ],
+        "sourceUrl": "https://friendshipfl.org/our-programs",
+        "sourceText": "Social programs like Teen Scene are framed as structured social experiences building friendship, confidence, and independence for teens with special needs."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://friendshipfl.org/our-programs",
+        "sourceText": "Teen Scene is presented as a community social/ recreational program, not a clinical treatment service or higher level of care."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "(754) 800-1770",
+        "sourceUrl": "https://friendshipfl.org/",
+        "sourceText": "Site-wide header uses the same main number “(754) 800-1770” as the contact line for Friendship Circle South Florida."
+      },
+      {
+        "field": "admissions.email",
+        "value": "Office@friendshipfl.org",
+        "sourceUrl": "https://friendshipfl.org/",
+        "sourceText": "Site-wide header/footer list “Office@friendshipfl.org” as the primary contact email for programs, including Teen Scene."
+      }
+    ]
+  },
+  {
+    "id": "program_21",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Program website https://www.friendshipcirclehallandale.org could not be reached (DNS failure), and no replacement official Hallandale site was found; leaving diagnosesServed null."
+      },
+      {
+        "field": "modalities",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Same connectivity issue; with no active official Hallandale site to review, modalities cannot be verified and are left null."
+      },
+      {
+        "field": "treatsASD",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Although the name suggests a Friendship Circle program, the specific Hallandale site is not accessible, so ASD support cannot be confirmed for this location."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "No official program page is reachable to confirm or deny substance use services; value is left null."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Without an active official site for Hallandale, level of care and acuity cannot be determined; leaving highAcuityMH null."
+      }
+    ]
+  },
+  {
+    "id": "program_22",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": "https://www.fcpb.org/lander",
+        "sourceText": "The domain https://www.fcpb.org now shows a parked-domain landing page with unrelated ad links; no official Friendship Circle Parkland/North Broward content is available, so diagnosesServed is left null."
+      },
+      {
+        "field": "modalities",
+        "value": null,
+        "sourceUrl": "https://www.fcpb.org/lander",
+        "sourceText": "Because the domain is parked and contains no program details, treatment/support modalities cannot be verified and remain null."
+      },
+      {
+        "field": "treatsASD",
+        "value": null,
+        "sourceUrl": "https://www.fcpb.org/lander",
+        "sourceText": "No valid official program page is available at this domain; ASD support cannot be confirmed for the Parkland/North Broward program."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": "https://www.fcpb.org/lander",
+        "sourceText": "With only a domain-sale page visible, no information about substance use services is available; treatsSUD is left null."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": null,
+        "sourceUrl": "https://www.fcpb.org/lander",
+        "sourceText": "Level of care and acuity cannot be determined from the parked domain; highAcuityMH is left null."
+      }
+    ]
+  },
+  {
+    "id": "program_23",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Autism Spectrum",
+          "Intellectual Disabilities",
+          "Developmental Disabilities"
+        ],
+        "sourceUrl": "https://www.friendshipcirclemiami.org/about-us/mission-statement/",
+        "sourceText": "Mission and events emphasize serving “individuals with special needs” and “unique abilities,” with an annual “305 Autism Awareness Ride” listed under Events, supporting inclusion of autism and other developmental disabilities."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "Social Skills Training",
+          "Peer Support"
+        ],
+        "sourceUrl": "https://www.friendshipcirclemiami.org/",
+        "sourceText": "Homepage and About our programs sections describe structured activities and facilitated interactions between neurodiverse individuals and typically developing peers to build meaningful connections and friendships."
+      },
+      {
+        "field": "treatsASD",
+        "value": true,
+        "sourceUrl": "https://www.friendshipcirclemiami.org/about-us/mission-statement/",
+        "sourceText": "Mission and events include the “305 Autism Awareness Ride,” explicitly connecting the organization’s programming and fundraising to autism and related developmental disabilities."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.friendshipcirclemiami.org/programs/",
+        "sourceText": "Program descriptions focus on social, recreational, and support programming rather than clinical treatment or higher levels of psychiatric care."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "305-234-5654",
+        "sourceUrl": "https://www.friendshipcirclemiami.org/about-us/mission-statement/",
+        "sourceText": "Top banner and footer list “305-234-5654” as the main Friendship Circle of Miami contact number."
+      }
+    ]
+  },
+  {
+    "id": "high_focus_parent",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Depression",
+          "Anxiety",
+          "Bipolar",
+          "Eating Disorders",
+          "ADHD",
+          "OCD",
+          "Psychosis",
+          "Self-harm",
+          "Substance Use"
+        ],
+        "sourceUrl": "https://www.highfocuscenters.com/program/mental-health/",
+        "sourceText": "Mental health program page lists psychiatric disorders treated: depression, anxiety disorders, bipolar disorder, disordered eating, ADHD/ADD, obsessive-compulsive disorder, suicidal thoughts or behaviors, self-harm, mania, and psychosis. Homepage also highlights mental health, substance use, and co-occurring disorders."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "DBT",
+          "Family Therapy",
+          "Psychoeducation",
+          "Psychiatric Services"
+        ],
+        "sourceUrl": "https://www.highfocuscenters.com/program/mental-health/",
+        "sourceText": "Mental health program features section names evidence-based techniques including family group sessions, psychoeducation, and psychiatric services; adolescent programming description notes that teens are taught dialectical behavior therapy (DBT) skills and receive weekly psychiatry sessions."
+      },
+      {
+        "field": "treatsSUD",
+        "value": true,
+        "sourceUrl": "https://www.highfocuscenters.com/",
+        "sourceText": "Homepage hero text: “outpatient treatment programs for mental health, substance use and co-occurring disorders,” and navigation includes a separate Substance Use Disorder program."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.highfocuscenters.com/program/mental-health/",
+        "sourceText": "All levels of care described are outpatient PHP and IOP for adults and adolescents; no inpatient or residential programming is mentioned."
+      },
+      {
+        "field": "lgbtqAffirming",
+        "value": true,
+        "sourceUrl": "https://www.highfocuscenters.com/",
+        "sourceText": "Homepage “What and Who We Treat” navigation lists “LGBTQ+ Services” as a dedicated program, indicating explicit services for LGBTQ+ clients."
+      },
+      {
+        "field": "transAffirming",
+        "value": true,
+        "sourceUrl": "https://www.highfocuscenters.com/",
+        "sourceText": "Dedicated “LGBTQ+ Services” program implies affirming care for LGBTQ+ individuals including transgender clients; no exclusionary language is present."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "(877) 511-3114",
+        "sourceUrl": "https://www.highfocuscenters.com/",
+        "sourceText": "Site header and footer consistently list “Get Help Now — (877) 511-3114” and \"(877) 511-3114\" as the central admissions contact number."
+      }
+    ]
+  },
+  {
+  {
+    "id": "program_28",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Cherry Hill location page returns HTTP 403 and there is no alternative official Cherry Hill-specific content accessible; specific diagnoses served at this site cannot be verified."
+      },
+      {
+        "field": "modalities",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Without access to a Cherry Hill program or location page, there is no verifiable list of modalities; these fields are left null rather than inferred from network standards."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "High Focus Centers treats substance use and co-occurring disorders at some locations, but the Cherry Hill page is blocked (403) so its specific SUD offerings cannot be confirmed."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.highfocuscenters.com/program/mental-health/",
+        "sourceText": "Network mental health description indicates all programming is outpatient PHP/IOP; there is no indication that any High Focus Centers site offers inpatient or residential care."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "(877) 511-3114",
+        "sourceUrl": "https://www.highfocuscenters.com/",
+        "sourceText": "Network-wide “Get Help Now — (877) 511-3114” contact line is used for routing admissions inquiries to all locations, including Cherry Hill."
+      }
+    ]
+  },
+  {
+    "id": "program_29",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": "https://www.highfocuscenters.com/program/mental-health/",
+        "sourceText": "The mental health program page’s “Available at these locations” section includes Branchburg, but it does not break out location-specific diagnoses; site-level conditions treated cannot be enumerated from accessible content."
+      },
+      {
+        "field": "modalities",
+        "value": null,
+        "sourceUrl": "https://www.highfocuscenters.com/program/mental-health/",
+        "sourceText": "While the mental health program page describes DBT, family group sessions, psychoeducation, and psychiatric services as system techniques, Branchburg’s location page itself is 403; to avoid overreach, modalities are left null at the location object level."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "The network states that some locations offer co-occurring substance use treatment, but without access to the Branchburg location page we cannot verify SUD services at this specific site."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.highfocuscenters.com/program/mental-health/",
+        "sourceText": "Mental health program overview describes only outpatient PHP and IOP levels of care across the system; inpatient or residential treatment is not offered at High Focus Centers, including Branchburg."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "(877) 511-3114",
+        "sourceUrl": "https://www.highfocuscenters.com/",
+        "sourceText": "The central admissions number is used for all High Focus Centers locations, including Branchburg."
+      }
+    ]
+  },
+  {
+    "id": "program_30",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Lawrenceville’s specific location/program pages are not accessible (HTTP 403), and no alternate official content enumerates the conditions treated at this site."
+      },
+      {
+        "field": "modalities",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "Although the network mental health page describes several evidence-based techniques, there is no Lawrenceville-specific page available to confirm which modalities are offered at this location."
+      },
+      {
+        "field": "treatsSUD",
+        "value": null,
+        "sourceUrl": null,
+        "sourceText": "High Focus Centers treat substance use and co-occurring disorders at some outpatient sites, but the Lawrenceville pages are blocked (403); we cannot safely assert SUD services here."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.highfocuscenters.com/program/mental-health/",
+        "sourceText": "The system provides only outpatient PHP/IOP care; there is no indication that Lawrenceville or any other High Focus Centers site delivers inpatient or residential treatment."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "(877) 511-3114",
+        "sourceUrl": "https://www.highfocuscenters.com/",
+        "sourceText": "Central admissions phone number is the only consistent contact given for accessing services at Lawrenceville and other locations."
+      }
+    ]
+  },
+  {
+    "id": "program_31",
+    "fields": [
+      {
+        "field": "diagnosesServed",
+        "value": [
+          "Depression",
+          "Anxiety",
+          "Bipolar",
+          "Eating Disorders",
+          "ADHD",
+          "OCD",
+          "Psychosis",
+          "Self-harm",
+          "Substance Use"
+        ],
+        "sourceUrl": "https://www.highfocuscenters.com/program/mental-health/",
+        "sourceText": "System mental health page lists the core diagnostic categories treated; Parsippany location page describes both teen and adult mental health PHP/IOP and co-occurring programs."
+      },
+      {
+        "field": "modalities",
+        "value": [
+          "DBT",
+          "Family Therapy",
+          "Psychoeducation",
+          "Psychiatric Services"
+        ],
+        "sourceUrl": "https://www.highfocuscenters.com/program/mental-health/",
+        "sourceText": "High Focus mental health program description notes DBT skills for adolescents and core techniques of family group sessions, psychoeducation, and psychiatric services, all offered through Parsippany’s PHP/IOP tracks."
+      },
+      {
+        "field": "treatsSUD",
+        "value": true,
+        "sourceUrl": "https://www.highfocuscenters.com/location/nj/parsippany/",
+        "sourceText": "Parsippany location page lists multiple “Co-Occurring IOP” programs for ages 14–17 and adults, indicating integrated mental health and substance use treatment."
+      },
+      {
+        "field": "highAcuityMH",
+        "value": false,
+        "sourceUrl": "https://www.highfocuscenters.com/location/nj/parsippany/",
+        "sourceText": "Parsippany description details PHP and IOP levels of outpatient care for teens and adults; no inpatient/residential services are described."
+      },
+      {
+        "field": "admissions.phone",
+        "value": "(877) 511-3114",
+        "sourceUrl": "https://www.highfocuscenters.com/location/nj/parsippany/",
+        "sourceText": "Parsippany page header uses the same “Get Help Now — (877) 511-3114” contact for admissions."
+      },
+      {
+        "field": "admissions.transportProvided",
+        "value": true,
+        "sourceUrl": "https://www.highfocuscenters.com/location/nj/parsippany/",
+        "sourceText": "Transportation Services section explains that Parsippany provides round-trip PHP transportation from home and transport from school to the center for after-school IOP within a 15-mile radius."
+      }
+    ]
+  }
+]
+

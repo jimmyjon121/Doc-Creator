@@ -8,6 +8,21 @@
         return;
     }
 
+    const TASK_TO_MILESTONE_MAP = {
+        needsAssessment: 'needs_assessment',
+        healthPhysical: 'health_physical',
+        aftercareThreadSent: 'aftercare_thread',
+        optionsDocUploaded: 'options_doc',
+        dischargePacketUploaded: 'discharge_packet',
+        referralClosureCorrespondence: 'referral_closure',
+        gadCompleted: 'gad_assessment',
+        phqCompleted: 'phq_assessment',
+        satisfactionSurvey: 'satisfaction_survey',
+        dischargeSummary: 'discharge_summary',
+        dischargePlanningNote: 'final_planning_note',
+        dischargeASAM: 'discharge_asam'
+    };
+
     class ClientTaskService {
         constructor(clientManager, schema) {
             this.clientManager = clientManager;
@@ -27,6 +42,7 @@
                     if (changed) {
                         await this.clientManager.updateClient(client.id, { taskState: client.taskState });
                     }
+                    await this.syncClientMilestones(client);
                 }
                 console.log(`✅ Task service initialized (${clients.length} clients normalized)`);
             } catch (error) {
@@ -110,6 +126,7 @@
             }
 
             const updatedClient = await this.clientManager.updateClient(clientId, updatePayload);
+            await this.syncMilestoneStatus(clientId, taskId, nextState.completed);
             return updatedClient.taskState?.[taskId];
         }
 
@@ -159,6 +176,40 @@
                 return { state: 'dueSoon', severity: 'medium', days: diffDays };
             }
             return { state: 'pending', severity: 'low', days: diffDays };
+        }
+
+        async syncMilestoneStatus(clientId, taskId, completed) {
+            const milestoneId = TASK_TO_MILESTONE_MAP[taskId];
+            if (!milestoneId) return;
+            const milestonesManager = window.milestonesManager;
+            if (!milestonesManager || typeof milestonesManager.updateMilestoneStatus !== 'function') return;
+
+            try {
+                const statusMap = milestonesManager.statusTypes || {};
+                const status = completed
+                    ? statusMap.COMPLETE || 'complete'
+                    : statusMap.NOT_STARTED || 'not_started';
+                await milestonesManager.updateMilestoneStatus(
+                    clientId,
+                    milestoneId,
+                    status,
+                    '',
+                    window.ccConfig?.currentUser?.initials || 'UNK'
+                );
+            } catch (error) {
+                console.warn(`Failed to sync milestone for ${taskId}`, error);
+            }
+        }
+
+        async syncClientMilestones(client) {
+            if (!client || !client.id) return;
+            const tasks = Object.keys(TASK_TO_MILESTONE_MAP);
+            for (const taskId of tasks) {
+                const legacyValue = typeof client[taskId] === 'boolean' ? client[taskId] : undefined;
+                const taskStateCompleted = client.taskState?.[taskId]?.completed;
+                const completed = typeof legacyValue === 'boolean' ? legacyValue : Boolean(taskStateCompleted);
+                await this.syncMilestoneStatus(client.id, taskId, completed);
+            }
         }
     }
 

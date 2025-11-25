@@ -935,42 +935,75 @@
 
         .results__map {
             display: none;
-            flex-direction: column;
-            gap: 12px;
-            min-height: 480px;
             position: relative;
+            min-height: clamp(520px, 70vh, 880px);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: #0f1020;
         }
 
         .results__map.is-visible {
-            display: flex;
+            display: block;
+        }
+
+        body.map-view-active .pane.results {
+            background: transparent;
+            padding: 0;
+            box-shadow: none;
+            grid-column: 1 / -1;
+        }
+
+        body.map-view-active .results__header,
+        body.map-view-active .results-controls-bar {
+            opacity: 0;
+            pointer-events: none;
+            height: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        body.map-view-active .pane.filters,
+        body.map-view-active .pane.builder {
+            display: none;
+        }
+
+        body.map-view-active .app-shell {
+            grid-template-columns: 1fr;
         }
 
         .map-toolbar {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: min(360px, calc(100% - 32px));
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
             gap: 12px;
-            padding: 10px 14px;
-            border-radius: 12px;
-            background: rgba(233, 236, 255, 0.4);
-            border: 1px solid rgba(110, 123, 255, 0.16);
-            color: var(--text-subtle);
-            font-size: 0.85rem;
+            padding: 16px;
+            border-radius: 20px;
+            background: rgba(14, 16, 35, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #f4f6ff;
+            font-size: 0.9rem;
+            box-shadow: 0 24px 60px rgba(5, 6, 18, 0.45);
+            z-index: 5;
         }
 
         .map-status {
             display: flex;
             align-items: center;
             gap: 8px;
+            font-weight: 600;
+            color: #dde3ff;
         }
 
         .map-canvas {
-            flex: 1;
-            min-height: 440px;
-            border-radius: var(--radius-lg);
+            width: 100%;
+            height: clamp(520px, 70vh, 880px);
+            border-radius: inherit;
             overflow: hidden;
-            border: 1px solid rgba(110, 123, 255, 0.18);
-            box-shadow: var(--shadow-soft);
+            border: none;
+            box-shadow: none;
         }
 
         .leaflet-container {
@@ -979,17 +1012,26 @@
         }
 
         .map-legend {
+            position: absolute;
+            right: 16px;
+            bottom: 16px;
+            background: rgba(14, 16, 35, 0.85);
+            border-radius: 18px;
+            padding: 14px 18px;
             display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 10px;
+            color: #f4f6ff;
+            font-size: 0.78rem;
+            box-shadow: 0 20px 55px rgba(5, 6, 18, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            z-index: 5;
         }
 
         .map-controls {
             display: flex;
-            align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 8px;
         }
 
         .map-control {
@@ -997,7 +1039,7 @@
             flex-direction: column;
             gap: 4px;
             font-size: 0.75rem;
-            color: var(--text-subtle);
+            color: rgba(255, 255, 255, 0.85);
         }
 
         .map-control__input-row {
@@ -1011,48 +1053,48 @@
         }
 
         .map-control span strong {
-            color: var(--navy-700);
+            color: #ffffff;
         }
 
         .map-control input[type="text"],
-        .map-control select,
-        .map-control input[type="range"] {
-            border-radius: 10px;
-            border: 1px solid rgba(110, 123, 255, 0.24);
-            background: rgba(255, 255, 255, 0.85);
-            color: var(--text-strong);
-            font-size: 0.82rem;
-            padding: 6px 10px;
+        .map-control select {
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.12);
+            color: #f4f6ff;
+            font-size: 0.85rem;
+            padding: 8px 12px;
         }
 
         .map-control input[type="text"]:focus,
         .map-control select:focus {
             outline: none;
-            border-color: var(--accent-400);
-            background: rgba(233, 236, 255, 0.9);
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .map-control--radius input[type="range"] {
-            width: 160px;
+            width: 100%;
             padding: 0;
             background: transparent;
+            accent-color: var(--accent-500);
         }
 
         .map-control__button {
             border: none;
             border-radius: 999px;
-            background: rgba(110, 123, 255, 0.2);
-            color: var(--navy-700);
-            padding: 6px 14px;
+            background: linear-gradient(135deg, var(--accent-500), var(--accent-200));
+            color: #0f1020;
+            padding: 8px 16px;
             font-size: 0.78rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background var(--transition-fast), transform var(--transition-fast);
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
         }
 
         .map-control__button:is(:hover, :focus-visible) {
-            background: rgba(110, 123, 255, 0.32);
             transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(110, 123, 255, 0.35);
         }
 
         .map-control--presets {
@@ -1066,30 +1108,30 @@
             font-size: 0.75rem;
             font-weight: 600;
             letter-spacing: 0.04em;
-            color: var(--text-subtle);
+            color: rgba(255, 255, 255, 0.78);
         }
 
         .map-control__preset {
             border: none;
             border-radius: 999px;
-            padding: 6px 12px;
+            padding: 8px 14px;
             font-size: 0.75rem;
             font-weight: 600;
-            background: rgba(110, 123, 255, 0.18);
-            color: var(--navy-700);
+            background: rgba(255, 255, 255, 0.12);
+            color: #f4f6ff;
             cursor: pointer;
             transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
         }
 
         .map-control__preset:is(:hover, :focus-visible) {
-            background: rgba(110, 123, 255, 0.32);
+            background: rgba(255, 255, 255, 0.2);
             transform: translateY(-1px);
         }
 
         .map-control__preset.is-active {
-            background: linear-gradient(135deg, var(--accent-500), var(--accent-200));
-            color: var(--navy-900);
-            box-shadow: 0 8px 18px rgba(110, 123, 255, 0.25);
+            background: #ffffff;
+            color: var(--navy-700);
+            box-shadow: 0 8px 18px rgba(255, 255, 255, 0.25);
         }
 
         .map-legend__item {
@@ -1097,11 +1139,11 @@
             align-items: center;
             gap: 6px;
             font-size: 0.78rem;
-            color: var(--text-subtle);
-            padding: 4px 8px;
+            color: rgba(255, 255, 255, 0.85);
+            padding: 4px 10px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(21, 22, 51, 0.08);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.14);
         }
 
         .map-marker-dot {
@@ -2567,9 +2609,9 @@
                         </label>
                         <button type="button" class="map-control__button" id="mapLocateButton" aria-label="Use my current location">My Location</button>
                     </div>
-                    <div class="map-legend" id="mapLegend"></div>
                 </div>
                 <div class="map-canvas" id="resultsMapCanvas" role="presentation"></div>
+                <div class="map-legend" id="mapLegend"></div>
             </section>
             <section class="results__compare" id="resultsCompareContainer" aria-label="Program comparison workspace">
                 <header class="compare-toolbar">
@@ -4268,6 +4310,16 @@
                 return Boolean(home && typeof home.lat === "number" && typeof home.lng === "number");
             }
 
+            function isMapFilterActive() {
+                if (!state.map) {
+                    return false;
+                }
+                if (state.map.applyFiltersGlobally) {
+                    return true;
+                }
+                return state.view === "map" && hasHomeLocation();
+            }
+
             function getRadiusPresetForMiles(miles) {
                 if (typeof miles !== "number" || Number.isNaN(miles)) {
                     return null;
@@ -4765,7 +4817,7 @@
                 if (activeFilterButtons.length) {
                     summaryParts.push(`${activeFilterButtons.length} filter${activeFilterButtons.length > 1 ? "s" : ""} active`);
                 }
-                const mapFiltering = state.map.applyFiltersGlobally || state.view === "map";
+                const mapFiltering = isMapFilterActive();
                 const radiusMiles = Number.isFinite(state.map.radiusMiles) ? state.map.radiusMiles : state.map.defaultRadius;
                 const radiusLabel = `Radius ${radiusMiles} mi`;
                 if (mapFiltering) {
@@ -4846,7 +4898,7 @@
 
             function buildPaginationSignature() {
                 const center = state.map?.center || {};
-                const mapDescriptor = (state.map.applyFiltersGlobally || state.view === "map")
+                const mapDescriptor = isMapFilterActive()
                     ? `${state.map.distanceFilter}|${state.map.radiusMiles}|${Number(center.lat || 0).toFixed(2)}|${Number(center.lng || 0).toFixed(2)}`
                     : "map-off";
                 return [
@@ -5077,9 +5129,423 @@
                 return `<ul>${lines.map(line => `<li>${escapeHtml(line)}</li>`).join("")}</ul>`;
             }
 
+            const LETTERHEAD_HEADER_ASSET = 'assets/letterhead/ffas-letterhead-header.png';
+            const LETTERHEAD_FOOTER_ASSET = 'assets/letterhead/ffas-letterhead-footer.jpg';
+
+            function renderAftercareOptionsLetterhead(snapshot, label, generatedAt) {
+                const client = snapshot.clientContext || {};
+                const laneOrder = ["stabilize", "bridge", "sustain", "atHome"];
+                const laneNames = {
+                    stabilize: "Stabilize (0–7 days)",
+                    bridge: "Bridge (Week 2–4)",
+                    sustain: "Sustain (30+ days)",
+                    atHome: "At-Home Supports"
+                };
+                const preparedBy = window.ccConfig?.currentUser?.fullName
+                    || window.ccConfig?.currentUser?.displayName
+                    || window.ccConfig?.currentUser?.initials
+                    || "CareConnect Clinical Team";
+
+                const entries = [];
+                laneOrder.forEach(laneKey => {
+                    const laneEntries = snapshot.lanes[laneKey] || [];
+                    laneEntries.forEach(entry => {
+                        const programDetails = entry.type === "program" && typeof getProgramById === "function"
+                            ? getProgramById(entry.programId)
+                            : null;
+                        const locationParts = [];
+                        if (programDetails?.location?.city) locationParts.push(programDetails.location.city);
+                        if (programDetails?.location?.state) locationParts.push(programDetails.location.state);
+                        const locationLabel = locationParts.join(", ");
+                        const contactLines = [];
+                        const liaison = programDetails?.contact?.admissions || entry.contactPerson;
+                        const phone = programDetails?.contact?.phone || entry.contactPhone;
+                        const email = programDetails?.contact?.email || entry.contactEmail;
+                        const website = programDetails?.website || entry.contactWebsite;
+                        if (liaison) contactLines.push(sanitizeTextForExport(liaison));
+                        if (phone) contactLines.push(`Phone: ${sanitizeTextForExport(phone)}`);
+                        if (email) contactLines.push(`Email: ${sanitizeTextForExport(email)}`);
+                        if (website) {
+                            const safeUrl = sanitizeTextForExport(website);
+                            contactLines.push(`<a href="${safeUrl}" target="_blank">${safeUrl}</a>`);
+                        }
+                        entries.push({
+                            lane: laneKey,
+                            stageLabel: laneNames[laneKey],
+                            name: sanitizeTextForExport(entry.type === "program" ? (entry.programName || "Program") : (entry.resourceName || "Resource")),
+                            format: sanitizeTextForExport(entry.format || programDetails?.format || ""),
+                            focus: sanitizeTextForExport(entry.focus || programDetails?.focus || ""),
+                            location: locationLabel || sanitizeTextForExport(entry.city || ""),
+                            distance: formatDistanceForDocument(entry.distanceFromHome),
+                            reasonHtml: entry.reasonFormatted || (entry.reason ? `<p>${sanitizeTextForExport(entry.reason)}</p>` : ""),
+                            notesHtml: entry.programNote ? `<p>${sanitizeTextForExport(entry.programNote)}</p>` : (entry.notesHtml || ""),
+                            contactHtml: contactLines.length ? contactLines.join("<br>") : "—"
+                        });
+                    });
+                });
+
+                const totalOptions = entries.length;
+                const stageCounts = laneOrder.map(key => ({
+                    key,
+                    label: laneNames[key],
+                    count: snapshot.lanes[key]?.length || 0
+                }));
+                const priorityList = entries.slice(0, 4).map(item => {
+                    const meta = [item.stageLabel];
+                    if (item.focus) meta.push(item.focus);
+                    if (item.distance) meta.push(item.distance);
+                    return `<li><strong>${item.name}</strong><span>${meta.filter(Boolean).join(" • ")}</span></li>`;
+                }).join("") || '<li>Continue curating aftercare resources to ensure three solid options per stage.</li>';
+
+                const tableRows = entries.length ? entries.map(entry => `
+                    <tr>
+                        <td>
+                            <div class="stage-pill">${entry.stageLabel}</div>
+                        </td>
+                        <td>
+                            <div class="program-name">${entry.name}</div>
+                            ${entry.format ? `<div class="program-format">${entry.format}</div>` : ""}
+                        </td>
+                        <td>
+                            ${entry.reasonHtml || '<p class="muted">Rationale pending</p>'}
+                        </td>
+                        <td>
+                            ${entry.focus ? `<div class="focus-pill">${entry.focus}</div>` : ""}
+                            ${entry.location ? `<div class="meta-line">${entry.location}${entry.distance ? ` • ${entry.distance}` : ""}</div>` : ""}
+                            ${entry.contactHtml ? `<div class="meta-line">${entry.contactHtml}</div>` : ""}
+                        </td>
+                        <td>
+                            ${entry.notesHtml || '<p class="muted">Add progress notes or inline evidence</p>'}
+                        </td>
+                    </tr>
+                `).join("") : `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            No programs selected yet. Return to the Programs workspace to add recommendations before generating this document.
+                        </td>
+                    </tr>
+                `;
+
+                const summaryCards = [
+                    { label: "Total Options", value: totalOptions },
+                    { label: "Stabilize Window", value: stageCounts.find(card => card.key === "stabilize")?.count || 0 },
+                    { label: "Bridge Support", value: stageCounts.find(card => card.key === "bridge")?.count || 0 },
+                    { label: "At-Home Touchpoints", value: stageCounts.find(card => card.key === "atHome")?.count || 0 }
+                ];
+
+                return `
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>${sanitizeTextForExport(label)} • ${generatedAt}</title>
+                        <style>
+                            @page { margin: 0; }
+                            body {
+                                font-family: 'Inter', 'Segoe UI', sans-serif;
+                                margin: 0;
+                                color: #0f172a;
+                                background: #f5f7fb;
+                            }
+                            header.letterhead-header {
+                                position: fixed;
+                                top: 0;
+                                left: 0;
+                                right: 0;
+                                height: 180px;
+                                background: url('${LETTERHEAD_HEADER_ASSET}') no-repeat center top;
+                                background-size: cover;
+                            }
+                            footer.letterhead-footer {
+                                position: fixed;
+                                bottom: 0;
+                                left: 0;
+                                right: 0;
+                                height: 140px;
+                                display: flex;
+                                justify-content: center;
+                                align-items: flex-end;
+                            }
+                            footer.letterhead-footer img {
+                                width: 100%;
+                                height: auto;
+                                display: block;
+                            }
+                            main.letter-content {
+                                padding: 200px 64px 180px;
+                            }
+                            .doc-title {
+                                font-size: 28px;
+                                font-weight: 700;
+                                color: #0f172a;
+                                margin-bottom: 8px;
+                            }
+                            .doc-subtitle {
+                                color: #475569;
+                                font-size: 15px;
+                                margin-bottom: 32px;
+                            }
+                            .meta-grid {
+                                display: grid;
+                                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                                gap: 12px;
+                                margin-bottom: 28px;
+                            }
+                            .meta-card {
+                                background: white;
+                                border-radius: 12px;
+                                padding: 14px 16px;
+                                border: 1px solid #e2e8f0;
+                            }
+                            .meta-label {
+                                font-size: 12px;
+                                text-transform: uppercase;
+                                color: #94a3b8;
+                                letter-spacing: 0.05em;
+                            }
+                            .meta-value {
+                                font-size: 15px;
+                                font-weight: 600;
+                                color: #0f172a;
+                            }
+                            .summary-cards {
+                                display: grid;
+                                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                                gap: 12px;
+                                margin-bottom: 32px;
+                            }
+                            .summary-card {
+                                background: linear-gradient(135deg, #eef2ff, #e0f2fe);
+                                border-radius: 12px;
+                                padding: 16px;
+                                border: 1px solid rgba(79, 70, 229, 0.12);
+                            }
+                            .summary-card .value {
+                                font-size: 26px;
+                                font-weight: 700;
+                                color: #312e81;
+                            }
+                            .summary-card .label {
+                                font-size: 13px;
+                                color: #475569;
+                            }
+                            .priority-panel {
+                                background: white;
+                                border-radius: 16px;
+                                padding: 20px;
+                                border: 1px solid #e2e8f0;
+                                margin-bottom: 24px;
+                            }
+                            .priority-panel h3 {
+                                margin: 0 0 12px;
+                                color: #0f172a;
+                                font-size: 18px;
+                            }
+                            .priority-panel ol {
+                                margin: 0;
+                                padding-left: 18px;
+                                color: #475569;
+                            }
+                            .priority-panel li {
+                                margin-bottom: 6px;
+                                font-size: 15px;
+                            }
+                            .priority-panel li span {
+                                display: block;
+                                font-size: 13px;
+                                color: #94a3b8;
+                            }
+                            table.options-table {
+                                width: 100%;
+                                border-collapse: collapse;
+                                background: white;
+                                border-radius: 16px;
+                                overflow: hidden;
+                                border: 1px solid #e2e8f0;
+                            }
+                            table.options-table thead {
+                                background: #312e81;
+                                color: white;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
+                                font-size: 12px;
+                            }
+                            table.options-table th,
+                            table.options-table td {
+                                padding: 16px;
+                                vertical-align: top;
+                                border-bottom: 1px solid #e2e8f0;
+                            }
+                            table.options-table tbody tr:last-child td {
+                                border-bottom: none;
+                            }
+                            .stage-pill {
+                                display: inline-flex;
+                                padding: 6px 10px;
+                                border-radius: 999px;
+                                background: #eef2ff;
+                                color: #312e81;
+                                font-size: 12px;
+                                font-weight: 600;
+                            }
+                            .program-name {
+                                font-size: 16px;
+                                font-weight: 700;
+                                color: #0f172a;
+                            }
+                            .program-format {
+                                font-size: 13px;
+                                color: #475569;
+                                margin-top: 4px;
+                            }
+                            .focus-pill {
+                                display: inline-flex;
+                                padding: 4px 8px;
+                                border-radius: 999px;
+                                background: #ecfccb;
+                                color: #166534;
+                                font-size: 12px;
+                                font-weight: 600;
+                                margin-bottom: 6px;
+                            }
+                            .meta-line {
+                                font-size: 13px;
+                                color: #475569;
+                                line-height: 1.4;
+                            }
+                            .muted {
+                                color: #cbd5f5;
+                            }
+                            .empty-state {
+                                text-align: center;
+                                padding: 32px;
+                                font-size: 15px;
+                                color: #475569;
+                            }
+                            .notes-grid {
+                                display: grid;
+                                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                                gap: 16px;
+                                margin-top: 28px;
+                            }
+                            .notes-card {
+                                background: white;
+                                border-radius: 16px;
+                                padding: 18px;
+                                border: 1px solid #e2e8f0;
+                            }
+                            .notes-card h4 {
+                                margin: 0 0 10px;
+                                font-size: 16px;
+                                color: #0f172a;
+                            }
+                            .notes-card ul {
+                                margin: 0;
+                                padding-left: 18px;
+                                color: #475569;
+                                line-height: 1.5;
+                            }
+                            @media print {
+                                header.letterhead-header,
+                                footer.letterhead-footer {
+                                    position: fixed;
+                                }
+                                main.letter-content {
+                                    padding: 180px 48px 150px;
+                                }
+                                body {
+                                    background: white;
+                                }
+                            }
+                        </style>
+                    </head>
+                    <body class="letterhead-doc">
+                        <header class="letterhead-header"></header>
+                        <footer class="letterhead-footer">
+                            <img src="${LETTERHEAD_FOOTER_ASSET}" alt="FFAS Footer Artwork">
+                        </footer>
+                        <main class="letter-content">
+                            <div class="doc-title">${sanitizeTextForExport(label)}</div>
+                            <div class="doc-subtitle">Comprehensive placement comparison curated for the family and payer team.</div>
+                            <div class="meta-grid">
+                                <div class="meta-card">
+                                    <div class="meta-label">Prepared For</div>
+                                    <div class="meta-value">${sanitizeTextForExport(client.initials || "Not Assigned")}</div>
+                                </div>
+                                <div class="meta-card">
+                                    <div class="meta-label">Kipu ID</div>
+                                    <div class="meta-value">${sanitizeTextForExport(client.kipuId || "Pending")}</div>
+                                </div>
+                                <div class="meta-card">
+                                    <div class="meta-label">Prepared By</div>
+                                    <div class="meta-value">${sanitizeTextForExport(preparedBy)}</div>
+                                </div>
+                                <div class="meta-card">
+                                    <div class="meta-label">Generated</div>
+                                    <div class="meta-value">${generatedAt}</div>
+                                </div>
+                            </div>
+                            <div class="summary-cards">
+                                ${summaryCards.map(card => `
+                                    <div class="summary-card">
+                                        <div class="value">${card.value}</div>
+                                        <div class="label">${card.label}</div>
+                                    </div>
+                                `).join("")}
+                            </div>
+                            <div class="priority-panel">
+                                <h3>Priority Highlights</h3>
+                                <ol>
+                                    ${priorityList}
+                                </ol>
+                            </div>
+                            <table class="options-table">
+                                <thead>
+                                    <tr>
+                                        <th>Stage</th>
+                                        <th>Program</th>
+                                        <th>Clinical Fit</th>
+                                        <th>Location & Contact</th>
+                                        <th>Notes & Evidence</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                            <div class="notes-grid">
+                                <div class="notes-card">
+                                    <h4>Next Steps</h4>
+                                    <ul>
+                                        <li>Confirm availability with highlighted programs and log insurance determinations.</li>
+                                        <li>Update Aftercare Thread with family feedback and document uploads.</li>
+                                        <li>Lock placement once payer approval is secured and schedule warm handoff.</li>
+                                    </ul>
+                                </div>
+                                <div class="notes-card">
+                                    <h4>Reminders</h4>
+                                    <ul>
+                                        <li>Options Doc auto-locks until Aftercare Thread is marked complete.</li>
+                                        <li>Use Quick Update to add inline evidence (Kipu docs, call notes, owners).</li>
+                                        <li>Ensure ASAM tracker reflects any LOC changes tied to these placements.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </main>
+                    </body>
+                    </html>
+                `;
+            }
+
             function renderDocumentHtml(snapshot) {
                 const label = getDocumentTypeLabel(snapshot.documentType);
                 const generatedAt = new Date(snapshot.generatedAt).toLocaleString();
+                if (snapshot.documentType === "aftercare-options") {
+                    return renderAftercareOptionsLetterhead(snapshot, label, generatedAt);
+                }
+                return renderDefaultDocumentHtml(snapshot, label, generatedAt);
+            }
+            function renderDefaultDocumentHtml(snapshot, label, generatedAt) {
                 const laneOrder = ["stabilize", "bridge", "sustain", "atHome"];
                 const laneNames = {
                     stabilize: "Stabilize (0–7 days)",
@@ -5439,8 +5905,10 @@
 
             function buildMapGroups(programs) {
                 const groups = new Map();
-                const center = state.map.center;
-                const radius = state.map.radiusMiles;
+                const center = state.map.center || {};
+                const radius = isMapFilterActive() ? state.map.radiusMiles : null;
+                const canComputeDistance = typeof center.lat === "number" && typeof center.lng === "number";
+                const showDistanceFromHome = hasHomeLocation();
                 let missingLocation = 0;
                 let filterExcluded = 0;
                 let distanceExcluded = 0;
@@ -5455,11 +5923,14 @@
                         return;
                     }
                     let distanceMiles = null;
-                    if (typeof center.lat === "number" && typeof center.lng === "number") {
-                        distanceMiles = computeDistanceMiles(center.lat, center.lng, loc.lat, loc.lng);
-                        if (radius && distanceMiles > radius) {
+                    if (canComputeDistance) {
+                        const calculatedDistance = computeDistanceMiles(center.lat, center.lng, loc.lat, loc.lng);
+                        if (radius && calculatedDistance > radius) {
                             distanceExcluded += 1;
                             return;
+                        }
+                        if (showDistanceFromHome) {
+                            distanceMiles = calculatedDistance;
                         }
                     }
                     const key = `${loc.lat.toFixed(2)}|${loc.lng.toFixed(2)}`;
@@ -5548,7 +6019,9 @@
                 updateHomeMarker();
                 ensureMapLegend();
                 mapState.isReady = true;
-                elements.mapStatusLabel.textContent = "Map view ready. Drag to explore programs.";
+                elements.mapStatusLabel.textContent = isMapFilterActive()
+                    ? "Map view ready. Drag to explore programs."
+                    : "Showing all programs. Set a home ZIP to filter by distance.";
                 mapState.instance.on("moveend", () => {
                     const center = mapState.instance.getCenter();
                     state.map.center = { lat: center.lat, lng: center.lng, source: "pan" };
@@ -5568,8 +6041,15 @@
             function updateMapCircle() {
                 if (!mapState.circleLayer || !mapState.instance) return;
                 const center = state.map.center;
-                mapState.circleLayer.setLatLng([center.lat, center.lng]);
-                mapState.circleLayer.setRadius(state.map.radiusMiles * 1609.34);
+                if (typeof center.lat === "number" && typeof center.lng === "number") {
+                    mapState.circleLayer.setLatLng([center.lat, center.lng]);
+                }
+                if (isMapFilterActive()) {
+                    mapState.circleLayer.setStyle({ opacity: 1, fillOpacity: 0.12 });
+                    mapState.circleLayer.setRadius(state.map.radiusMiles * 1609.34);
+                } else {
+                    mapState.circleLayer.setStyle({ opacity: 0, fillOpacity: 0 });
+                }
             }
 
             async function updateMap(programs) {
@@ -5584,7 +6064,9 @@
                     }
                 });
                 if (!groups.length) {
-                    elements.mapStatusLabel.textContent = "No mappable programs with the current filters. Try expanding the radius or removing a filter.";
+                    elements.mapStatusLabel.textContent = isMapFilterActive()
+                        ? "No mappable programs with the current filters. Try expanding the radius or removing a filter."
+                        : "No programs available.";
                     updateMapLegendPrograms([], stats);
                     mapState.groups = [];
                     return;
@@ -5628,7 +6110,9 @@
                 }
                 updateRadiusPresetUi();
                 if (!options.silent) {
-                    state.map.applyFiltersGlobally = true;
+                    if (hasHomeLocation() || state.map.applyFiltersGlobally || options.forceGlobal) {
+                        state.map.applyFiltersGlobally = true;
+                    }
                 }
                 updateMapCircle();
             }
@@ -6300,6 +6784,7 @@
 
             function applyFilters(programs) {
                 return programs.filter(program => {
+                    const mapContextActive = state.map.applyFiltersGlobally || state.view === "map";
                     if (state.filters.focus.size && !state.filters.focus.has(program.focus)) {
                         return false;
                     }
@@ -6330,8 +6815,8 @@
                         ].join(" ").toLowerCase();
                         if (!haystack.includes(term)) return false;
                     }
-                    const applyMapFilters = state.map.applyFiltersGlobally || state.view === "map";
-                    if (applyMapFilters) {
+                    const applyMapFilters = isMapFilterActive();
+                    if (mapContextActive) {
                         if (!matchesDistanceFilter(program)) {
                             return false;
                         }
@@ -6339,11 +6824,13 @@
                         if (!loc || typeof loc.lat !== "number" || typeof loc.lng !== "number") {
                             return false;
                         }
-                        const center = state.map.center;
-                        if (typeof center.lat === "number" && typeof center.lng === "number") {
-                            const distance = computeDistanceMiles(center.lat, center.lng, loc.lat, loc.lng);
-                            if (distance > state.map.radiusMiles) {
-                                return false;
+                        if (applyMapFilters) {
+                            const center = state.map.center;
+                            if (typeof center.lat === "number" && typeof center.lng === "number") {
+                                const distance = computeDistanceMiles(center.lat, center.lng, loc.lat, loc.lng);
+                                if (Number.isFinite(state.map.radiusMiles) && distance > state.map.radiusMiles) {
+                                    return false;
+                                }
                             }
                         }
                     }
@@ -6864,6 +7351,7 @@
                 const isRows = view === "rows";
                 const isMap = view === "map";
                 const isCompare = view === "compare";
+                document.body.classList.toggle("map-view-active", isMap);
                 elements.resultsGrid.classList.toggle("is-compact", isRows);
                 elements.resultsGrid.style.display = (isMap || isCompare) ? "none" : "grid";
                 elements.mapContainer.classList.toggle("is-visible", isMap);
