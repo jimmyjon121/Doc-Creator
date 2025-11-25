@@ -1605,11 +1605,107 @@
       );
     }
     
-    // Determine which phase to add to based on document type
     const docType = dom.docTypeSelect?.value || 'aftercare-options';
-    const phase = docType === 'aftercare-options' ? 'simple' : 'stabilize';
-    window.ccDocumentModel?.addProgram(phase, program.id);
+    
+    // For Aftercare Options, check if this is an at-home type program
+    if (docType === 'aftercare-options') {
+      const isAtHomeType = isAtHomeProgramType(program);
+      
+      if (isAtHomeType) {
+        // Show prompt for at-home type programs
+        showAtHomePrompt(program);
+        return;
+      }
+      
+      // Regular program - add to primary
+      window.ccDocumentModel?.addProgram('simple', program.id);
+    } else {
+      // Aftercare Plan - add to stabilize phase
+      window.ccDocumentModel?.addProgram('stabilize', program.id);
+    }
+    
     updateBuilderUI();
+  }
+  
+  // Check if program is typically an at-home type (IOP, PHP, Outpatient, Virtual)
+  function isAtHomeProgramType(program) {
+    const atHomeLOCs = ['IOP', 'PHP', 'Outpatient', 'OP', 'Intensive Outpatient', 'Partial Hospitalization'];
+    const primaryLOC = program.primaryLOC || '';
+    const levelOfCare = program.levelOfCare || [];
+    const format = program.format || [];
+    
+    // Check if primary LOC is an at-home type
+    if (atHomeLOCs.some(loc => primaryLOC.toLowerCase().includes(loc.toLowerCase()))) {
+      return true;
+    }
+    
+    // Check if any level of care is at-home type
+    if (levelOfCare.some(loc => atHomeLOCs.some(ah => loc.toLowerCase().includes(ah.toLowerCase())))) {
+      return true;
+    }
+    
+    // Check if format is Virtual only (no Onsite)
+    if (format.includes('Virtual') && !format.includes('Onsite') && !format.includes('Hybrid')) {
+      return true;
+    }
+    
+    return false;
+  }
+  
+  function showAtHomePrompt(program) {
+    // Create the prompt modal
+    const modal = document.createElement('div');
+    modal.className = 'athome-prompt-overlay';
+    modal.innerHTML = `
+      <div class="athome-prompt">
+        <div class="athome-prompt__header">
+          <span class="athome-prompt__icon">🏠</span>
+          <span class="athome-prompt__title">Add to which section?</span>
+        </div>
+        <div class="athome-prompt__program">
+          <strong>${program.name}</strong>
+          <span class="athome-prompt__loc">${program.primaryLOC || 'Virtual'}</span>
+        </div>
+        <div class="athome-prompt__info">
+          This looks like an outpatient/virtual program. Where should it go?
+        </div>
+        <div class="athome-prompt__buttons">
+          <button class="athome-prompt__btn athome-prompt__btn--primary" data-action="primary">
+            🏥 Primary Recommendations
+          </button>
+          <button class="athome-prompt__btn athome-prompt__btn--athome" data-action="athome">
+            🏠 At-Home Options
+          </button>
+        </div>
+        <button class="athome-prompt__close" data-action="close">✕</button>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Handle button clicks
+    modal.addEventListener('click', (e) => {
+      const action = e.target.dataset.action || e.target.closest('[data-action]')?.dataset.action;
+      
+      if (action === 'primary') {
+        window.ccDocumentModel?.addProgram('simple', program.id);
+        updateBuilderUI();
+        modal.remove();
+      } else if (action === 'athome') {
+        window.ccDocumentModel?.addProgram('atHome', program.id);
+        updateBuilderUI();
+        modal.remove();
+      } else if (action === 'close') {
+        modal.remove();
+      }
+    });
+    
+    // Close on overlay click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.remove();
+      }
+    });
   }
 
   // ============================================================================
