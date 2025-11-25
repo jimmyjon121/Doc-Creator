@@ -238,52 +238,80 @@
 .toolbar {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: var(--space-5);
   height: var(--header-height);
   padding: 0 var(--space-6);
-  background: white;
-  border-bottom: 1px solid var(--neutral-200);
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #3730a3 100%);
+  border-radius: var(--radius-xl);
+  box-shadow: 
+    0 4px 20px rgba(30, 27, 75, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
 }
 
 .toolbar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   font-size: var(--text-lg);
   font-weight: 700;
-  color: var(--navy-800);
+  color: white;
   white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  letter-spacing: -0.01em;
+}
+
+.toolbar__brand span {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
 }
 
 .toolbar__search {
   flex: 1;
-  max-width: 400px;
+  max-width: 480px;
   position: relative;
 }
 
 .toolbar__search-input {
   width: 100%;
-  padding: var(--space-2) var(--space-4);
-  padding-left: 40px;
-  border: 1px solid var(--neutral-300);
-  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  padding-left: 44px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--navy-800);
+  transition: all 0.2s ease;
   background: var(--neutral-50);
   transition: all var(--transition-fast);
 }
 
+.toolbar__search-input::placeholder {
+  color: var(--neutral-400);
+  font-weight: 400;
+}
+
 .toolbar__search-input:focus {
   outline: none;
-  border-color: var(--accent-500);
-  box-shadow: var(--shadow-focus);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 
+    0 0 0 3px rgba(255, 255, 255, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.1);
   background: white;
 }
 
 .toolbar__search-icon {
   position: absolute;
-  left: var(--space-3);
+  left: var(--space-4);
   top: 50%;
   transform: translateY(-50%);
-  color: var(--neutral-400);
+  color: var(--accent-500);
+  pointer-events: none;
   pointer-events: none;
 }
 
@@ -293,20 +321,38 @@
   gap: var(--space-2);
 }
 
+.toolbar__client-label {
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 11px !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .toolbar__client-select {
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-4);
   padding-right: var(--space-8);
-  border: 1px solid var(--neutral-300);
+  border: 2px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-md);
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--navy-800);
+  min-width: 160px;
+  cursor: pointer;
+  transition: all 0.2s ease;
   min-width: 160px;
   cursor: pointer;
 }
 
+.toolbar__client-select:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
 .toolbar__client-select:focus {
   outline: none;
-  border-color: var(--accent-500);
-  box-shadow: var(--shadow-focus);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
 }
 
 .toolbar__actions {
@@ -319,21 +365,32 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
+  font-size: 1.25rem;
   border-radius: var(--radius-md);
-  color: var(--neutral-600);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
   transition: all var(--transition-fast);
 }
 
 .toolbar__btn:hover {
-  background: var(--neutral-100);
-  color: var(--navy-800);
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+  transform: translateY(-1px);
 }
 
 .toolbar__btn--active {
-  background: var(--accent-500);
-  color: white;
+  background: white;
+  color: var(--accent-600);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.toolbar__btn--active:hover {
+  background: white;
+  color: var(--accent-700);
 }
 
 /* ============================================================================
