@@ -237,6 +237,41 @@
   // ============================================================================
 
   function bindEvents() {
+    // Filter rail toggle
+    const filterToggle = document.getElementById('filterToggle');
+    const filterRail = document.getElementById('filterRail');
+    
+    filterToggle?.addEventListener('click', () => {
+      filterRail?.classList.toggle('is-expanded');
+      // Save preference
+      localStorage.setItem('cc-filter-expanded', filterRail?.classList.contains('is-expanded') ? 'true' : 'false');
+      // Update grid layout
+      updateMainLayout();
+    });
+    
+    // Collapsed filter icons - expand and scroll to section
+    document.querySelectorAll('.filter-rail__icon-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const section = btn.dataset.filterSection;
+        filterRail?.classList.add('is-expanded');
+        localStorage.setItem('cc-filter-expanded', 'true');
+        updateMainLayout();
+        
+        // Scroll to the section
+        setTimeout(() => {
+          const sectionEl = document.querySelector(`.filter-group[data-section="${section}"]`);
+          sectionEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 300);
+      });
+    });
+    
+    // Restore filter rail state
+    const savedFilterState = localStorage.getItem('cc-filter-expanded');
+    if (savedFilterState === 'true') {
+      filterRail?.classList.add('is-expanded');
+    }
+    updateMainLayout();
+
     // Search
     dom.globalSearch?.addEventListener('input', debounce(handleSearch, 300));
 
@@ -1197,6 +1232,7 @@
 
     state.filters = filters;
     renderPrograms();
+    updateFilterIcons();
 
     if (state.currentView === 'map') {
       renderMap();
@@ -1226,6 +1262,50 @@
     dom.globalSearch.value = '';
     state.filters = {};
     renderPrograms();
+    updateFilterIcons();
+  }
+
+  // Update main layout grid based on filter rail state
+  function updateMainLayout() {
+    const mainLayout = document.querySelector('.main-layout');
+    const filterRail = document.getElementById('filterRail');
+    const isExpanded = filterRail?.classList.contains('is-expanded');
+    
+    if (mainLayout) {
+      if (isExpanded) {
+        mainLayout.style.gridTemplateColumns = 'var(--filter-rail-width-expanded) 1fr var(--builder-pane-width)';
+      } else {
+        mainLayout.style.gridTemplateColumns = 'var(--filter-rail-width) 1fr var(--builder-pane-width)';
+      }
+    }
+  }
+
+  // Update collapsed filter icons to show active state
+  function updateFilterIcons() {
+    document.querySelectorAll('.filter-rail__icon-btn').forEach(btn => {
+      const section = btn.dataset.filterSection;
+      let hasActive = false;
+      
+      switch (section) {
+        case 'loc':
+          hasActive = document.querySelectorAll('#locFilters input:checked').length > 0;
+          break;
+        case 'format':
+          hasActive = document.querySelectorAll('#formatFilters input:checked').length > 0;
+          break;
+        case 'state':
+          hasActive = dom.stateFilter?.selectedOptions?.length > 0;
+          break;
+        case 'age':
+          hasActive = dom.ageMin?.value || dom.ageMax?.value;
+          break;
+        case 'flags':
+          hasActive = document.querySelectorAll('#flagFilters input:checked').length > 0;
+          break;
+      }
+      
+      btn.classList.toggle('has-active', hasActive);
+    });
   }
 
   function sortPrograms(programs) {

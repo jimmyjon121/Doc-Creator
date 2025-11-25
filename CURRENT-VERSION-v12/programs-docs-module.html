@@ -140,102 +140,123 @@
     
     <!-- FILTER RAIL -->
     <aside class="filter-rail" id="filterRail">
-      <div class="filter-rail__header">
-        <h2 class="filter-rail__title">Filters</h2>
-        <button id="clearAllFilters" class="filter-rail__clear">Clear All</button>
-                </div>
+      <!-- Toggle Button -->
+      <button class="filter-rail__toggle" id="filterToggle" title="Toggle filters">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
       
-      <!-- LOC Filter -->
-      <div class="filter-group">
-        <div class="filter-group__header">
-          <h3 class="filter-group__title">Level of Care</h3>
-          <button class="filter-group__clear" data-filter="loc">Clear</button>
-        </div>
-        <div id="locFilters">
-          <!-- Populated by JS -->
-            </div>
-        </div>
-      
-      <!-- Format Filter -->
-      <div class="filter-group">
-        <div class="filter-group__header">
-          <h3 class="filter-group__title">Format</h3>
-          <button class="filter-group__clear" data-filter="format">Clear</button>
-        </div>
-        <div id="formatFilters">
-          <label class="filter-checkbox">
-            <input type="checkbox" class="filter-checkbox__input" data-filter="format" value="Onsite">
-            <span class="filter-checkbox__label">Onsite</span>
-                        </label>
-          <label class="filter-checkbox">
-            <input type="checkbox" class="filter-checkbox__input" data-filter="format" value="Virtual">
-            <span class="filter-checkbox__label">Virtual</span>
-                        </label>
-          <label class="filter-checkbox">
-            <input type="checkbox" class="filter-checkbox__input" data-filter="format" value="Hybrid">
-            <span class="filter-checkbox__label">Hybrid</span>
-                        </label>
-                    </div>
-            </div>
-      
-      <!-- State Filter -->
-      <div class="filter-group">
-        <div class="filter-group__header">
-          <h3 class="filter-group__title">State</h3>
-          <button class="filter-group__clear" data-filter="state">Clear</button>
-        </div>
-        <select id="stateFilter" class="filter-select" multiple size="5">
-          <!-- Populated by JS -->
-                            </select>
-                    </div>
-      
-      <!-- Age Range Filter -->
-      <div class="filter-group">
-        <div class="filter-group__header">
-          <h3 class="filter-group__title">Age Range</h3>
-            </div>
-        <div class="filter-range">
-          <input type="number" id="ageMin" class="filter-range__input" placeholder="Min" min="0" max="100">
-          <span class="filter-range__separator">to</span>
-          <input type="number" id="ageMax" class="filter-range__input" placeholder="Max" min="0" max="100">
-                    </div>
-            </div>
-      
-      <!-- Clinical Flags Filter -->
-      <div class="filter-group">
-        <div class="filter-group__header">
-          <h3 class="filter-group__title">Clinical Flags</h3>
-          <button class="filter-group__clear" data-filter="flags">Clear</button>
-        </div>
-        <div id="flagFilters">
-          <label class="filter-checkbox">
-            <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="lgbtq">
-            <span class="filter-checkbox__label">LGBTQ+ Affirming</span>
-                        </label>
-          <label class="filter-checkbox">
-            <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="trans">
-            <span class="filter-checkbox__label">Trans Affirming</span>
-                        </label>
-          <label class="filter-checkbox">
-            <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="asd">
-            <span class="filter-checkbox__label">Treats ASD</span>
-                        </label>
-          <label class="filter-checkbox">
-            <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="sud">
-            <span class="filter-checkbox__label">Treats SUD</span>
-          </label>
-          <label class="filter-checkbox">
-            <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="highAcuity">
-            <span class="filter-checkbox__label">High Acuity MH</span>
-                        </label>
-                    </div>
+      <!-- Collapsed Icons (shown when collapsed) -->
+      <div class="filter-rail__collapsed-icons">
+        <button class="filter-rail__icon-btn" data-filter-section="loc" title="Level of Care">🏥</button>
+        <button class="filter-rail__icon-btn" data-filter-section="format" title="Format">📍</button>
+        <button class="filter-rail__icon-btn" data-filter-section="state" title="State">🗺️</button>
+        <button class="filter-rail__icon-btn" data-filter-section="age" title="Age Range">👤</button>
+        <button class="filter-rail__icon-btn" data-filter-section="flags" title="Clinical Flags">⚕️</button>
       </div>
       
-      <div class="filter-rail__footer">
-        <p class="filter-rail__stats">
-          Showing <strong id="resultsCount">0</strong> of <strong id="totalCount">0</strong> programs
-        </p>
-            </div>
+      <!-- Full Filter Content (shown when expanded) -->
+      <div class="filter-rail__content">
+        <div class="filter-rail__header">
+          <h2 class="filter-rail__title">Filters</h2>
+          <button id="clearAllFilters" class="filter-rail__clear">Clear All</button>
+        </div>
+      
+        <!-- LOC Filter -->
+        <div class="filter-group" data-section="loc">
+          <div class="filter-group__header">
+            <h3 class="filter-group__title">Level of Care</h3>
+            <button class="filter-group__clear" data-filter="loc">Clear</button>
+          </div>
+          <div class="filter-group__options" id="locFilters">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      
+        <!-- Format Filter -->
+        <div class="filter-group" data-section="format">
+          <div class="filter-group__header">
+            <h3 class="filter-group__title">Format</h3>
+            <button class="filter-group__clear" data-filter="format">Clear</button>
+          </div>
+          <div class="filter-group__options" id="formatFilters">
+            <label class="filter-checkbox">
+              <input type="checkbox" class="filter-checkbox__input" data-filter="format" value="Onsite">
+              <span class="filter-checkbox__label">Onsite</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" class="filter-checkbox__input" data-filter="format" value="Virtual">
+              <span class="filter-checkbox__label">Virtual</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" class="filter-checkbox__input" data-filter="format" value="Hybrid">
+              <span class="filter-checkbox__label">Hybrid</span>
+            </label>
+          </div>
+        </div>
+      
+        <!-- State Filter -->
+        <div class="filter-group" data-section="state">
+          <div class="filter-group__header">
+            <h3 class="filter-group__title">State</h3>
+            <button class="filter-group__clear" data-filter="state">Clear</button>
+          </div>
+          <div class="filter-group__options">
+            <select id="stateFilter" class="filter-select" multiple size="5">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+        </div>
+      
+        <!-- Age Range Filter -->
+        <div class="filter-group" data-section="age">
+          <div class="filter-group__header">
+            <h3 class="filter-group__title">Age Range</h3>
+          </div>
+          <div class="filter-group__options filter-range">
+            <input type="number" id="ageMin" class="filter-range__input" placeholder="Min" min="0" max="100">
+            <span class="filter-range__separator">to</span>
+            <input type="number" id="ageMax" class="filter-range__input" placeholder="Max" min="0" max="100">
+          </div>
+        </div>
+      
+        <!-- Clinical Flags Filter -->
+        <div class="filter-group" data-section="flags">
+          <div class="filter-group__header">
+            <h3 class="filter-group__title">Clinical Flags</h3>
+            <button class="filter-group__clear" data-filter="flags">Clear</button>
+          </div>
+          <div class="filter-group__options" id="flagFilters">
+            <label class="filter-checkbox">
+              <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="lgbtq">
+              <span class="filter-checkbox__label">LGBTQ+ Affirming</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="trans">
+              <span class="filter-checkbox__label">Trans Affirming</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="asd">
+              <span class="filter-checkbox__label">Treats ASD</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="sud">
+              <span class="filter-checkbox__label">Treats SUD</span>
+            </label>
+            <label class="filter-checkbox">
+              <input type="checkbox" class="filter-checkbox__input" data-filter="flags" value="highAcuity">
+              <span class="filter-checkbox__label">High Acuity MH</span>
+            </label>
+          </div>
+        </div>
+      
+        <div class="filter-rail__footer">
+          <p class="filter-rail__stats">
+            Showing <strong id="resultsCount">0</strong> of <strong id="totalCount">0</strong> programs
+          </p>
+        </div>
+      </div><!-- End filter-rail__content -->
     </aside>
     
     <!-- RESULTS AREA -->
