@@ -5,6 +5,22 @@
 
 // Feature configuration with granular control
 const FEATURE_FLAGS = {
+    // Core module flags (enabled by default)
+    programsV2Core: {
+        name: 'Programs V2 Module',
+        description: 'Modern Programs & Docs module with filters and document builder',
+        enabled: true,
+        dependencies: [],
+        risk: 'low'
+    },
+    devMode: {
+        name: 'Developer Mode',
+        description: 'Enable developer tools and debug logging',
+        enabled: false,
+        dependencies: [],
+        risk: 'low'
+    },
+    
     // Core features
     enableAdvancedFilters: {
         name: 'Advanced Filters',

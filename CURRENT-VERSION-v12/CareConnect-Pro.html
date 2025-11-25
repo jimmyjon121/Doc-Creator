@@ -43085,7 +43085,9 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                                 
                                 // Initialize client selector when programs tab is shown
                                 setTimeout(() => {
-                                    initializeClientSelector();
+                                    if (typeof initializeClientSelector === 'function') {
+                                        initializeClientSelector();
+                                    }
                                 }, 100);
                             } else if (tab === 'clients') {
                                 // For clients tab, keep full width but HIDE selection panel
@@ -43858,15 +43860,18 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 });
             });
             
-            // Refresh analytics when admin tab is shown
-            const originalSwitchTab = window.switchTab;
-            if (originalSwitchTab) {
-                window.switchTab = function(tab) {
-                    originalSwitchTab(tab);
-                    if (tab === 'admin') {
-                        window.refreshAdminAnalytics();
-                    }
-                };
+            // Listen for tab changes to refresh admin analytics
+            // Using MutationObserver instead of wrapping switchTab to avoid conflicts
+            const adminTab = document.getElementById('adminTab');
+            if (adminTab) {
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.attributeName === 'class' && adminTab.classList.contains('active')) {
+                            window.refreshAdminAnalytics();
+                        }
+                    });
+                });
+                observer.observe(adminTab, { attributes: true });
             }
         })();
     </script>
