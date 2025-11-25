@@ -2556,8 +2556,8 @@
   border-radius: var(--radius-xl);
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - var(--header-height) - 32px);
-  margin: var(--space-3);
+  max-height: calc(100vh - var(--header-height) - 48px);
+  margin: var(--space-4);
   margin-left: 0;
   box-shadow: 
     0 4px 16px rgba(0, 0, 0, 0.08),
