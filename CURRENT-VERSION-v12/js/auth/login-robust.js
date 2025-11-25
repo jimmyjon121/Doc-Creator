@@ -652,6 +652,17 @@
         setSessionExpiry();
         clearRateLimitState();
 
+        // Audit log successful login
+        if (window.auditService) {
+          window.auditService.log(
+            'user:logged_in',
+            result.username,
+            result.fullName || result.username,
+            { role: computedRole, isMaster: result.isMaster },
+            'medium'
+          ).catch(console.warn);
+        }
+
         passwordInput.value = '';
 
         if (
@@ -880,6 +891,22 @@
 
   function logout() {
     try {
+      // Capture user info before clearing session for audit log
+      const username = getSession(CONFIG.USERNAME_KEY);
+      const fullName = getSession(CONFIG.FULLNAME_KEY);
+      const userRole = getSession('userRole');
+      
+      // Audit log logout before clearing state
+      if (window.auditService && username) {
+        window.auditService.log(
+          'user:logged_out',
+          username,
+          fullName || username,
+          { role: userRole },
+          'low'
+        ).catch(console.warn);
+      }
+      
       // Clear login state first
       clearLoginState();
       

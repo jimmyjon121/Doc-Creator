@@ -23736,9 +23736,9 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                     <span class="menu-icon">📋</span>
                     <span>Templates</span>
                 </button>
-                <button class="menu-item" onclick="showAnalytics().catch(console.error); toggleMenu();">
+                <button class="menu-item" onclick="if(window.switchTab) { window.switchTab('admin'); } toggleMenu();">
                     <span class="menu-icon">📊</span>
-                    <span>Analytics</span>
+                    <span>Analytics & Admin</span>
                 </button>
                 <button class="menu-item" onclick="showHelp(); toggleMenu();">
                     <span class="menu-icon">❓</span>
@@ -24992,6 +24992,11 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                             console.log('Switching to tab:', tab);
                             console.trace('Tab switch called from:');
 
+                            // Track tab switch in analytics
+                            if (window.analyticsService) {
+                                window.analyticsService.track('tab:switched', { tab }).catch(console.warn);
+                            }
+
                             if (tab === 'admin') {
                                 const role = (localStorage.getItem('userRole') || '').toLowerCase();
                                 const isMaster = localStorage.getItem('isMaster') === 'true';
@@ -26128,6 +26133,570 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         })();
     </script>
 
+    <!-- Analytics Service (comprehensive event tracking and reporting) -->
+    <script>
+        (function () {
+            'use strict';
+
+            let dbManager = null;
+            let initialized = false;
+
+            /**
+             * Sanitize metadata to prevent PHI leakage
+             * Only allow safe, non-PHI fields
+             */
+            function sanitizeMetadata(metadata) {
+                if (!metadata || typeof metadata !== 'object') return {};
+                const safe = {};
+                const allowedKeys = [
+                    'count', 'type', 'tab', 'module', 'documentType', 'programId', 'programName',
+                    'houseId', 'houseName', 'action', 'status', 'error', 'duration', 'size',
+                    'format', 'method', 'source', 'target', 'filter', 'searchTerm', 'viewMode'
+                ];
+                Object.keys(metadata).forEach(key => {
+                    if (allowedKeys.includes(key)) {
+                        const value = metadata[key];
+                        // Ensure no raw names, addresses, IDs that could be PHI
+                        if (typeof value === 'string' && value.length > 100) {
+                            safe[key] = value.substring(0, 100) + '...';
+                        } else {
+                            safe[key] = value;
+                        }
+                    }
+                });
+                return safe;
+            }
+
+            /**
+             * Get current user ID (username only, no PHI)
+             */
+            function getCurrentUserId() {
+                try {
+                    return localStorage.getItem('username') || 'anonymous';
+                } catch (e) {
+                    return 'anonymous';
+                }
+            }
+
+            /**
+             * Get current session ID
+             */
+            function getSessionId() {
+                try {
+                    let sessionId = sessionStorage.getItem('analyticsSessionId');
+                    if (!sessionId) {
+                        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                        sessionStorage.setItem('analyticsSessionId', sessionId);
+                    }
+                    return sessionId;
+                } catch (e) {
+                    return `session_${Date.now()}`;
+                }
+            }
+
+            async function ensureDB() {
+                if (!dbManager) {
+                    if (window.IndexedDBManager) {
+                        dbManager = new window.IndexedDBManager();
+                        await dbManager.init();
+                    } else {
+                        throw new Error('IndexedDBManager not available');
+                    }
+                }
+                return dbManager;
+            }
+
+            window.analyticsService = {
+                async initialize() {
+                    if (initialized) return;
+                    try {
+                        await ensureDB();
+                        initialized = true;
+                        // Track initialization
+                        await this.track('system:initialized', {});
+                    } catch (e) {
+                        console.error('[analyticsService] Initialization failed:', e);
+                        throw e;
+                    }
+                },
+
+                /**
+                 * Track an analytics event
+                 * @param {string} eventType - e.g. 'tab:switched', 'document:generated'
+                 * @param {object} metadata - Non-PHI metadata only
+                 */
+                async track(eventType, metadata = {}) {
+                    if (!initialized) {
+                        try {
+                            await this.initialize();
+                        } catch (e) {
+                            console.warn('[analyticsService] Track failed (not initialized):', e);
+                            return;
+                        }
+                    }
+
+                    try {
+                        const sanitized = sanitizeMetadata(metadata);
+                        const event = {
+                            id: null, // auto-increment
+                            timestamp: Date.now(),
+                            timestampIso: new Date().toISOString(),
+                            eventType: String(eventType),
+                            userId: getCurrentUserId(),
+                            sessionId: getSessionId(),
+                            metadata: sanitized
+                        };
+
+                        await dbManager.put(dbManager.stores.analytics, event);
+                    } catch (e) {
+                        console.warn('[analyticsService] Track failed:', e);
+                        // Don't throw - analytics failures shouldn't break the app
+                    }
+                },
+
+                /**
+                 * Query analytics events with filters
+                 */
+                async query(filters = {}) {
+                    if (!initialized) await this.initialize();
+                    try {
+                        let events = await dbManager.getAll(dbManager.stores.analytics);
+                        
+                        // Apply filters
+                        if (filters.startDate) {
+                            const start = typeof filters.startDate === 'number' ? filters.startDate : new Date(filters.startDate).getTime();
+                            events = events.filter(e => e.timestamp >= start);
+                        }
+                        if (filters.endDate) {
+                            const end = typeof filters.endDate === 'number' ? filters.endDate : new Date(filters.endDate).getTime();
+                            events = events.filter(e => e.timestamp <= end);
+                        }
+                        if (filters.eventTypes && Array.isArray(filters.eventTypes)) {
+                            events = events.filter(e => filters.eventTypes.includes(e.eventType));
+                        }
+                        if (filters.userId) {
+                            events = events.filter(e => e.userId === filters.userId);
+                        }
+
+                        // Sort by timestamp descending
+                        events.sort((a, b) => b.timestamp - a.timestamp);
+
+                        return events;
+                    } catch (e) {
+                        console.error('[analyticsService] Query failed:', e);
+                        return [];
+                    }
+                },
+
+                /**
+                 * Get aggregated statistics for a time range
+                 */
+                async getStats(timeRange = '7d') {
+                    if (!initialized) await this.initialize();
+                    try {
+                        const now = Date.now();
+                        let startDate = null;
+                        
+                        switch (timeRange) {
+                            case '24h':
+                                startDate = now - (24 * 60 * 60 * 1000);
+                                break;
+                            case '7d':
+                                startDate = now - (7 * 24 * 60 * 60 * 1000);
+                                break;
+                            case '30d':
+                                startDate = now - (30 * 24 * 60 * 60 * 1000);
+                                break;
+                            case '90d':
+                                startDate = now - (90 * 24 * 60 * 60 * 1000);
+                                break;
+                            case 'all':
+                            default:
+                                startDate = null;
+                        }
+
+                        const events = await this.query({ startDate, endDate: now });
+
+                        // Aggregate stats
+                        const stats = {
+                            totalEvents: events.length,
+                            timeRange,
+                            byEventType: {},
+                            byUser: {},
+                            byDay: {},
+                            topPrograms: {},
+                            documentCounts: {
+                                generated: 0,
+                                exported: 0,
+                                byType: {}
+                            },
+                            tabUsage: {},
+                            activeUsers: new Set(),
+                            sessions: new Set()
+                        };
+
+                        events.forEach(event => {
+                            // By event type
+                            stats.byEventType[event.eventType] = (stats.byEventType[event.eventType] || 0) + 1;
+                            
+                            // By user
+                            stats.byUser[event.userId] = (stats.byUser[event.userId] || 0) + 1;
+                            stats.activeUsers.add(event.userId);
+                            stats.sessions.add(event.sessionId);
+
+                            // By day
+                            const day = new Date(event.timestamp).toLocaleDateString('en-CA');
+                            stats.byDay[day] = (stats.byDay[day] || 0) + 1;
+
+                            // Document events
+                            if (event.eventType === 'document:generated') {
+                                stats.documentCounts.generated++;
+                                const docType = event.metadata?.documentType || 'unknown';
+                                stats.documentCounts.byType[docType] = (stats.documentCounts.byType[docType] || 0) + 1;
+                            }
+                            if (event.eventType === 'document:exported') {
+                                stats.documentCounts.exported++;
+                            }
+
+                            // Tab usage
+                            if (event.eventType === 'tab:switched') {
+                                const tab = event.metadata?.tab || 'unknown';
+                                stats.tabUsage[tab] = (stats.tabUsage[tab] || 0) + 1;
+                            }
+
+                            // Top programs
+                            if (event.metadata?.programId) {
+                                const progId = event.metadata.programId;
+                                stats.topPrograms[progId] = {
+                                    id: progId,
+                                    name: event.metadata.programName || progId,
+                                    count: (stats.topPrograms[progId]?.count || 0) + 1
+                                };
+                            }
+                        });
+
+                        // Convert sets to counts
+                        stats.activeUserCount = stats.activeUsers.size;
+                        stats.sessionCount = stats.sessions.size;
+                        delete stats.activeUsers;
+                        delete stats.sessions;
+
+                        // Sort top programs
+                        stats.topPrograms = Object.values(stats.topPrograms)
+                            .sort((a, b) => b.count - a.count)
+                            .slice(0, 10);
+
+                        return stats;
+                    } catch (e) {
+                        console.error('[analyticsService] getStats failed:', e);
+                        return {
+                            totalEvents: 0,
+                            timeRange,
+                            byEventType: {},
+                            byUser: {},
+                            byDay: {},
+                            topPrograms: [],
+                            documentCounts: { generated: 0, exported: 0, byType: {} },
+                            tabUsage: {},
+                            activeUserCount: 0,
+                            sessionCount: 0
+                        };
+                    }
+                },
+
+                /**
+                 * Export analytics data to CSV
+                 */
+                async exportToCSV(filters = {}) {
+                    if (!initialized) await this.initialize();
+                    try {
+                        const events = await this.query(filters);
+                        
+                        if (events.length === 0) {
+                            return 'No events found for the selected filters.';
+                        }
+
+                        // CSV header
+                        const headers = ['Timestamp', 'Event Type', 'User ID', 'Session ID', 'Metadata'];
+                        const rows = [headers.join(',')];
+
+                        // CSV rows
+                        events.forEach(event => {
+                            const timestamp = new Date(event.timestamp).toISOString();
+                            const eventType = event.eventType || '';
+                            const userId = event.userId || '';
+                            const sessionId = event.sessionId || '';
+                            const metadata = JSON.stringify(event.metadata || {}).replace(/"/g, '""');
+                            rows.push(`"${timestamp}","${eventType}","${userId}","${sessionId}","${metadata}"`);
+                        });
+
+                        return rows.join('\n');
+                    } catch (e) {
+                        console.error('[analyticsService] exportToCSV failed:', e);
+                        throw e;
+                    }
+                },
+
+                /**
+                 * Cleanup old events (retention policy)
+                 */
+                async cleanup(retentionDays = 90) {
+                    if (!initialized) await this.initialize();
+                    try {
+                        const cutoff = Date.now() - (retentionDays * 24 * 60 * 60 * 1000);
+                        const events = await this.query({ endDate: cutoff });
+                        
+                        let deleted = 0;
+                        for (const event of events) {
+                            try {
+                                await dbManager.delete(dbManager.stores.analytics, event.id);
+                                deleted++;
+                            } catch (e) {
+                                console.warn('[analyticsService] Failed to delete event:', e);
+                            }
+                        }
+
+                        return deleted;
+                    } catch (e) {
+                        console.error('[analyticsService] cleanup failed:', e);
+                        throw e;
+                    }
+                }
+            };
+
+            // Auto-initialize on DOM ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    window.analyticsService.initialize().catch(console.warn);
+                });
+            } else {
+                window.analyticsService.initialize().catch(console.warn);
+            }
+        })();
+    </script>
+
+    <!-- Audit Service (HIPAA-compliant audit logging) -->
+    <script>
+        (function () {
+            'use strict';
+
+            let dbManager = null;
+            let initialized = false;
+
+            function getCurrentUserId() {
+                try {
+                    return localStorage.getItem('username') || 'anonymous';
+                } catch (e) {
+                    return 'anonymous';
+                }
+            }
+
+            function getCurrentUserRole() {
+                try {
+                    return localStorage.getItem('userRole') || 'coach';
+                } catch (e) {
+                    return 'coach';
+                }
+            }
+
+            function getSessionId() {
+                try {
+                    let sessionId = sessionStorage.getItem('auditSessionId');
+                    if (!sessionId) {
+                        sessionId = `audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                        sessionStorage.setItem('auditSessionId', sessionId);
+                    }
+                    return sessionId;
+                } catch (e) {
+                    return `audit_${Date.now()}`;
+                }
+            }
+
+            async function ensureDB() {
+                if (!dbManager) {
+                    if (window.IndexedDBManager) {
+                        dbManager = new window.IndexedDBManager();
+                        await dbManager.init();
+                    } else {
+                        throw new Error('IndexedDBManager not available');
+                    }
+                }
+                return dbManager;
+            }
+
+            window.auditService = {
+                async initialize() {
+                    if (initialized) return;
+                    try {
+                        await ensureDB();
+                        initialized = true;
+                    } catch (e) {
+                        console.error('[auditService] Initialization failed:', e);
+                        throw e;
+                    }
+                },
+
+                /**
+                 * Log an audit event
+                 * @param {string} actionType - e.g. 'client:created', 'document:exported', 'feature:toggled'
+                 * @param {string} target - Target ID (client ID, document ID, etc.)
+                 * @param {string} targetName - Safe identifier (initials, document type, etc.) - NO PHI
+                 * @param {object} details - Additional context (NO PHI)
+                 * @param {string} severity - 'low', 'medium', 'high'
+                 * @param {object} context - Additional context object
+                 */
+                async log(actionType, target = null, targetName = null, details = {}, severity = 'low', context = {}) {
+                    if (!initialized) {
+                        try {
+                            await this.initialize();
+                        } catch (e) {
+                            console.warn('[auditService] Log failed (not initialized):', e);
+                            return;
+                        }
+                    }
+
+                    try {
+                        // Sanitize details to prevent PHI leakage
+                        const sanitizedDetails = {};
+                        if (details && typeof details === 'object') {
+                            Object.keys(details).forEach(key => {
+                                const value = details[key];
+                                // Only allow safe values
+                                if (typeof value === 'string' && value.length > 200) {
+                                    sanitizedDetails[key] = value.substring(0, 200) + '...';
+                                } else if (typeof value === 'number' || typeof value === 'boolean') {
+                                    sanitizedDetails[key] = value;
+                                } else if (typeof value === 'string') {
+                                    sanitizedDetails[key] = value;
+                                }
+                            });
+                        }
+
+                        const auditEntry = {
+                            id: null, // auto-increment
+                            timestamp: Date.now(),
+                            timestampIso: new Date().toISOString(),
+                            userId: getCurrentUserId(),
+                            userRole: getCurrentUserRole(),
+                            actionType: String(actionType),
+                            target: target || null,
+                            targetName: targetName || null,
+                            details: sanitizedDetails,
+                            severity: ['low', 'medium', 'high'].includes(severity) ? severity : 'low',
+                            sessionId: getSessionId(),
+                            ...context
+                        };
+
+                        await dbManager.put(dbManager.stores.auditLog, auditEntry);
+                    } catch (e) {
+                        console.error('[auditService] Log failed:', e);
+                        // Audit failures are critical - log to console but don't throw
+                    }
+                },
+
+                /**
+                 * Query audit log entries
+                 */
+                async query(filters = {}) {
+                    if (!initialized) await this.initialize();
+                    try {
+                        let entries = await dbManager.getAll(dbManager.stores.auditLog);
+                        
+                        // Apply filters
+                        if (filters.startDate) {
+                            const start = typeof filters.startDate === 'number' ? filters.startDate : new Date(filters.startDate).getTime();
+                            entries = entries.filter(e => e.timestamp >= start);
+                        }
+                        if (filters.endDate) {
+                            const end = typeof filters.endDate === 'number' ? filters.endDate : new Date(filters.endDate).getTime();
+                            entries = entries.filter(e => e.timestamp <= end);
+                        }
+                        if (filters.userId) {
+                            entries = entries.filter(e => e.userId === filters.userId);
+                        }
+                        if (filters.actionTypes && Array.isArray(filters.actionTypes)) {
+                            entries = entries.filter(e => filters.actionTypes.includes(e.actionType));
+                        }
+                        if (filters.severity && Array.isArray(filters.severity)) {
+                            entries = entries.filter(e => filters.severity.includes(e.severity));
+                        }
+                        if (filters.target) {
+                            entries = entries.filter(e => e.target === filters.target);
+                        }
+
+                        // Sort by timestamp descending
+                        entries.sort((a, b) => b.timestamp - a.timestamp);
+
+                        return entries;
+                    } catch (e) {
+                        console.error('[auditService] Query failed:', e);
+                        return [];
+                    }
+                },
+
+                /**
+                 * Get recent high-severity entries
+                 */
+                async getRecentHighSeverity(limit = 50) {
+                    if (!initialized) await this.initialize();
+                    try {
+                        const entries = await this.query({ severity: ['high'] });
+                        return entries.slice(0, limit);
+                    } catch (e) {
+                        console.error('[auditService] getRecentHighSeverity failed:', e);
+                        return [];
+                    }
+                },
+
+                /**
+                 * Export audit log to CSV
+                 */
+                async exportToCSV(filters = {}) {
+                    if (!initialized) await this.initialize();
+                    try {
+                        const entries = await this.query(filters);
+                        
+                        if (entries.length === 0) {
+                            return 'No audit entries found for the selected filters.';
+                        }
+
+                        // CSV header
+                        const headers = ['Timestamp', 'User ID', 'User Role', 'Action Type', 'Target', 'Target Name', 'Severity', 'Details', 'Session ID'];
+                        const rows = [headers.join(',')];
+
+                        // CSV rows
+                        entries.forEach(entry => {
+                            const timestamp = new Date(entry.timestamp).toISOString();
+                            const userId = entry.userId || '';
+                            const userRole = entry.userRole || '';
+                            const actionType = entry.actionType || '';
+                            const target = entry.target || '';
+                            const targetName = entry.targetName || '';
+                            const severity = entry.severity || '';
+                            const details = JSON.stringify(entry.details || {}).replace(/"/g, '""');
+                            const sessionId = entry.sessionId || '';
+                            rows.push(`"${timestamp}","${userId}","${userRole}","${actionType}","${target}","${targetName}","${severity}","${details}","${sessionId}"`);
+                        });
+
+                        return rows.join('\n');
+                    } catch (e) {
+                        console.error('[auditService] exportToCSV failed:', e);
+                        throw e;
+                    }
+                }
+            };
+
+            // Auto-initialize on DOM ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    window.auditService.initialize().catch(console.warn);
+                });
+            } else {
+                window.auditService.initialize().catch(console.warn);
+            }
+        })();
+    </script>
+
     <!-- Admin Manager (renders Admin Command Center widgets) -->
     <script>
         window.adminManager = (function () {
@@ -26203,7 +26772,21 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                     const flagId = input.getAttribute('data-flag-toggle');
                     if (!flagId || !window.featureFlags) return;
                     try {
+                        const mod = window.featureFlags.getAll()[flagId];
+                        const wasEnabled = mod?.enabled || false;
                         window.featureFlags.toggle(flagId, input.checked);
+                        
+                        // Audit log feature toggle
+                        if (window.auditService) {
+                            window.auditService.log(
+                                'feature:toggled',
+                                flagId,
+                                mod?.label || flagId,
+                                { enabled: input.checked, previousState: wasEnabled, phiRisk: mod?.phiRisk },
+                                mod?.phiRisk === 'high' ? 'high' : 'medium'
+                            ).catch(console.warn);
+                        }
+                        
                         showNotification(`Feature "${flagId}" set to ${input.checked ? 'ON' : 'OFF'}`, 'success');
                     } catch (e) {
                         console.error('[adminManager] toggle failed:', e);
@@ -26238,25 +26821,436 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 }
             }
 
-            function renderPlaceholderWidget(id, title, bodyHtml) {
-                const host = document.getElementById(id);
+            async function renderAnalyticsWidget() {
+                const host = document.getElementById('analyticsWidget');
                 if (!host) return;
-                host.innerHTML = `
-                    <div class="admin-widget__header">
-                        <h3>${title}</h3>
-                    </div>
-                    <div>${bodyHtml}</div>
-                `;
+
+                try {
+                    if (!window.analyticsService) {
+                        host.innerHTML = `
+                            <div class="admin-widget__header">
+                                <h3>Analytics Overview</h3>
+                            </div>
+                            <div><p>Analytics service not available.</p></div>
+                        `;
+                        return;
+                    }
+
+                    await window.analyticsService.initialize();
+                    const timeRange = state.analyticsTimeRange || '7d';
+                    const stats = await window.analyticsService.getStats(timeRange);
+
+                    let html = `
+                        <div class="admin-widget__header">
+                            <h3>Analytics Overview</h3>
+                            <select id="analyticsTimeRange" style="font-size:0.8rem;padding:4px 8px;">
+                                <option value="24h" ${timeRange === '24h' ? 'selected' : ''}>Last 24h</option>
+                                <option value="7d" ${timeRange === '7d' ? 'selected' : ''}>Last 7 days</option>
+                                <option value="30d" ${timeRange === '30d' ? 'selected' : ''}>Last 30 days</option>
+                                <option value="90d" ${timeRange === '90d' ? 'selected' : ''}>Last 90 days</option>
+                                <option value="all" ${timeRange === 'all' ? 'selected' : ''}>All time</option>
+                            </select>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px;">
+                            <div style="padding:12px;background:#f3f4f6;border-radius:8px;">
+                                <div style="font-size:0.75rem;color:#6b7280;">Total Events</div>
+                                <div style="font-size:1.5rem;font-weight:600;color:#111827;">${stats.totalEvents.toLocaleString()}</div>
+                            </div>
+                            <div style="padding:12px;background:#f3f4f6;border-radius:8px;">
+                                <div style="font-size:0.75rem;color:#6b7280;">Active Users</div>
+                                <div style="font-size:1.5rem;font-weight:600;color:#111827;">${stats.activeUserCount || 0}</div>
+                            </div>
+                            <div style="padding:12px;background:#f3f4f6;border-radius:8px;">
+                                <div style="font-size:0.75rem;color:#6b7280;">Sessions</div>
+                                <div style="font-size:1.5rem;font-weight:600;color:#111827;">${stats.sessionCount || 0}</div>
+                            </div>
+                            <div style="padding:12px;background:#f3f4f6;border-radius:8px;">
+                                <div style="font-size:0.75rem;color:#6b7280;">Docs Generated</div>
+                                <div style="font-size:1.5rem;font-weight:600;color:#111827;">${stats.documentCounts.generated || 0}</div>
+                            </div>
+                        </div>
+                        <div style="margin-top:12px;">
+                            <div style="font-size:0.85rem;font-weight:600;margin-bottom:8px;">Top Event Types</div>
+                            <div style="max-height:150px;overflow-y:auto;">
+                                ${Object.entries(stats.byEventType || {})
+                                    .sort((a, b) => b[1] - a[1])
+                                    .slice(0, 5)
+                                    .map(([type, count]) => `
+                                        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #e5e7eb;">
+                                            <span style="font-size:0.8rem;">${type}</span>
+                                            <span style="font-weight:600;">${count}</span>
+                                        </div>
+                                    `).join('')}
+                            </div>
+                        </div>
+                        <div class="admin-widget__footer">
+                            <button type="button" class="section-chip" id="exportAnalyticsBtn">📥 Export CSV</button>
+                        </div>
+                    `;
+
+                    host.innerHTML = html;
+
+                    // Time range selector
+                    const timeRangeSelect = document.getElementById('analyticsTimeRange');
+                    if (timeRangeSelect) {
+                        timeRangeSelect.onchange = async () => {
+                            state.analyticsTimeRange = timeRangeSelect.value;
+                            await renderAnalyticsWidget();
+                        };
+                    }
+
+                    // Export button
+                    const exportBtn = document.getElementById('exportAnalyticsBtn');
+                    if (exportBtn) {
+                        exportBtn.onclick = async () => {
+                            try {
+                                const csv = await window.analyticsService.exportToCSV({
+                                    startDate: state.analyticsTimeRange === 'all' ? null : 
+                                        Date.now() - (state.analyticsTimeRange === '24h' ? 24 * 60 * 60 * 1000 :
+                                        state.analyticsTimeRange === '7d' ? 7 * 24 * 60 * 60 * 1000 :
+                                        state.analyticsTimeRange === '30d' ? 30 * 24 * 60 * 60 * 1000 :
+                                        state.analyticsTimeRange === '90d' ? 90 * 24 * 60 * 60 * 1000 : null)
+                                });
+                                const blob = new Blob([csv], { type: 'text/csv' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `analytics_${state.analyticsTimeRange}_${new Date().toISOString().split('T')[0]}.csv`;
+                                a.click();
+                                URL.revokeObjectURL(url);
+                                showNotification('Analytics data exported successfully.', 'success');
+                            } catch (e) {
+                                console.error('[adminManager] Export analytics failed:', e);
+                                showNotification('Failed to export analytics data.', 'error');
+                            }
+                        };
+                    }
+                } catch (e) {
+                    console.error('[adminManager] Render analytics widget failed:', e);
+                    host.innerHTML = `
+                        <div class="admin-widget__header">
+                            <h3>Analytics Overview</h3>
+                        </div>
+                        <div><p>Error loading analytics: ${e.message}</p></div>
+                    `;
+                }
+            }
+
+            async function renderAuditLogWidget() {
+                const host = document.getElementById('auditLogWidget');
+                if (!host) return;
+
+                try {
+                    if (!window.auditService) {
+                        host.innerHTML = `
+                            <div class="admin-widget__header">
+                                <h3>Audit Log</h3>
+                            </div>
+                            <div><p>Audit service not available.</p></div>
+                        `;
+                        return;
+                    }
+
+                    await window.auditService.initialize();
+                    const filters = state.auditFilters || {};
+                    const entries = await window.auditService.query({
+                        ...filters,
+                        startDate: filters.startDate || (Date.now() - 7 * 24 * 60 * 60 * 1000)
+                    });
+
+                    const severityBadge = (sev) => {
+                        const classes = {
+                            high: 'severity-badge severity-badge--high',
+                            medium: 'severity-badge severity-badge--medium',
+                            low: 'severity-badge severity-badge--low'
+                        };
+                        return `<span class="${classes[sev] || classes.low}">${sev.toUpperCase()}</span>`;
+                    };
+
+                    let html = `
+                        <div class="admin-widget__header">
+                            <h3>Audit Log</h3>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                                <select id="auditSeverityFilter" style="font-size:0.8rem;padding:4px 8px;">
+                                    <option value="">All Severities</option>
+                                    <option value="high" ${filters.severity?.includes('high') ? 'selected' : ''}>High</option>
+                                    <option value="medium" ${filters.severity?.includes('medium') ? 'selected' : ''}>Medium</option>
+                                    <option value="low" ${filters.severity?.includes('low') ? 'selected' : ''}>Low</option>
+                                </select>
+                                <button type="button" class="section-chip" id="exportAuditBtn" style="font-size:0.8rem;padding:4px 12px;">📥 Export</button>
+                            </div>
+                        </div>
+                        <div style="max-height:400px;overflow-y:auto;">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>User</th>
+                                        <th>Action</th>
+                                        <th>Target</th>
+                                        <th>Severity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${entries.slice(0, 50).map(entry => `
+                                        <tr>
+                                            <td style="font-size:0.75rem;">${new Date(entry.timestamp).toLocaleString()}</td>
+                                            <td style="font-size:0.75rem;">${entry.userId || 'N/A'}</td>
+                                            <td style="font-size:0.75rem;">${entry.actionType || 'N/A'}</td>
+                                            <td style="font-size:0.75rem;">${entry.targetName || entry.target || 'N/A'}</td>
+                                            <td>${severityBadge(entry.severity)}</td>
+                                        </tr>
+                                    `).join('')}
+                                    ${entries.length === 0 ? '<tr><td colspan="5" style="text-align:center;padding:20px;color:#6b7280;">No audit entries found.</td></tr>' : ''}
+                                </tbody>
+                            </table>
+                        </div>
+                        ${entries.length > 50 ? `<div style="margin-top:8px;font-size:0.75rem;color:#6b7280;text-align:center;">Showing first 50 of ${entries.length} entries</div>` : ''}
+                    `;
+
+                    host.innerHTML = html;
+
+                    // Severity filter
+                    const severityFilter = document.getElementById('auditSeverityFilter');
+                    if (severityFilter) {
+                        severityFilter.onchange = async () => {
+                            if (severityFilter.value) {
+                                state.auditFilters = { ...state.auditFilters, severity: [severityFilter.value] };
+                            } else {
+                                state.auditFilters = { ...state.auditFilters };
+                                delete state.auditFilters.severity;
+                            }
+                            await renderAuditLogWidget();
+                        };
+                    }
+
+                    // Export button
+                    const exportBtn = document.getElementById('exportAuditBtn');
+                    if (exportBtn) {
+                        exportBtn.onclick = async () => {
+                            try {
+                                const csv = await window.auditService.exportToCSV(state.auditFilters || {});
+                                const blob = new Blob([csv], { type: 'text/csv' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `audit_log_${new Date().toISOString().split('T')[0]}.csv`;
+                                a.click();
+                                URL.revokeObjectURL(url);
+                                showNotification('Audit log exported successfully.', 'success');
+                            } catch (e) {
+                                console.error('[adminManager] Export audit log failed:', e);
+                                showNotification('Failed to export audit log.', 'error');
+                            }
+                        };
+                    }
+                } catch (e) {
+                    console.error('[adminManager] Render audit log widget failed:', e);
+                    host.innerHTML = `
+                        <div class="admin-widget__header">
+                            <h3>Audit Log</h3>
+                        </div>
+                        <div><p>Error loading audit log: ${e.message}</p></div>
+                    `;
+                }
+            }
+
+            async function renderSystemStatusWidget() {
+                const host = document.getElementById('systemStatusWidget');
+                if (!host) return;
+
+                try {
+                    let dbSize = null;
+                    if (window.IndexedDBManager) {
+                        const db = new window.IndexedDBManager();
+                        await db.init();
+                        dbSize = await db.getSize();
+                    }
+
+                    const analyticsCount = window.analyticsService ? (await window.analyticsService.query()).length : 0;
+                    const auditCount = window.auditService ? (await window.auditService.query()).length : 0;
+
+                    let html = `
+                        <div class="admin-widget__header">
+                            <h3>System Status</h3>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:12px;">
+                            <div style="padding:12px;background:#f3f4f6;border-radius:8px;">
+                                <div style="font-size:0.75rem;color:#6b7280;">Database Size</div>
+                                <div style="font-size:1.1rem;font-weight:600;color:#111827;">
+                                    ${dbSize ? `${(dbSize.usage / 1024 / 1024).toFixed(2)} MB / ${(dbSize.quota / 1024 / 1024 / 1024).toFixed(2)} GB` : 'N/A'}
+                                </div>
+                                ${dbSize ? `<div style="font-size:0.7rem;color:#6b7280;margin-top:4px;">${dbSize.percentage.toFixed(2)}% used</div>` : ''}
+                            </div>
+                            <div style="padding:12px;background:#f3f4f6;border-radius:8px;">
+                                <div style="font-size:0.75rem;color:#6b7280;">Analytics Events</div>
+                                <div style="font-size:1.1rem;font-weight:600;color:#111827;">${analyticsCount.toLocaleString()}</div>
+                            </div>
+                            <div style="padding:12px;background:#f3f4f6;border-radius:8px;">
+                                <div style="font-size:0.75rem;color:#6b7280;">Audit Entries</div>
+                                <div style="font-size:1.1rem;font-weight:600;color:#111827;">${auditCount.toLocaleString()}</div>
+                            </div>
+                            <div style="padding:12px;background:#f3f4f6;border-radius:8px;">
+                                <div style="font-size:0.75rem;color:#6b7280;">Browser</div>
+                                <div style="font-size:0.85rem;color:#111827;">${navigator.userAgent.split(' ').slice(-2).join(' ')}</div>
+                            </div>
+                        </div>
+                        <div class="admin-widget__footer" style="margin-top:12px;">
+                            <button type="button" class="section-chip" id="cleanupAnalyticsBtn" style="font-size:0.8rem;">🧹 Cleanup Old Data</button>
+                        </div>
+                    `;
+
+                    host.innerHTML = html;
+
+                    // Cleanup button
+                    const cleanupBtn = document.getElementById('cleanupAnalyticsBtn');
+                    if (cleanupBtn) {
+                        cleanupBtn.onclick = async () => {
+                            if (!confirm('Delete analytics events older than 90 days? This cannot be undone.')) return;
+                            try {
+                                if (window.analyticsService) {
+                                    const deleted = await window.analyticsService.cleanup(90);
+                                    showNotification(`Cleaned up ${deleted} old analytics events.`, 'success');
+                                    await renderSystemStatusWidget();
+                                    await renderAnalyticsWidget();
+                                }
+                            } catch (e) {
+                                console.error('[adminManager] Cleanup failed:', e);
+                                showNotification('Failed to cleanup old data.', 'error');
+                            }
+                        };
+                    }
+                } catch (e) {
+                    console.error('[adminManager] Render system status widget failed:', e);
+                    host.innerHTML = `
+                        <div class="admin-widget__header">
+                            <h3>System Status</h3>
+                        </div>
+                        <div><p>Error loading system status: ${e.message}</p></div>
+                    `;
+                }
+            }
+
+            async function renderUsageReportsWidget() {
+                const host = document.getElementById('usageReportsWidget');
+                if (!host) return;
+
+                try {
+                    if (!window.analyticsService) {
+                        host.innerHTML = `
+                            <div class="admin-widget__header">
+                                <h3>Usage Reports</h3>
+                            </div>
+                            <div><p>Analytics service not available.</p></div>
+                        `;
+                        return;
+                    }
+
+                    await window.analyticsService.initialize();
+                    const stats = await window.analyticsService.getStats('30d');
+
+                    let html = `
+                        <div class="admin-widget__header">
+                            <h3>Usage Reports</h3>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:12px;">
+                            <div style="padding:12px;background:#f3f4f6;border-radius:8px;">
+                                <div style="font-size:0.85rem;font-weight:600;margin-bottom:8px;">Document Activity (30 days)</div>
+                                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
+                                    <div>
+                                        <div style="font-size:0.7rem;color:#6b7280;">Generated</div>
+                                        <div style="font-size:1.2rem;font-weight:600;">${stats.documentCounts.generated || 0}</div>
+                                    </div>
+                                    <div>
+                                        <div style="font-size:0.7rem;color:#6b7280;">Exported</div>
+                                        <div style="font-size:1.2rem;font-weight:600;">${stats.documentCounts.exported || 0}</div>
+                                    </div>
+                                </div>
+                                ${Object.keys(stats.documentCounts.byType || {}).length > 0 ? `
+                                    <div style="margin-top:8px;font-size:0.75rem;">
+                                        ${Object.entries(stats.documentCounts.byType).map(([type, count]) => 
+                                            `<div style="display:flex;justify-content:space-between;"><span>${type}</span><span>${count}</span></div>`
+                                        ).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div style="padding:12px;background:#f3f4f6;border-radius:8px;">
+                                <div style="font-size:0.85rem;font-weight:600;margin-bottom:8px;">Tab Usage</div>
+                                <div style="max-height:120px;overflow-y:auto;">
+                                    ${Object.entries(stats.tabUsage || {}).length > 0
+                                        ? Object.entries(stats.tabUsage).sort((a, b) => b[1] - a[1]).map(([tab, count]) => `
+                                            <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.8rem;">
+                                                <span>${tab}</span>
+                                                <span style="font-weight:600;">${count}</span>
+                                            </div>
+                                        `).join('')
+                                        : '<div style="font-size:0.75rem;color:#6b7280;">No tab usage data</div>'}
+                                </div>
+                            </div>
+                            ${stats.topPrograms && stats.topPrograms.length > 0 ? `
+                                <div style="padding:12px;background:#f3f4f6;border-radius:8px;">
+                                    <div style="font-size:0.85rem;font-weight:600;margin-bottom:8px;">Top Programs</div>
+                                    <div style="max-height:120px;overflow-y:auto;">
+                                        ${stats.topPrograms.slice(0, 5).map(prog => `
+                                            <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:0.8rem;">
+                                                <span>${prog.name}</span>
+                                                <span style="font-weight:600;">${prog.count}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="admin-widget__footer" style="margin-top:12px;">
+                            <button type="button" class="section-chip" id="exportUsageReportBtn">📊 Export Report</button>
+                        </div>
+                    `;
+
+                    host.innerHTML = html;
+
+                    // Export report button
+                    const exportBtn = document.getElementById('exportUsageReportBtn');
+                    if (exportBtn) {
+                        exportBtn.onclick = async () => {
+                            try {
+                                const csv = await window.analyticsService.exportToCSV({
+                                    startDate: Date.now() - (30 * 24 * 60 * 60 * 1000)
+                                });
+                                const blob = new Blob([csv], { type: 'text/csv' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `usage_report_${new Date().toISOString().split('T')[0]}.csv`;
+                                a.click();
+                                URL.revokeObjectURL(url);
+                                showNotification('Usage report exported successfully.', 'success');
+                            } catch (e) {
+                                console.error('[adminManager] Export usage report failed:', e);
+                                showNotification('Failed to export usage report.', 'error');
+                            }
+                        };
+                    }
+                } catch (e) {
+                    console.error('[adminManager] Render usage reports widget failed:', e);
+                    host.innerHTML = `
+                        <div class="admin-widget__header">
+                            <h3>Usage Reports</h3>
+                        </div>
+                        <div><p>Error loading usage reports: ${e.message}</p></div>
+                    `;
+                }
             }
 
             async function initialize() {
                 if (state.initialized) return;
 
                 renderFeatureTogglesWidget();
-                renderPlaceholderWidget('analyticsWidget', 'Analytics Overview', '<p>Analytics service wiring is in progress.</p>');
-                renderPlaceholderWidget('auditLogWidget', 'Audit Log', '<p>Audit log viewer is in progress.</p>');
-                renderPlaceholderWidget('systemStatusWidget', 'System Status', '<p>System stats widget is in progress.</p>');
-                renderPlaceholderWidget('usageReportsWidget', 'Usage Reports', '<p>Usage report generator is in progress.</p>');
+                await Promise.all([
+                    renderAnalyticsWidget(),
+                    renderAuditLogWidget(),
+                    renderSystemStatusWidget(),
+                    renderUsageReportsWidget()
+                ]);
 
                 const refreshBtn = document.getElementById('refreshAdminBtn');
                 if (refreshBtn) {
@@ -26270,6 +27264,12 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 
             async function refresh() {
                 renderFeatureTogglesWidget();
+                await Promise.all([
+                    renderAnalyticsWidget(),
+                    renderAuditLogWidget(),
+                    renderSystemStatusWidget(),
+                    renderUsageReportsWidget()
+                ]);
             }
 
             return {

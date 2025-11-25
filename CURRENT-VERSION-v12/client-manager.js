@@ -160,6 +160,17 @@ class ClientManager {
         // Save to IndexedDB
         await this.dbManager.put(this.storeName, client);
         
+        // Audit log client creation
+        if (window.auditService) {
+            window.auditService.log(
+                'client:created',
+                client.id,
+                client.initials,
+                { kipuId: client.kipuId, houseId: client.houseId, status: client.status },
+                'high'
+            ).catch(console.warn);
+        }
+        
         // Update cache
         this.clientsCache.push(client);
         
@@ -180,6 +191,18 @@ class ClientManager {
         }
         
         await this.dbManager.delete(this.storeName, clientId);
+        
+        // Audit log client deletion
+        if (window.auditService) {
+            window.auditService.log(
+                'client:deleted',
+                clientId,
+                client.initials,
+                { kipuId: client.kipuId, houseId: client.houseId, status: client.status },
+                'high'
+            ).catch(console.warn);
+        }
+        
         this.clientsCache = this.clientsCache.filter(c => c.id !== clientId);
         
         if (this.currentClient && this.currentClient.id === clientId) {
@@ -218,6 +241,27 @@ class ClientManager {
         
         // Save
         await this.dbManager.put(this.storeName, updatedClient);
+        
+        // Audit log client update (only log significant changes)
+        if (window.auditService) {
+            const changedFields = Object.keys(updates).filter(key => 
+                key !== 'lastModified' && client[key] !== updates[key]
+            );
+            if (changedFields.length > 0) {
+                window.auditService.log(
+                    'client:updated',
+                    clientId,
+                    updatedClient.initials,
+                    { 
+                        changedFields: changedFields.slice(0, 10), // Limit to first 10 fields
+                        kipuId: updatedClient.kipuId,
+                        houseId: updatedClient.houseId,
+                        status: updatedClient.status
+                    },
+                    'high'
+                ).catch(console.warn);
+            }
+        }
         
         // Update cache
         const index = this.clientsCache.findIndex(c => c.id === clientId);
