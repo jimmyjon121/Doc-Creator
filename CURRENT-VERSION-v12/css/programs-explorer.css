@@ -2777,6 +2777,272 @@
   color: var(--neutral-600);
 }
 
+/* =============================================================================
+   CLINICAL DOSSIER - Enhanced Profile Styles
+   ============================================================================= */
+
+/* Network Programs Section */
+.profile-card--network {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid var(--neutral-200);
+}
+
+.profile-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.profile-card__badge {
+  background: var(--accent-500);
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.profile-card__desc {
+  font-size: 13px;
+  color: var(--neutral-600);
+  margin-bottom: 16px;
+}
+
+.profile-card__editable {
+  font-size: 11px;
+  color: var(--accent-600);
+  background: var(--accent-50);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.network-programs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.network-program-card {
+  background: white;
+  border: 1px solid var(--neutral-200);
+  border-radius: 8px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.network-program-card:hover {
+  border-color: var(--accent-400);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.network-program-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.network-program-card__loc {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--accent-600);
+  background: var(--accent-50);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.network-program-card__distance {
+  font-size: 11px;
+  color: var(--neutral-500);
+}
+
+.network-program-card__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy-800);
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+}
+
+.network-program-card__location {
+  font-size: 12px;
+  color: var(--neutral-600);
+  margin: 0 0 8px 0;
+}
+
+.network-program-card__tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.network-program-card__tags span {
+  font-size: 10px;
+  color: var(--neutral-500);
+  background: var(--neutral-100);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Coach Intelligence Section */
+.profile-card--intel {
+  background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+  border: 1px solid #fde047;
+}
+
+.intel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.intel-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.intel-field--full {
+  grid-column: 1 / -1;
+}
+
+.intel-field__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--neutral-700);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.intel-field__input {
+  padding: 8px 10px;
+  border: 1px solid var(--neutral-300);
+  border-radius: 6px;
+  font-size: 13px;
+  background: white;
+  transition: border-color 0.15s ease;
+}
+
+.intel-field__input:focus {
+  outline: none;
+  border-color: var(--accent-500);
+  box-shadow: 0 0 0 3px var(--accent-100);
+}
+
+.intel-field__textarea {
+  padding: 10px;
+  border: 1px solid var(--neutral-300);
+  border-radius: 6px;
+  font-size: 13px;
+  background: white;
+  min-height: 80px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.intel-field__textarea:focus {
+  outline: none;
+  border-color: var(--accent-500);
+  box-shadow: 0 0 0 3px var(--accent-100);
+}
+
+/* Rating Stars */
+.intel-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.intel-rating__star {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: var(--neutral-300);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.1s ease;
+}
+
+.intel-rating__star:hover {
+  transform: scale(1.2);
+}
+
+.intel-rating__star.active {
+  color: #f59e0b;
+}
+
+.intel-rating__label {
+  margin-left: 8px;
+  font-size: 13px;
+  color: var(--neutral-600);
+}
+
+/* FFAS History Section */
+.profile-card--history {
+  background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);
+  border: 1px solid #c4b5fd;
+}
+
+.ffas-history {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 12px;
+}
+
+.ffas-history__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ffas-history__number {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent-700);
+}
+
+.ffas-history__date {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-700);
+}
+
+.ffas-history__label {
+  font-size: 11px;
+  color: var(--neutral-600);
+  text-transform: uppercase;
+}
+
+/* Button Styles for Dossier */
+.btn--outline {
+  background: transparent;
+  border: 1px solid var(--accent-500);
+  color: var(--accent-600);
+}
+
+.btn--outline:hover {
+  background: var(--accent-50);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .intel-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .network-programs-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .ffas-history {
+    justify-content: center;
+  }
+}
+
 .builder-item {
   display: flex;
   align-items: flex-start;

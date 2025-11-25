@@ -1336,7 +1336,7 @@
   }
 
   /**
-   * Render the full immersive profile - no tabs, single scrollable view
+   * Render the full immersive Clinical Dossier - comprehensive program profile
    */
   function renderFullProfile() {
     const p = window.ccPrograms?.byId(state.selectedProgramId);
@@ -1345,6 +1345,8 @@
     const content = document.getElementById('profileContent');
     const hasAcademics = ['RTC', 'TBS'].some(loc => p.levelOfCare.includes(loc));
     const distance = p.distanceMiles !== null ? `${p.distanceMiles} mi away` : null;
+    const isNetwork = p.isNetwork || (p.children && p.children.length > 0);
+    const coachIntel = getCoachIntel(p.id);
 
     // Build clinical flags
     const flags = [
@@ -1356,23 +1358,26 @@
     ];
     const activeFlags = flags.filter(f => p[f.key]);
 
+    // Get child programs for networks
+    const childPrograms = isNetwork ? getChildPrograms(p) : [];
+
     content.innerHTML = `
       <!-- QUICK STATS BAR -->
       <div class="profile-stats">
         <div class="profile-stat">
           <span class="profile-stat__icon">📍</span>
-          <span class="profile-stat__value">${p.city}, ${p.state}</span>
+          <span class="profile-stat__value">${p.city || 'Multiple'}, ${p.state || 'Locations'}</span>
           ${distance ? `<span class="profile-stat__sub">${distance}</span>` : ''}
         </div>
         <div class="profile-stat">
           <span class="profile-stat__icon">👥</span>
-          <span class="profile-stat__value">${p.gendersServed.join(', ')}</span>
+          <span class="profile-stat__value">${p.gendersServed?.join(', ') || 'All'}</span>
           <span class="profile-stat__sub">${p.ageMin || '?'}-${p.ageMax || '?'} years</span>
         </div>
         <div class="profile-stat">
           <span class="profile-stat__icon">🏥</span>
-          <span class="profile-stat__value">${p.levelOfCare.join(', ')}</span>
-          <span class="profile-stat__sub">${p.format.join(', ')}</span>
+          <span class="profile-stat__value">${p.levelOfCare?.join(', ') || p.primaryLOC}</span>
+          <span class="profile-stat__sub">${p.format?.join(', ') || 'Onsite'}</span>
         </div>
         ${activeFlags.length > 0 ? `
           <div class="profile-stat profile-stat--flags">
@@ -1380,6 +1385,33 @@
           </div>
         ` : ''}
       </div>
+
+      ${isNetwork && childPrograms.length > 0 ? `
+      <!-- NETWORK PROGRAMS SECTION -->
+      <section class="profile-card profile-card--network">
+        <div class="profile-card__header">
+          <h3 class="profile-card__title">🏢 Network Locations</h3>
+          <span class="profile-card__badge">${childPrograms.length} programs</span>
+        </div>
+        <p class="profile-card__desc">This network has multiple locations and programs. Click to explore each one.</p>
+        <div class="network-programs-grid">
+          ${childPrograms.map(child => `
+            <div class="network-program-card" onclick="window.ccAppController?.openProfile('${child.id}')">
+              <div class="network-program-card__header">
+                <span class="network-program-card__loc">${child.primaryLOC || 'Program'}</span>
+                ${child.distanceMiles ? `<span class="network-program-card__distance">${child.distanceMiles} mi</span>` : ''}
+              </div>
+              <h4 class="network-program-card__name">${child.name}</h4>
+              <p class="network-program-card__location">📍 ${child.city}, ${child.state}</p>
+              <div class="network-program-card__tags">
+                ${(child.gendersServed || []).slice(0, 2).map(g => `<span>${g}</span>`).join('')}
+                <span>${child.ageMin || '?'}-${child.ageMax || '?'} yrs</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </section>
+      ` : ''}
 
       <!-- TWO COLUMN LAYOUT -->
       <div class="profile-grid">
@@ -1449,6 +1481,51 @@
               </ul>
             </section>
           ` : ''}
+
+          <!-- COACH INTELLIGENCE (Editable) -->
+          <section class="profile-card profile-card--intel">
+            <div class="profile-card__header">
+              <h3 class="profile-card__title">🧠 Coach Intelligence</h3>
+              <span class="profile-card__editable">✏️ Editable</span>
+            </div>
+            <p class="profile-card__desc">Your team's knowledge about this program. This data is stored locally.</p>
+            
+            <div class="intel-grid">
+              <div class="intel-field">
+                <label class="intel-field__label">📅 Last Contacted</label>
+                <input type="date" class="intel-field__input" id="intelLastContact" value="${coachIntel.lastContact || ''}" onchange="updateCoachIntel('${p.id}', 'lastContact', this.value)">
+              </div>
+              <div class="intel-field">
+                <label class="intel-field__label">⏱️ Typical Wait Time</label>
+                <input type="text" class="intel-field__input" id="intelWaitTime" placeholder="e.g., 2-3 weeks" value="${coachIntel.waitTime || ''}" onchange="updateCoachIntel('${p.id}', 'waitTime', this.value)">
+              </div>
+              <div class="intel-field">
+                <label class="intel-field__label">💰 Cost Estimate</label>
+                <input type="text" class="intel-field__input" id="intelCost" placeholder="e.g., $800-1200/day" value="${coachIntel.costEstimate || ''}" onchange="updateCoachIntel('${p.id}', 'costEstimate', this.value)">
+              </div>
+              <div class="intel-field">
+                <label class="intel-field__label">📊 Census/Availability</label>
+                <input type="text" class="intel-field__input" id="intelCensus" placeholder="e.g., Running full, waitlist" value="${coachIntel.census || ''}" onchange="updateCoachIntel('${p.id}', 'census', this.value)">
+              </div>
+              <div class="intel-field intel-field--full">
+                <label class="intel-field__label">👤 Best Contact Person</label>
+                <input type="text" class="intel-field__input" id="intelContact" placeholder="e.g., Sarah in Admissions, ext 123" value="${coachIntel.bestContact || ''}" onchange="updateCoachIntel('${p.id}', 'bestContact', this.value)">
+              </div>
+              <div class="intel-field intel-field--full">
+                <label class="intel-field__label">⭐ Your Rating</label>
+                <div class="intel-rating" id="intelRating">
+                  ${[1,2,3,4,5].map(n => `
+                    <button class="intel-rating__star ${(coachIntel.rating || 0) >= n ? 'active' : ''}" onclick="updateCoachIntel('${p.id}', 'rating', ${n})">${(coachIntel.rating || 0) >= n ? '★' : '☆'}</button>
+                  `).join('')}
+                  <span class="intel-rating__label">${coachIntel.rating ? `${coachIntel.rating}/5` : 'Not rated'}</span>
+                </div>
+              </div>
+              <div class="intel-field intel-field--full">
+                <label class="intel-field__label">💡 Tips & Notes</label>
+                <textarea class="intel-field__textarea" id="intelTips" placeholder="Tips from colleagues, things to ask about, red flags..." onchange="updateCoachIntel('${p.id}', 'tips', this.value)">${coachIntel.tips || ''}</textarea>
+              </div>
+            </div>
+          </section>
         </div>
 
         <!-- RIGHT COLUMN -->
@@ -1527,9 +1604,25 @@
             </section>
           ` : ''}
 
-          <!-- NOTES -->
+          <!-- FFAS HISTORY -->
+          <section class="profile-card profile-card--history">
+            <h3 class="profile-card__title">📋 FFAS History</h3>
+            <div class="ffas-history">
+              <div class="ffas-history__stat">
+                <span class="ffas-history__number" id="ffasPlacementCount">${coachIntel.placements || 0}</span>
+                <span class="ffas-history__label">Placements</span>
+              </div>
+              <div class="ffas-history__stat">
+                <span class="ffas-history__date" id="ffasLastPlacement">${coachIntel.lastPlacement || 'Never'}</span>
+                <span class="ffas-history__label">Last Placed</span>
+              </div>
+            </div>
+            <button class="btn btn--sm btn--outline" onclick="logPlacement('${p.id}')">+ Log Placement</button>
+          </section>
+
+          <!-- NOTES (Legacy) -->
           <section class="profile-card profile-card--notes">
-            <h3 class="profile-card__title">📝 Internal Notes</h3>
+            <h3 class="profile-card__title">📝 Quick Notes</h3>
             <textarea class="profile-notes-input" id="profileNotesText" placeholder="Add private notes about this program...">${getNotes(p.id)}</textarea>
             <button class="btn btn--sm btn--secondary" onclick="saveNotes('${p.id}')">Save Notes</button>
           </section>
@@ -1537,6 +1630,59 @@
       </div>
     `;
   }
+
+  // Get child programs for a network
+  function getChildPrograms(parent) {
+    if (!parent.children || parent.children.length === 0) return [];
+    return parent.children.map(childId => {
+      const child = window.ccPrograms?.byId(childId);
+      return child || null;
+    }).filter(Boolean);
+  }
+
+  // Coach Intelligence storage
+  function getCoachIntel(programId) {
+    try {
+      const intel = JSON.parse(localStorage.getItem('cc-coach-intel') || '{}');
+      return intel[programId] || {};
+    } catch {
+      return {};
+    }
+  }
+
+  window.updateCoachIntel = function(programId, field, value) {
+    try {
+      const intel = JSON.parse(localStorage.getItem('cc-coach-intel') || '{}');
+      if (!intel[programId]) intel[programId] = {};
+      intel[programId][field] = value;
+      intel[programId].updatedAt = new Date().toISOString();
+      localStorage.setItem('cc-coach-intel', JSON.stringify(intel));
+      
+      // Update rating display if that's what changed
+      if (field === 'rating') {
+        renderFullProfile(); // Re-render to update stars
+      }
+    } catch (e) {
+      console.error('Failed to save coach intel:', e);
+    }
+  };
+
+  window.logPlacement = function(programId) {
+    const intel = getCoachIntel(programId);
+    const count = (intel.placements || 0) + 1;
+    const today = new Date().toLocaleDateString();
+    
+    window.updateCoachIntel(programId, 'placements', count);
+    window.updateCoachIntel(programId, 'lastPlacement', today);
+    
+    // Update display
+    const countEl = document.getElementById('ffasPlacementCount');
+    const dateEl = document.getElementById('ffasLastPlacement');
+    if (countEl) countEl.textContent = count;
+    if (dateEl) dateEl.textContent = today;
+    
+    alert(`Logged placement #${count} at this program!`);
+  };
 
   function getNotes(programId) {
     try {
