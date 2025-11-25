@@ -325,6 +325,9 @@
     document.getElementById('alumniParentFocus')?.addEventListener('change', handleAlumniChange);
     document.getElementById('alumniProgramming')?.addEventListener('change', handleAlumniChange);
     document.getElementById('alumniNest')?.addEventListener('change', handleAlumniChange);
+    
+    // At-Home mode dropdown
+    document.getElementById('atHomeMode')?.addEventListener('change', handleAtHomeModeChange);
 
     // Map controls
     document.getElementById('mapZoomIn')?.addEventListener('click', () => window.ccMapController?.getMap()?.zoomIn());
@@ -1677,6 +1680,13 @@
     if (alumniParentFocus) alumniParentFocus.checked = draft.alumni.parentFocusGroup;
     if (alumniProgramming) alumniProgramming.checked = draft.alumni.alumniProgramming;
     if (alumniNest) alumniNest.checked = draft.alumni.nestAlumni;
+    
+    // Update at-home mode dropdown
+    const atHomeModeSelect = document.getElementById('atHomeMode');
+    if (atHomeModeSelect) {
+      atHomeModeSelect.value = draft.atHomeMode || 'include';
+      handleAtHomeModeChange(); // Update UI to match
+    }
   }
 
   function updateSimpleListUI(programIds) {
@@ -1689,7 +1699,7 @@
       container.innerHTML = `
         <div class="builder-simple-list__empty">
           <span style="font-size: 24px; margin-bottom: 8px;">📋</span>
-          <span>Click "+ Add" on any program card to add it here</span>
+          <span>Click "+ Add" on any program card</span>
         </div>
       `;
       if (countEl) countEl.textContent = '0 programs';
@@ -1698,12 +1708,13 @@
         const p = window.ccPrograms?.byId(id);
         if (!p) return '';
         return `
-          <div class="builder-item" data-program-id="${id}">
+          <div class="builder-item" data-program-id="${id}" draggable="true">
             <span class="builder-item__drag">⋮⋮</span>
             <div class="builder-item__content">
               <div class="builder-item__name">${p.name}</div>
               <div class="builder-item__location">${p.city || 'Virtual'}, ${p.state || ''}</div>
             </div>
+            <button class="builder-item__athome-toggle" data-action="move-to-athome" title="Move to At-Home">🏠</button>
             <button class="builder-item__remove" data-action="remove-simple">✕</button>
           </div>
         `;
@@ -1711,7 +1722,7 @@
       
       if (countEl) countEl.textContent = `${programIds.length} program${programIds.length !== 1 ? 's' : ''}`;
       
-      // Bind remove buttons for simple list
+      // Bind remove buttons
       container.querySelectorAll('[data-action="remove-simple"]').forEach(btn => {
         btn.addEventListener('click', () => {
           const programId = btn.closest('.builder-item').dataset.programId;
@@ -1719,7 +1730,177 @@
           updateBuilderUI();
         });
       });
+      
+      // Bind move to at-home buttons
+      container.querySelectorAll('[data-action="move-to-athome"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const programId = btn.closest('.builder-item').dataset.programId;
+          window.ccDocumentModel?.removeProgram('simple', programId);
+          window.ccDocumentModel?.addProgram('atHome', programId);
+          updateBuilderUI();
+        });
+      });
+      
+      // Setup drag-and-drop for reordering
+      setupDragAndDrop(container, 'simple');
     }
+    
+    // Also update the at-home list
+    updateAtHomeListUI();
+  }
+  
+  function updateAtHomeListUI() {
+    const container = document.getElementById('atHomeListContent');
+    const countEl = document.getElementById('atHomeListCount');
+    const draft = window.ccDocumentModel?.getCurrentDraft();
+    const programIds = draft?.phases?.atHome || [];
+    
+    if (!container) return;
+    
+    if (programIds.length === 0) {
+      container.innerHTML = `
+        <div class="builder-simple-list__empty builder-simple-list__empty--athome">
+          <span style="font-size: 20px; margin-bottom: 4px;">🏠</span>
+          <span>Add IOP, outpatient, or virtual options</span>
+        </div>
+      `;
+      if (countEl) countEl.textContent = '0 programs';
+    } else {
+      container.innerHTML = programIds.map(id => {
+        const p = window.ccPrograms?.byId(id);
+        if (!p) return '';
+        return `
+          <div class="builder-item" data-program-id="${id}" draggable="true">
+            <span class="builder-item__drag">⋮⋮</span>
+            <div class="builder-item__content">
+              <div class="builder-item__name">${p.name}</div>
+              <div class="builder-item__location">${p.city || 'Virtual'}, ${p.state || ''}</div>
+            </div>
+            <button class="builder-item__athome-toggle" data-action="move-to-primary" title="Move to Primary">🏥</button>
+            <button class="builder-item__remove" data-action="remove-athome">✕</button>
+          </div>
+        `;
+      }).join('');
+      
+      if (countEl) countEl.textContent = `${programIds.length} program${programIds.length !== 1 ? 's' : ''}`;
+      
+      // Bind remove buttons
+      container.querySelectorAll('[data-action="remove-athome"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const programId = btn.closest('.builder-item').dataset.programId;
+          window.ccDocumentModel?.removeProgram('atHome', programId);
+          updateBuilderUI();
+        });
+      });
+      
+      // Bind move to primary buttons
+      container.querySelectorAll('[data-action="move-to-primary"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const programId = btn.closest('.builder-item').dataset.programId;
+          window.ccDocumentModel?.removeProgram('atHome', programId);
+          window.ccDocumentModel?.addProgram('simple', programId);
+          updateBuilderUI();
+        });
+      });
+      
+      // Setup drag-and-drop for reordering
+      setupDragAndDrop(container, 'atHome');
+    }
+  }
+  
+  function setupDragAndDrop(container, phase) {
+    const items = container.querySelectorAll('.builder-item');
+    
+    items.forEach(item => {
+      item.addEventListener('dragstart', (e) => {
+        item.classList.add('dragging');
+        e.dataTransfer.setData('text/plain', item.dataset.programId);
+        e.dataTransfer.setData('source-phase', phase);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      
+      item.addEventListener('dragend', () => {
+        item.classList.remove('dragging');
+        // Remove all drag-over classes
+        document.querySelectorAll('.drag-over, .drag-over-empty').forEach(el => {
+          el.classList.remove('drag-over', 'drag-over-empty');
+        });
+      });
+      
+      item.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const dragging = container.querySelector('.dragging');
+        if (dragging && dragging !== item) {
+          item.classList.add('drag-over');
+        }
+      });
+      
+      item.addEventListener('dragleave', () => {
+        item.classList.remove('drag-over');
+      });
+      
+      item.addEventListener('drop', (e) => {
+        e.preventDefault();
+        item.classList.remove('drag-over');
+        
+        const draggedId = e.dataTransfer.getData('text/plain');
+        const sourcePhase = e.dataTransfer.getData('source-phase');
+        const targetId = item.dataset.programId;
+        
+        if (draggedId === targetId) return;
+        
+        // Reorder within the same phase
+        if (sourcePhase === phase) {
+          const draft = window.ccDocumentModel?.getCurrentDraft();
+          if (!draft) return;
+          
+          const programIds = [...(draft.phases[phase] || [])];
+          const draggedIndex = programIds.indexOf(draggedId);
+          const targetIndex = programIds.indexOf(targetId);
+          
+          if (draggedIndex > -1 && targetIndex > -1) {
+            programIds.splice(draggedIndex, 1);
+            programIds.splice(targetIndex, 0, draggedId);
+            window.ccDocumentModel?.reorderPrograms(phase, programIds);
+            updateBuilderUI();
+          }
+        } else {
+          // Move between phases
+          window.ccDocumentModel?.removeProgram(sourcePhase, draggedId);
+          window.ccDocumentModel?.addProgram(phase, draggedId);
+          updateBuilderUI();
+        }
+      });
+    });
+    
+    // Also allow dropping on empty container
+    container.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (container.querySelector('.builder-simple-list__empty')) {
+        container.classList.add('drag-over-empty');
+      }
+    });
+    
+    container.addEventListener('dragleave', (e) => {
+      if (!container.contains(e.relatedTarget)) {
+        container.classList.remove('drag-over-empty');
+      }
+    });
+    
+    container.addEventListener('drop', (e) => {
+      e.preventDefault();
+      container.classList.remove('drag-over-empty');
+      
+      const draggedId = e.dataTransfer.getData('text/plain');
+      const sourcePhase = e.dataTransfer.getData('source-phase');
+      
+      if (!draggedId || sourcePhase === phase) return;
+      
+      // Move to this phase
+      window.ccDocumentModel?.removeProgram(sourcePhase, draggedId);
+      window.ccDocumentModel?.addProgram(phase, draggedId);
+      updateBuilderUI();
+    });
   }
 
   function clearBuilderPhases() {
@@ -1759,6 +1940,30 @@
     window.ccDocumentModel?.setAlumniService('parentFocusGroup', document.getElementById('alumniParentFocus').checked);
     window.ccDocumentModel?.setAlumniService('alumniProgramming', document.getElementById('alumniProgramming').checked);
     window.ccDocumentModel?.setAlumniService('nestAlumni', document.getElementById('alumniNest').checked);
+  }
+  
+  function handleAtHomeModeChange() {
+    const mode = document.getElementById('atHomeMode')?.value || 'include';
+    const section = document.getElementById('atHomeSection');
+    const subtitle = document.getElementById('atHomeSubtitle');
+    
+    // Update UI based on mode
+    if (section) {
+      section.classList.toggle('athome-hidden', mode === 'none');
+    }
+    
+    // Update subtitle text
+    if (subtitle) {
+      const subtitles = {
+        'include': 'Programs added here appear at the bottom of the document with "AT-HOME" header',
+        'separate': 'Programs here will generate a separate "At-Home Options" document',
+        'none': ''
+      };
+      subtitle.textContent = subtitles[mode] || '';
+    }
+    
+    // Store in draft
+    window.ccDocumentModel?.setAtHomeMode(mode);
   }
 
   function saveDraft() {

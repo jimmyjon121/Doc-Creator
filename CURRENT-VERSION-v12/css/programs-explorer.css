@@ -2522,6 +2522,125 @@
   border-left: 3px solid var(--accent-500);
 }
 
+.builder-simple-list__section {
+  margin-bottom: var(--space-4);
+}
+
+.builder-simple-list__section--athome {
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--neutral-300);
+}
+
+.builder-simple-list__section--athome .builder-simple-list__header {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: var(--space-1);
+}
+
+.builder-simple-list__section--athome .builder-simple-list__title {
+  color: var(--accent-600);
+}
+
+.builder-athome-mode {
+  font-size: var(--text-xs);
+  padding: 4px 8px;
+  border: 1px solid var(--neutral-300);
+  border-radius: var(--radius-sm);
+  background: white;
+  color: var(--navy-700);
+  cursor: pointer;
+}
+
+.builder-athome-mode:focus {
+  outline: none;
+  border-color: var(--accent-500);
+}
+
+.builder-simple-list__count-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--neutral-500);
+}
+
+.builder-simple-list__section--athome.athome-hidden .builder-simple-list__content,
+.builder-simple-list__section--athome.athome-hidden .builder-simple-list__subtitle,
+.builder-simple-list__section--athome.athome-hidden .builder-simple-list__count-row {
+  display: none;
+}
+
+.builder-simple-list__subtitle {
+  font-size: var(--text-xs);
+  color: var(--neutral-500);
+  margin-bottom: var(--space-2);
+  font-style: italic;
+}
+
+.builder-simple-list__content--athome {
+  min-height: 80px;
+  background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+  border-color: var(--accent-300);
+}
+
+.builder-simple-list__empty--athome {
+  color: var(--accent-600);
+}
+
+/* Drag and drop styling */
+.builder-item {
+  cursor: grab;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.builder-item:active {
+  cursor: grabbing;
+}
+
+.builder-item.dragging {
+  opacity: 0.5;
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.builder-item.drag-over {
+  border-top: 2px solid var(--accent-500);
+  margin-top: -2px;
+}
+
+.builder-simple-list__content.drag-over-empty {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-color: var(--accent-500);
+  border-style: solid;
+}
+
+.builder-item__drag {
+  cursor: grab;
+  padding: 4px;
+  color: var(--neutral-400);
+  user-select: none;
+}
+
+.builder-item__drag:hover {
+  color: var(--neutral-600);
+}
+
+/* Add to At-Home button */
+.builder-item__athome-toggle {
+  font-size: var(--text-xs);
+  padding: 2px 6px;
+  background: var(--accent-100);
+  color: var(--accent-700);
+  border: 1px solid var(--accent-300);
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 4px;
+}
+
+.builder-item__athome-toggle:hover {
+  background: var(--accent-200);
+}
+
 .builder-item {
   display: flex;
   align-items: flex-start;

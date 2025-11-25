@@ -146,6 +146,7 @@ https://us06web.zoom.us/j/86864413744`,
         alumniProgramming: type === 'aftercare-plan',
         nestAlumni: false,
       },
+      atHomeMode: 'include', // 'include' | 'separate' | 'none'
       createdAt: new Date(),
       updatedAt: new Date(),
       status: 'draft',
@@ -367,6 +368,16 @@ https://us06web.zoom.us/j/86864413744`,
   function setScenario(scenario) {
     if (!_currentDraft) return;
     _currentDraft.scenario = scenario;
+    _saveDraft();
+  }
+  
+  /**
+   * Set at-home mode
+   * @param {string} mode - 'include' | 'separate' | 'none'
+   */
+  function setAtHomeMode(mode) {
+    if (!_currentDraft) return;
+    _currentDraft.atHomeMode = mode;
     _saveDraft();
   }
 
@@ -648,9 +659,11 @@ https://us06web.zoom.us/j/86864413744`,
       });
     }
 
-    // At-Home section
+    // At-Home section (only if mode is 'include')
+    const atHomeMode = doc.atHomeMode || 'include';
     const atHomePrograms = doc.phases.atHome || [];
-    if (atHomePrograms.length > 0) {
+    
+    if (atHomeMode === 'include' && atHomePrograms.length > 0) {
       lines.push('');
       lines.push(AT_HOME_HEADER);
       lines.push('');
@@ -692,19 +705,75 @@ https://us06web.zoom.us/j/86864413744`,
 
     return lines.join('\n');
   }
+  
+  /**
+   * Generate separate at-home options document
+   * @param {DocumentDraft} draft - Optional draft to use (defaults to current)
+   * @returns {string}
+   */
+  function generateAtHomeDocument(draft = null) {
+    const doc = draft || _currentDraft;
+    if (!doc) {
+      console.error('No draft to generate at-home document');
+      return '';
+    }
+    
+    const atHomePrograms = doc.phases.atHome || [];
+    if (atHomePrograms.length === 0) {
+      return '';
+    }
+
+    const lines = [];
+    const prefs = window.ccPreferences?.get() || {};
+    const style = prefs.writeUpLength || 'standard';
+    const programs = window.ccPrograms;
+    
+    if (!programs) {
+      console.error('ccPrograms not available');
+      return '';
+    }
+
+    // Header for at-home document
+    lines.push(`Hello,
+
+If extended residential or therapeutic care is not a viable option for ${doc.clientInitials}, below are clinical recommendations for continued support at home. These include local outpatient services, virtual therapy options, and community-based programs.
+
+At-Home Options:`);
+    lines.push('');
+    lines.push('');
+
+    atHomePrograms.forEach(id => {
+      const program = programs.byId(id);
+      if (!program) return;
+
+      lines.push(generateProgramWriteUp(program, style));
+      lines.push('');
+      lines.push('');
+    });
+
+    return lines.join('\n');
+  }
 
   /**
    * Get file name for export
    * @param {string} extension - File extension ('docx' or 'pdf')
+   * @param {string} docType - 'primary' or 'athome' 
    * @returns {string}
    */
-  function getFileName(extension = 'pdf') {
+  function getFileName(extension = 'pdf', docType = 'primary') {
     if (!_currentDraft) return `Aftercare_Document.${extension}`;
 
     const initials = _currentDraft.clientInitials || 'XX';
-    const docName = _currentDraft.type === 'aftercare-plan' 
-      ? 'Aftercare_Plan' 
-      : 'Aftercare_Options';
+    let docName;
+    
+    if (docType === 'athome') {
+      docName = 'At_Home_Options';
+    } else {
+      docName = _currentDraft.type === 'aftercare-plan' 
+        ? 'Aftercare_Plan' 
+        : 'Aftercare_Options';
+    }
+    
     const date = new Date().toISOString().split('T')[0];
 
     return `${initials}_${docName}_${date}.${extension}`;
@@ -869,12 +938,14 @@ https://us06web.zoom.us/j/86864413744`,
     setProgramNote,
     setDocumentType,
     setScenario,
+    setAtHomeMode,
     setAlumniService,
     setClient,
 
     // Generation
     generateProgramWriteUp,
     generateDocument,
+    generateAtHomeDocument,
     getFileName,
     getDocumentSummary,
 

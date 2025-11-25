@@ -385,18 +385,44 @@
         
         <!-- SIMPLE LIST VIEW (for Aftercare Options) -->
         <div id="simpleListView" class="builder-simple-list">
-          <div class="builder-simple-list__header">
-            <span class="builder-simple-list__title">Selected Programs</span>
-            <span class="builder-simple-list__count" id="simpleListCount">0 programs</span>
-          </div>
-          <div class="builder-simple-list__content" id="simpleListContent" data-phase="simple">
-            <div class="builder-simple-list__empty">
-              <span style="font-size: 24px; margin-bottom: 8px;">📋</span>
-              <span>Click "+ Add" on any program card to add it here</span>
+          <!-- Primary Recommendations -->
+          <div class="builder-simple-list__section">
+            <div class="builder-simple-list__header">
+              <span class="builder-simple-list__title">🏥 Primary Recommendations</span>
+              <span class="builder-simple-list__count" id="simpleListCount">0 programs</span>
+            </div>
+            <div class="builder-simple-list__content" id="simpleListContent" data-phase="simple">
+              <div class="builder-simple-list__empty">
+                <span style="font-size: 24px; margin-bottom: 8px;">📋</span>
+                <span>Click "+ Add" on any program card</span>
+              </div>
             </div>
           </div>
+          
+          <!-- At-Home Options Section -->
+          <div class="builder-simple-list__section builder-simple-list__section--athome" id="atHomeSection">
+            <div class="builder-simple-list__header">
+              <span class="builder-simple-list__title">🏠 At-Home Options</span>
+              <select id="atHomeMode" class="builder-athome-mode">
+                <option value="include">Include at bottom</option>
+                <option value="separate">Separate document</option>
+                <option value="none">Not needed</option>
+              </select>
+            </div>
+            <div class="builder-simple-list__subtitle" id="atHomeSubtitle">Programs added here appear at the bottom of the document with "AT-HOME" header</div>
+            <div class="builder-simple-list__content builder-simple-list__content--athome" id="atHomeListContent" data-phase="atHome">
+              <div class="builder-simple-list__empty builder-simple-list__empty--athome">
+                <span style="font-size: 20px; margin-bottom: 4px;">🏠</span>
+                <span>Add IOP, outpatient, or virtual options</span>
+              </div>
+            </div>
+            <div class="builder-simple-list__count-row">
+              <span id="atHomeListCount">0 programs</span>
+            </div>
+          </div>
+          
           <div class="builder-simple-list__tip">
-            💡 Tip: Add 3-5 programs to give families good options to compare
+            💡 Drag programs to reorder • Add 3-5 primary + 2-3 at-home options
           </div>
         </div>
         
