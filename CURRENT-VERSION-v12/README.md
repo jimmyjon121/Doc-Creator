@@ -4,6 +4,8 @@
 
 This directory (`CURRENT-VERSION-v12/`) is the active development workspace for CareConnect Pro.
 
+> 📖 **Quick Start Guide:** See [`../DEV-WORKFLOW-HANDOFF.md`](../DEV-WORKFLOW-HANDOFF.md) for detailed daily workflow instructions, troubleshooting, and file locations.
+
 ## 🛠️ Development Workflow
 
 We follow a strict **R&D vs. Stable** workflow to ensure stability while allowing rapid iteration.

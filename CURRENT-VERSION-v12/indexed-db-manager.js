@@ -115,6 +115,23 @@ class IndexedDBManager {
             });
             analyticsStore.createIndex('type', 'type', { unique: false });
             analyticsStore.createIndex('timestamp', 'timestamp', { unique: false });
+            analyticsStore.createIndex('eventType', 'eventType', { unique: false });
+            analyticsStore.createIndex('userId', 'userId', { unique: false });
+        }
+        
+        // Audit Log store (HIPAA-compliant audit trail)
+        if (!db.objectStoreNames.contains(this.stores.auditLog)) {
+            const auditStore = db.createObjectStore(this.stores.auditLog, { 
+                keyPath: 'id', 
+                autoIncrement: true 
+            });
+            auditStore.createIndex('timestamp', 'timestamp', { unique: false });
+            auditStore.createIndex('userId', 'userId', { unique: false });
+            auditStore.createIndex('userRole', 'userRole', { unique: false });
+            auditStore.createIndex('actionType', 'actionType', { unique: false });
+            auditStore.createIndex('severity', 'severity', { unique: false });
+            auditStore.createIndex('target', 'target', { unique: false });
+            auditStore.createIndex('sessionId', 'sessionId', { unique: false });
         }
         
         // Map tiles store
