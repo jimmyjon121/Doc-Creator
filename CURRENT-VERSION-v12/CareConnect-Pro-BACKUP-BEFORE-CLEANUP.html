@@ -611,25 +611,46 @@
     // ============= NAVIGATION HELPERS =============
     
     /**
-     * View client details - Delegates to modern Client Profile Manager
+     * View client details
      * @param {string|Object} clientOrId - Client ID or client object
      */
-    window.viewClientDetails = window.viewClientDetails || function(clientOrId) {
-        // Extract client ID
-        const clientId = typeof clientOrId === 'string' ? clientOrId : (clientOrId && clientOrId.id);
-        
-        if (!clientId) {
-            console.error('viewClientDetails called without valid clientId');
-            window.showNotification?.('Client not found', 'error');
-            return;
-        }
-        
-        // Use modern Client Profile Manager
-        if (window.clientProfileManager && typeof window.clientProfileManager.open === 'function') {
-            window.clientProfileManager.open(clientId);
-        } else {
-            console.error('Client Profile Manager not available');
-            window.showNotification?.('Profile viewer not available', 'error');
+    window.viewClientDetails = window.viewClientDetails || async function(clientOrId) {
+        try {
+            let client;
+            
+            // Handle both ID and object
+            if (typeof clientOrId === 'string') {
+                if (!window.clientManager) {
+                    window.showNotification('Client manager not available', 'error');
+                    return;
+                }
+                client = await window.clientManager.getClient(clientOrId);
+            } else {
+                client = clientOrId;
+            }
+            
+            if (!client) {
+                window.showNotification('Client not found', 'error');
+                return;
+            }
+            
+            // Switch to clients tab
+            if (window.switchTab) {
+                window.switchTab('clients');
+            }
+            
+            // Show client details after a short delay
+            setTimeout(() => {
+                if (window.showClientDetailsModal) {
+                    window.showClientDetailsModal(client);
+                } else {
+                    console.log('Client details modal not available, client:', client);
+                    window.showNotification(`Viewing client: ${client.initials}`, 'info');
+                }
+            }, 100);
+        } catch (error) {
+            console.error('Error viewing client details:', error);
+            window.showNotification('Failed to view client details', 'error');
         }
     };
     
@@ -14511,14 +14532,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                     return;
                 }
                 
-                // Check if required classes are loaded
-                if (typeof HousesManager === 'undefined' || typeof MilestonesManager === 'undefined' || typeof AftercareManager === 'undefined') {
-                    console.warn('CM Tracker managers not loaded yet, deferring initialization...');
-                    // Defer initialization until scripts are loaded
-                    setTimeout(() => initializeCMTracker(), 500);
-                    return;
-                }
-                
                 // Initialize houses manager
                 if (!window.housesManager) {
                     window.housesManager = new HousesManager(window.dbManager);
@@ -18466,25 +18479,46 @@ if (!document.querySelector('#morning-review-badge-styles')) {
     // ============= NAVIGATION HELPERS =============
     
     /**
-     * View client details - Delegates to modern Client Profile Manager
+     * View client details
      * @param {string|Object} clientOrId - Client ID or client object
      */
-    window.viewClientDetails = window.viewClientDetails || function(clientOrId) {
-        // Extract client ID
-        const clientId = typeof clientOrId === 'string' ? clientOrId : (clientOrId && clientOrId.id);
-        
-        if (!clientId) {
-            console.error('viewClientDetails called without valid clientId');
-            window.showNotification?.('Client not found', 'error');
-            return;
-        }
-        
-        // Use modern Client Profile Manager
-        if (window.clientProfileManager && typeof window.clientProfileManager.open === 'function') {
-            window.clientProfileManager.open(clientId);
-        } else {
-            console.error('Client Profile Manager not available');
-            window.showNotification?.('Profile viewer not available', 'error');
+    window.viewClientDetails = window.viewClientDetails || async function(clientOrId) {
+        try {
+            let client;
+            
+            // Handle both ID and object
+            if (typeof clientOrId === 'string') {
+                if (!window.clientManager) {
+                    window.showNotification('Client manager not available', 'error');
+                    return;
+                }
+                client = await window.clientManager.getClient(clientOrId);
+            } else {
+                client = clientOrId;
+            }
+            
+            if (!client) {
+                window.showNotification('Client not found', 'error');
+                return;
+            }
+            
+            // Switch to clients tab
+            if (window.switchTab) {
+                window.switchTab('clients');
+            }
+            
+            // Show client details after a short delay
+            setTimeout(() => {
+                if (window.showClientDetailsModal) {
+                    window.showClientDetailsModal(client);
+                } else {
+                    console.log('Client details modal not available, client:', client);
+                    window.showNotification(`Viewing client: ${client.initials}`, 'info');
+                }
+            }, 100);
+        } catch (error) {
+            console.error('Error viewing client details:', error);
+            window.showNotification('Failed to view client details', 'error');
         }
     };
     
@@ -32703,14 +32737,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                     return;
                 }
                 
-                // Check if required classes are loaded
-                if (typeof HousesManager === 'undefined' || typeof MilestonesManager === 'undefined' || typeof AftercareManager === 'undefined') {
-                    console.warn('CM Tracker managers not loaded yet, deferring initialization...');
-                    // Defer initialization until scripts are loaded
-                    setTimeout(() => initializeCMTracker(), 500);
-                    return;
-                }
-                
                 // Initialize houses manager
                 if (!window.housesManager) {
                     window.housesManager = new HousesManager(window.dbManager);
@@ -41546,18 +41572,18 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         </button>
     </div>
     
-    <!-- History Panel - Hidden by default -->
-    <div class="history-panel" id="historyPanel" style="display: none; position: fixed; right: -400px; top: 0; width: 400px; height: 100vh; background: white; box-shadow: -5px 0 15px rgba(0,0,0,0.1); z-index: 999; overflow-y: auto;">
-        <div class="history-header" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 20px;">
+    <!-- History Panel -->
+    <div class="history-panel" id="historyPanel">
+        <div class="history-header">
             <h3>Document History</h3>
             <button onclick="toggleHistory()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">✕</button>
         </div>
         <div id="historyContent"></div>
     </div>
     
-    <!-- Comparison View - Hidden by default -->
-    <div class="comparison-view" id="comparisonView" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 1200px; height: 80vh; background: white; border-radius: 12px; box-shadow: 0 10px 50px rgba(0,0,0,0.3); z-index: 10000; overflow: hidden;">
-        <div class="comparison-header" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 20px;">
+    <!-- Comparison View -->
+    <div class="comparison-view" id="comparisonView">
+        <div class="comparison-header">
             <h3>Program Comparison</h3>
             <button onclick="closeComparison()" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">✕</button>
         </div>
