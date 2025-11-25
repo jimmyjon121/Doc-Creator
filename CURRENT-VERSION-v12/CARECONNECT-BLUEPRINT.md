@@ -1,19 +1,20 @@
 # CareConnect Pro – Product Blueprint & Onboarding Guide
-_Last updated: 2025-11-14_
+_Last updated: 2025-11-25_
 
 ## 1. Purpose Of This Document
-- Provide a single “source of truth” for engineers, designers, and operators onboarding to CareConnect Pro v12.
+- Provide a single "source of truth" for engineers, designers, and operators onboarding to CareConnect Pro v13.
 - Summarize product intent, current architecture, navigation model, data flows, and operational practices.
 - Link key assets in the repository so new contributors know where to look first.
 
 ## 2. Product Snapshot
 - **Product name:** CareConnect Pro (Family First Adolescent Services)
-- **Current build:** v4.1.0 (CareConnect Pro v12.2-dashboard series) – `CURRENT-VERSION-v12/CareConnect-Pro.html`
-- **Stable snapshot:** `CURRENT-VERSION-v12/CareConnect-Pro_v12.1-STABLE.html` (read-only reference)
+- **Current build:** v13.0.0 (CareConnect Pro v13 - Stability Release) – `CURRENT-VERSION-v12/CareConnect-Pro.html`
+- **Stable snapshot:** `CURRENT-VERSION-v12/CareConnect-Pro-BACKUP-BEFORE-CLEANUP.html` (read-only reference)
 - **Programs workspace:** `CURRENT-VERSION-v12/programs-docs-module.html`
 - **Dataset:** `CURRENT-VERSION-v12/programs.v2.json` (140-program library)
 - **Launch entry point (dev):** `http://localhost:8000/CareConnect-Pro.html`
 - **Chrome extension:** `chrome-extension-enhanced/` (outside this bundle, but part of ecosystem)
+- **Changelog:** See `CHANGELOG-v13.md` for detailed version history
 
 ## 3. Mission & Outcomes
 - **Mission statement:** Ensure every adolescent receives timely, comprehensive aftercare planning while freeing clinical coaches to focus on direct care.
@@ -85,6 +86,13 @@ _Last updated: 2025-11-14_
 - Added slide-out drawer navigation; all primary tabs moved inside.
 - Ensured fallback functions exposed via `window` for new button actions.
 - Updated Programs toolbar positioning (`top: var(--app-shell-top-offset)`) and styling (curved bottom only) for seamless integration.
+
+## 12.1. Version 13 Stability Fixes (November 25, 2025)
+- **Client Profile Modernization:** Replaced 1,300+ lines of legacy `viewClientDetails` code with modern `ClientProfileManager` delegation.
+- **HousesManager Fix:** Added deferred initialization to prevent `ReferenceError` when scripts load asynchronously.
+- **Encoding Fix:** Restored UTF-8 encoding to fix garbled emoji characters.
+- **Panel Visibility:** Fixed floating "Document History" and "Program Comparison" panels with inline styles.
+- **Code Quality:** Eliminated duplicate function definitions and shadowing issues.
 
 ## 13. Known Gaps & Follow-Ups
 - Dashboard widgets require re-render guardrails when switching tabs quickly (monitor console warnings).

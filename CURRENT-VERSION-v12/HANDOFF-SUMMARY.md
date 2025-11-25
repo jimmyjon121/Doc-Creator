@@ -3,7 +3,14 @@
 
 ## 🎯 What We Did
 
-### Cleanup Achievements
+### v13 Stability Fixes (November 25, 2025)
+- ✅ Fixed `HousesManager is not defined` error (deferred initialization)
+- ✅ Modernized `viewClientDetails` (uses ClientProfileManager)
+- ✅ Fixed character encoding (emoji mojibake)
+- ✅ Fixed floating panel visibility (History & Comparison panels)
+- ✅ Removed ~1,300 lines of legacy duplicate code
+
+### v12 Cleanup Achievements
 - ✅ Removed 26+ unused files (27% reduction)
 - ✅ Fixed all legacy purple gradients
 - ✅ Removed mysterious purple button
@@ -86,6 +93,7 @@ See `COMPLETE-CLEANUP-BLUEPRINT.md` for comprehensive details.
 ---
 
 **Status:** Production Ready ✅  
-**Version:** v12.3-STABLE  
-**Date:** November 20, 2025
+**Version:** v13.0.0  
+**Branch:** cleanup/v13  
+**Date:** November 25, 2025
 
