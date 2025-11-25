@@ -1496,29 +1496,28 @@
                 <input type="date" class="intel-field__input" id="intelLastContact" value="${coachIntel.lastContact || ''}" onchange="updateCoachIntel('${p.id}', 'lastContact', this.value)">
               </div>
               <div class="intel-field">
-                <label class="intel-field__label">⏱️ Typical Wait Time</label>
-                <input type="text" class="intel-field__input" id="intelWaitTime" placeholder="e.g., 2-3 weeks" value="${coachIntel.waitTime || ''}" onchange="updateCoachIntel('${p.id}', 'waitTime', this.value)">
-              </div>
-              <div class="intel-field">
                 <label class="intel-field__label">💰 Cost Estimate</label>
                 <input type="text" class="intel-field__input" id="intelCost" placeholder="e.g., $800-1200/day" value="${coachIntel.costEstimate || ''}" onchange="updateCoachIntel('${p.id}', 'costEstimate', this.value)">
               </div>
-              <div class="intel-field">
+              <div class="intel-field intel-field--full">
+                <label class="intel-field__label">⏱️ Reported Wait Time</label>
+                <div class="intel-wait-row">
+                  <input type="text" class="intel-field__input intel-wait-row__wait" id="intelWaitTime" placeholder="e.g., 2-3 weeks" value="${coachIntel.waitTime || ''}" onchange="updateCoachIntel('${p.id}', 'waitTime', this.value)">
+                  <input type="date" class="intel-field__input intel-wait-row__date" id="intelWaitReportedOn" value="${coachIntel.waitReportedOn || ''}" onchange="updateCoachIntel('${p.id}', 'waitReportedOn', this.value)" title="Date this was reported">
+                </div>
+                <div class="intel-field__hint">Wait time + when it was reported</div>
+              </div>
+              <div class="intel-field intel-field--full">
                 <label class="intel-field__label">📊 Census/Availability</label>
-                <input type="text" class="intel-field__input" id="intelCensus" placeholder="e.g., Running full, waitlist" value="${coachIntel.census || ''}" onchange="updateCoachIntel('${p.id}', 'census', this.value)">
+                <div class="intel-wait-row">
+                  <input type="text" class="intel-field__input intel-wait-row__wait" id="intelCensus" placeholder="e.g., Running full, 2 beds open" value="${coachIntel.census || ''}" onchange="updateCoachIntel('${p.id}', 'census', this.value)">
+                  <input type="date" class="intel-field__input intel-wait-row__date" id="intelCensusReportedOn" value="${coachIntel.censusReportedOn || ''}" onchange="updateCoachIntel('${p.id}', 'censusReportedOn', this.value)" title="Date this was reported">
+                </div>
+                <div class="intel-field__hint">Census info + when it was reported</div>
               </div>
               <div class="intel-field intel-field--full">
                 <label class="intel-field__label">👤 Best Contact Person</label>
                 <input type="text" class="intel-field__input" id="intelContact" placeholder="e.g., Sarah in Admissions, ext 123" value="${coachIntel.bestContact || ''}" onchange="updateCoachIntel('${p.id}', 'bestContact', this.value)">
-              </div>
-              <div class="intel-field intel-field--full">
-                <label class="intel-field__label">⭐ Your Rating</label>
-                <div class="intel-rating" id="intelRating">
-                  ${[1,2,3,4,5].map(n => `
-                    <button class="intel-rating__star ${(coachIntel.rating || 0) >= n ? 'active' : ''}" onclick="updateCoachIntel('${p.id}', 'rating', ${n})">${(coachIntel.rating || 0) >= n ? '★' : '☆'}</button>
-                  `).join('')}
-                  <span class="intel-rating__label">${coachIntel.rating ? `${coachIntel.rating}/5` : 'Not rated'}</span>
-                </div>
               </div>
               <div class="intel-field intel-field--full">
                 <label class="intel-field__label">💡 Tips & Notes</label>
@@ -1547,6 +1546,9 @@
             ` : ''}
             ${p.contacts?.contactName ? `<p class="profile-contact-name">Ask for: ${p.contacts.contactName}</p>` : ''}
           </section>
+
+          <!-- FAMILY AMBASSADOR -->
+          ${renderFamilyAmbassadorSection(p.id)}
 
           <!-- INSURANCE -->
           <section class="profile-card">
@@ -1682,6 +1684,135 @@
     if (dateEl) dateEl.textContent = today;
     
     alert(`Logged placement #${count} at this program!`);
+  };
+
+  // ============================================================================
+  // FAMILY AMBASSADOR SYSTEM
+  // ============================================================================
+
+  // Get Family Ambassador assignments from localStorage
+  function getFamilyAmbassador(programId) {
+    try {
+      const ambassadors = JSON.parse(localStorage.getItem('cc-family-ambassadors') || '{}');
+      return ambassadors[programId] || null;
+    } catch {
+      return null;
+    }
+  }
+
+  // Save Family Ambassador assignment
+  window.saveFamilyAmbassador = function(programId, data) {
+    try {
+      const ambassadors = JSON.parse(localStorage.getItem('cc-family-ambassadors') || '{}');
+      ambassadors[programId] = {
+        ...data,
+        updatedAt: new Date().toISOString()
+      };
+      localStorage.setItem('cc-family-ambassadors', JSON.stringify(ambassadors));
+      return true;
+    } catch (e) {
+      console.error('Failed to save family ambassador:', e);
+      return false;
+    }
+  };
+
+  // Get all FFAS staff (for dropdown in admin)
+  function getFFASStaff() {
+    // This could eventually come from a database, for now it's a static list
+    // that admin can manage
+    try {
+      const staff = JSON.parse(localStorage.getItem('cc-ffas-staff') || '[]');
+      if (staff.length === 0) {
+        // Default starter list
+        return [
+          { id: 'staff-1', name: 'Unassigned', email: '', phone: '' }
+        ];
+      }
+      return staff;
+    } catch {
+      return [{ id: 'staff-1', name: 'Unassigned', email: '', phone: '' }];
+    }
+  }
+
+  // Save FFAS staff list
+  window.saveFFASStaff = function(staff) {
+    try {
+      localStorage.setItem('cc-ffas-staff', JSON.stringify(staff));
+      return true;
+    } catch (e) {
+      console.error('Failed to save FFAS staff:', e);
+      return false;
+    }
+  };
+
+  // Render Family Ambassador section in profile
+  function renderFamilyAmbassadorSection(programId) {
+    const ambassador = getFamilyAmbassador(programId);
+    
+    if (!ambassador || !ambassador.staffName || ambassador.staffName === 'Unassigned') {
+      return `
+        <section class="profile-card profile-card--ambassador profile-card--empty-ambassador">
+          <h3 class="profile-card__title">👥 Family Ambassador</h3>
+          <p class="profile-card__empty">No Family Ambassador assigned</p>
+          <p class="profile-card__hint">Admins can assign ambassadors in the Admin Command Center</p>
+        </section>
+      `;
+    }
+
+    return `
+      <section class="profile-card profile-card--ambassador">
+        <h3 class="profile-card__title">👥 Family Ambassador</h3>
+        
+        <div class="ambassador-block">
+          <div class="ambassador-block__section">
+            <div class="ambassador-block__label">FFAS Representative</div>
+            <div class="ambassador-block__name">${ambassador.staffName}</div>
+            ${ambassador.staffEmail ? `
+              <a href="mailto:${ambassador.staffEmail}" class="ambassador-block__contact">✉️ ${ambassador.staffEmail}</a>
+            ` : ''}
+            ${ambassador.staffPhone ? `
+              <a href="tel:${ambassador.staffPhone}" class="ambassador-block__contact">📞 ${ambassador.staffPhone}</a>
+            ` : ''}
+          </div>
+          
+          ${ambassador.programContactName ? `
+            <div class="ambassador-block__section ambassador-block__section--program">
+              <div class="ambassador-block__label">Program Liaison</div>
+              <div class="ambassador-block__name">${ambassador.programContactName}</div>
+              ${ambassador.programContactRole ? `<div class="ambassador-block__role">${ambassador.programContactRole}</div>` : ''}
+              ${ambassador.programContactEmail ? `
+                <a href="mailto:${ambassador.programContactEmail}" class="ambassador-block__contact">✉️ ${ambassador.programContactEmail}</a>
+              ` : ''}
+              ${ambassador.programContactPhone ? `
+                <a href="tel:${ambassador.programContactPhone}" class="ambassador-block__contact">📞 ${ambassador.programContactPhone}</a>
+              ` : ''}
+            </div>
+          ` : ''}
+        </div>
+        
+        ${ambassador.notes ? `
+          <div class="ambassador-notes">
+            <div class="ambassador-notes__label">Notes</div>
+            <p class="ambassador-notes__text">${ambassador.notes}</p>
+          </div>
+        ` : ''}
+      </section>
+    `;
+  }
+
+  // Expose for admin panel
+  window.ccFamilyAmbassadors = {
+    get: getFamilyAmbassador,
+    save: window.saveFamilyAmbassador,
+    getStaff: getFFASStaff,
+    saveStaff: window.saveFFASStaff,
+    getAll: function() {
+      try {
+        return JSON.parse(localStorage.getItem('cc-family-ambassadors') || '{}');
+      } catch {
+        return {};
+      }
+    }
   };
 
   function getNotes(programId) {

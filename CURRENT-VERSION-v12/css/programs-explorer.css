@@ -2950,35 +2950,26 @@
   box-shadow: 0 0 0 3px var(--accent-100);
 }
 
-/* Rating Stars */
-.intel-rating {
+/* Wait Time Row with Date */
+.intel-wait-row {
   display: flex;
-  align-items: center;
-  gap: 4px;
+  gap: 8px;
 }
 
-.intel-rating__star {
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: var(--neutral-300);
-  cursor: pointer;
-  padding: 0;
-  transition: all 0.1s ease;
+.intel-wait-row__wait {
+  flex: 2;
 }
 
-.intel-rating__star:hover {
-  transform: scale(1.2);
+.intel-wait-row__date {
+  flex: 1;
+  min-width: 130px;
 }
 
-.intel-rating__star.active {
-  color: #f59e0b;
-}
-
-.intel-rating__label {
-  margin-left: 8px;
-  font-size: 13px;
-  color: var(--neutral-600);
+.intel-field__hint {
+  font-size: 11px;
+  color: var(--neutral-500);
+  margin-top: 4px;
+  font-style: italic;
 }
 
 /* FFAS History Section */
@@ -3028,6 +3019,99 @@
   background: var(--accent-50);
 }
 
+/* Family Ambassador Section */
+.profile-card--ambassador {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  border: 1px solid #6ee7b7;
+}
+
+.profile-card--empty-ambassador {
+  background: var(--neutral-50);
+  border: 1px dashed var(--neutral-300);
+}
+
+.profile-card__hint {
+  font-size: 11px;
+  color: var(--neutral-500);
+  margin-top: 8px;
+}
+
+.ambassador-block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ambassador-block__section {
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ambassador-block__section--program {
+  background: #f0fdf4;
+}
+
+.ambassador-block__label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--neutral-500);
+  margin-bottom: 4px;
+}
+
+.ambassador-block__name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--navy-800);
+  margin-bottom: 4px;
+}
+
+.ambassador-block__role {
+  font-size: 12px;
+  color: var(--neutral-600);
+  margin-bottom: 6px;
+}
+
+.ambassador-block__contact {
+  display: block;
+  font-size: 13px;
+  color: var(--accent-600);
+  text-decoration: none;
+  margin-top: 4px;
+}
+
+.ambassador-block__contact:hover {
+  color: var(--accent-700);
+  text-decoration: underline;
+}
+
+.ambassador-notes {
+  margin-top: 12px;
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.ambassador-notes__label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--neutral-500);
+  margin-bottom: 4px;
+}
+
+.ambassador-notes__text {
+  font-size: 13px;
+  color: var(--neutral-700);
+  margin: 0;
+  line-height: 1.4;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .intel-grid {
@@ -3040,6 +3124,14 @@
   
   .ffas-history {
     justify-content: center;
+  }
+  
+  .intel-wait-row {
+    flex-direction: column;
+  }
+  
+  .intel-wait-row__date {
+    min-width: auto;
   }
 }
 
