@@ -122,7 +122,10 @@ class ClientProfileManager {
                             </div>
                             <div class="hero-stats">
                                 <div class="hero-stat-card">
-                                    <div class="hero-stat-label">Days in Care</div>
+                                    <div class="hero-stat-label">
+                                        Days in Care
+                                        <span class="metric-info" data-metric="client_days_in_care">i</span>
+                                    </div>
                                     <div class="hero-stat-value">${metrics.daysInCare}<span class="hero-stat-sub">days</span></div>
                                     <div class="hero-stat-sub">Active since ${metrics.startDateLabel}</div>
                                 </div>
@@ -132,7 +135,10 @@ class ClientProfileManager {
                                     <div class="hero-stat-sub">Case Manager · ${this.activeClient.caseManagerInitials || 'Unassigned'}</div>
                                 </div>
                                 <div class="hero-stat-card">
-                                    <div class="hero-stat-label">Checklist Completion</div>
+                                    <div class="hero-stat-label">
+                                        Checklist Completion
+                                        <span class="metric-info" data-metric="client_completion_pct">i</span>
+                                    </div>
                                     <div class="hero-stat-value">${metrics.completion}%</div>
                                     <div class="hero-stat-sub">${metrics.completed}/${metrics.total} complete</div>
                                 </div>
@@ -146,7 +152,7 @@ class ClientProfileManager {
                     </div>
 
                     <!-- Content -->
-                    <div id="profileContent" class="profile-content">
+                    <div id="clientProfileContent" class="profile-content">
                         <!-- Dynamic Content Loaded Here -->
                     </div>
                 </div>
@@ -154,6 +160,9 @@ class ClientProfileManager {
         `;
 
         document.body.appendChild(modal);
+        if (window.attachMetricTooltips) {
+            window.attachMetricTooltips(modal);
+        }
         
         // Close on background click
         modal.addEventListener('click', (e) => {
@@ -174,7 +183,7 @@ class ClientProfileManager {
     }
 
     loadTab(tabId) {
-        const container = document.getElementById('profileContent');
+        const container = document.getElementById('clientProfileContent');
         if (!container) return;
         
         container.innerHTML = '';
@@ -1200,18 +1209,28 @@ class ClientProfileManager {
 
     getHouseName(houseId) {
         const map = {
-            'house_nest': 'Nest',
+            // Family First Houses (with house_ prefix)
+            'house_meridian': 'Meridian',
             'house_cove': 'Cove',
+            'house_preserve': 'Preserve',
             'house_hedge': 'Hedge',
-            'house_arbor': 'Arbor',
-            'house_grove': 'Grove'
+            'house_banyan': 'Banyan',
+            'house_prosperity': 'Prosperity',
+            // Without prefix
+            'meridian': 'Meridian',
+            'cove': 'Cove',
+            'preserve': 'Preserve',
+            'hedge': 'Hedge',
+            'banyan': 'Banyan',
+            'prosperity': 'Prosperity'
         };
-        return map[houseId] || houseId || 'N/A';
+        return map[houseId] || map[houseId?.toLowerCase()] || houseId || 'N/A';
     }
 
     calculateMetrics(client) {
         const days = this.calculateDaysInCare(client);
-        const houseName = this.getHouseName(client.houseId);
+        // Check both houseId and house fields for compatibility
+        const houseName = this.getHouseName(client.houseId || client.house);
         const schema = window.TaskSchema;
         let completed = 0;
         let total = 0;

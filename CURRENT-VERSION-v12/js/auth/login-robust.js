@@ -9,7 +9,7 @@
   const CONFIG = {
     MASTER_USERNAME: 'MasterAdmin',
     MASTER_PASSWORD: 'FFA@dm1n2025!',
-    LEGACY_USERNAME: 'Doc121',
+    LEGACY_USERNAME: 'Doc232',
     LEGACY_PASSWORD: 'FFA121',
     ACCOUNT_STORAGE_KEY: 'careconnect_user_accounts',
     SESSION_KEY: 'isLoggedIn',
@@ -142,6 +142,20 @@
     removeSession('manualLogin');
     removeSession(CONFIG.SESSION_EXPIRES_KEY);
     clearRateLimitState();
+
+    // Also clear unified user context keys
+    try {
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('currentUserId');
+      localStorage.removeItem('currentUserName');
+      localStorage.removeItem('currentUserEmail');
+      localStorage.removeItem('currentUserRole');
+      if (window.ccConfig) {
+        window.ccConfig.currentUser = null;
+      }
+    } catch (e) {
+      console.warn('Failed to fully clear unified user context:', e);
+    }
   }
 
   function getSessionExpiry() {
@@ -644,10 +658,56 @@
         const computedRole = result.role || (result.isMaster ? 'admin' : 'coach');
         setSession('userRole', computedRole);
         
+        if (window.analyticsHooks?.registerUserProfile) {
+          try {
+            const fullName = result.fullName || result.username || '';
+            const nameParts = fullName.trim().split(' ').filter(Boolean);
+            window.analyticsHooks.registerUserProfile({
+              id: result.username,
+              firstName: nameParts[0] || fullName || result.username,
+              lastName: nameParts.slice(1).join(' ') || '',
+              email: result.email || '',
+              role: computedRole
+            });
+          } catch (error) {
+            console.warn('Analytics user registration failed:', error);
+          }
+        }
+        
         // Set user initials for display
         const fullName = result.fullName || result.username;
         const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || result.username.slice(0, 2).toUpperCase();
         setSession('userInitials', initials);
+
+        // ═══════════════════════════════════════════════════════════════
+        // Unified user context for the rest of the app
+        // ═══════════════════════════════════════════════════════════════
+        try {
+          const currentUserObj = {
+            id: result.username,
+            username: result.username,
+            fullName: result.fullName || result.username,
+            initials,
+            role: computedRole,
+            email: result.email || '',
+            permissions: result.isMaster ? ['admin', 'edit', 'view'] : ['edit', 'view']
+          };
+
+          // JSON blob used by client-manager, outcome tracking, etc.
+          localStorage.setItem('currentUser', JSON.stringify(currentUserObj));
+
+          // Global config object used by various modules
+          window.ccConfig = window.ccConfig || {};
+          window.ccConfig.currentUser = currentUserObj;
+
+          // Keys used by analytics-data-capture
+          localStorage.setItem('currentUserId', currentUserObj.id);
+          localStorage.setItem('currentUserName', currentUserObj.fullName);
+          localStorage.setItem('currentUserEmail', currentUserObj.email || '');
+          localStorage.setItem('currentUserRole', currentUserObj.role || 'coach');
+        } catch (userContextError) {
+          console.warn('Failed to persist unified user context:', userContextError);
+        }
         
         setSessionExpiry();
         clearRateLimitState();

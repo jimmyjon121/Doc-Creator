@@ -9,15 +9,41 @@ class HousesManager {
         this.houses = [];
         this.storeName = 'houses';
         
-        // Default houses for Family First
+        // Default houses for Family First with capacity and sub-units
         this.defaultHouses = [
-            { id: 'house_nest', name: 'NEST', displayOrder: 1, isActive: true },
-            { id: 'house_cove', name: 'Cove', displayOrder: 2, isActive: true },
-            { id: 'house_hedge', name: 'Hedge', displayOrder: 3, isActive: true },
-            { id: 'house_meridian', name: 'Meridian', displayOrder: 4, isActive: true },
-            { id: 'house_banyan', name: 'Banyan', displayOrder: 5, isActive: true },
-            { id: 'house_preserve', name: 'Preserve', displayOrder: 6, isActive: true }
+            { 
+                id: 'house_nest', 
+                name: 'NEST', 
+                displayOrder: 1, 
+                isActive: true,
+                capacity: 20,
+                programType: 'neurodivergent', // Clinical designation
+                subUnits: [
+                    { id: 'nest_preserve', name: 'Preserve', capacity: 12 },
+                    { id: 'nest_prosperity', name: 'Prosperity', capacity: 8 }
+                ]
+            },
+            { 
+                id: 'house_cove', 
+                name: 'Cove', 
+                displayOrder: 2, 
+                isActive: true,
+                capacity: 15,
+                programType: 'residential',
+                subUnits: [
+                    { id: 'cove_unit_a', name: 'Unit A', capacity: 8 },
+                    { id: 'cove_unit_b', name: 'Unit B', capacity: 7 }
+                    // Unit C is school/group - not beds
+                ]
+            },
+            { id: 'house_hedge', name: 'Hedge', displayOrder: 3, isActive: true, capacity: 12, programType: 'residential' },
+            { id: 'house_meridian', name: 'Meridian', displayOrder: 4, isActive: true, capacity: 10, programType: 'residential' },
+            { id: 'house_banyan', name: 'Banyan', displayOrder: 5, isActive: true, capacity: 10, programType: 'residential' }
+            // Note: Preserve and Prosperity as standalone houses are deprecated - they're NEST sub-units
         ];
+        
+        // Total capacity across all houses
+        this.totalCapacity = this.defaultHouses.reduce((sum, h) => sum + (h.capacity || 0), 0);
     }
 
     /**
@@ -256,13 +282,17 @@ class HousesManager {
                 ? Math.round((completedMilestones / totalMilestones) * 100)
                 : 0;
             
+            // Get actual capacity for this house
+            const capacity = this.getHouseCapacity(houseId);
+            
             return {
                 totalClients: clients.length,
                 activeClients: activeClients.length,
                 dischargedClients: dischargedClients.length,
                 avgLengthOfStay,
                 milestoneCompletionRate,
-                occupancyRate: Math.round((activeClients.length / 10) * 100) // Assuming 10 beds per house
+                capacity,
+                occupancyRate: Math.round((activeClients.length / capacity) * 100)
             };
         } catch (error) {
             console.error('Failed to get house statistics:', error);
@@ -275,6 +305,177 @@ class HousesManager {
                 occupancyRate: 0
             };
         }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // OCCUPANCY & CENSUS METHODS
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Get occupancy data for a specific house
+     * @param {string} houseId - The house ID
+     * @returns {Object} { current, capacity, percentage, subUnits, isFull, status }
+     */
+    async getHouseOccupancy(houseId) {
+        try {
+            const house = this.getHouseById(houseId) || this.defaultHouses.find(h => h.id === houseId);
+            if (!house) {
+                return { current: 0, capacity: 0, percentage: 0, subUnits: [], isFull: false, status: 'unknown' };
+            }
+
+            // Get active clients in this house
+            const clients = await this.dbManager.getClientsByHouse(houseId);
+            const activeClients = clients.filter(c => c.status === 'active');
+            const current = activeClients.length;
+            const capacity = house.capacity || 10; // Default to 10 if not set
+            const percentage = capacity > 0 ? Math.round((current / capacity) * 100) : 0;
+
+            // Calculate sub-unit occupancy if applicable
+            let subUnits = [];
+            if (house.subUnits && house.subUnits.length > 0) {
+                subUnits = house.subUnits.map(sub => {
+                    const subClients = activeClients.filter(c => c.subUnitId === sub.id);
+                    const subCurrent = subClients.length;
+                    const subCapacity = sub.capacity || 0;
+                    const subPercentage = subCapacity > 0 ? Math.round((subCurrent / subCapacity) * 100) : 0;
+                    return {
+                        id: sub.id,
+                        name: sub.name,
+                        current: subCurrent,
+                        capacity: subCapacity,
+                        percentage: subPercentage,
+                        isFull: subCurrent >= subCapacity,
+                        status: this._getOccupancyStatus(subPercentage)
+                    };
+                });
+            }
+
+            return {
+                houseId: house.id,
+                name: house.name,
+                programType: house.programType || 'residential',
+                current,
+                capacity,
+                percentage,
+                available: Math.max(0, capacity - current),
+                subUnits,
+                isFull: current >= capacity,
+                status: this._getOccupancyStatus(percentage)
+            };
+        } catch (error) {
+            console.error('Failed to get house occupancy:', error);
+            return { current: 0, capacity: 0, percentage: 0, subUnits: [], isFull: false, status: 'error' };
+        }
+    }
+
+    /**
+     * Get total census across all houses
+     * @returns {Object} { total, capacity, percentage, byHouse, byProgramType }
+     */
+    async getTotalCensus() {
+        try {
+            const activeHouses = this.getActiveHouses().length > 0 
+                ? this.getActiveHouses() 
+                : this.defaultHouses.filter(h => h.isActive !== false);
+            
+            let totalCurrent = 0;
+            let totalCapacity = 0;
+            const byHouse = [];
+            const byProgramType = {};
+
+            for (const house of activeHouses) {
+                const occupancy = await this.getHouseOccupancy(house.id);
+                totalCurrent += occupancy.current;
+                totalCapacity += occupancy.capacity;
+                
+                byHouse.push({
+                    houseId: house.id,
+                    name: house.name,
+                    ...occupancy
+                });
+
+                // Aggregate by program type
+                const programType = house.programType || 'residential';
+                if (!byProgramType[programType]) {
+                    byProgramType[programType] = { current: 0, capacity: 0, houses: [] };
+                }
+                byProgramType[programType].current += occupancy.current;
+                byProgramType[programType].capacity += occupancy.capacity;
+                byProgramType[programType].houses.push(house.name);
+            }
+
+            // Calculate percentages for program types
+            Object.keys(byProgramType).forEach(type => {
+                const data = byProgramType[type];
+                data.percentage = data.capacity > 0 ? Math.round((data.current / data.capacity) * 100) : 0;
+                data.status = this._getOccupancyStatus(data.percentage);
+            });
+
+            const totalPercentage = totalCapacity > 0 ? Math.round((totalCurrent / totalCapacity) * 100) : 0;
+
+            return {
+                total: totalCurrent,
+                capacity: totalCapacity,
+                available: Math.max(0, totalCapacity - totalCurrent),
+                percentage: totalPercentage,
+                status: this._getOccupancyStatus(totalPercentage),
+                byHouse,
+                byProgramType,
+                timestamp: new Date().toISOString()
+            };
+        } catch (error) {
+            console.error('Failed to get total census:', error);
+            return { total: 0, capacity: 0, percentage: 0, byHouse: [], byProgramType: {} };
+        }
+    }
+
+    /**
+     * Get houses with available beds, sorted by availability
+     * @returns {Array} Houses with openings, sorted by most available first
+     */
+    async getAvailableBeds() {
+        try {
+            const census = await this.getTotalCensus();
+            
+            return census.byHouse
+                .filter(house => house.available > 0)
+                .sort((a, b) => b.available - a.available)
+                .map(house => ({
+                    houseId: house.houseId,
+                    name: house.name,
+                    programType: house.programType,
+                    available: house.available,
+                    capacity: house.capacity,
+                    current: house.current,
+                    percentage: house.percentage,
+                    status: house.status,
+                    subUnits: house.subUnits?.filter(sub => sub.available > 0) || []
+                }));
+        } catch (error) {
+            console.error('Failed to get available beds:', error);
+            return [];
+        }
+    }
+
+    /**
+     * Get occupancy status label based on percentage
+     * @private
+     */
+    _getOccupancyStatus(percentage) {
+        if (percentage >= 100) return 'full';
+        if (percentage >= 90) return 'critical';
+        if (percentage >= 75) return 'warning';
+        return 'available';
+    }
+
+    /**
+     * Get capacity for a specific house (with fallback to defaults)
+     * @param {string} houseId - The house ID
+     * @returns {number} The capacity
+     */
+    getHouseCapacity(houseId) {
+        const house = this.getHouseById(houseId) || this.defaultHouses.find(h => h.id === houseId);
+        return house?.capacity || 10; // Default to 10 if not found
     }
 
     /**

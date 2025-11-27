@@ -68,7 +68,10 @@ class FlightPlanWidget extends DashboardWidget {
                 <div class="flight-plan-widget">
                     <div class="widget-header">
                         <h3>📋 Daily Flight Plan</h3>
-                        <span class="time-context">${timeContext.focus}</span>
+                        <div class="widget-header-actions">
+                            <span class="metric-info" data-metric="dash_flight_plan">i</span>
+                            <span class="time-context">${timeContext.focus}</span>
+                        </div>
                     </div>
                     <div class="priority-zones">
             `;
@@ -107,6 +110,9 @@ class FlightPlanWidget extends DashboardWidget {
             `;
             
             this.container.innerHTML = html;
+            if (window.attachMetricTooltips) {
+                window.attachMetricTooltips(this.container);
+            }
             this.hideLoading();
         } catch (error) {
             console.error('Failed to render flight plan:', error);
@@ -132,6 +138,9 @@ class FlightPlanWidget extends DashboardWidget {
         const clientInfo = `${item.client.initials} (${item.client.houseId})`;
         const actionId = `action-${item.type}-${item.client.id}-${Date.now()}`;
         
+        // Normalize action text - always show "Complete Task" for task-related items
+        const actionText = item.action === 'Escalate immediately' ? 'Complete Task' : (item.action || 'Open');
+        
         return `
             <div class="priority-item">
                 <div class="item-main">
@@ -142,7 +151,7 @@ class FlightPlanWidget extends DashboardWidget {
                     </div>
                     <div class="item-actions">
                         <button class="btn-action" onclick="dashboardWidgets.takeAction('${actionId}', '${item.type}', '${item.client.id}')">
-                            ${item.action}
+                            ${actionText}
                         </button>
                         ${item.type.includes('milestone') ? 
                             `<button class="btn-quick-complete" onclick="dashboardWidgets.quickComplete('${item.client.id}', '${item.milestone?.milestone}')">
@@ -222,6 +231,7 @@ class JourneyRadarWidget extends DashboardWidget {
                 <div class="journey-radar-widget">
                     <div class="widget-header">
                         <h3>🧭 Client Journey Radar</h3>
+                        <span class="metric-info" data-metric="dash_journey_radar">i</span>
                     </div>
                     <div class="journey-timeline">
             `;
@@ -267,6 +277,9 @@ class JourneyRadarWidget extends DashboardWidget {
             `;
             
             this.container.innerHTML = html;
+            if (window.attachMetricTooltips) {
+                window.attachMetricTooltips(this.container);
+            }
             this.hideLoading();
             
             // Add hover tooltips

@@ -116,6 +116,43 @@
                 nextState.status = 'complete';
             }
 
+            if (!currentState?.analyticsTaskId && window.CareConnectAnalytics?.logTask) {
+                try {
+                    const analyticsTask = await window.CareConnectAnalytics.logTask({
+                        clientId,
+                        taskType: taskId,
+                        category: taskConfig.category || 'tracker',
+                        title: taskConfig.label || taskId,
+                        description: taskConfig.description || '',
+                        dueDate: nextState.dueDate,
+                        priority: taskConfig.priority || 'medium',
+                        assignedTo: nextState.assignedTo
+                    });
+                    if (analyticsTask?.id) {
+                        nextState.analyticsTaskId = analyticsTask.id;
+                    }
+                } catch (error) {
+                    console.warn('[TaskService] Failed to log analytics task', error);
+                }
+            } else if (currentState?.analyticsTaskId) {
+                nextState.analyticsTaskId = currentState.analyticsTaskId;
+            }
+
+            const newlyCompleted = nextState.completed && !currentState?.analyticsCompleted;
+            if (newlyCompleted && nextState.analyticsTaskId && window.CareConnectAnalytics?.completeTask) {
+                try {
+                    await window.CareConnectAnalytics.completeTask(
+                        nextState.analyticsTaskId,
+                        updates.notes || ''
+                    );
+                    nextState.analyticsCompleted = true;
+                } catch (error) {
+                    console.warn('[TaskService] Failed to log analytics task completion', error);
+                }
+            } else if (currentState?.analyticsCompleted) {
+                nextState.analyticsCompleted = true;
+            }
+
             const updatePayload = { taskState: { ...client.taskState, [taskId]: nextState } };
 
             if (taskConfig.legacyField) {

@@ -61,7 +61,9 @@ class AftercareManager {
             responseDate: optionData.responseDate || null
         };
         
-        return await this.dbManager.updateAftercareOption(clientId, nextOrdinal, option);
+        const savedOption = await this.dbManager.updateAftercareOption(clientId, nextOrdinal, option);
+        this.captureReferralCreated(clientId, savedOption, optionData);
+        return savedOption;
     }
     
     /**
@@ -80,7 +82,11 @@ class AftercareManager {
             ...updates
         };
         
-        return await this.dbManager.updateAftercareOption(clientId, ordinal, updatedOption);
+        const savedOption = await this.dbManager.updateAftercareOption(clientId, ordinal, updatedOption);
+        if (updates.status && existingOption?.status !== updates.status) {
+            this.captureReferralStatusChange(savedOption, updates.status, updates.notes);
+        }
+        return savedOption;
     }
     
     /**
@@ -109,7 +115,9 @@ class AftercareManager {
         const contactHistory = option.contactHistory || [];
         contactHistory.push(contactEntry);
         
-        return await this.updateAftercareOption(clientId, ordinal, { contactHistory });
+        const updatedOption = await this.updateAftercareOption(clientId, ordinal, { contactHistory });
+        this.captureProgramContact(updatedOption, contactEntry);
+        return updatedOption;
     }
     
     /**
@@ -160,6 +168,77 @@ class AftercareManager {
         }
         
         return true;
+    }
+
+    normalizeStatusForAnalytics(status) {
+        if (!status) return 'pending';
+        const normalized = status.toLowerCase();
+        if (normalized.includes('admi')) return 'admitted';
+        if (normalized.includes('decline') || normalized.includes('no admin') || normalized.includes('financial')) {
+            return 'declined';
+        }
+        if (normalized.includes('withdraw')) return 'withdrawn';
+        return 'pending';
+    }
+
+    async captureReferralCreated(clientId, option, optionData = {}) {
+        if (!window.analyticsHooks?.logReferral) return;
+        try {
+            let clientInitials = optionData.clientInitials || null;
+            if (!clientInitials && window.clientManager?.getClient) {
+                const clientRecord = await window.clientManager.getClient(clientId);
+                clientInitials = clientRecord?.initials || null;
+            }
+
+            const payload = {
+                clientId,
+                clientInitials,
+                programId: option.programId || option.id,
+                programName: option.programName || `Aftercare Option ${option.ordinal}`,
+                programType: optionData.programType || 'aftercare',
+                programState: optionData.programState || null,
+                referralDate: option.dateProvidedToFamily || new Date().toISOString().split('T')[0],
+                referralMethod: optionData.contactMethod || 'aftercare_option',
+                notes: option.notes || optionData.notes || '',
+                estimatedLOS: optionData.estimatedLOS || null,
+                estimatedDailyRate: optionData.estimatedDailyRate || null
+            };
+
+            window.analyticsHooks.logReferral(payload);
+        } catch (error) {
+            console.warn('[AftercareManager] Failed to capture referral analytics', error);
+        }
+    }
+
+    captureReferralStatusChange(option, status, notes) {
+        if (!window.analyticsHooks?.updateReferralStatus || !option?.id) return;
+        try {
+            const normalizedStatus = this.normalizeStatusForAnalytics(status);
+            window.analyticsHooks.updateReferralStatus(option.id, normalizedStatus, {
+                programName: option.programName,
+                reason: status,
+                notes: notes || ''
+            });
+        } catch (error) {
+            console.warn('[AftercareManager] Failed to capture referral status change', error);
+        }
+    }
+
+    captureProgramContact(option, contactEntry) {
+        if (!window.analyticsHooks?.logProgramContact || !option) return;
+        try {
+            const contactDate = contactEntry.date ? contactEntry.date.split('T')[0] : null;
+            window.analyticsHooks.logProgramContact(option.programId || option.id, {
+                programName: option.programName,
+                contactType: contactEntry.type || 'outreach',
+                contactDate,
+                contactPerson: contactEntry.contactedParty || null,
+                notes: contactEntry.description || '',
+                method: contactEntry.method || null
+            });
+        } catch (error) {
+            console.warn('[AftercareManager] Failed to capture program contact analytics', error);
+        }
     }
     
     /**

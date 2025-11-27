@@ -11,7 +11,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CareConnect Pro v4.1.0 - Professional Aftercare Document Builder</title>
+    <title>CareConnect Pro v12.4 - REVAMPED PROFILE</title>
     
     <!-- Content Security Policy for enhanced security -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tile.openstreetmap.org https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org https://c.tile.openstreetmap.org https://tile.openstreetmap.fr https://a.tile.openstreetmap.fr https://b.tile.openstreetmap.fr https://c.tile.openstreetmap.fr https://server.arcgisonline.com https://services.arcgisonline.com https://*.opentopomap.org https://*.basemaps.cartocdn.com; font-src 'self' data:; connect-src 'self' https://nominatim.openstreetmap.org https://tile.openstreetmap.org https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org https://c.tile.openstreetmap.org https://tile.openstreetmap.fr https://a.tile.openstreetmap.fr https://b.tile.openstreetmap.fr https://c.tile.openstreetmap.fr https://server.arcgisonline.com https://services.arcgisonline.com https://*.opentopomap.org https://*.basemaps.cartocdn.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
@@ -22,12 +22,15 @@
     <script src="libs/jspdf.umd.min.js"></script>
     <script src="libs/html2canvas.min.js"></script>
     
+    <link rel="stylesheet" href="css/client-profile.css">
+    <link rel="stylesheet" href="css/app-layout.css">
     
     <!-- Enhanced Features Libraries -->
     <script src="libs/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="libs/select2.min.css">
     <script src="libs/select2.min.js"></script>
     <link rel="stylesheet" href="libs/leaflet.css">
+    <link rel="stylesheet" href="map-v2-dist/assets/map-v2.css">
     <script src="libs/leaflet.js"></script>
     <script src="libs/chart.min.js"></script>
     <script src="libs/d3.v7.min.js"></script>
@@ -38,12 +41,22 @@
     
     <!-- Database Management -->
     <script src="indexed-db-manager.js"></script>
+
+    <!-- Task Schema & Services -->
+    <script src="configs/task-schema.js"></script>
     
     <!-- Client Management -->
     <script src="client-manager.js"></script>
+    <script src="js/task-service.js"></script>
     
     <!-- Demo Data Generator (Development Only) -->
     <script src="js/demo-data.js"></script>
+    
+    <!-- CM Tracker for Clients Tab -->
+    <script src="cm-tracker.js"></script>
+
+    <!-- Client Profile Manager (Modern Modal) -->
+    <script src="client-profile-manager.js"></script>
     
     <!-- Initialize Client Management System -->
     <script>
@@ -63,12 +76,21 @@
             
             // Initialize client manager
             window.clientManager = new ClientManager(window.dbManager);
+
+            // Initialize task service (ensures TaskSchema state is populated)
+            if (typeof ClientTaskService !== 'undefined') {
+                window.taskService = new ClientTaskService(window.clientManager, window.TaskSchema);
+                await window.taskService.initialize();
+            }
             
             console.log('✅ Client management system initialized');
             
             // Dispatch event to notify that client manager is ready
             window.dispatchEvent(new CustomEvent('clientManagerReady', { 
-                detail: { clientManager: window.clientManager } 
+                detail: { 
+                    clientManager: window.clientManager,
+                    taskService: window.taskService
+                } 
             }));
         })();
     </script>
@@ -251,13 +273,13 @@
         
         // Load core scripts
         const scripts = [
-            // UNUSED FILES REMOVED (never instantiated or called):
-            // 'feature-flags.js',
+            // Feature flags - Admin Command Center for enabling/disabling modules
+            'feature-flags.js',
             // 'performance-monitor.js',
             // 'intelligent-matching.js',
             // 'multi-client-workflow.js',
             // 'advanced-filters.js',
-            // 'morning-review-dashboard.js',
+            'morning-review-dashboard.js', // Morning Review Dashboard
             
             // ACTIVE FILES:
             // 'indexed-db-manager.js', // DUPLICATE: Already loaded in <head>
@@ -14496,10 +14518,10 @@ if (!document.querySelector('#morning-review-badge-styles')) {
     </style>
     <!-- Client Tracking JavaScript -->
     <script>
-        // CM Tracker Functions
-        let currentHouseId = 'house_nest';
-        let currentClientFilter = 'active';
-        let cmTrackerInitialized = false;
+        // CM Tracker Functions (use var to allow re-declaration from duplicate code blocks)
+        var currentHouseId = currentHouseId || 'house_nest';
+        var currentClientFilter = currentClientFilter || 'active';
+        var cmTrackerInitialized = cmTrackerInitialized || false;
         
         // Initialize CM Tracker
         async function initializeCMTracker() {
@@ -16097,42 +16119,46 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             }
         }
         
-        // View client details with modern design
+        // View client details - Redirect to modern Client Profile Manager
         // NOTE: Accepts either a client ID (string) or a full client object
         async function viewClientDetails(clientOrId) {
+            // Extract client ID
+            let clientId = null;
+            if (typeof clientOrId === 'string') {
+                clientId = clientOrId;
+            } else if (clientOrId && typeof clientOrId === 'object') {
+                clientId = clientOrId.id;
+            }
+            
+            // Guard against invalid IDs
+            if (!clientId) {
+                console.error('viewClientDetails called without a valid clientId:', clientOrId);
+                showAlert('Client not found', 'error');
+                return;
+            }
+            
+            // Use the modern Client Profile Manager
+            if (window.clientProfileManager && typeof window.clientProfileManager.open === 'function') {
+                window.clientProfileManager.open(clientId);
+                return;
+            }
+            
+            // Fallback: show notification if profile manager not available
+            console.warn('Client Profile Manager not available, falling back to legacy view');
+            showAlert('Loading client profile...', 'info');
+            
+            // Legacy fallback - basic info only
             try {
-                let clientId = null;
-                let client = null;
-                
-                // Support being called with either an ID or a client object
-                if (typeof clientOrId === 'string') {
-                    clientId = clientOrId;
-                } else if (clientOrId && typeof clientOrId === 'object') {
-                    clientId = clientOrId.id;
-                    client = clientOrId;
-                }
-                
-                // Guard against invalid IDs (prevents IndexedDB DataError)
-                if (!clientId) {
-                    console.error('viewClientDetails called without a valid clientId:', clientOrId);
-                    showAlert('Client not found', 'error');
-                    return;
-                }
-                
-                // Load client from ClientManager if we weren't given the full object
-                if (!client) {
-                    client = await window.clientManager.getClient(clientId);
-                }
-                
+                const client = await window.clientManager.getClient(clientId);
                 if (!client) {
                     showAlert('Client not found', 'error');
                     return;
                 }
                 
-                // Get related data
-                const house = housesManager.getHouseById(client.houseId);
-                const milestones = await milestonesManager.getClientMilestones(client.id);
-                const aftercareOptions = await aftercareManager.getClientAftercareOptions(client.id);
+                // Get related data for legacy fallback
+                const house = housesManager?.getHouseById?.(client.houseId);
+                const milestones = await milestonesManager?.getClientMilestones?.(client.id) || [];
+                const aftercareOptions = await aftercareManager?.getClientAftercareOptions?.(client.id) || [];
                 const daysInCare = window.clientManager.calculateDaysInCare(client);
                 const hoursElapsed = window.clientManager.calculateHoursElapsed(client);
                 
@@ -18173,120 +18199,8 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             }
         }
     </script>
-    <!-- Initialize Service Worker -->
+    <!-- Global Helpers and Enhancements -->
     <script>
-        // Function to clear IndexedDB if needed
-        async function clearIndexedDB() {
-            try {
-                await indexedDB.deleteDatabase('CareConnectPro');
-                console.log('Database cleared successfully');
-                return true;
-            } catch (error) {
-                console.error('Failed to clear database:', error);
-                return false;
-            }
-        }
-
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    registrations.forEach(registration => registration.unregister());
-                });
-            }
-            // Force reload with cache bypass
-            window.location.reload(true);
-        };
-        
-        // Function to load script with retry
-        function loadScript(src, retries = 3) {
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = `${src}?v=${cacheBust}`;
-                script.onload = () => {
-                    console.log(`✅ Loaded: ${src}`);
-                    resolve();
-                };
-                script.onerror = () => {
-                    if (retries > 0) {
-                        console.warn(`⚠️ Retrying ${src}... (${retries} attempts left)`);
-                        setTimeout(() => loadScript(src, retries - 1).then(resolve).catch(reject), 500);
-                    } else {
-                        console.error(`❌ Failed to load: ${src}`);
-                        reject(new Error(`Failed to load ${src}`));
-                    }
-                };
-                document.head.appendChild(script);
-            });
-        }
-        
-        // Load core scripts
-        const scripts = [
-            'feature-flags.js',
-            'performance-monitor.js', 
-            'indexed-db-manager.js',
-            'intelligent-matching.js',
-            'multi-client-workflow.js',
-            'advanced-filters.js',
-            'client-manager.js',
-            'demo-data-generator.js',
-            'tracker-engine.js',
-            'morning-review-dashboard.js',
-            'tracker-timeline.js',
-            'tracker-bulk-update.js',
-            'tracker-aftercare-cascade.js',
-            'discharge-checklist.js',
-            'houses-manager.js',
-            'milestones-manager.js',
-            'aftercare-manager.js',
-            'document-generator.js'
-        ];
-        
-        // Load scripts sequentially to ensure proper order
-        Promise.all(scripts.map(src => loadScript(src))).then(() => {
-            console.log('✅ All core scripts loaded');
-            
-            // Load dashboard scripts after core scripts
-            const dashboardScripts = [
-                'dashboard-manager.js',
-                'dashboard-widgets.js',
-                // 'enhancements/onboarding-integration.js' // REMOVED: Unused
-            ];
-            return Promise.all(dashboardScripts.map(src => loadScript(src)));
-        }).then(() => {
-            console.log('✅ All dashboard scripts loaded');
-            
-            // Make dashboard manager globally available
-            if (typeof dashboardManager !== 'undefined') {
-                window.dashboardManager = dashboardManager;
-            }
-            if (typeof dashboardWidgets !== 'undefined') {
-                window.dashboardWidgets = dashboardWidgets;
-            }
-            
-            // Load demo data loader in development
-            if (window.location.hostname === 'localhost') {
-                loadScript('demo-data-loader.js').then(() => {
-                    console.log('✅ Demo data loader initialized');
-                }).catch(err => {
-                    console.warn('Demo data loader not found (optional)');
-                });
-            }
-            
-            // Handle IndexedDB version errors - Handled gracefully in initializeEnhancedFeatures
-            // window.addEventListener('error', function(event) {
-            //    if (event.message && event.message.includes('VersionError')) {
-            //        console.error('🔄 IndexedDB version mismatch detected. Please clear cache.');
-            //        if (confirm('IndexedDB version mismatch detected. Clear cache and reload?')) {
-            //            window.clearCacheAndReload();
-            //        }
-            //    }
-            // });
-            
-            // Initialize enhanced features now that all scripts are loaded
-            return initializeEnhancedFeatures();
-        }).catch(error => {
-            console.error('❌ Script loading error:', error);
-        });
-    
 // Enhancement: global-helpers.js
 /**
  * Global Helper Functions for CareConnect Pro
@@ -19883,8 +19797,8 @@ console.log('🔐 Login fix applied');
 (function() {
     const STORAGE_KEY = 'ccpro-user-accounts-v1';
     const DEFAULT_USERS = [
-        { username: 'MasterAdmin', password: 'FFA@dm1n2025!', role: 'admin', fullName: 'Master Administrator' },
-        { username: 'Doc232', password: 'FFA121', role: 'admin', fullName: 'Document Creator' }
+        { username: 'MasterAdmin', password: 'FFA121', role: 'admin', fullName: 'Master Administrator' },
+        { username: 'Doc121', password: 'FFA121', role: 'user', fullName: 'Document Creator' }
     ];
     let memoryFallback = [];
 
@@ -32809,10 +32723,10 @@ if (!document.querySelector('#morning-review-badge-styles')) {
     </style>
     <!-- Client Tracking JavaScript -->
     <script>
-        // CM Tracker Functions
-        let currentHouseId = 'house_nest';
-        let currentClientFilter = 'active';
-        let cmTrackerInitialized = false;
+        // CM Tracker Functions (use var to allow re-declaration from duplicate code blocks)
+        var currentHouseId = currentHouseId || 'house_nest';
+        var currentClientFilter = currentClientFilter || 'active';
+        var cmTrackerInitialized = cmTrackerInitialized || false;
         
         // Initialize CM Tracker
         async function initializeCMTracker() {
@@ -34410,42 +34324,46 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             }
         }
         
-        // View client details with modern design
+        // View client details - Redirect to modern Client Profile Manager
         // NOTE: Accepts either a client ID (string) or a full client object
         async function viewClientDetails(clientOrId) {
+            // Extract client ID
+            let clientId = null;
+            if (typeof clientOrId === 'string') {
+                clientId = clientOrId;
+            } else if (clientOrId && typeof clientOrId === 'object') {
+                clientId = clientOrId.id;
+            }
+            
+            // Guard against invalid IDs
+            if (!clientId) {
+                console.error('viewClientDetails called without a valid clientId:', clientOrId);
+                showAlert('Client not found', 'error');
+                return;
+            }
+            
+            // Use the modern Client Profile Manager
+            if (window.clientProfileManager && typeof window.clientProfileManager.open === 'function') {
+                window.clientProfileManager.open(clientId);
+                return;
+            }
+            
+            // Fallback: show notification if profile manager not available
+            console.warn('Client Profile Manager not available, falling back to legacy view');
+            showAlert('Loading client profile...', 'info');
+            
+            // Legacy fallback - basic info only
             try {
-                let clientId = null;
-                let client = null;
-                
-                // Support being called with either an ID or a client object
-                if (typeof clientOrId === 'string') {
-                    clientId = clientOrId;
-                } else if (clientOrId && typeof clientOrId === 'object') {
-                    clientId = clientOrId.id;
-                    client = clientOrId;
-                }
-                
-                // Guard against invalid IDs (prevents IndexedDB DataError)
-                if (!clientId) {
-                    console.error('viewClientDetails called without a valid clientId:', clientOrId);
-                    showAlert('Client not found', 'error');
-                    return;
-                }
-                
-                // Load client from ClientManager if we weren't given the full object
-                if (!client) {
-                    client = await window.clientManager.getClient(clientId);
-                }
-                
+                const client = await window.clientManager.getClient(clientId);
                 if (!client) {
                     showAlert('Client not found', 'error');
                     return;
                 }
                 
-                // Get related data
-                const house = housesManager.getHouseById(client.houseId);
-                const milestones = await milestonesManager.getClientMilestones(client.id);
-                const aftercareOptions = await aftercareManager.getClientAftercareOptions(client.id);
+                // Get related data for legacy fallback
+                const house = housesManager?.getHouseById?.(client.houseId);
+                const milestones = await milestonesManager?.getClientMilestones?.(client.id) || [];
+                const aftercareOptions = await aftercareManager?.getClientAftercareOptions?.(client.id) || [];
                 const daysInCare = window.clientManager.calculateDaysInCare(client);
                 const hoursElapsed = window.clientManager.calculateHoursElapsed(client);
                 
@@ -41363,6 +41281,10 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 <span class="app-drawer__icon">👥</span>
                 <span>Clients</span>
             </button>
+            <button type="button" class="app-drawer__item app-drawer__item--admin" data-nav-target="admin" data-admin-only="true" style="display:none;">
+                <span class="app-drawer__icon">⚙️</span>
+                <span>Admin Command Center</span>
+            </button>
         </div>
     </nav>
     <script>
@@ -41429,6 +41351,19 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 `,
                 'programs': `
                     <!-- Programs section uses its own toolbar, so hide this header -->
+                `,
+                'admin': `
+                    <div class="section-header__content">
+                        <div>
+                            <p class="section-eyebrow">Administration</p>
+                            <div class="section-header__title">Command Center</div>
+                        </div>
+                        <div class="section-status">Admin access required</div>
+                    </div>
+                    <div class="section-header__actions">
+                        <button type="button" class="section-chip" onclick="window.featureFlags && window.featureFlags.showPanel()">Feature Flags</button>
+                        <button type="button" class="section-chip" onclick="window.refreshAdminAnalytics && window.refreshAdminAnalytics()">Refresh</button>
+                    </div>
                 `,
                 default: `
                     <div class="section-header__content">
@@ -42210,6 +42145,157 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             visibility: visible !important;
             opacity: 1 !important;
         }
+        
+        /* Admin Command Center Styles */
+        .admin-command-center {
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .admin-header {
+            margin-bottom: 30px;
+        }
+        
+        .admin-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0 0 8px 0;
+        }
+        
+        .admin-subtitle {
+            color: #6b7280;
+            font-size: 16px;
+            margin: 0;
+        }
+        
+        .admin-sections {
+            display: grid;
+            gap: 24px;
+        }
+        
+        .admin-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .admin-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin: 0 0 12px 0;
+        }
+        
+        .admin-section p {
+            color: #6b7280;
+            font-size: 14px;
+            margin: 0 0 16px 0;
+        }
+        
+        .admin-btn {
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            color: #374151;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .admin-btn:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        
+        .admin-btn.primary {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+        
+        .admin-btn.primary:hover {
+            background: #4f46e5;
+        }
+        
+        .admin-btn.warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-color: #fcd34d;
+        }
+        
+        .admin-btn.warning:hover {
+            background: #fde68a;
+        }
+        
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .analytics-card {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .analytics-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #6366f1;
+            margin-bottom: 4px;
+        }
+        
+        .analytics-label {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .admin-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .system-info {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 16px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-row span:first-child {
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .info-row span:last-child {
+            color: #1f2937;
+            font-weight: 600;
+        }
 
         /* Flight Plan Widget */
         .priority-zones {
@@ -42895,7 +42981,9 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                                 
                                 // Initialize client selector when programs tab is shown
                                 setTimeout(() => {
-                                    initializeClientSelector();
+                                    if (typeof initializeClientSelector === 'function') {
+                                        initializeClientSelector();
+                                    }
                                 }, 100);
                             } else if (tab === 'clients') {
                                 // For clients tab, keep full width but HIDE selection panel
@@ -43407,6 +43495,81 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                     </div>
                 </div> <!-- End of clientsTab -->
                 
+                <!-- Admin Command Center Tab (Admin Only) -->
+                <div id="adminTab" class="tab-content" data-admin-only="true" style="display:none;">
+                    <div class="admin-command-center">
+                        <div class="admin-header">
+                            <h2>⚙️ Admin Command Center</h2>
+                            <p class="admin-subtitle">Manage features, view analytics, and configure the application</p>
+                        </div>
+                        
+                        <div class="admin-sections">
+                            <!-- Feature Flags Section -->
+                            <div class="admin-section">
+                                <h3>🎛️ Feature Management</h3>
+                                <p>Enable or disable features across the application. Changes take effect immediately.</p>
+                                <button class="admin-btn primary" onclick="window.featureFlags && window.featureFlags.showPanel()">
+                                    Open Feature Flags Panel
+                                </button>
+                            </div>
+                            
+                            <!-- App Analytics Section -->
+                            <div class="admin-section">
+                                <h3>📊 Application Analytics</h3>
+                                <div class="analytics-grid" id="adminAnalytics">
+                                    <div class="analytics-card">
+                                        <div class="analytics-value" id="totalClients">--</div>
+                                        <div class="analytics-label">Total Clients</div>
+                                    </div>
+                                    <div class="analytics-card">
+                                        <div class="analytics-value" id="activeUsers">--</div>
+                                        <div class="analytics-label">Active Users</div>
+                                    </div>
+                                    <div class="analytics-card">
+                                        <div class="analytics-value" id="totalPrograms">--</div>
+                                        <div class="analytics-label">Programs in DB</div>
+                                    </div>
+                                    <div class="analytics-card">
+                                        <div class="analytics-value" id="docsGenerated">--</div>
+                                        <div class="analytics-label">Docs Generated</div>
+                                    </div>
+                                </div>
+                                <button class="admin-btn" onclick="window.refreshAdminAnalytics && window.refreshAdminAnalytics()">
+                                    Refresh Analytics
+                                </button>
+                            </div>
+                            
+                            <!-- Data Management Section -->
+                            <div class="admin-section">
+                                <h3>💾 Data Management</h3>
+                                <div class="admin-actions">
+                                    <button class="admin-btn" onclick="window.exportAllData && window.exportAllData()">
+                                        📤 Export All Data
+                                    </button>
+                                    <button class="admin-btn" onclick="document.getElementById('importDataInput').click()">
+                                        📥 Import Data
+                                    </button>
+                                    <input type="file" id="importDataInput" accept=".json" style="display:none" onchange="window.importData && window.importData(this.files[0])">
+                                    <button class="admin-btn warning" onclick="if(confirm('Clear all demo data? This cannot be undone.')) window.clearDemoData && window.clearDemoData()">
+                                        🗑️ Clear Demo Data
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- System Info Section -->
+                            <div class="admin-section">
+                                <h3>ℹ️ System Information</h3>
+                                <div class="system-info">
+                                    <div class="info-row"><span>Version:</span><span>v12.4 REVAMPED PROFILE</span></div>
+                                    <div class="info-row"><span>Build:</span><span>dashboard-refresh-01</span></div>
+                                    <div class="info-row"><span>Environment:</span><span id="envMode">--</span></div>
+                                    <div class="info-row"><span>Storage Used:</span><span id="storageUsed">--</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- End of adminTab -->
+                
             </div>
             
     <!-- ClearHive Branding -->
@@ -43512,5 +43675,102 @@ if (!document.querySelector('#morning-review-badge-styles')) {
     
     <!-- Session migration is handled by login-robust.js -->
     <!-- No additional migration script needed - login-robust.js is the single source of truth -->
+    <script defer src="map-v2-dist/assets/map-v2.js"></script>
+    
+    <!-- Admin Command Center Functions -->
+    <script>
+        (function() {
+            'use strict';
+            
+            // Check if user is admin and show admin-only elements
+            function checkAdminAccess() {
+                const userRole = localStorage.getItem('userRole');
+                const isAdmin = userRole === 'admin';
+                
+                // Show/hide admin-only elements
+                document.querySelectorAll('[data-admin-only="true"]').forEach(el => {
+                    el.style.display = isAdmin ? '' : 'none';
+                });
+                
+                console.log('Admin access check:', isAdmin ? '✅ Admin' : '👤 User');
+            }
+            
+            // Refresh admin analytics
+            window.refreshAdminAnalytics = async function() {
+                try {
+                    // Total clients
+                    if (window.clientManager) {
+                        const clients = await window.clientManager.getAllClients();
+                        const totalEl = document.getElementById('totalClients');
+                        if (totalEl) totalEl.textContent = clients.length;
+                    }
+                    
+                    // Total programs
+                    if (window.programsData) {
+                        const programsEl = document.getElementById('totalPrograms');
+                        if (programsEl) programsEl.textContent = window.programsData.length || 0;
+                    }
+                    
+                    // Active users (from session storage or estimate)
+                    const activeEl = document.getElementById('activeUsers');
+                    if (activeEl) activeEl.textContent = '1'; // Current user
+                    
+                    // Docs generated (from localStorage counter)
+                    const docsCount = localStorage.getItem('docsGeneratedCount') || '0';
+                    const docsEl = document.getElementById('docsGenerated');
+                    if (docsEl) docsEl.textContent = docsCount;
+                    
+                    // Environment mode
+                    const envEl = document.getElementById('envMode');
+                    if (envEl) {
+                        const host = window.location.hostname;
+                        envEl.textContent = (host === 'localhost' || host === '127.0.0.1') ? 'Development' : 'Production';
+                    }
+                    
+                    // Storage used
+                    const storageEl = document.getElementById('storageUsed');
+                    if (storageEl && navigator.storage && navigator.storage.estimate) {
+                        const estimate = await navigator.storage.estimate();
+                        const usedMB = ((estimate.usage || 0) / (1024 * 1024)).toFixed(2);
+                        storageEl.textContent = usedMB + ' MB';
+                    } else if (storageEl) {
+                        storageEl.textContent = 'N/A';
+                    }
+                    
+                    console.log('✅ Admin analytics refreshed');
+                } catch (error) {
+                    console.error('Failed to refresh admin analytics:', error);
+                }
+            };
+            
+            // Run on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                // Check admin access after a short delay to ensure login state is loaded
+                setTimeout(checkAdminAccess, 500);
+                
+                // Also check when storage changes (login/logout)
+                window.addEventListener('storage', function(e) {
+                    if (e.key === 'userRole' || e.key === 'isLoggedIn') {
+                        checkAdminAccess();
+                    }
+                });
+            });
+            
+            // Listen for tab changes to refresh admin analytics
+            // Using MutationObserver instead of wrapping switchTab to avoid conflicts
+            const adminTab = document.getElementById('adminTab');
+            if (adminTab) {
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.attributeName === 'class' && adminTab.classList.contains('active')) {
+                            window.refreshAdminAnalytics();
+                        }
+                    });
+                });
+                observer.observe(adminTab, { attributes: true });
+            }
+        })();
+    </script>
 </body>
 </html>
+

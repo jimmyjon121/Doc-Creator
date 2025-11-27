@@ -206,7 +206,7 @@ class DashboardManager {
                             priority: 'red',
                             client: client,
                             message: `Day ${daysInCare} - CRITICAL: Aftercare overdue`,
-                            action: 'Escalate immediately',
+                            action: 'Complete Task',
                             dueDate: 'Overdue',
                             sortOrder: 0
                         });
@@ -293,6 +293,9 @@ class DashboardManager {
                 }
             }
             
+            // Add enhanced discharge alerts from ClientManager
+            await this.addEnhancedDischargeAlerts(alerts);
+            
             // Sort by priority and sortOrder
             alerts.sort((a, b) => {
                 if (a.priority !== b.priority) {
@@ -314,6 +317,75 @@ class DashboardManager {
         } catch (error) {
             console.error('Failed to load critical alerts:', error);
             return { red: [], purple: [], yellow: [], green: [] };
+        }
+    }
+    
+    /**
+     * Add enhanced discharge alerts using ClientManager methods
+     * @param {Array} alerts - Existing alerts array to append to
+     */
+    async addEnhancedDischargeAlerts(alerts) {
+        try {
+            if (!window.clientManager || typeof window.clientManager.getUpcomingDischarges !== 'function') {
+                return;
+            }
+            
+            const upcomingDischarges = window.clientManager.getUpcomingDischarges(48);
+            
+            for (const client of upcomingDischarges) {
+                // Skip if we already have an alert for this client
+                const existingAlert = alerts.find(a => 
+                    a.client?.id === client.id && 
+                    (a.type === 'discharge_prep' || a.type === 'discharge_packet')
+                );
+                
+                if (existingAlert) continue;
+                
+                // Determine priority based on urgency and packet status
+                let priority = 'yellow';
+                let sortOrder = 6;
+                
+                if (client.isCritical && !client.packetComplete) {
+                    priority = 'red';
+                    sortOrder = 0;
+                } else if (client.isUrgent || !client.packetComplete) {
+                    priority = 'purple';
+                    sortOrder = 3;
+                }
+                
+                // Build message
+                let message = `${client.initials} discharges in ${client.hoursRemaining} hours`;
+                if (!client.packetComplete) {
+                    message += ' - PACKET INCOMPLETE';
+                }
+                if (!client.outcomeRecorded) {
+                    message += ' - No outcome recorded';
+                }
+                
+                // Build action text
+                let action = 'Review discharge';
+                if (!client.packetComplete) {
+                    action = 'Complete packet NOW';
+                } else if (!client.outcomeRecorded) {
+                    action = 'Record outcome';
+                }
+                
+                alerts.push({
+                    type: 'discharge_upcoming',
+                    priority: priority,
+                    client: client,
+                    message: message,
+                    action: action,
+                    dueDate: `${client.dcDateFormatted} ${client.dcTimeFormatted}`,
+                    sortOrder: sortOrder,
+                    hoursRemaining: client.hoursRemaining,
+                    packetStatus: client.packetStatus,
+                    packetComplete: client.packetComplete,
+                    outcomeRecorded: client.outcomeRecorded
+                });
+            }
+        } catch (error) {
+            console.error('Failed to add enhanced discharge alerts:', error);
         }
     }
 
@@ -513,7 +585,7 @@ class DashboardManager {
         const allClients = await clientManager.getAllClients();
 
         // If view is set to "myClients", filter by coach assignment
-        if (this.currentView === 'myClients' && !this.currentCoach.isAdmin) {
+        if (this.currentView === 'myClients' && this.currentCoach && !this.currentCoach.isAdmin) {
             const myClients = allClients.filter(client => 
                 client.caseManagerInitials === this.currentCoach.initials ||
                 client.familyAmbassadorPrimaryInitials === this.currentCoach.initials ||

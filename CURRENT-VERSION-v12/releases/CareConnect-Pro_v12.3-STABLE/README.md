@@ -37,7 +37,7 @@ We follow a strict **R&D vs. Stable** workflow to ensure stability while allowin
 ## 🔐 Login Credentials (Dev)
 
 - **Master Admin:** `MasterAdmin` / `FFA@dm1n2025!`
-- **Doc Admin:** `Doc121` / `FFA121`
+- **Doc Admin:** `Doc232` / `FFA121`
 
 ## 🐛 Debugging
 

@@ -375,6 +375,18 @@ class DocumentGenerator {
             // Store document
             this.generatedDocuments.push(document);
             this.saveDocumentsToStorage();
+
+            if (window.analyticsHooks?.logDocumentGenerated) {
+                const dueDate = this.getDocumentDueDate(client, docType);
+                window.analyticsHooks.logDocumentGenerated({
+                    clientId: client.id,
+                    clientInitials: client.initials,
+                    documentType: workflow.documentType,
+                    title: document.name,
+                    dueDate,
+                    notes: ''
+                });
+            }
             
             // Update tracker if applicable
             if (docType.trackerFields) {
@@ -508,6 +520,18 @@ class DocumentGenerator {
      */
     fireEvent(eventName, detail) {
         window.dispatchEvent(new CustomEvent(eventName, { detail }));
+    }
+
+    getDocumentDueDate(client, docType) {
+        if (!docType?.minDay || !client?.admissionDate) {
+            return null;
+        }
+        const base = new Date(client.admissionDate);
+        if (Number.isNaN(base.getTime())) {
+            return null;
+        }
+        base.setDate(base.getDate() + docType.minDay);
+        return base.toISOString().split('T')[0];
     }
     
     /**

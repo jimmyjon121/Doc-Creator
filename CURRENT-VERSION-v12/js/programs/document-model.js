@@ -811,7 +811,16 @@ At-Home Options:`);
   }
 
   // ============================================================================
-  // EXPORT (Stubs - actual export needs external libraries)
+  // LETTERHEAD PATHS
+  // ============================================================================
+  
+  const LETTERHEAD = {
+    header: 'assets/letterhead/ffas-letterhead-header.png',
+    footer: 'assets/letterhead/ffas-letterhead-footer.jpg'
+  };
+
+  // ============================================================================
+  // EXPORT FUNCTIONS
   // ============================================================================
 
   /**
@@ -832,26 +841,19 @@ At-Home Options:`);
 
     console.log('📄 Export requested:', format);
     console.log('Content length:', content.length, 'characters');
-
-    // For now, create a simple text download
-    // In production, this would use docx.js and pdfmake/jsPDF
     
     if (format === 'pdf' || format === 'both') {
       const pdfFileName = getFileName('pdf');
       results.pdf = pdfFileName;
-      // TODO: Implement PDF generation with letterhead
-      console.log('PDF would be generated:', pdfFileName);
+      await _generatePDFWithLetterhead(content, pdfFileName);
     }
 
     if (format === 'docx' || format === 'both') {
       const docxFileName = getFileName('docx');
       results.docx = docxFileName;
-      // TODO: Implement DOCX generation
-      console.log('DOCX would be generated:', docxFileName);
+      // Generate DOCX with letterhead
+      await _generateDOCXWithLetterhead(content, docxFileName);
     }
-
-    // Download text version for now
-    _downloadTextFile(content, getFileName('txt'));
 
     // Update draft status
     _currentDraft.status = 'exported';
@@ -862,7 +864,497 @@ At-Home Options:`);
       detail: { format, files: results }
     }));
 
+    // Show outcome tracking modal for aftercare-plan documents
+    if (_currentDraft.type === 'aftercare-plan' && _currentDraft.clientId) {
+      setTimeout(() => {
+        if (window.outcomeTrackingModal) {
+          // Collect selected programs from all phases
+          const selectedPrograms = {
+            stabilize: _currentDraft.phases?.stabilize || [],
+            bridge: _currentDraft.phases?.bridge || [],
+            sustain: _currentDraft.phases?.sustain || []
+          };
+          
+          window.outcomeTrackingModal.show({
+            clientId: _currentDraft.clientId,
+            clientInitials: _currentDraft.clientInitials || 'Client',
+            selectedPrograms: selectedPrograms,
+            documentId: _currentDraft.id,
+            onComplete: (outcome) => {
+              console.log('✅ Discharge outcome recorded:', outcome);
+            }
+          });
+        }
+      }, 1000); // Delay to let PDF download start
+    }
+
     return results;
+  }
+
+  /**
+   * Generate PDF with Family First letterhead
+   * @param {string} content - Document content
+   * @param {string} filename - Output filename
+   */
+  async function _generatePDFWithLetterhead(content, filename) {
+    // Open a new window for print-to-PDF with letterhead
+    const printWindow = window.open('', '_blank', 'width=850,height=1100');
+    
+    if (!printWindow) {
+      console.error('Popup blocked - falling back to text download');
+      _downloadTextFile(content, filename.replace('.pdf', '.txt'));
+      return;
+    }
+
+    // Get absolute path to letterhead images
+    const basePath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+    const headerPath = basePath + LETTERHEAD.header;
+    const footerPath = basePath + LETTERHEAD.footer;
+    
+    // Format content for HTML display
+    const htmlContent = _formatContentForPrint(content);
+    
+    printWindow.document.write(`
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${filename}</title>
+  <style>
+    @page {
+      size: letter;
+      margin: 0.5in 0.75in 1in 0.75in;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+      font-size: 11pt;
+      line-height: 1.5;
+      color: #1a1a1a;
+      margin: 0;
+      padding: 0;
+      background: white;
+    }
+    
+    .document-container {
+      max-width: 7in;
+      margin: 0 auto;
+      padding: 0;
+    }
+    
+    .letterhead-header {
+      width: 100%;
+      max-width: 350px;
+      height: auto;
+      margin: 0 auto 24px auto;
+      display: block;
+    }
+    
+    .letterhead-footer {
+      position: fixed;
+      bottom: 0.25in;
+      left: 0;
+      right: 0;
+      text-align: center;
+    }
+    
+    .letterhead-footer img {
+      max-width: 650px;
+      width: 80%;
+      height: auto;
+    }
+    
+    .document-content {
+      padding-bottom: 80px; /* Space for footer */
+    }
+    
+    .greeting {
+      margin-bottom: 16px;
+    }
+    
+    .intro-paragraph {
+      margin-bottom: 24px;
+      text-align: justify;
+    }
+    
+    .section-header {
+      font-weight: bold;
+      margin-top: 24px;
+      margin-bottom: 8px;
+      color: #1a365d;
+    }
+    
+    .program-block {
+      margin-bottom: 28px;
+      page-break-inside: avoid;
+    }
+    
+    .program-title {
+      font-size: 11pt;
+      font-weight: bold;
+      color: #1a365d;
+      margin-bottom: 8px;
+    }
+    
+    .program-description {
+      margin-bottom: 8px;
+      text-align: justify;
+    }
+    
+    .program-bullets {
+      margin: 8px 0 8px 20px;
+      padding: 0;
+    }
+    
+    .program-bullets li {
+      margin-bottom: 4px;
+    }
+    
+    .program-contact {
+      font-size: 10pt;
+      color: #4a5568;
+      margin-top: 8px;
+    }
+    
+    .program-contact div {
+      margin-bottom: 2px;
+    }
+    
+    .at-home-header {
+      font-weight: bold;
+      font-style: italic;
+      margin-top: 32px;
+      margin-bottom: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #cbd5e0;
+      color: #2d3748;
+    }
+    
+    .alumni-section {
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid #cbd5e0;
+    }
+    
+    .alumni-title {
+      font-weight: bold;
+      color: #1a365d;
+      margin-bottom: 12px;
+    }
+    
+    .alumni-block {
+      margin-bottom: 16px;
+      font-size: 10pt;
+    }
+    
+    @media print {
+      body {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
+      
+      .letterhead-footer {
+        position: fixed;
+        bottom: 0;
+      }
+      
+      .no-print {
+        display: none !important;
+      }
+    }
+    
+    /* Print button styles */
+    .print-controls {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+      display: flex;
+      gap: 8px;
+    }
+    
+    .print-btn {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .print-btn-primary {
+      background: #1a365d;
+      color: white;
+    }
+    
+    .print-btn-primary:hover {
+      background: #2d4a7c;
+    }
+    
+    .print-btn-secondary {
+      background: #e2e8f0;
+      color: #1a365d;
+    }
+    
+    .print-btn-secondary:hover {
+      background: #cbd5e0;
+    }
+  </style>
+</head>
+<body>
+  <div class="print-controls no-print">
+    <button class="print-btn print-btn-primary" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    <button class="print-btn print-btn-secondary" onclick="window.close()">✕ Close</button>
+  </div>
+  
+  <div class="document-container">
+    <img src="${headerPath}" alt="Family First Adolescent Services" class="letterhead-header">
+    
+    <div class="document-content">
+      ${htmlContent}
+    </div>
+  </div>
+  
+  <div class="letterhead-footer">
+    <img src="${footerPath}" alt="Family First Contact Information">
+  </div>
+</body>
+</html>
+    `);
+    
+    printWindow.document.close();
+    
+    // Focus and print after images load
+    printWindow.onload = function() {
+      printWindow.focus();
+    };
+  }
+  
+  /**
+   * Format plain text content for HTML print display
+   * @param {string} content - Raw document content
+   * @returns {string} - HTML formatted content
+   */
+  function _formatContentForPrint(content) {
+    const lines = content.split('\n');
+    let html = '';
+    let inBullets = false;
+    let currentSection = '';
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      // Skip empty lines but close bullet list if open
+      if (!line) {
+        if (inBullets) {
+          html += '</ul>';
+          inBullets = false;
+        }
+        continue;
+      }
+      
+      // Check for greeting (Hello,)
+      if (line.startsWith('Hello,') || line.startsWith('Hello ')) {
+        html += `<p class="greeting">${_escapeHtml(line)}</p>`;
+        continue;
+      }
+      
+      // Check for section headers
+      if (line === 'Aftercare Options:' || line === 'Aftercare Plan:' || line === 'At-Home Options:') {
+        html += `<p class="section-header">${_escapeHtml(line)}</p>`;
+        continue;
+      }
+      
+      // Check for AT HOME header
+      if (line.startsWith('AT HOME Recommendation:') || line.startsWith('AT-HOME')) {
+        html += `<p class="at-home-header">${_escapeHtml(line)}</p>`;
+        continue;
+      }
+      
+      // Check for ALUMNI SERVICES
+      if (line === 'ALUMNI SERVICES') {
+        html += `<div class="alumni-section"><p class="alumni-title">${_escapeHtml(line)}</p>`;
+        continue;
+      }
+      
+      // Check for program title (Name – Location pattern)
+      if (line.includes(' – ') && !line.startsWith('•') && !line.startsWith('Phone:') && !line.startsWith('Email:')) {
+        if (inBullets) {
+          html += '</ul>';
+          inBullets = false;
+        }
+        html += `<div class="program-block"><p class="program-title">${_escapeHtml(line)}</p>`;
+        continue;
+      }
+      
+      // Check for bullets
+      if (line.startsWith('•') || line.startsWith('-')) {
+        if (!inBullets) {
+          html += '<ul class="program-bullets">';
+          inBullets = true;
+        }
+        html += `<li>${_escapeHtml(line.substring(1).trim())}</li>`;
+        continue;
+      }
+      
+      // Check for contact info
+      if (line.startsWith('Phone:') || line.startsWith('Email:') || line.startsWith('Website:') || 
+          line.startsWith('Address:') || line.startsWith('Location:')) {
+        if (inBullets) {
+          html += '</ul>';
+          inBullets = false;
+        }
+        if (!html.includes('program-contact') || html.lastIndexOf('</div>') > html.lastIndexOf('program-contact')) {
+          html += '<div class="program-contact">';
+        }
+        html += `<div>${_escapeHtml(line)}</div>`;
+        
+        // Check if next line is also contact info
+        const nextLine = (lines[i + 1] || '').trim();
+        if (!nextLine.startsWith('Phone:') && !nextLine.startsWith('Email:') && 
+            !nextLine.startsWith('Website:') && !nextLine.startsWith('Address:') && 
+            !nextLine.startsWith('Location:')) {
+          html += '</div></div>'; // Close contact and program block
+        }
+        continue;
+      }
+      
+      // Check for alumni content (zoom links, etc.)
+      if (line.includes('zoom.us') || line.includes('Meeting ID:') || line.includes('Passcode:')) {
+        html += `<div class="alumni-block">${_escapeHtml(line)}</div>`;
+        continue;
+      }
+      
+      // Check for alumni service headers
+      if (line.endsWith(':') && (line.includes('Focus Group') || line.includes('Alumni') || line.includes('NEST'))) {
+        html += `<p class="section-header" style="font-size: 10pt; margin-top: 16px;">${_escapeHtml(line)}</p>`;
+        continue;
+      }
+      
+      // Regular paragraph (intro text or description)
+      if (inBullets) {
+        html += '</ul>';
+        inBullets = false;
+      }
+      html += `<p class="program-description">${_escapeHtml(line)}</p>`;
+    }
+    
+    // Close any open tags
+    if (inBullets) {
+      html += '</ul>';
+    }
+    
+    return html;
+  }
+  
+  /**
+   * Escape HTML special characters
+   * @param {string} text
+   * @returns {string}
+   */
+  function _escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  /**
+   * Generate DOCX with Family First letterhead
+   * @param {string} content - Document content
+   * @param {string} filename - Output filename
+   */
+  async function _generateDOCXWithLetterhead(content, filename) {
+    // For DOCX, we'll create an HTML file that can be opened in Word
+    // Word can import HTML with images
+    const basePath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+    const headerPath = basePath + LETTERHEAD.header;
+    const footerPath = basePath + LETTERHEAD.footer;
+    
+    const htmlContent = _formatContentForPrint(content);
+    
+    const docHtml = `
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" 
+      xmlns:w="urn:schemas-microsoft-com:office:word">
+<head>
+  <meta charset="UTF-8">
+  <title>${filename}</title>
+  <!--[if gte mso 9]>
+  <xml>
+    <w:WordDocument>
+      <w:View>Print</w:View>
+      <w:Zoom>100</w:Zoom>
+    </w:WordDocument>
+  </xml>
+  <![endif]-->
+  <style>
+    body {
+      font-family: Calibri, sans-serif;
+      font-size: 11pt;
+      line-height: 1.5;
+      margin: 0.5in 0.75in;
+    }
+    .letterhead-header {
+      width: 300px;
+      margin-bottom: 24px;
+    }
+    .letterhead-footer {
+      text-align: center;
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid #ccc;
+    }
+    .letterhead-footer img {
+      width: 400px;
+    }
+    .program-title {
+      font-weight: bold;
+      color: #1a365d;
+      margin-top: 16px;
+    }
+    .program-description {
+      text-align: justify;
+    }
+    .program-bullets {
+      margin-left: 20px;
+    }
+    .program-contact {
+      font-size: 10pt;
+      color: #666;
+    }
+    .at-home-header {
+      font-weight: bold;
+      font-style: italic;
+      margin-top: 24px;
+      padding-top: 12px;
+      border-top: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <img src="${headerPath}" class="letterhead-header">
+  ${htmlContent}
+  <div class="letterhead-footer">
+    <img src="${footerPath}">
+  </div>
+</body>
+</html>`;
+
+    // Download as .doc (Word can open HTML files)
+    const blob = new Blob([docHtml], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename.replace('.docx', '.doc');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   /**

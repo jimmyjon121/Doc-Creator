@@ -2390,16 +2390,112 @@
       return;
     }
 
-    // Simple preview in new window
-    const previewWin = window.open('', '_blank');
+    // Preview with letterhead - use the PDF generation for preview
+    const previewWin = window.open('', '_blank', 'width=850,height=1100');
+    
+    if (!previewWin) {
+      alert('Please allow popups to preview the document.');
+      return;
+    }
+    
+    // Get letterhead paths
+    const basePath = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+    const headerPath = basePath + 'assets/letterhead/ffas-letterhead-header.png';
+    const footerPath = basePath + 'assets/letterhead/ffas-letterhead-footer.jpg';
+    
+    // Format content for display
+    const htmlContent = content
+      .split('\n')
+      .map(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return '<br>';
+        if (trimmed.startsWith('•')) {
+          return `<li style="margin-left: 20px;">${trimmed.substring(1).trim()}</li>`;
+        }
+        if (trimmed.includes(' – ') && !trimmed.startsWith('Phone:') && !trimmed.startsWith('Email:')) {
+          return `<p style="font-weight: bold; color: #1a365d; margin-top: 20px; margin-bottom: 8px;">${trimmed}</p>`;
+        }
+        if (trimmed.startsWith('Phone:') || trimmed.startsWith('Email:') || trimmed.startsWith('Website:') || trimmed.startsWith('Address:') || trimmed.startsWith('Location:')) {
+          return `<p style="font-size: 10pt; color: #666; margin: 2px 0;">${trimmed}</p>`;
+        }
+        if (trimmed.startsWith('AT HOME') || trimmed.startsWith('AT-HOME')) {
+          return `<p style="font-weight: bold; font-style: italic; margin-top: 24px; padding-top: 12px; border-top: 1px solid #ccc;">${trimmed}</p>`;
+        }
+        if (trimmed === 'ALUMNI SERVICES') {
+          return `<p style="font-weight: bold; color: #1a365d; margin-top: 24px; padding-top: 12px; border-top: 1px solid #ccc;">${trimmed}</p>`;
+        }
+        return `<p style="margin: 4px 0; text-align: justify;">${trimmed}</p>`;
+      })
+      .join('');
+    
     previewWin.document.write(`
+      <!DOCTYPE html>
       <html>
-      <head><title>Document Preview</title>
-      <style>body { font-family: Calibri, sans-serif; padding: 40px; max-width: 800px; margin: auto; white-space: pre-wrap; line-height: 1.6; }</style>
+      <head>
+        <meta charset="UTF-8">
+        <title>Document Preview</title>
+        <style>
+          body {
+            font-family: Calibri, 'Segoe UI', Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+            color: #1a1a1a;
+            margin: 0;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #f5f5f5;
+          }
+          .page {
+            background: white;
+            padding: 40px 60px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-height: 1000px;
+          }
+          .letterhead-header {
+            width: 350px;
+            max-width: 350px;
+            margin: 0 auto 24px auto;
+            display: block;
+          }
+          .letterhead-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+          }
+          .letterhead-footer img {
+            max-width: 650px;
+            width: 80%;
+          }
+          .preview-badge {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #f59e0b;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 12px;
+          }
+        </style>
       </head>
-      <body>${content.replace(/\n/g, '<br>')}</body>
+      <body>
+        <div class="preview-badge">📋 PREVIEW</div>
+        <div class="page">
+          <img src="${headerPath}" alt="Family First Adolescent Services" class="letterhead-header">
+          <div class="content">
+            ${htmlContent}
+          </div>
+          <div class="letterhead-footer">
+            <img src="${footerPath}" alt="Contact Information">
+          </div>
+        </div>
+      </body>
       </html>
     `);
+    previewWin.document.close();
   }
 
   async function exportDocument() {

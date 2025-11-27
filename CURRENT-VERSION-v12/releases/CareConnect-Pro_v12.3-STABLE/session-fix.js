@@ -114,7 +114,7 @@
         
         // Validate credentials
         if ((username === 'MasterAdmin' && password === 'FFA@dm1n2025!') ||
-            (username === 'Doc121' && password === 'FFA121')) {
+            (username === 'Doc232' && password === 'FFA121')) {
             
             // Set session in localStorage
             localStorage.setItem('isLoggedIn', 'true');

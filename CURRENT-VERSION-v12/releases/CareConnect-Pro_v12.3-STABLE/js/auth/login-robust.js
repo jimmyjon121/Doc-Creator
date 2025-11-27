@@ -9,7 +9,7 @@
   const CONFIG = {
     MASTER_USERNAME: 'MasterAdmin',
     MASTER_PASSWORD: 'FFA@dm1n2025!',
-    LEGACY_USERNAME: 'Doc121',
+    LEGACY_USERNAME: 'Doc232',
     LEGACY_PASSWORD: 'FFA121',
     ACCOUNT_STORAGE_KEY: 'careconnect_user_accounts',
     SESSION_KEY: 'isLoggedIn',
