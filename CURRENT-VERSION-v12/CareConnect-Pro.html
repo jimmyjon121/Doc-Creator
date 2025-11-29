@@ -27441,6 +27441,10 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                                 Clinical Operations
                                 <span class="acc-tab__badge" id="accClinicalBadge" style="display:none;">0</span>
                             </button>
+                            <button class="acc-tab" onclick="accSwitchTab('data', this)">
+                                <span class="acc-tab__icon">📂</span>
+                                Data Management
+                            </button>
                             <button class="acc-tab" onclick="accSwitchTab('export', this)">
                                 <span class="acc-tab__icon">📤</span>
                                 Export &amp; Reports
@@ -27771,6 +27775,73 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                                             <div class="acc-bar-chart" id="accDischargeDestinations" style="margin-top: 0.75rem;">
                                                 <div class="acc-empty">No discharge data yet</div>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ═══════════════════════════════════════════════════════════════════════
+                             DATA MANAGEMENT PANEL
+                             ═══════════════════════════════════════════════════════════════════════ -->
+                        <div class="acc-panel" id="accPanelData">
+                            <div class="acc-grid">
+                                <!-- Import Data -->
+                                <div class="acc-col-4">
+                                    <div class="acc-card">
+                                        <div class="acc-card__header">
+                                            <h3 class="acc-card__title">
+                                                <span class="acc-card__title-icon">📥</span>
+                                                Import Data
+                                            </h3>
+                                        </div>
+                                        <div class="acc-card__body">
+                                            <p class="acc-card__subtitle">
+                                                Import demo or production data from a structured export file.
+                                            </p>
+                                            <button class="acc-btn acc-btn--primary" onclick="adminImportData && adminImportData()">
+                                                <span>📥</span> Import Data
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Manage Programs -->
+                                <div class="acc-col-4">
+                                    <div class="acc-card">
+                                        <div class="acc-card__header">
+                                            <h3 class="acc-card__title">
+                                                <span class="acc-card__title-icon">⚙️</span>
+                                                Manage Programs
+                                            </h3>
+                                        </div>
+                                        <div class="acc-card__body">
+                                            <p class="acc-card__subtitle">
+                                                Open the program catalog management tools.
+                                            </p>
+                                            <button class="acc-btn acc-btn--secondary" onclick="adminOpenProgramManager && adminOpenProgramManager()">
+                                                <span>⚙️</span> Open Program Manager
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Danger Zone -->
+                                <div class="acc-col-4">
+                                    <div class="acc-card acc-card--danger">
+                                        <div class="acc-card__header">
+                                            <h3 class="acc-card__title">
+                                                <span class="acc-card__title-icon">🗑️</span>
+                                                Clear All Programs
+                                            </h3>
+                                        </div>
+                                        <div class="acc-card__body">
+                                            <p class="acc-card__subtitle">
+                                                Clears locally stored program selections and drafts. This cannot be undone.
+                                            </p>
+                                            <button class="acc-btn acc-btn--danger" onclick="adminClearAllPrograms && adminClearAllPrograms()">
+                                                Clear All Programs
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -28932,6 +29003,94 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         }, 1000);
         
     })();
+    </script>
+    
+    <!-- Admin Data Management Wrappers -->
+    <script>
+        (function() {
+            'use strict';
+            
+            function hasAdminAccess() {
+                try {
+                    const ccUserRole = (window.ccConfig && window.ccConfig.currentUser && window.ccConfig.currentUser.role) || null;
+                    const storedRole = localStorage.getItem('userRole');
+                    const role = (ccUserRole || storedRole || '').toString().toLowerCase();
+                    return role === 'admin';
+                } catch (e) {
+                    console.warn('[AdminData] Failed to resolve admin role', e);
+                    return false;
+                }
+            }
+            
+            function ensureAdminOrAlert() {
+                if (!hasAdminAccess()) {
+                    alert('Admin access required to use Data Management tools.');
+                    return false;
+                }
+                return true;
+            }
+            
+            window.adminImportData = function() {
+                if (!ensureAdminOrAlert()) return;
+                
+                try {
+                    const fn = window.importData;
+                    if (typeof fn === 'function') {
+                        fn();
+                    } else {
+                        console.warn('[AdminData] importData() not found on window');
+                        alert('Import function is not available in this build.');
+                    }
+                } catch (error) {
+                    console.error('[AdminData] adminImportData failed', error);
+                    alert('Unable to import data. Please check the console for details.');
+                }
+            };
+            
+            window.adminOpenProgramManager = function() {
+                if (!ensureAdminOrAlert()) return;
+                
+                try {
+                    if (typeof window.openProgramManager === 'function') {
+                        window.openProgramManager();
+                        return;
+                    }
+                    
+                    // Fallback: try to switch to Programs tab
+                    if (typeof window.switchTab === 'function') {
+                        window.switchTab('programs');
+                    } else {
+                        console.warn('[AdminData] openProgramManager() and switchTab() not available');
+                        alert('Program manager is not available in this build.');
+                    }
+                } catch (error) {
+                    console.error('[AdminData] adminOpenProgramManager failed', error);
+                    alert('Unable to open program manager. Please check the console for details.');
+                }
+            };
+            
+            window.adminClearAllPrograms = function() {
+                if (!ensureAdminOrAlert()) return;
+                
+                const confirmed = window.confirm(
+                    'This will clear all locally stored program selections and drafts on this device. ' +
+                    'This action cannot be undone. Do you want to continue?'
+                );
+                if (!confirmed) return;
+                
+                try {
+                    if (typeof window.clearAllPrograms === 'function') {
+                        window.clearAllPrograms();
+                    } else {
+                        console.warn('[AdminData] clearAllPrograms() not found on window');
+                        alert('Clear All Programs is not available in this build.');
+                    }
+                } catch (error) {
+                    console.error('[AdminData] adminClearAllPrograms failed', error);
+                    alert('Unable to clear programs. Please check the console for details.');
+                }
+            };
+        })();
     </script>
     
     <!-- User Menu Functions -->
