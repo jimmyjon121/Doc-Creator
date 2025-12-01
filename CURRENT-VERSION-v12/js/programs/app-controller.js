@@ -213,7 +213,7 @@
     // Safety net: if the grid is still empty shortly after init, run one more render.
     setTimeout(() => {
       if (state.currentView === 'grid' && dom.resultsGrid) {
-        const hasCards = dom.resultsGrid.querySelector('.program-card, .umbrella-card');
+        const hasCards = dom.resultsGrid.querySelector('.universal-card');
         if (!hasCards) {
           console.log('🔁 Grid still empty after init, re-rendering programs...');
           renderPrograms();
@@ -710,231 +710,299 @@
     const displayPrograms = programs.slice(0, perPage);
 
     // Clear existing cards (but keep empty state)
-    const cards = dom.resultsGrid.querySelectorAll('.program-card, .umbrella-card');
+  const cards = dom.resultsGrid.querySelectorAll('.universal-card');
     cards.forEach(c => c.remove());
 
     // Render cards
     displayPrograms.forEach(program => {
-      const card = program.isUmbrellaParent 
-        ? createUmbrellaCard(program)
-        : createProgramCard(program);
+    const card = createUniversalCard(program);
       dom.resultsGrid.appendChild(card);
     });
   }
 
-  function createProgramCard(program) {
-    const card = document.createElement('article');
-    card.className = 'program-card';
-    card.dataset.programId = program.id;
+// ============================================================================
+// CARD DATA HELPERS (used by Universal Card)
+// ============================================================================
 
-    const locColor = window.ccMapIcons?.colors[program.primaryLOC] || '#6E7BFF';
-    
-    // Primary LOC badge only in hero
-    const primaryBadge = `<span class="loc-badge loc-badge--${program.primaryLOC.toLowerCase().replace(/\s+/g, '-')}">${program.primaryLOC}</span>`;
+function getCardBadges(program) {
+  const badges = [];
+  const primaryLOC = program.primaryLOC || 'Program';
+  const locSlug = primaryLOC.toLowerCase().replace(/\s+/g, '-');
 
-    // Format badge
-    const formatBadge = program.format[0] !== 'Onsite' 
-      ? `<span class="format-badge format-badge--${program.format[0].toLowerCase()}">${program.format[0]}</span>` 
-      : '';
-
-    const distance = program.distanceMiles !== null 
-      ? `<span class="program-card__distance">${program.distanceMiles} mi</span>` 
-      : '';
-
-    // Identity indicators
-    const identityBadges = [];
-    if (program.lgbtqAffirming) identityBadges.push('<span class="identity-badge" title="LGBTQ+ Affirming">🏳️‍🌈</span>');
-    if (program.transAffirming) identityBadges.push('<span class="identity-badge" title="Trans Affirming">🏳️‍⚧️</span>');
-    const identityHtml = identityBadges.length > 0 ? `<div class="program-card__identity">${identityBadges.join('')}</div>` : '';
-
-    // Clinical flags as small icons
-    const flagIcons = [];
-    if (program.treatsASD) flagIcons.push('<span title="Treats ASD">🧩</span>');
-    if (program.treatsSUD) flagIcons.push('<span title="Treats SUD">💊</span>');
-    if (program.highAcuityMH) flagIcons.push('<span title="High Acuity">⚡</span>');
-    const flagsHtml = flagIcons.length > 0 ? `<div class="program-card__flags">${flagIcons.join('')}</div>` : '';
-
-    // Age range
-    const ageRange = (program.ageMin || program.ageMax) 
-      ? `<span class="program-card__age">Ages ${program.ageMin || '?'}-${program.ageMax || '?'}</span>` 
-      : '';
-
-    // Hero style - LOC colored gradient
-    const heroStyle = program.heroImageUrl 
-      ? `background-image: linear-gradient(to bottom, transparent 40%, rgba(15,16,32,0.9)), url('${program.heroImageUrl}'); background-size: cover; background-position: center;`
-      : `background: linear-gradient(135deg, ${locColor} 0%, #151633 100%);`;
-
-    // Smart tags - show modalities or diagnoses, color coded
-    const smartTags = [];
-    if (program.modalities && program.modalities.length > 0) {
-      program.modalities.slice(0, 2).forEach(m => smartTags.push({ text: m, type: 'modality' }));
-    }
-    if (program.diagnosesServed && program.diagnosesServed.length > 0 && smartTags.length < 3) {
-      program.diagnosesServed.slice(0, 3 - smartTags.length).forEach(d => smartTags.push({ text: d, type: 'dx' }));
-    }
-    if (smartTags.length === 0 && program.tags) {
-      program.tags.slice(0, 3).forEach(t => smartTags.push({ text: t, type: 'tag' }));
-    }
-    const tagsHtml = smartTags.map(t => `<span class="smart-tag smart-tag--${t.type}">${t.text}</span>`).join('');
-
-    // Check if in compare list
-    const isComparing = state.compareList.includes(program.id);
-
-    card.innerHTML = `
-      <div class="program-card__hero" style="${heroStyle}">
-        <div class="program-card__hero-top">
-          ${primaryBadge}
-          ${formatBadge}
-        </div>
-        ${identityHtml}
-        <div class="program-card__hero-bottom">
-          <h3 class="program-card__name">${program.name}</h3>
-          <div class="program-card__meta">
-            <span class="program-card__location">📍 ${program.city}, ${program.state}</span>
-            ${distance}
-            ${ageRange}
-          </div>
-        </div>
-      </div>
-      <div class="program-card__content">
-        <p class="program-card__summary">${program.summary || 'No description available.'}</p>
-        <div class="program-card__tags">
-          ${tagsHtml}
-          ${flagsHtml}
-        </div>
-      </div>
-      <div class="program-card__actions">
-        <button class="card-btn card-btn--primary" data-action="add">
-          <span>+ Add</span>
-        </button>
-        <button class="card-btn card-btn--icon ${isComparing ? 'card-btn--active' : ''}" data-action="compare" title="Compare">
-          ⚖️
-        </button>
-        <button class="card-btn card-btn--icon card-btn--arrow" data-action="details" title="View Details">
-          →
-        </button>
-      </div>
-    `;
-
-    // Click on card (not buttons) opens profile
-    card.addEventListener('click', (e) => {
-      if (!e.target.closest('.card-btn')) {
-        openProfile(program);
-      }
+  if (program.isUmbrellaParent) {
+    badges.push({
+      label: 'Network',
+      className: 'universal-card__badge loc-badge loc-badge--network',
     });
+  } else {
+    badges.push({
+      label: primaryLOC,
+      className: `universal-card__badge loc-badge loc-badge--${locSlug}`,
+    });
+  }
 
-    // Event handlers
-    card.querySelector('[data-action="details"]').addEventListener('click', (e) => {
+  const format = Array.isArray(program.format) ? program.format[0] : program.format;
+  if (format && format !== 'Onsite') {
+    badges.push({
+      label: format,
+      className: `universal-card__badge format-badge format-badge--${format.toLowerCase().replace(/\s+/g, '-')}`,
+    });
+  }
+
+  if (typeof program.distanceMiles === 'number' && Number.isFinite(program.distanceMiles)) {
+    badges.push({
+      label: `${program.distanceMiles} mi`,
+      className: 'universal-card__badge universal-card__badge--distance',
+    });
+  }
+
+  return badges;
+}
+
+function getNetworkMeta(program) {
+  if (!program.isUmbrellaParent) return null;
+
+  const children = window.ccPrograms?.getChildren(program.id) || [];
+  const childLocs = new Set();
+  const childStates = new Set();
+
+  children.forEach(child => {
+    (child.levelOfCare || []).forEach(loc => childLocs.add(loc));
+    if (child.state) childStates.add(child.state);
+  });
+
+  return { children, childLocs, childStates };
+}
+
+function getCardStats(program, networkMeta) {
+  if (program.isUmbrellaParent) {
+    const locations = networkMeta?.children?.length ?? 0;
+    const locTypes = networkMeta?.childLocs?.size ?? 0;
+    return [
+      { value: locations || '--', label: 'Locations' },
+      { value: locTypes || '--', label: 'LOC Types' },
+    ];
+  }
+
+  const ageMin = program.ageMin ?? '';
+  const ageMax = program.ageMax ?? '';
+  const ageRange = ageMin || ageMax ? `${ageMin || '?'}-${ageMax || '?'}` : '--';
+
+  const gender = Array.isArray(program.gendersServed) && program.gendersServed.length
+    ? (program.gendersServed.length > 1 ? 'Co-ed' : program.gendersServed[0])
+    : '--';
+
+  const primaryLOC = program.primaryLOC || '--';
+
+  return [
+    { value: ageRange, label: 'Ages' },
+    { value: gender, label: 'Gender' },
+    { value: primaryLOC, label: 'LOC' },
+  ];
+}
+
+function getCardTags(program) {
+  const tags = [];
+
+  if (program.modalities?.length) {
+    program.modalities.slice(0, 2).forEach(modality => tags.push(modality));
+  }
+
+  if (program.diagnosesServed?.length && tags.length < 3) {
+    program.diagnosesServed.slice(0, 3 - tags.length).forEach(dx => tags.push(dx));
+  }
+
+  if (tags.length === 0 && program.tags?.length) {
+    program.tags.slice(0, 3).forEach(tag => tags.push(tag));
+  }
+
+  return tags;
+}
+
+function getCardFlags(program) {
+  const flags = [];
+  if (program.treatsASD) flags.push({ icon: '🧩', label: 'Treats ASD' });
+  if (program.treatsSUD) flags.push({ icon: '💊', label: 'Treats Substance Use' });
+  if (program.highAcuityMH) flags.push({ icon: '⚡', label: 'High Acuity Mental Health' });
+  return flags;
+}
+
+function getProgramLocationText(program, networkMeta) {
+  if (program.isUmbrellaParent) {
+    const states = networkMeta?.childStates;
+    if (!states || states.size === 0) {
+      return 'Multiple locations';
+    }
+    if (states.size === 1) {
+      return `${[...states][0]} • Network`;
+    }
+    const firstStates = [...states].slice(0, 3).join(', ');
+    const extra = states.size > 3 ? ` +${states.size - 3}` : '';
+    return `${firstStates}${extra}`;
+  }
+
+  const city = program.city || (program.format?.includes('Virtual') ? 'Virtual' : '');
+  const stateValue = program.state || '';
+  return [city, stateValue].filter(Boolean).join(', ') || 'Location TBD';
+}
+
+function isProgramAdded(programId) {
+  const draft = window.ccDocumentModel?.getCurrentDraft();
+  if (!draft?.phases) return false;
+  const phases = draft.phases;
+  const buckets = ['simple', 'stabilize', 'bridge', 'sustain', 'atHome'];
+  return buckets.some(bucket => Array.isArray(phases[bucket]) && phases[bucket].includes(programId));
+}
+
+function getProgramIconMarkup(program) {
+  if (program.isUmbrellaParent && program.logoUrl) {
+    const safeAlt = `${program.name || 'Program'} logo`;
+    return `<img src="${program.logoUrl}" alt="${safeAlt}" class="universal-card__icon universal-card__icon--image">`;
+  }
+
+  const emoji = program.isUmbrellaParent ? '🏢' : (program.format?.includes('Virtual') ? '💻' : '🏥');
+  return `<div class="universal-card__icon">${emoji}</div>`;
+}
+
+function createUniversalCard(program) {
+  const card = document.createElement('article');
+  card.className = 'universal-card';
+  card.dataset.programId = program.id;
+
+  const networkMeta = getNetworkMeta(program);
+  const badges = getCardBadges(program);
+  const stats = getCardStats(program, networkMeta);
+  const tags = getCardTags(program);
+  const flags = getCardFlags(program);
+  const locationText = getProgramLocationText(program, networkMeta);
+  const isAdded = !program.isUmbrellaParent && isProgramAdded(program.id);
+  const isComparing = state.compareList.includes(program.id);
+
+  if (isAdded) {
+    card.classList.add('universal-card--added');
+  }
+
+  const badgeHtml = badges.map(badge => `<span class="${badge.className}">${badge.label}</span>`).join('');
+  const statsHtml = stats.map(stat => `
+        <div class="universal-card__stat">
+          <span class="universal-card__stat-value">${stat.value || '--'}</span>
+          <span class="universal-card__stat-label">${stat.label}</span>
+        </div>
+      `).join('');
+  const tagsHtml = tags.map(tag => `<span class="universal-card__tag">${tag}</span>`).join('');
+  const flagsHtml = flags.length
+    ? `<div class="universal-card__flags">${flags.map(flag => `<span class="universal-card__flag" title="${flag.label}">${flag.icon}</span>`).join('')}</div>`
+    : '';
+
+  const primaryBtnAction = program.isUmbrellaParent ? 'details' : 'add';
+  const primaryBtnLabel = program.isUmbrellaParent
+    ? 'Explore Network →'
+    : (isAdded ? '✔ Added' : '+ Add');
+
+  const primaryBtnClasses = ['universal-card__btn', 'universal-card__btn--primary'];
+  if (isAdded) {
+    primaryBtnClasses.push('is-added');
+  }
+
+  const addedChip = program.isUmbrellaParent
+    ? ''
+    : '<span class="universal-card__added-chip">✔ Added to Plan</span>';
+
+  const secondaryActions = program.isUmbrellaParent
+    ? ''
+    : `
+        <button class="universal-card__btn universal-card__btn--icon ${isComparing ? 'universal-card__btn--active' : ''}" data-action="compare" title="Compare programs">⚖️</button>
+        <button class="universal-card__btn universal-card__btn--icon" data-action="details" title="View full profile">→</button>
+      `;
+
+  card.innerHTML = `
+    ${addedChip}
+    <div class="universal-card__header">
+      ${getProgramIconMarkup(program)}
+      <div class="universal-card__identity">
+        <div class="universal-card__badges">
+          ${badgeHtml}
+        </div>
+        <h3 class="universal-card__name">${program.name}</h3>
+        <div class="universal-card__location">
+          <span>📍</span>
+          <span>${locationText}</span>
+        </div>
+      </div>
+    </div>
+    <div class="universal-card__stats">
+      ${statsHtml}
+    </div>
+    <div class="universal-card__body">
+      <p class="universal-card__summary">${program.summary || 'No description available.'}</p>
+      <div class="universal-card__tags">
+        ${tagsHtml}
+        ${flagsHtml}
+      </div>
+    </div>
+    <div class="universal-card__actions">
+      <button class="${primaryBtnClasses.join(' ')}" data-action="${primaryBtnAction}" title="${program.isUmbrellaParent ? 'View network details' : 'Add to plan'}">
+        ${primaryBtnLabel}
+      </button>
+      ${secondaryActions}
+    </div>
+  `;
+
+  const iconImg = card.querySelector('.universal-card__icon--image');
+  if (iconImg) {
+    iconImg.addEventListener('error', () => {
+      const fallback = document.createElement('div');
+      fallback.className = 'universal-card__icon';
+      fallback.textContent = '🏢';
+      iconImg.replaceWith(fallback);
+    });
+  }
+
+  card.addEventListener('click', (e) => {
+    if (!e.target.closest('.universal-card__btn')) {
+      openProfile(program);
+    }
+  });
+
+  card.querySelectorAll('[data-action="details"]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
       e.stopPropagation();
       openProfile(program);
     });
-    card.querySelector('[data-action="add"]').addEventListener('click', (e) => {
+  });
+
+  const addBtn = card.querySelector('[data-action="add"]');
+  if (addBtn) {
+    addBtn.addEventListener('click', (e) => {
       e.stopPropagation();
+      if (!state.currentClient) {
+        const message = 'Select or create a client before adding programs.';
+        if (window.showNotification) {
+          window.showNotification(message, 'warning');
+        } else {
+          alert(message);
+        }
+        return;
+      }
       quickAdd(program);
+      card.classList.add('universal-card--added');
+      addBtn.classList.add('is-added');
+      addBtn.textContent = '✔ Added';
     });
-    card.querySelector('[data-action="compare"]').addEventListener('click', (e) => {
+  }
+
+  const compareBtn = card.querySelector('[data-action="compare"]');
+  if (compareBtn) {
+    compareBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       toggleCompare(program);
-      e.target.closest('.card-btn').classList.toggle('card-btn--active');
+      compareBtn.classList.toggle('universal-card__btn--active');
     });
-
-    return card;
   }
 
-  function createUmbrellaCard(program) {
-    const card = document.createElement('article');
-    card.className = 'umbrella-card';
-    card.dataset.programId = program.id;
+  return card;
+}
 
-    const children = window.ccPrograms?.getChildren(program.id) || [];
-    const childLocs = new Set();
-    const childStates = new Set();
-    children.forEach(c => {
-      c.levelOfCare.forEach(loc => childLocs.add(loc));
-      if (c.state) childStates.add(c.state);
-    });
-
-    const locBadges = [...childLocs].slice(0, 4).map(loc => 
-      `<span class="loc-badge loc-badge--${loc.toLowerCase().replace(/\s+/g, '-')}">${loc}</span>`
-    ).join('');
-
-    const statesList = [...childStates].slice(0, 5).join(', ');
-    const moreStates = childStates.size > 5 ? ` +${childStates.size - 5}` : '';
-
-    // Group children by state
-    const childrenByState = {};
-    children.forEach(c => {
-      if (!childrenByState[c.state]) childrenByState[c.state] = [];
-      childrenByState[c.state].push(c);
-    });
-
-    const childList = Object.entries(childrenByState).slice(0, 4).map(([state, progs]) => 
-      `<div class="umbrella-location" data-state="${state}">
-        <span class="umbrella-location__state">${state}</span>
-        <span class="umbrella-location__count">${progs.length} location${progs.length > 1 ? 's' : ''}</span>
-      </div>`
-    ).join('');
-
-    card.innerHTML = `
-      <div class="umbrella-card__hero">
-        <div class="umbrella-card__brand">
-          ${program.logoUrl 
-            ? `<img src="${program.logoUrl}" class="umbrella-card__logo" alt="" onerror="this.style.display='none'">` 
-            : '<div class="umbrella-card__icon">🏢</div>'}
-          <div class="umbrella-card__title">
-            <span class="umbrella-card__label">NETWORK</span>
-            <h3>${program.name}</h3>
-          </div>
-        </div>
-        <div class="umbrella-card__stats">
-          <div class="umbrella-stat">
-            <span class="umbrella-stat__value">${children.length}</span>
-            <span class="umbrella-stat__label">Locations</span>
-          </div>
-          <div class="umbrella-stat">
-            <span class="umbrella-stat__value">${childLocs.size}</span>
-            <span class="umbrella-stat__label">LOC Types</span>
-          </div>
-        </div>
-      </div>
-      <div class="umbrella-card__content">
-        <div class="umbrella-card__badges">${locBadges}</div>
-        <p class="umbrella-card__summary">${program.summary || 'Network of treatment programs.'}</p>
-        <div class="umbrella-card__coverage">
-          <span class="umbrella-coverage__label">Coverage:</span>
-          <span class="umbrella-coverage__states">${statesList}${moreStates}</span>
-        </div>
-        <div class="umbrella-card__locations">
-          ${childList}
-        </div>
-      </div>
-      <div class="umbrella-card__actions">
-        <button class="card-btn card-btn--primary" data-action="details">
-          <span>Explore Network →</span>
-        </button>
-      </div>
-    `;
-
-    // Click handlers
-    card.querySelector('[data-action="details"]').addEventListener('click', () => openProfile(program));
-    
-    // Location click - expand to show children
-    card.querySelectorAll('.umbrella-location').forEach(loc => {
-      loc.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const state = loc.dataset.state;
-        const stateChildren = childrenByState[state];
-        if (stateChildren && stateChildren.length === 1) {
-          openProfile(stateChildren[0]);
-        } else {
-          // Filter to this state's children
-          openProfile(program);
-        }
-      });
-    });
-
-    return card;
-  }
 
   function renderRows(programs) {
     dom.resultsTableBody.innerHTML = programs.map(program => {
@@ -2670,6 +2738,23 @@
   } else {
     init();
   }
+
+  // ============================================================================
+  // EXPOSE PUBLIC API
+  // ============================================================================
+  
+  window.ccAppController = {
+    openProfile: (programIdOrObject) => {
+      const program = typeof programIdOrObject === 'string' 
+        ? window.ccPrograms?.byId(programIdOrObject)
+        : programIdOrObject;
+      if (program) {
+        openProfile(program);
+      }
+    },
+    switchView: switchView,
+    getState: () => ({ ...state })
+  };
 
 })();
 

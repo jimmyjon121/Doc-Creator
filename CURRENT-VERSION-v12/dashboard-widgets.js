@@ -56,20 +56,37 @@ class FlightPlanWidget extends DashboardWidget {
         this.showLoading();
         
         try {
-            const data = window.dashboardManager?.cache?.priorities;
+            // Use filtered priorities if filters are active
+            const data = window.dashboardManager?.hasActiveFilters?.() 
+                ? window.dashboardManager.getFilteredPriorities()
+                : window.dashboardManager?.cache?.priorities;
+                
             if (!data || this.isZonesEmpty(data)) {
-                this.renderEmptyState('No priority alerts yet. Add clients or populate demo data to see this queue.', { showDemoAction: true });
+                const hasFilters = window.dashboardManager?.hasActiveFilters?.();
+                const message = hasFilters 
+                    ? 'No tasks match the current filter. Click a Journey stage again to clear the filter.'
+                    : 'No priority alerts yet. Add clients or populate demo data to see this queue.';
+                this.renderEmptyState(message, { showDemoAction: !hasFilters });
                 return;
             }
             
             const timeContext = window.dashboardManager?.getTimeAwareGreeting();
+            const hasFilters = window.dashboardManager?.hasActiveFilters?.();
+            
+            // Filter indicator
+            const filterBadge = hasFilters 
+                ? `<span class="filter-badge" onclick="dashboardManager.clearFilters()">Filtered ✕</span>`
+                : '';
             
             let html = `
                 <div class="flight-plan-widget">
                     <div class="widget-header">
+                        <div style="display: flex; align-items: center; gap: 8px;">
                         <h3>📋 Daily Flight Plan</h3>
-                        <div class="widget-header-actions">
                             <span class="metric-info" data-metric="dash_flight_plan">i</span>
+                            ${filterBadge}
+                        </div>
+                        <div class="widget-header-actions">
                             <span class="time-context">${timeContext.focus}</span>
                         </div>
                     </div>
@@ -135,7 +152,9 @@ class FlightPlanWidget extends DashboardWidget {
     }
 
     renderPriorityItem(item) {
-        const clientInfo = `${item.client.initials} (${item.client.houseId})`;
+        // Look up proper house name from housesManager
+        const houseName = this.getHouseDisplayName(item.client.houseId);
+        const clientInfo = `${item.client.initials} (${houseName})`;
         const actionId = `action-${item.type}-${item.client.id}-${Date.now()}`;
         
         // Normalize action text - always show "Complete Task" for task-related items
@@ -198,6 +217,31 @@ class FlightPlanWidget extends DashboardWidget {
             toggleIcon.textContent = this.expandedZones.has(zone) ? '▼' : '▶';
         }
     }
+
+    /**
+     * Get display name for a house ID
+     * @param {string} houseId - The house ID (e.g., 'house_nest')
+     * @returns {string} The display name (e.g., 'NEST')
+     */
+    getHouseDisplayName(houseId) {
+        if (!houseId) return 'Unassigned';
+        
+        // Try to get from housesManager
+        if (window.housesManager && typeof window.housesManager.getHouseById === 'function') {
+            const house = window.housesManager.getHouseById(houseId);
+            if (house && house.name) {
+                return house.name;
+            }
+        }
+        
+        // Fallback: extract name from ID (e.g., 'house_nest' -> 'Nest')
+        const match = houseId.match(/^house_(.+)$/);
+        if (match) {
+            return match[1].charAt(0).toUpperCase() + match[1].slice(1);
+        }
+        
+        return houseId;
+    }
 }
 
 
@@ -218,6 +262,8 @@ class JourneyRadarWidget extends DashboardWidget {
                 return;
             }
             
+            const activeFilter = window.dashboardManager?.filters?.journeyStage;
+            
             const segments = [
                 { key: 'week1', label: 'Week 1', color: 'green' },
                 { key: 'day14to16', label: 'Day 14-16', color: 'yellow', critical: true },
@@ -227,11 +273,22 @@ class JourneyRadarWidget extends DashboardWidget {
                 { key: 'recentlyDischarged', label: 'Recently Discharged', color: 'gray' }
             ];
             
+            // Show filter indicator if active
+            const filterIndicator = activeFilter 
+                ? `<button class="filter-clear-btn" onclick="dashboardManager.clearFilters()" title="Clear filter">
+                       <span class="filter-active-label">Filtered: ${this.getSegmentLabel(activeFilter)}</span>
+                       <span class="filter-clear-icon">✕</span>
+                   </button>` 
+                : '';
+            
             let html = `
                 <div class="journey-radar-widget">
                     <div class="widget-header">
+                        <div style="display: flex; align-items: center; gap: 8px;">
                         <h3>🧭 Client Journey Radar</h3>
                         <span class="metric-info" data-metric="dash_journey_radar">i</span>
+                        </div>
+                        ${filterIndicator}
                     </div>
                     <div class="journey-timeline">
             `;
@@ -239,6 +296,7 @@ class JourneyRadarWidget extends DashboardWidget {
             for (const segment of segments) {
                 const clients = data[segment.key] || [];
                 const hasClients = clients.length > 0;
+                const isActive = activeFilter === segment.key;
                 
                 // Check for critical aftercare needs
                 let criticalIndicator = '';
@@ -249,10 +307,15 @@ class JourneyRadarWidget extends DashboardWidget {
                     }
                 }
 
+                // Click filters Flight Plan; Shift+click opens modal
+                const clickHandler = hasClients 
+                    ? `onclick="dashboardWidgets.handleSegmentClick(event, '${segment.key}')"`
+                    : '';
+
                 html += `
-                    <div class="journey-segment segment-${segment.color} ${hasClients ? 'has-clients' : ''} ${segment.critical ? 'critical-stage' : ''}" 
+                    <div class="journey-segment segment-${segment.color} ${hasClients ? 'has-clients' : ''} ${segment.critical ? 'critical-stage' : ''} ${isActive ? 'segment-active' : ''}" 
                          data-segment="${segment.key}"
-                         onclick="${hasClients ? `dashboardWidgets.showSegmentClients('${segment.key}')` : ''}">
+                         ${clickHandler}>
                         <div class="segment-label">${segment.label} ${criticalIndicator}</div>
                         <div class="segment-count">${clients.length}</div>
                         ${segment.key === 'dischargePipeline' && clients.length > 0 ? 
@@ -290,132 +353,37 @@ class JourneyRadarWidget extends DashboardWidget {
         }
     }
 
+    getSegmentLabel(key) {
+        const labels = {
+            week1: 'Week 1',
+            day14to16: 'Day 14-16',
+            day30: 'Day 30',
+            day45plus: '45+ Days',
+            dischargePipeline: 'Discharge Pipeline',
+            recentlyDischarged: 'Recently Discharged'
+        };
+        return labels[key] || key;
+    }
+
     addSegmentTooltips(data, segments) {
         segments.forEach(segment => {
             const element = this.container.querySelector(`[data-segment="${segment.key}"]`);
             if (element && data[segment.key]?.length > 0) {
                 const clients = data[segment.key].slice(0, 5).map(c => c.initials).join(', ');
                 const more = data[segment.key].length > 5 ? ` +${data[segment.key].length - 5} more` : '';
-                element.title = `${clients}${more}`;
+                element.title = `Click to filter • Shift+click for details\n${clients}${more}`;
             }
         });
     }
 }
 
-// Coach Schedule Widget
-class CoachScheduleWidget extends DashboardWidget {
-    constructor(container) {
-        super('coachSchedule', container);
-    }
-
-    async render() {
-        this.showLoading();
-
-        try {
-            const schedule = await this.buildSchedule();
-            const hasItems = schedule.today.length > 0 || schedule.week.length > 0;
-
-            if (!hasItems) {
-                this.renderEmptyState('No scheduled work yet. Add clients or populate demo data to surface your upcoming tasks.', { showDemoAction: true });
-                return;
-            }
-
-            const todayLabel = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
-
-            let html = `
-                <div class="coach-schedule-widget">
-                    <div class="widget-header">
-                        <h3>🗓 Coach Schedule</h3>
-                        <span class="schedule-date">${todayLabel}</span>
-                    </div>
-                    ${this.renderScheduleSection('Today', schedule.today)}
-                    ${this.renderScheduleSection('Upcoming', schedule.week)}
-                </div>
-            `;
-
-            this.container.innerHTML = html;
-            this.hideLoading();
-        } catch (error) {
-            console.error('Failed to render schedule:', error);
-            this.container.innerHTML = '<div class="widget-error">Failed to load schedule</div>';
-        }
-    }
-
-    async buildSchedule() {
-        const priorities = dashboardManager.cache?.priorities || { red: [], yellow: [], purple: [], green: [] };
-        const quickWins = await dashboardManager.getQuickWins();
-
-        const today = [];
-        const week = [];
-
-        const mapItem = (item, bucket) => ({
-            client: item.client,
-            label: item.message || item.action,
-            action: item.action,
-            bucket,
-            due: item.dueDate || bucket,
-            type: item.type || 'task'
-        });
-
-        const addItems = (source = [], bucket = 'Today', target = today) => {
-            source.forEach(item => target.push(mapItem(item, bucket)));
-        };
-
-        addItems(priorities.red, 'Urgent');
-        addItems(priorities.yellow, 'Due today');
-        addItems(priorities.purple, 'Discharge prep', week);
-        addItems(priorities.green, 'Upcoming', week);
-
-        quickWins.slice(0, 3).forEach(win => {
-            today.push({
-                client: win.client,
-                label: win.action,
-                action: win.action,
-                bucket: 'Quick win',
-                due: `${win.estimatedTime}m`,
-                type: 'quickwin'
-            });
-        });
-
-        return {
-            today: today.slice(0, 6),
-            week: week.slice(0, 6)
-        };
-    }
-
-    renderScheduleSection(title, items) {
-        if (!items.length) {
-            return '';
-        }
-
-        const rows = items.map(item => {
-            const hasClient = Boolean(item.client?.id);
-            return `
-            <div class="schedule-item">
-                <div class="schedule-item__main">
-                    <span class="schedule-client">${item.client?.initials || '--'}</span>
-                    <span class="schedule-label">${item.label}</span>
-                </div>
-                <div class="schedule-item__meta">
-                    <span class="schedule-bucket">${item.bucket}</span>
-                    <span class="schedule-due">${item.due}</span>
-                    ${hasClient ? `<button class="schedule-action" onclick="dashboardWidgets.takeAction('schedule', '${item.type}', '${item.client.id}')">Open</button>` : ''}
-                </div>
-            </div>
-        `; }).join('');
-
-        return `
-            <div class="schedule-section">
-                <div class="schedule-section__title">${title}</div>
-                ${rows}
-            </div>
-        `;
-    }
-}
+// Coach Schedule Widget - REMOVED (redundant with Flight Plan)
+// The Coach Schedule was showing the same data as Flight Plan, just reformatted.
+// See plan: coach-dashboar.plan.md Section 1 for analysis.
 
 
 
-// Quick Actions Widget
+// Quick Actions Widget (with inline KPIs)
 class QuickActionsWidget extends DashboardWidget {
     constructor(container) {
         super('quickActions', container);
@@ -423,34 +391,55 @@ class QuickActionsWidget extends DashboardWidget {
 
     async render() {
         const suggestions = await dashboardManager.generateSmartSuggestions();
+        const greeting = dashboardManager.getTimeAwareGreeting();
+        
+        // Get KPI counts from priorities
+        const priorities = dashboardManager.cache?.priorities || { red: [], yellow: [], purple: [], green: [] };
+        const totalRed = priorities.red?.length || 0;
+        const totalYellow = priorities.yellow?.length || 0;
+        const activeClients = dashboardManager.cache?.metrics?.activeClients || 0;
         
         let html = `
-            <div class="quick-actions">
-                <div class="quick-actions__row">
-                    <button class="quick-actions__btn" onclick="showAddClientModal()">
-                        <span>➕</span>
-                        <small>Add Client</small>
-                    </button>
-                    <button class="quick-actions__btn" onclick="dashboardWidgets.quickGenerateDoc()">
-                        <span>📄</span>
-                        <small>Generate Doc</small>
-                    </button>
-                    <button class="quick-actions__btn" onclick="dashboardWidgets.viewAllAlerts()">
-                        <span>🔔</span>
-                        <small>All Alerts</small>
-                    </button>
-                    <button class="quick-actions__btn" onclick="dashboardWidgets.exportDashboard()">
-                        <span>📊</span>
-                        <small>Export</small>
-                    </button>
-                    <button class="quick-actions__btn" onclick="initializeDashboard && initializeDashboard(true)">
-                        <span>🔄</span>
-                        <small>Refresh</small>
-                    </button>
-                    <button class="quick-actions__btn" onclick="window.morningReview && window.morningReview.renderMorningReview()">
-                        <span>☀️</span>
-                        <small>Morning Review</small>
-                    </button>
+            <div class="quick-actions-widget">
+                <div class="dashboard-greeting-row">
+                    <div class="greeting-section">
+                        <h2 class="greeting-text">${greeting.greeting}</h2>
+                        <p class="greeting-subtext">${greeting.focus}</p>
+                    </div>
+                    <div class="dashboard-kpi-badges">
+                        <span class="kpi-badge kpi-urgent" title="Urgent tasks requiring immediate action">${totalRed} Urgent</span>
+                        <span class="kpi-badge kpi-today" title="Tasks due today">${totalYellow} Due Today</span>
+                        <span class="kpi-badge kpi-clients" title="Active clients in your caseload">${activeClients} Clients</span>
+                    </div>
+                </div>
+                <div class="quick-actions">
+                    <div class="quick-actions__row">
+                        <button class="quick-actions__btn" onclick="showAddClientModal()">
+                            <span>➕</span>
+                            <small>Add Client</small>
+                        </button>
+                        <button class="quick-actions__btn" onclick="dashboardWidgets.quickGenerateDoc()">
+                            <span>📄</span>
+                            <small>Generate Doc</small>
+                        </button>
+                        <button class="quick-actions__btn" onclick="initializeDashboard && initializeDashboard(true)">
+                            <span>🔄</span>
+                            <small>Refresh</small>
+                        </button>
+                        <button class="quick-actions__btn" onclick="window.morningReview && window.morningReview.renderMorningReview()">
+                            <span>☀️</span>
+                            <small>Morning Review</small>
+                        </button>
+                        <button class="quick-actions__btn" onclick="window.dashboardWidgets && window.dashboardWidgets.openDischargedClients ? window.dashboardWidgets.openDischargedClients() : (window.showDischargedClientsView && window.showDischargedClientsView())">
+                            <span>🚪</span>
+                            <small>Discharged Clients</small>
+                        </button>
+                        ${window.ccConfig?.demoMode ? `
+                        <button class="quick-actions__btn" data-demo-only="true" onclick="window.populateDemoClients && window.populateDemoClients(40)">
+                            <span>🎭</span>
+                            <small>Demo Clients</small>
+                        </button>` : ''}
+                    </div>
                 </div>
                 ${suggestions.length > 0 ? this.renderSuggestions(suggestions) : ''}
             </div>
@@ -476,6 +465,423 @@ class QuickActionsWidget extends DashboardWidget {
     }
 }
 
+// Changes Today Widget - Shows recent admissions, approaching milestones, discharges
+class ChangesTodayWidget extends DashboardWidget {
+    constructor(container) {
+        super('changesToday', container);
+    }
+
+    async render() {
+        this.showLoading();
+
+        try {
+            const changes = dashboardManager.cache?.recentChanges || {
+                newAdmissions: [],
+                approachingDay14: [],
+                approachingDischarge: [],
+                escalations: []
+            };
+            
+            const totalChanges = changes.newAdmissions.length + 
+                                 changes.approachingDay14.length + 
+                                 changes.approachingDischarge.length;
+
+            if (totalChanges === 0) {
+                this.container.innerHTML = `
+                    <div class="changes-today-widget">
+                        <div class="widget-header">
+                            <h3>📅 Changes Today</h3>
+                        </div>
+                        <div class="widget-empty-compact">
+                            <p>No notable changes today</p>
+                        </div>
+                    </div>
+                `;
+                this.hideLoading();
+                return;
+            }
+
+            let html = `
+                <div class="changes-today-widget">
+                    <div class="widget-header">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h3>📅 Changes Today</h3>
+                            <span class="metric-info" data-metric="dash_changes_today">i</span>
+                    </div>
+                        <span class="changes-count">${totalChanges}</span>
+                    </div>
+                    <div class="changes-list">
+            `;
+            
+            // New Admissions
+            if (changes.newAdmissions.length > 0) {
+                html += `<div class="changes-section">`;
+                for (const item of changes.newAdmissions) {
+                    html += `
+                        <div class="change-item change-admission" onclick="viewClientDetails(clientManager.getClient('${item.client.id}'))">
+                            <span class="change-icon">🆕</span>
+                            <span class="change-text">${item.message}</span>
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+            }
+            
+            // Approaching Day 14
+            if (changes.approachingDay14.length > 0) {
+                html += `<div class="changes-section">`;
+                for (const item of changes.approachingDay14) {
+                    html += `
+                        <div class="change-item change-milestone" onclick="viewClientDetails(clientManager.getClient('${item.client.id}'))">
+                            <span class="change-icon">⚠️</span>
+                            <span class="change-text">${item.message}</span>
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+            }
+            
+            // Approaching Discharge
+            if (changes.approachingDischarge.length > 0) {
+                html += `<div class="changes-section">`;
+                for (const item of changes.approachingDischarge) {
+                    html += `
+                        <div class="change-item change-discharge" onclick="viewClientDetails(clientManager.getClient('${item.client.id}'))">
+                            <span class="change-icon">🚪</span>
+                            <span class="change-text">${item.message}</span>
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+            }
+            
+            html += `
+                    </div>
+                </div>
+            `;
+
+            this.container.innerHTML = html;
+            this.hideLoading();
+        } catch (error) {
+            console.error('Failed to render changes today:', error);
+            this.container.innerHTML = '<div class="widget-error">Failed to load changes</div>';
+        }
+    }
+}
+
+// Gaps & Missing Data Widget - Shows clients with missing critical data
+class GapsWidget extends DashboardWidget {
+    constructor(container) {
+        super('gaps', container);
+    }
+
+    async render() {
+        this.showLoading();
+        
+        try {
+            const gaps = dashboardManager.cache?.gaps || {
+                missingDcDate: [],
+                noAftercareStarted: [],
+                missingCareTeam: []
+            };
+            
+            const totalGaps = gaps.missingDcDate.length + 
+                              gaps.noAftercareStarted.length + 
+                              gaps.missingCareTeam.length;
+            
+            if (totalGaps === 0) {
+                this.container.innerHTML = `
+                    <div class="gaps-widget">
+                        <div class="widget-header">
+                            <h3>✅ Data Gaps</h3>
+                        </div>
+                        <div class="widget-empty-compact">
+                            <p>No data gaps detected!</p>
+                        </div>
+                    </div>
+                `;
+                this.hideLoading();
+                return;
+            }
+            
+            const gapCategories = [
+                { key: 'missingDcDate', label: 'Missing DC Date', icon: '📅', clients: gaps.missingDcDate },
+                { key: 'noAftercareStarted', label: 'No Aftercare Started', icon: '🏠', clients: gaps.noAftercareStarted },
+                { key: 'missingCareTeam', label: 'No Care Team', icon: '👥', clients: gaps.missingCareTeam }
+            ];
+            
+            let html = `
+                <div class="gaps-widget">
+                    <div class="widget-header">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h3>⚠️ Data Gaps</h3>
+                            <span class="metric-info" data-metric="dash_gaps">i</span>
+                        </div>
+                        <span class="gaps-total">${totalGaps}</span>
+                    </div>
+                    <div class="gaps-list">
+            `;
+            
+            for (const cat of gapCategories) {
+                if (cat.clients.length === 0) continue;
+                html += `
+                    <div class="gap-category" onclick="dashboardWidgets.showGapClients('${cat.key}')">
+                        <span class="gap-icon">${cat.icon}</span>
+                        <span class="gap-label">${cat.label}</span>
+                        <span class="gap-count">${cat.clients.length}</span>
+                    </div>
+                `;
+            }
+            
+            html += `
+                    </div>
+                </div>
+            `;
+            
+            this.container.innerHTML = html;
+            this.hideLoading();
+        } catch (error) {
+            console.error('Failed to render gaps widget:', error);
+            this.container.innerHTML = '<div class="widget-error">Failed to load gaps</div>';
+        }
+    }
+}
+
+// Intake/Discharge Pipeline Widget - Shows upcoming intakes and discharges
+class PipelineWidget extends DashboardWidget {
+    constructor(container) {
+        super('pipeline', container);
+        }
+
+    async render() {
+        this.showLoading();
+        
+        try {
+            const pipeline = dashboardManager.cache?.pipeline || { intakes: [], discharges: [] };
+            const hasData = pipeline.intakes.length > 0 || pipeline.discharges.length > 0;
+            
+            if (!hasData) {
+                this.container.innerHTML = `
+                    <div class="pipeline-widget">
+                        <div class="widget-header">
+                            <h3>🔄 Pipeline</h3>
+                </div>
+                        <div class="widget-empty-compact">
+                            <p>No upcoming intakes or discharges</p>
+                </div>
+            </div>
+                `;
+                this.hideLoading();
+                return;
+            }
+            
+            let html = `
+                <div class="pipeline-widget">
+                    <div class="widget-header">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h3>🔄 Pipeline</h3>
+                            <span class="metric-info" data-metric="dash_pipeline">i</span>
+                        </div>
+                    </div>
+            `;
+            
+            // Intakes section
+            if (pipeline.intakes.length > 0) {
+                html += `
+                    <div class="pipeline-section">
+                        <div class="pipeline-section-title">📥 Intakes (${pipeline.intakes.length})</div>
+                        <div class="pipeline-items">
+                `;
+                for (const client of pipeline.intakes.slice(0, 3)) {
+                    const status = client.isPreAdmission ? 'Pre-admit' : `Day ${client.daysInCare}`;
+                    html += `
+                        <div class="pipeline-item pipeline-intake" onclick="viewClientDetails(clientManager.getClient('${client.id}'))">
+                            <span class="pipeline-initials">${client.initials}</span>
+                            <span class="pipeline-status">${status}</span>
+            </div>
+        `;
+    }
+                html += `</div></div>`;
+            }
+            
+            // Discharges section
+            if (pipeline.discharges.length > 0) {
+                html += `
+                    <div class="pipeline-section">
+                        <div class="pipeline-section-title">📤 Discharges (${pipeline.discharges.length})</div>
+                        <div class="pipeline-items">
+                `;
+                for (const client of pipeline.discharges.slice(0, 3)) {
+                    const urgency = client.daysUntilDischarge <= 2 ? 'urgent' : '';
+                    html += `
+                        <div class="pipeline-item pipeline-discharge ${urgency}" onclick="viewClientDetails(clientManager.getClient('${client.id}'))">
+                            <span class="pipeline-initials">${client.initials}</span>
+                            <span class="pipeline-status">${client.daysUntilDischarge}d</span>
+                        </div>
+                    `;
+                }
+                html += `</div></div>`;
+            }
+            
+            html += `</div>`;
+            
+            this.container.innerHTML = html;
+            this.hideLoading();
+        } catch (error) {
+            console.error('Failed to render pipeline widget:', error);
+            this.container.innerHTML = '<div class="widget-error">Failed to load pipeline</div>';
+        }
+    }
+}
+
+// Program Spotlight Widget - Shows a random program for coach learning
+class ProgramSpotlightWidget extends DashboardWidget {
+    constructor(container) {
+        super('programSpotlight', container);
+        this.currentProgram = null;
+    }
+
+    async render() {
+        this.showLoading();
+        
+        try {
+            // Check if programs API is ready
+            if (!window.ccPrograms?.isReady || !window.ccPrograms.core?.length) {
+                this.container.innerHTML = `
+                    <div class="spotlight-widget">
+                        <div class="widget-header">
+                            <h3>📚 Program Spotlight</h3>
+                        </div>
+                        <div class="widget-empty-compact">
+                            <p>Programs database loading...</p>
+                        </div>
+                    </div>
+                `;
+                this.hideLoading();
+                return;
+            }
+            
+            // Pick random program if none selected
+            if (!this.currentProgram) {
+                this.pickRandomProgram();
+            }
+            
+            const p = this.currentProgram;
+            const locBadges = (p.levelOfCare || []).slice(0, 2).map(loc => 
+                `<span class="loc-badge">${loc}</span>`
+            ).join('');
+            
+            const summary = p.summary ? 
+                (p.summary.length > 100 ? p.summary.substring(0, 100) + '...' : p.summary) : 
+                'No description available';
+            
+            this.container.innerHTML = `
+                <div class="spotlight-widget">
+                    <div class="widget-header">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h3>📚 Program Spotlight</h3>
+                            <span class="metric-info" data-metric="dash_program_spotlight">i</span>
+                        </div>
+                        <button class="spotlight-refresh" onclick="dashboardWidgets.refreshSpotlight()" title="Show different program">🔄</button>
+                    </div>
+                    <div class="spotlight-program">
+                        <div class="spotlight-name">${p.name}</div>
+                        <div class="spotlight-location">${p.city}, ${p.state}</div>
+                        <div class="spotlight-badges">${locBadges}</div>
+                        <div class="spotlight-summary">${summary}</div>
+                        <button class="spotlight-learn-btn" onclick="dashboardWidgets.learnMoreProgram('${p.id}')">
+                            Learn More →
+                    </button>
+                </div>
+            </div>
+        `;
+            this.hideLoading();
+        } catch (error) {
+            console.error('Failed to render program spotlight:', error);
+            this.container.innerHTML = '<div class="widget-error">Failed to load spotlight</div>';
+    }
+    }
+
+    pickRandomProgram() {
+        const programs = window.ccPrograms?.core || [];
+        if (programs.length > 0) {
+            this.currentProgram = programs[Math.floor(Math.random() * programs.length)];
+        }
+    }
+}
+
+// House Health Widget - Shows compliance status for each house with click-to-filter
+class HouseHealthWidget extends DashboardWidget {
+    constructor(container) {
+        super('houseHealth', container);
+    }
+
+    async render() {
+        this.showLoading();
+        
+        try {
+            const houseHealth = dashboardManager.cache?.houseHealth || {};
+            const houses = Object.values(houseHealth);
+            
+            if (houses.length === 0) {
+                this.container.innerHTML = `
+                    <div class="house-health-widget">
+                        <div class="widget-header">
+                            <h3>🏠 House Compliance</h3>
+                        </div>
+                        <div class="widget-empty-compact">
+                            <p>No house data available</p>
+                </div>
+            </div>
+        `;
+                this.hideLoading();
+                return;
+            }
+            
+            const activeHouseFilter = dashboardManager.filters?.house;
+            
+            let html = `
+                <div class="house-health-widget">
+                    <div class="widget-header">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <h3>🏠 House Compliance</h3>
+                            <span class="metric-info" data-metric="dash_house_health">i</span>
+                        </div>
+                        ${activeHouseFilter ? `<button class="filter-clear-btn" onclick="dashboardManager.clearFilters()">Clear Filter ✕</button>` : ''}
+                    </div>
+                    <div class="house-cards-grid">
+            `;
+            
+            for (const h of houses) {
+                const isActive = activeHouseFilter === h.house.id;
+                const scoreClass = h.score >= 90 ? 'excellent' : h.score >= 70 ? 'good' : h.score >= 40 ? 'warning' : 'critical';
+                
+                html += `
+                    <div class="house-card ${scoreClass} ${isActive ? 'house-active' : ''}" 
+                         onclick="dashboardManager.setFilter('house', '${h.house.id}')"
+                         title="Click to filter by ${h.house.name}">
+                        <div class="house-weather">${h.weather}</div>
+                        <div class="house-name">${h.house.name}</div>
+                        <div class="house-score">${h.score}%</div>
+                        <div class="house-clients">${h.clientCount} clients</div>
+                    </div>
+                `;
+            }
+            
+            html += `
+                    </div>
+                </div>
+            `;
+            
+            this.container.innerHTML = html;
+            this.hideLoading();
+        } catch (error) {
+            console.error('Failed to render house health widget:', error);
+            this.container.innerHTML = '<div class="widget-error">Failed to load house data</div>';
+        }
+    }
+}
+
 // Dashboard Widgets Manager
 class DashboardWidgets {
     constructor() {
@@ -488,8 +894,12 @@ class DashboardWidgets {
         const widgetContainers = {
             flightPlan: document.getElementById('flightPlanWidget'),
             journeyRadar: document.getElementById('journeyRadarWidget'),
-            coachSchedule: document.getElementById('coachScheduleWidget'),
-            quickActions: document.getElementById('quickActionsWidget')
+            quickActions: document.getElementById('quickActionsWidget'),
+            changesToday: document.getElementById('changesTodayWidget'),
+            pipeline: document.getElementById('pipelineWidget'),
+            gaps: document.getElementById('gapsWidget'),
+            programSpotlight: document.getElementById('programSpotlightWidget'),
+            houseHealth: document.getElementById('houseHealthWidget')
         };
         
         if (widgetContainers.flightPlan) {
@@ -500,12 +910,47 @@ class DashboardWidgets {
             this.widgets.set('journeyRadar', new JourneyRadarWidget(widgetContainers.journeyRadar));
         }
         
-        if (widgetContainers.coachSchedule) {
-            this.widgets.set('coachSchedule', new CoachScheduleWidget(widgetContainers.coachSchedule));
-        }
-        
         if (widgetContainers.quickActions) {
             this.widgets.set('quickActions', new QuickActionsWidget(widgetContainers.quickActions));
+        }
+        
+        if (widgetContainers.changesToday) {
+            this.widgets.set('changesToday', new ChangesTodayWidget(widgetContainers.changesToday));
+        }
+        
+        if (widgetContainers.pipeline) {
+            // Verify pipeline widget is in the correct column
+            const parentColumn = widgetContainers.pipeline.closest('.dashboard-column');
+            if (parentColumn && !parentColumn.classList.contains('dashboard-column--secondary')) {
+                console.error('⚠️ Pipeline widget found in wrong column! Moving to secondary column...');
+                const secondaryColumn = document.querySelector('.dashboard-column--secondary');
+                if (secondaryColumn) {
+                    // Find the correct position (after changesTodayWidget, before gapsWidget)
+                    const changesToday = document.getElementById('changesTodayWidget');
+                    const gapsWidget = document.getElementById('gapsWidget');
+                    if (changesToday && changesToday.nextSibling) {
+                        secondaryColumn.insertBefore(widgetContainers.pipeline, changesToday.nextSibling);
+                    } else if (gapsWidget) {
+                        secondaryColumn.insertBefore(widgetContainers.pipeline, gapsWidget);
+                    } else {
+                        secondaryColumn.appendChild(widgetContainers.pipeline);
+                    }
+                    console.log('✅ Pipeline widget moved to secondary column');
+                }
+            }
+            this.widgets.set('pipeline', new PipelineWidget(widgetContainers.pipeline));
+        }
+        
+        if (widgetContainers.gaps) {
+            this.widgets.set('gaps', new GapsWidget(widgetContainers.gaps));
+        }
+        
+        if (widgetContainers.programSpotlight) {
+            this.widgets.set('programSpotlight', new ProgramSpotlightWidget(widgetContainers.programSpotlight));
+        }
+        
+        if (widgetContainers.houseHealth) {
+            this.widgets.set('houseHealth', new HouseHealthWidget(widgetContainers.houseHealth));
         }
         
         for (const [id, widget] of this.widgets) {
@@ -570,34 +1015,65 @@ class DashboardWidgets {
         }
     }
 
+    /**
+     * Handle segment click - normal click filters, shift+click shows modal
+     */
+    handleSegmentClick(event, segment) {
+        if (event.shiftKey) {
+            // Shift+click: show client list modal
+            this.showSegmentClients(segment);
+        } else {
+            // Normal click: filter the Flight Plan
+            dashboardManager.setFilter('journeyStage', segment);
+        }
+    }
+
     showSegmentClients(segment) {
         const clients = dashboardManager.cache.journeyData[segment];
         if (!clients || clients.length === 0) return;
         
-        let content = '<div class="segment-clients-list">';
+        let content = '<div class="segment-drawer">';
         for (const client of clients) {
-            let daysInfo = '';
-            let statusIndicator = '';
+            const houseName = this.getHouseDisplayName(client.houseId);
+            const days = client.daysInCare || dashboardManager.calculateDaysInCare(client.admissionDate);
             
+            // Build status badges
+            const badges = [];
+            if (client.aftercareThreadSent) {
+                badges.push('<span class="drawer-badge badge-green">Aftercare Started</span>');
+            }
+            if (client.dischargeDate) {
+                badges.push('<span class="drawer-badge badge-purple">DC Date Set</span>');
+            }
+            if (!client.aftercareThreadSent && days > 14) {
+                badges.push('<span class="drawer-badge badge-red">No Aftercare</span>');
+            }
+            
+            // Special info based on segment
+            let extraInfo = '';
             if (segment === 'dischargePipeline') {
-                daysInfo = ` - ${client.daysUntilDischarge} days until discharge`;
+                extraInfo = `<span class="drawer-extra">${client.daysUntilDischarge}d until DC</span>`;
             } else if (segment === 'recentlyDischarged') {
-                daysInfo = ` - Discharged ${client.daysSinceDischarge} days ago`;
-            } else if (segment === 'day14to16') {
-                daysInfo = ` - Day ${client.daysInCare}`;
-                if (client.needsAftercare) {
-                    statusIndicator = '<span class="status-indicator urgent">Aftercare needed</span>';
-                }
-            } else {
-                daysInfo = ` - Day ${dashboardManager.calculateDaysInCare(client.admissionDate)}`;
+                extraInfo = `<span class="drawer-extra">${client.daysSinceDischarge}d ago</span>`;
             }
             
             content += `
-                <div class="segment-client-item" onclick="viewClientDetails(clientManager.getClient('${client.id}'))">
-                    <span class="client-initials">${client.initials}</span>
-                    <span class="client-house">${client.houseId}</span>
-                    <span class="client-info">${daysInfo}</span>
-                    ${statusIndicator}
+                <div class="drawer-client-row">
+                    <div class="drawer-client-info">
+                        <span class="drawer-initials">${client.initials}</span>
+                        <span class="drawer-house">${houseName}</span>
+                        <span class="drawer-days">Day ${days}</span>
+                        ${extraInfo}
+                    </div>
+                    <div class="drawer-badges">${badges.join('')}</div>
+                    <div class="drawer-actions">
+                        <button class="drawer-btn drawer-btn-primary" onclick="viewClientDetails(clientManager.getClient('${client.id}')); closeModal();">
+                            Open
+                        </button>
+                        <button class="drawer-btn drawer-btn-secondary" onclick="dashboardWidgets.addTaskForClient('${client.id}'); closeModal();">
+                            Add Task
+                        </button>
+                    </div>
                 </div>
             `;
         }
@@ -608,6 +1084,27 @@ class DashboardWidgets {
             content: content,
             buttons: [{ text: 'Close', action: () => closeModal() }]
         });
+    }
+
+    /**
+     * Get display name for a house ID (helper for segment drawer)
+     */
+    getHouseDisplayName(houseId) {
+        if (!houseId) return 'Unassigned';
+        
+        if (window.housesManager && typeof window.housesManager.getHouseById === 'function') {
+            const house = window.housesManager.getHouseById(houseId);
+            if (house && house.name) {
+                return house.name;
+            }
+        }
+        
+        const match = houseId.match(/^house_(.+)$/);
+        if (match) {
+            return match[1].charAt(0).toUpperCase() + match[1].slice(1);
+        }
+        
+        return houseId;
     }
 
     getSegmentTitle(segment) {
@@ -705,6 +1202,95 @@ class DashboardWidgets {
     enterFocusMode() {
         // Focus mode - batch similar tasks
         showNotification('Focus mode coming soon!', 'info');
+    }
+
+    // =========================================================================
+    // NEW WIDGET HELPER METHODS
+    // =========================================================================
+
+    /**
+     * Show clients with a specific gap type
+     */
+    showGapClients(gapType) {
+        const gaps = dashboardManager.cache?.gaps || {};
+        const clients = gaps[gapType] || [];
+        
+        if (clients.length === 0) return;
+        
+        const titles = {
+            missingDcDate: 'Clients Missing Discharge Date',
+            noAftercareStarted: 'Clients Without Aftercare Started',
+            missingCareTeam: 'Clients Without Care Team'
+        };
+        
+        let content = '<div class="gap-clients-list">';
+        for (const client of clients) {
+            content += `
+                <div class="gap-client-item" onclick="viewClientDetails(clientManager.getClient('${client.id}'))">
+                    <span class="client-initials">${client.initials}</span>
+                    <span class="client-days">Day ${client.daysInCare}</span>
+                    <span class="client-gap">${client.gap}</span>
+                </div>
+            `;
+        }
+        content += '</div>';
+        
+        showModal({
+            title: titles[gapType] || 'Gap Clients',
+            content: content,
+            buttons: [{ text: 'Close', action: () => closeModal() }]
+        });
+    }
+
+    /**
+     * Refresh program spotlight to show a different program
+     */
+    refreshSpotlight() {
+        const widget = this.widgets.get('programSpotlight');
+        if (widget) {
+            widget.currentProgram = null;
+            widget.pickRandomProgram();
+            widget.render();
+        }
+    }
+
+    /**
+     * Navigate to Programs tab and open a specific program's detail modal
+     */
+    learnMoreProgram(programId) {
+        // Switch to programs tab first
+        switchTab('programs');
+        
+        // Wait for programs tab to load, then open the program profile
+        setTimeout(() => {
+            if (window.ccAppController?.openProfile) {
+                window.ccAppController.openProfile(programId);
+            } else {
+                console.warn('ccAppController not available yet');
+                // Retry after a delay
+                setTimeout(() => {
+                    if (window.ccAppController?.openProfile) {
+                        window.ccAppController.openProfile(programId);
+                    }
+                }, 500);
+            }
+        }, 300);
+    }
+
+    /**
+     * Add a task for a specific client (from segment drawer)
+     */
+    addTaskForClient(clientId) {
+        // Open client and navigate to tasks/milestones
+        clientManager.getClient(clientId).then(client => {
+            if (client) {
+                viewClientDetails(client);
+                setTimeout(() => {
+                    const milestonesTab = document.querySelector('[onclick*="showClientTab(\'milestones\')"]');
+                    if (milestonesTab) milestonesTab.click();
+                }, 100);
+            }
+        });
     }
 }
 

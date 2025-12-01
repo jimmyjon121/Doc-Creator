@@ -452,7 +452,7 @@ class MorningReviewDashboard {
                                        onchange="morningReview.completeTask('${task.client.id}', '${task.item.id}')">
                             </div>
                             <div class="task-details">
-                                <div class="task-client">${task.client.initials} - ${task.client.houseId}</div>
+                                <div class="task-client">${task.client.initials} - ${this.getHouseDisplayName(task.client.houseId)}</div>
                                 <div class="task-name">${task.item.label}</div>
                                 ${task.daysPastDue ? `<div class="task-overdue">${task.daysPastDue} days overdue</div>` : ''}
                                 ${task.daysUntilDue ? `<div class="task-due">Due in ${task.daysUntilDue} days</div>` : ''}
@@ -479,7 +479,7 @@ class MorningReviewDashboard {
                 <div class="followup-list">
                     ${followUps.map(f => `
                         <div class="followup-item">
-                            <div class="followup-client">${f.client.initials} - ${f.client.houseId}</div>
+                            <div class="followup-client">${f.client.initials} - ${this.getHouseDisplayName(f.client.houseId)}</div>
                             <div class="followup-options">
                                 ${f.options.map(opt => `
                                     <span class="option-tag">${opt.programName} (${f.daysSinceSent} days)</span>
@@ -848,6 +848,31 @@ class MorningReviewDashboard {
     emailReview() {
         console.log('Email review summary');
         // Would implement email functionality
+    }
+
+    /**
+     * Get display name for a house ID
+     * @param {string} houseId - The house ID (e.g., 'house_nest')
+     * @returns {string} The display name (e.g., 'NEST')
+     */
+    getHouseDisplayName(houseId) {
+        if (!houseId) return 'Unassigned';
+        
+        // Try to get from housesManager
+        if (window.housesManager && typeof window.housesManager.getHouseById === 'function') {
+            const house = window.housesManager.getHouseById(houseId);
+            if (house && house.name) {
+                return house.name;
+            }
+        }
+        
+        // Fallback: extract name from ID (e.g., 'house_nest' -> 'Nest')
+        const match = houseId.match(/^house_(.+)$/);
+        if (match) {
+            return match[1].charAt(0).toUpperCase() + match[1].slice(1);
+        }
+        
+        return houseId;
     }
 }
 

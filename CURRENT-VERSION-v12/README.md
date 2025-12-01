@@ -1,6 +1,6 @@
 # CareConnect Pro - Development Workspace
 
-**Current Version:** v12.2 (Dev)
+**Current Version:** v13.0.0 (Dev)
 
 This directory (`CURRENT-VERSION-v12/`) is the active development workspace for CareConnect Pro.
 

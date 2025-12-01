@@ -5,7 +5,7 @@
     Build Hash: dashboard-refresh-01
     Copyright (c) Family First Adolescent Services
 -->
-<!-- OFFICIAL ACTIVE APP – v12.2-dashboard (edit/debug here). Stable snapshot: CURRENT-VERSION-v12/CareConnect-Pro_v12.1-STABLE.html. Programs module: programs-docs-module.html, dataset: programs.v2.json -->
+<!-- OFFICIAL ACTIVE APP – v13.0.0 (edit/debug here). Stable snapshot: CURRENT-VERSION-v12/CareConnect-Pro_v12.1-STABLE.html. Programs module: programs-docs-module.html, dataset: programs.v2.json -->
 
 <html lang="en">
 <head>
@@ -24,6 +24,7 @@
     
     <link rel="stylesheet" href="css/theme-tokens.css">
     <link rel="stylesheet" href="css/client-profile.css">
+    <link rel="stylesheet" href="css/programs-explorer.css">
     <link rel="stylesheet" href="css/app-layout.css">
     <link rel="stylesheet" href="css/dark-mode.css">
     <style>
@@ -277,13 +278,18 @@
             dash_tracker_overall: 'Big picture of how many key checkboxes are turned on for your houses (admission, clinical, aftercare, docs). Higher = fewer loose ends.',
             dash_tracker_critical: 'Out of the urgent checklist items (48-hour admission tasks, aftercare steps, discharge docs), what percent are done on time.',
             dash_tracker_at_risk: 'Kids who are close to discharge and still missing something important. These are the cases to look at first.',
-            dash_tracker_strong: 'Houses where most trackers are green — roughly 80% or more complete.',
-            dash_flight_plan: 'Today’s to-do list grouped by urgency: red = must act now, purple = discharge prep, yellow = due today, green = coming up soon.',
-            dash_journey_radar: 'Counts of clients in each phase (Week 1, Day 14–16, Day 30, 45+ days, discharge pipeline, recently discharged) to show who needs aftercare or discharge work.',
+            dash_tracker_strong: 'Houses where most trackers are green - roughly 80% or more complete.',
+            dash_flight_plan: 'Today is to-do list grouped by urgency: red = must act now, purple = discharge prep, yellow = due today, green = coming up soon.',
+            dash_journey_radar: 'Counts of clients in each phase (Week 1, Day 14-16, Day 30, 45+ days, discharge pipeline, recently discharged) to show who needs aftercare or discharge work.',
+            dash_changes_today: 'Recent milestones and events: new admissions, clients approaching Day 14 aftercare window, and upcoming discharges within 7 days.',
+            dash_pipeline: 'Upcoming intakes scheduled within 3 days and discharges planned within the next 14 days. Helps you prepare for transitions.',
+            dash_gaps: 'Clients missing critical data: discharge dates, aftercare providers, care team assignments, or parent contact info. Click to see who needs attention.',
+            dash_program_spotlight: 'Random program from the database to help you learn about placement options. Click Learn More to see full details in the Programs tab.',
+            dash_house_health: 'Compliance scores for each house based on documentation completion, tracker status, and task completion rates. Click a house to filter your Flight Plan.',
 
             // Client profile metrics
             client_days_in_care: 'How long this client has been in treatment, from admission to today (or to discharge for past clients).',
-            client_completion_pct: 'Percent of this client’s key trackers that are checked off (admission, clinical, aftercare, discharge). Higher = fewer open items before discharge.'
+            client_completion_pct: 'Percent of this client key trackers that are checked off (admission, clinical, aftercare, discharge). Higher = fewer open items before discharge.'
         };
 
         const metricTooltip = (() => {
@@ -387,6 +393,32 @@
                 el.dataset.metricTooltipBound = 'true';
             });
         };
+        
+        // Auto-attach tooltips when dashboard widgets render
+        if (window.MutationObserver) {
+            const tooltipObserver = new MutationObserver(() => {
+                window.attachMetricTooltips();
+            });
+            
+            // Wait for dashboard to be ready
+            const startObserving = () => {
+                const dashboardContainer = document.querySelector('.dashboard-container');
+                if (dashboardContainer) {
+                    tooltipObserver.observe(dashboardContainer, {
+                        childList: true,
+                        subtree: true
+                    });
+                } else {
+                    setTimeout(startObserving, 100);
+                }
+            };
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', startObserving);
+            } else {
+                startObserving();
+            }
+        }
 
         // Restore unified current user context from localStorage on hard refresh
         (function restoreUserContext() {
@@ -577,7 +609,7 @@
         }).catch(error => {
             console.error('❌ Script loading error:', error);
         });
-</script>
+    </script>
     <!-- Global Helpers and Enhancements -->
     <script>
 // Enhancement: global-helpers.js
@@ -1544,23 +1576,21 @@
             retries--;
         }
         
-        // Check if demo data generator is available
-        if (!window.demoDataGenerator) {
-            console.error('Demo data generator not available');
-            window.showNotification('Demo data generator not loaded', 'error');
-            return;
-        }
+        window.pendingDemoClientCount = count;
         
         if (!window.clientManager?.generateDemoClients) {
             console.error('ClientManager.generateDemoClients not available');
-            window.showNotification('Client manager not ready', 'error');
+            window.showNotification('Client manager not ready yet—will retry automatically.', 'warning');
             return;
         }
         
         const confirmed = window.confirm(
             `Populate demo clients?\n\nThis will remove existing demo clients and create ${count} fresh records for testing.`
         );
-        if (!confirmed) return;
+        if (!confirmed) {
+            delete window.pendingDemoClientCount;
+            return;
+        }
         
         try {
             window.showNotification('🎭 Creating demo clients…', 'info');
@@ -1568,6 +1598,7 @@
             const created = await window.clientManager.generateDemoClients(count);
             console.log('Created clients:', created);
             window.showNotification(`✅ Added ${created.length} demo clients`, 'success');
+            delete window.pendingDemoClientCount;
             
             // Force dashboard refresh
             if (window.dashboardManager) {
@@ -1830,7 +1861,7 @@ document.addEventListener('keydown', function(e) {
 */
 
 // Example: Add custom logging
-console.log('CareConnect Pro - Enhanced Version Loaded');
+console.log('CareConnect Pro v13.0.0 - Enhanced Version Loaded');
 
 
 // Enhancement: coach-profiles.js
@@ -2966,10 +2997,13 @@ console.log('🔐 Login fix applied');
             const riskClass = stats.overallCompliance >= 80 ? 'good' : 
                              stats.overallCompliance >= 60 ? 'warning' : 'danger';
             
+            // Get proper house display name
+            const houseName = this.getHouseDisplayName(stats.houseId);
+            
             return `
                 <div class="house-card ${riskClass}">
                     <div class="house-header">
-                        <h4>${stats.houseId}</h4>
+                        <h4>${houseName}</h4>
                         <span class="house-score">${stats.overallCompliance}%</span>
                     </div>
                     <div class="house-details">
@@ -3009,6 +3043,31 @@ console.log('🔐 Login fix applied');
                 documentation: 'Docs'
             };
             return labels[category] || category;
+        }
+        
+        /**
+         * Get display name for a house ID
+         * @param {string} houseId - The house ID (e.g., 'house_nest')
+         * @returns {string} The display name (e.g., 'NEST')
+         */
+        getHouseDisplayName(houseId) {
+            if (!houseId) return 'Unassigned';
+            
+            // Try to get from housesManager
+            if (window.housesManager && typeof window.housesManager.getHouseById === 'function') {
+                const house = window.housesManager.getHouseById(houseId);
+                if (house && house.name) {
+                    return house.name;
+                }
+            }
+            
+            // Fallback: extract name from ID (e.g., 'house_nest' -> 'Nest')
+            const match = houseId.match(/^house_(.+)$/);
+            if (match) {
+                return match[1].charAt(0).toUpperCase() + match[1].slice(1);
+            }
+            
+            return houseId;
         }
         
         async getClientsByHouse() {
@@ -4240,6 +4299,24 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         enhanceQuickActions();
     }
     
+    function waitForElement(getter, timeout = 4000) {
+        return new Promise((resolve, reject) => {
+            const start = Date.now();
+            (function check() {
+                const value = typeof getter === 'function' ? getter() : document.querySelector(getter);
+                if (value) {
+                    resolve(value);
+                    return;
+                }
+                if (Date.now() - start > timeout) {
+                    reject(new Error('Timeout waiting for element'));
+                    return;
+                }
+                requestAnimationFrame(check);
+            })();
+        });
+    }
+    
     function enhanceQuickActions() {
         // Override quickGenerateDoc with full client-centric workflow
         window.dashboardWidgets.quickGenerateDoc = async function() {
@@ -4303,6 +4380,30 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             } catch (error) {
                 console.error('Error in quickGenerateDoc:', error);
                 window.showNotification('Failed to start document generation', 'error');
+            }
+        };
+        
+        window.dashboardWidgets.openDischargedClients = async function() {
+            try {
+                window.showNotification?.('Loading discharged archive…', 'info');
+                
+                if (typeof window.switchTab === 'function') {
+                    window.switchTab('clients');
+                }
+                
+                await waitForElement(() => document.getElementById('dischargedClientsView'));
+                
+                if (window.showDischargedClientsView) {
+                    await window.showDischargedClientsView();
+                    setTimeout(() => {
+                        document.getElementById('dischargedClientsView')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }, 150);
+                } else {
+                    throw new Error('showDischargedClientsView unavailable');
+                }
+            } catch (error) {
+                console.error('openDischargedClients error:', error);
+                window.showNotification?.('Unable to open discharged archive right now.', 'error');
             }
         };
         
@@ -15125,6 +15226,13 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         // Initialize CM Tracker
         async function initializeCMTracker() {
             try {
+                // Check if HousesManager class is available (may not be loaded yet)
+                if (typeof HousesManager === 'undefined') {
+                    console.warn('[CM Tracker] HousesManager not loaded yet, deferring initialization...');
+                    setTimeout(initializeCMTracker, 500);
+                    return;
+                }
+                
                 // Check if managers are available
                 if (!window.dbManager) {
                     console.error('DBManager not available for CM Tracker');
@@ -16261,7 +16369,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             try {
                 const clients = await clientManager.getAllClients();
                 const exportData = {
-                    version: '1.0',
+                    version: '13.0.0',
                     exportDate: new Date().toISOString(),
                     clients: clients
                 };
@@ -18674,11 +18782,159 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             }
         }
         
-        // Edit client
-        function editClient(clientId) {
-            // This will be implemented
-            console.log('Edit client:', clientId);
+        // Edit client - open edit modal with pre-filled data
+        async function editClient(clientId) {
+            try {
+                const client = await window.clientManager.getClient(clientId);
+                if (!client) {
+                    showAlert('Client not found', 'error');
+                    return;
+                }
+                
+                const houses = await housesManager.getActiveHouses();
+                
+                const modalHTML = `
+                    <div class="modal-overlay">
+                        <div class="modal-content">
+                            <h3>Edit Client: ${client.initials}</h3>
+                            <form id="editClientForm" onsubmit="handleEditClient(event, '${clientId}')">
+                                <div style="display: grid; gap: 15px;">
+                                    <div>
+                                        <label>Client Initials *</label>
+                                        <input type="text" name="initials" maxlength="4" required 
+                                               value="${client.initials || ''}"
+                                               style="text-transform: uppercase; width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label>Kipu ID *</label>
+                                        <input type="text" name="kipuId" required 
+                                               value="${client.kipuId || ''}"
+                                               style="width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label>House *</label>
+                                        <select name="houseId" required style="width: 100%;">
+                                            ${houses.map(h => `
+                                                <option value="${h.id}" ${h.id === client.houseId ? 'selected' : ''}>
+                                                    ${h.name}
+                                                </option>
+                                            `).join('')}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label>Admission Date</label>
+                                        <input type="date" name="admissionDate" 
+                                               value="${client.admissionDate || ''}"
+                                               style="width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label>Clinical Coach</label>
+                                        <input type="text" name="clinicalCoachInitials" maxlength="4" 
+                                               value="${client.clinicalCoachInitials || ''}"
+                                               placeholder="Initials" style="text-transform: uppercase; width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label>Case Manager</label>
+                                        <input type="text" name="caseManagerInitials" maxlength="4"
+                                               value="${client.caseManagerInitials || ''}"
+                                               placeholder="Initials" style="text-transform: uppercase; width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label>Primary Therapist</label>
+                                        <input type="text" name="primaryTherapistInitials" maxlength="4 
+                                               value="${client.primaryTherapistInitials || ''}"
+                                               placeholder="Initials" style="text-transform: uppercase; width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label>Family Ambassador</label>
+                                        <input type="text" name="familyAmbassadorPrimaryInitials" maxlength="4"
+                                               value="${client.familyAmbassadorPrimaryInitials || ''}"
+                                               placeholder="Initials" style="text-transform: uppercase; width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label>Discharge Date (leave blank if active)</label>
+                                        <input type="date" name="dischargeDate" 
+                                               value="${client.dischargeDate || ''}"
+                                               style="width: 100%;">
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end;">
+                                    <button type="button" onclick="window.closeModal()" 
+                                            style="padding: 10px 20px; background: #e5e7eb; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" 
+                                            style="padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+                document.addEventListener('keydown', handleModalKeydown);
+                
+                const overlay = document.querySelector('.modal-overlay');
+                if (overlay) {
+                    overlay.addEventListener('click', function(event) {
+                        if (event.target === this) {
+                            closeModal();
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error opening edit modal:', error);
+                showAlert('Failed to load client data', 'error');
+            }
         }
+        
+        // Handle edit client form submission
+        window.handleEditClient = async function(event, clientId) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            const updates = {
+                initials: formData.get('initials')?.toUpperCase(),
+                kipuId: formData.get('kipuId'),
+                houseId: formData.get('houseId'),
+                admissionDate: formData.get('admissionDate') || null,
+                clinicalCoachInitials: formData.get('clinicalCoachInitials')?.toUpperCase() || '',
+                caseManagerInitials: formData.get('caseManagerInitials')?.toUpperCase() || '',
+                primaryTherapistInitials: formData.get('primaryTherapistInitials')?.toUpperCase() || '',
+                familyAmbassadorPrimaryInitials: formData.get('familyAmbassadorPrimaryInitials')?.toUpperCase() || '',
+                dischargeDate: formData.get('dischargeDate') || null
+            };
+            
+            // Update status based on discharge date
+            updates.status = updates.dischargeDate ? 'discharged' : 'active';
+            
+            try {
+                await window.clientManager.updateClient(clientId, updates);
+                
+                showAlert('Client updated successfully!', 'success');
+                closeModal();
+                
+                // Refresh the current view
+                if (typeof loadHouseView === 'function' && currentHouseId) {
+                    await loadHouseView(currentHouseId);
+                }
+                if (typeof buildHouseNavigation === 'function') {
+                    await buildHouseNavigation();
+                }
+                
+                // Emit event for other listeners
+                if (window.eventBus) {
+                    window.eventBus.emit('clients:updated');
+                }
+            } catch (error) {
+                console.error('Failed to update client:', error);
+                showAlert(error.message || 'Failed to update client', 'error');
+            }
+        };
         
         // Generate document for client
         async function generateClientDocument(clientId, options = {}) {
@@ -18773,11 +19029,30 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         // Toggle milestone completion
         async function toggleMilestone(clientId, milestoneId) {
             try {
+                // Ensure milestonesManager is available
+                if (!window.milestonesManager) {
+                    console.warn('MilestonesManager not available, initializing...');
+                    if (typeof MilestonesManager !== 'undefined') {
+                        window.milestonesManager = new MilestonesManager(window.dbManager);
+                        milestonesManager = window.milestonesManager;
+                    } else {
+                        throw new Error('MilestonesManager class not loaded');
+                    }
+                }
+                
+                // Check if client has milestones initialized, if not initialize them
+                const existingMilestones = await milestonesManager.getClientMilestones(clientId);
+                if (!existingMilestones || existingMilestones.length === 0) {
+                    console.log('Initializing milestones for client:', clientId);
+                    await milestonesManager.initializeClientMilestones(clientId);
+                }
+                
                 await milestonesManager.toggleMilestone(clientId, milestoneId);
                 await loadHouseView(currentHouseId); // Refresh the view
+                showAlert('Milestone updated!', 'success');
             } catch (error) {
                 console.error('Failed to toggle milestone:', error);
-                showAlert('Failed to update milestone', 'error');
+                showAlert('Failed to update milestone: ' + error.message, 'error');
             }
         }
         
@@ -24909,16 +25184,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                         <div class="section-status">Live updates</div>
                     </div>
                     <div class="section-header__actions">
-                        <div class="section-chip section-chip--select" data-demo-only="true" style="display:inline-flex;align-items:center;gap:6px;">
-                            <span style="font-size:11px;letter-spacing:0.04em;text-transform:uppercase;color:#9ca3af;">Demo Scenario</span>
-                            <select id="demoScenarioSelect" onchange="window.setDemoScenario && window.setDemoScenario(this.value)" style="background:transparent;border:none;color:#e5e7eb;font-size:12px;outline:none;">
-                                <option value="balanced">Balanced mix</option>
-                                <option value="highCensus">High census</option>
-                                <option value="lowCompliance">Low compliance</option>
-                                <option value="dischargeHeavy">Discharge-heavy week</option>
-                            </select>
-                        </div>
-                        <button type="button" class="section-chip is-primary" data-demo-only="true" onclick="window.populateDemoClients && window.populateDemoClients(50)">Populate Demo Data</button>
                         <button type="button" class="section-chip" onclick="window.refreshDashboard && window.refreshDashboard(true)">Refresh</button>
                         <button type="button" class="section-chip" onclick="window.showSelectionPanel && window.showSelectionPanel()">Show Docs Panel</button>
                     </div>
@@ -26428,22 +26693,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 <!-- Dashboard Tab Content -->
                 <div id="dashboardTab" class="tab-content">
                     <div class="dashboard-container">
-                        <div class="dashboard-header">
-                            <div class="dashboard-headline">
-                                <div class="dashboard-greeting" id="dashboardGreeting">Good morning</div>
-                                <div class="dashboard-subtitle" id="dashboardSubtitle">Here's your morning priorities</div>
-                                <div class="dashboard-meta">
-                                    <span id="coachIndicator">Coach: --</span>
-                                    <span id="lastUpdateTime">Last updated: --</span>
-                                </div>
-                                <div class="dashboard-view-toggle">
-                                    <button class="active" data-view="myClients" onclick="window.setDashboardView && window.setDashboardView('myClients')">My Clients</button>
-                                    <button data-view="allClients" onclick="window.setDashboardView && window.setDashboardView('allClients')">All Clients</button>
-                                </div>
-                            </div>
-                            <div id="quickActionsWidget" class="dashboard-quick-actions"></div>
-                        </div>
-
+                        <!-- Empty State Banner (hidden when clients exist) -->
                         <div id="dashboardEmptyState" class="dashboard-empty-banner" style="display: none;">
                             <div class="banner-copy">
                                 <h4>No clients yet</h4>
@@ -26455,15 +26705,27 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                             </div>
                         </div>
 
+                        <!-- Quick Actions Widget (with greeting, KPIs, and action buttons) -->
+                        <div id="quickActionsWidget" class="dashboard-widget widget-quick-actions"></div>
+                        
+                        <!-- Journey Radar - Full Width -->
+                        <div id="journeyRadarWidget" class="dashboard-widget widget-journey journey-radar-full-width"></div>
+                        
+                        <!-- Main Grid: Flight Plan + Sidebar -->
                         <div class="dashboard-main-grid">
                             <div class="dashboard-column dashboard-column--primary">
                                 <div id="flightPlanWidget" class="dashboard-widget widget-flight-plan"></div>
                             </div>
                             <div class="dashboard-column dashboard-column--secondary">
-                                <div id="journeyRadarWidget" class="dashboard-widget widget-journey"></div>
-                                <div id="coachScheduleWidget" class="dashboard-widget widget-schedule"></div>
+                                <div id="changesTodayWidget" class="dashboard-widget widget-changes-today"></div>
+                                <div id="pipelineWidget" class="dashboard-widget widget-pipeline"></div>
+                                <div id="gapsWidget" class="dashboard-widget widget-gaps"></div>
+                                <div id="programSpotlightWidget" class="dashboard-widget widget-spotlight"></div>
                             </div>
                         </div>
+                        
+                        <!-- House Health Widget - Full Width -->
+                        <div id="houseHealthWidget" class="dashboard-widget widget-house-health"></div>
                     </div>
                 </div>
                 
@@ -26867,7 +27129,12 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                         
                         if (greetingEl) greetingEl.textContent = greeting.greeting;
                         if (subtitleEl) subtitleEl.textContent = greeting.focus;
-                        if (coachEl) coachEl.textContent = `Coach: ${dashboardManager.currentCoach?.initials || '--'}`;
+                        // Show full coach name if available, fallback to initials
+                        const coachName = dashboardManager.currentCoach?.fullName || 
+                                         dashboardManager.currentCoach?.name ||
+                                         dashboardManager.currentCoach?.initials || 
+                                         '--';
+                        if (coachEl) coachEl.textContent = `Coach: ${coachName}`;
                         if (updateEl) {
                             const timestamp = dashboardManager.lastUpdate || new Date();
                             updateEl.textContent = `Last updated: ${timestamp.toLocaleTimeString()}`;
@@ -29090,7 +29357,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                     alert('Unable to clear programs. Please check the console for details.');
                 }
             };
-        })();
+    })();
     </script>
     
     <!-- User Menu Functions -->

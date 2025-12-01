@@ -1274,6 +1274,12 @@
         DemoDataGenerator.init();
     }
 
-    // Export for module use
+    // Export for module use / legacy integration points
     window.DemoDataGenerator = DemoDataGenerator;
+    window.demoDataGenerator = DemoDataGenerator;
+    try {
+        window.dispatchEvent(new CustomEvent('demoDataReady'));
+    } catch (err) {
+        console.warn('[DemoData] Failed to dispatch ready event', err);
+    }
 })();

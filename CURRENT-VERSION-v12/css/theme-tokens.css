@@ -34,6 +34,9 @@
   --header-text: #FFFFFF;
   --header-text-muted: #C7D2FE;
   
+  /* --- Toolbar (Programs & Docs) --- */
+  --toolbar-bg: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #818cf8 100%);
+  
   /* --- Text Colors --- */
   --text-primary: #1F2937;            /* Gray-800 - Main body text */
   --text-secondary: #4B5563;          /* Gray-600 - Secondary text */
@@ -270,6 +273,9 @@
   --header-text: #FFFFFF;
   --header-text-muted: #A5B4FC;
   
+  /* --- Toolbar (Programs & Docs) --- */
+  --toolbar-bg: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #3730a3 100%);
+  
   /* --- Text Colors --- */
   --text-primary: #F3F4F6;            /* Gray-100 */
   --text-secondary: #D1D5DB;          /* Gray-300 */
@@ -463,6 +469,7 @@
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
+
 
 
 

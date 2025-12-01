@@ -130,6 +130,12 @@
    * @param {string} layerName - 'dark' or 'light'
    */
   function _setTileLayer(layerName) {
+    // Guard: if map not initialized, just store preference
+    if (!_map) {
+      _currentTileLayer = layerName;
+      return;
+    }
+    
     const layer = TILE_LAYERS[layerName] || TILE_LAYERS.dark;
     
     if (_tileLayer) {
@@ -494,6 +500,11 @@
    * @returns {string} Current layer name
    */
   function toggleTileLayer() {
+    // Guard: if map not initialized, just return current layer preference
+    if (!_map) {
+      console.warn('[MapController] Map not initialized, skipping tile layer toggle');
+      return _currentTileLayer;
+    }
     const newLayer = _currentTileLayer === 'dark' ? 'light' : 'dark';
     _setTileLayer(newLayer);
     _saveMapState();

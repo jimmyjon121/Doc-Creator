@@ -391,46 +391,39 @@ class ClientProfileManager {
                     </div>
                     <div class="card-header-actions">
                         <div style="text-align: right;">
-                            <div style="font-size: 24px; font-weight: 700; color: #4f46e5;">${progressPercent}%</div>
-                            <div style="font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Ready for Discharge</div>
+                            <div class="progress-percent">${progressPercent}%</div>
+                            <div class="progress-label">Ready for Discharge</div>
                         </div>
                     </div>
                 </div>
                 
-                <div style="margin-bottom: 32px; position: relative; padding: 0 10px;">
-                    <div style="height: 4px; background: #e2e8f0; border-radius: 2px; position: absolute; top: 50%; left: 0; right: 0; z-index: 0; transform: translateY(-50%);"></div>
-                    <div style="height: 4px; background: #4f46e5; border-radius: 2px; position: absolute; top: 50%; left: 0; width: ${progressPercent}%; z-index: 0; transform: translateY(-50%); transition: width 0.5s ease;"></div>
+                <div class="roadmap-progress-wrapper">
+                    <div class="roadmap-track"></div>
+                    <div class="roadmap-fill" style="width: ${progressPercent}%;"></div>
                     
-                    <div style="display: flex; justify-content: space-between; position: relative; z-index: 1;">
+                    <div class="roadmap-steps">
                         ${aftercareTasks.map((taskId, index) => {
                             const isComplete = client.taskState?.[taskId]?.completed;
                             const isCurrent = !isComplete && (index === 0 || client.taskState?.[aftercareTasks[index-1]]?.completed);
                             const isLocked = !isComplete && !isCurrent;
                             
                             let icon = '●';
-                            let color = '#cbd5e1'; // gray
-                            let labelColor = '#94a3b8';
+                            let stateClass = 'roadmap-step--locked';
                             
                             if (isComplete) {
                                 icon = '✓';
-                                color = '#10b981'; // green
-                                labelColor = '#0f172a';
+                                stateClass = 'roadmap-step--complete';
                             } else if (isCurrent) {
                                 icon = '◎';
-                                color = '#4f46e5'; // indigo
-                                labelColor = '#4f46e5';
+                                stateClass = 'roadmap-step--current';
                             } else if (isLocked) {
                                 icon = '🔒';
                             }
                             
                             return `
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; width: 80px;">
-                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: white; border: 2px solid ${color}; display: flex; align-items: center; justify-content: center; font-weight: bold; color: ${color}; transition: all 0.3s ease;">
-                                        ${icon}
-                                    </div>
-                                    <div style="font-size: 11px; font-weight: 600; text-align: center; color: ${labelColor}; line-height: 1.2;">
-                                        ${index + 1}. ${index === 0 ? 'Thread' : index === 1 ? 'Options' : index === 2 ? 'Packet' : 'Closure'}
-                                    </div>
+                                <div class="roadmap-step ${stateClass}">
+                                    <div class="roadmap-step-dot">${icon}</div>
+                                    <div class="roadmap-step-label">${index + 1}. ${index === 0 ? 'Thread' : index === 1 ? 'Options' : index === 2 ? 'Packet' : 'Closure'}</div>
                                 </div>
                             `;
                         }).join('')}
@@ -446,23 +439,19 @@ class ClientProfileManager {
                 <div class="card-header">
                     <h3 class="card-title">📂 Document Resources</h3>
                 </div>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;">
-                    <button class="action-btn btn-secondary" onclick="window.documentGenerator?.showDocumentSelection('${client.id}')" style="justify-content: flex-start; height: auto; padding: 16px;">
-                        <div style="width: 40px; height: 40px; background: #eef2ff; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0;">
-                            <span style="font-size: 20px;">📄</span>
-                        </div>
-                        <div style="text-align: left;">
-                            <div style="font-weight: 600; color: #0f172a;">Aftercare Options</div>
-                            <div style="font-size: 12px; color: #64748b;">Generate PDF Template</div>
+                <div class="doc-resources-grid">
+                    <button class="doc-resource-btn" onclick="window.documentGenerator?.showDocumentSelection('${client.id}')">
+                        <div class="doc-resource-icon doc-resource-icon--indigo"><span>📄</span></div>
+                        <div class="doc-resource-text">
+                            <div class="doc-resource-title">Aftercare Options</div>
+                            <div class="doc-resource-sub">Generate PDF Template</div>
                         </div>
                     </button>
-                    <button class="action-btn btn-secondary" onclick="window.documentGenerator?.showDocumentSelection('${client.id}')" style="justify-content: flex-start; height: auto; padding: 16px;">
-                        <div style="width: 40px; height: 40px; background: #fff7ed; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0;">
-                            <span style="font-size: 20px;">📦</span>
-                        </div>
-                        <div style="text-align: left;">
-                            <div style="font-weight: 600; color: #0f172a;">Discharge Packet</div>
-                            <div style="font-size: 12px; color: #64748b;">Compile Final Docs</div>
+                    <button class="doc-resource-btn" onclick="window.documentGenerator?.showDocumentSelection('${client.id}')">
+                        <div class="doc-resource-icon doc-resource-icon--orange"><span>📦</span></div>
+                        <div class="doc-resource-text">
+                            <div class="doc-resource-title">Discharge Packet</div>
+                            <div class="doc-resource-sub">Compile Final Docs</div>
                         </div>
                     </button>
                 </div>
@@ -478,28 +467,28 @@ class ClientProfileManager {
                     <h3 class="card-title">👥 Care Team</h3>
                 </div>
                 <div class="checklist-grid">
-                    <div class="check-item" style="cursor: default;">
+                    <div class="check-item check-item--readonly">
                         <div class="check-content">
                             <span class="check-label">Case Manager</span>
-                            <span class="check-meta" style="font-size: 16px; color: #0f172a;">${client.caseManagerInitials || 'Unassigned'}</span>
+                            <span class="check-meta check-meta--value">${client.caseManagerInitials || 'Unassigned'}</span>
                         </div>
                     </div>
-                    <div class="check-item" style="cursor: default;">
+                    <div class="check-item check-item--readonly">
                         <div class="check-content">
                             <span class="check-label">Clinical Coach</span>
-                            <span class="check-meta" style="font-size: 16px; color: #0f172a;">${client.clinicalCoachInitials || 'Unassigned'}</span>
+                            <span class="check-meta check-meta--value">${client.clinicalCoachInitials || 'Unassigned'}</span>
                         </div>
                     </div>
-                    <div class="check-item" style="cursor: default;">
+                    <div class="check-item check-item--readonly">
                         <div class="check-content">
                             <span class="check-label">Primary Therapist</span>
-                            <span class="check-meta" style="font-size: 16px; color: #0f172a;">${client.primaryTherapistInitials || 'Unassigned'}</span>
+                            <span class="check-meta check-meta--value">${client.primaryTherapistInitials || 'Unassigned'}</span>
                         </div>
                     </div>
-                    <div class="check-item" style="cursor: default;">
+                    <div class="check-item check-item--readonly">
                         <div class="check-content">
                             <span class="check-label">Family Ambassador</span>
-                            <span class="check-meta" style="font-size: 16px; color: #0f172a;">${client.familyAmbassadorPrimaryInitials || 'Unassigned'}</span>
+                            <span class="check-meta check-meta--value">${client.familyAmbassadorPrimaryInitials || 'Unassigned'}</span>
                         </div>
                     </div>
                 </div>
@@ -511,7 +500,7 @@ class ClientProfileManager {
         const events = this.buildTimelineEvents();
         const timelineHtml = events.length
             ? events.map(event => this.renderTimelineItem(event)).join('')
-            : '<p style="color:#94a3b8;">No activity recorded yet.</p>';
+            : '<p class="timeline-empty">No activity recorded yet.</p>';
         container.innerHTML = `
             <div class="profile-card">
                 <div class="card-header">
@@ -706,7 +695,7 @@ class ClientProfileManager {
                     <h3 class="card-title">📝 Clinical Notes</h3>
                 </div>
                 <textarea 
-                    style="width: 100%; min-height: 300px; padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; font-family: inherit; resize: vertical;"
+                    class="profile-notes-textarea"
                     placeholder="Add notes here..."
                     onchange="window.clientProfileManager.updateField('notes', this.value)"
                 >${client.notes || ''}</textarea>
