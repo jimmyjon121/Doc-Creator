@@ -232,6 +232,87 @@
 }
 
 /* ========================================
+   USER AGREEMENT OVERLAY
+   ======================================== */
+
+.ua-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 16, 32, 0.28);
+    backdrop-filter: blur(6px);
+    z-index: 10001;
+    animation: fadeIn 0.25s ease-out;
+}
+
+.ua-card {
+    max-width: 760px;
+    width: 92%;
+    max-height: 82vh;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 22px 26px 18px;
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ua-card h1 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 650;
+    color: var(--onboarding-dark);
+}
+
+.ua-subtitle {
+    margin: 2px 0 4px;
+    font-size: 0.85rem;
+    color: var(--cc-muted-500);
+}
+
+.ua-body {
+    margin-top: 4px;
+    flex: 1;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    padding: 10px 14px;
+    overflow-y: auto;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    background: var(--cc-surface-50);
+}
+
+.ua-body p {
+    margin: 0 0 8px 0;
+}
+
+.ua-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.ua-accept-btn {
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: none;
+    background: var(--onboarding-gradient);
+    color: #111827;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.35);
+    transition: var(--onboarding-transition);
+}
+
+.ua-accept-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* ========================================
    VIDEO ANIMATIONS
    ======================================== */
 

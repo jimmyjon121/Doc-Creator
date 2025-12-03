@@ -184,6 +184,96 @@ body.dark-mode #programsTab {
   color: var(--text-primary) !important;
 }
 
+[data-theme="dark"] .filter-rail,
+body.dark-mode .filter-rail {
+  background-color: rgba(15, 18, 39, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .filter-rail__search,
+body.dark-mode .filter-rail__search {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .filter-group,
+body.dark-mode .filter-group {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* LOC count pills in filter rail */
+[data-theme="dark"] .filter-checkbox__count,
+body.dark-mode .filter-checkbox__count {
+  background: rgba(15, 23, 42, 0.95) !important;
+  color: var(--accent-200, #a5b4fc) !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(129, 140, 248, 0.6) !important;
+}
+
+/* Map legend counts + labels */
+[data-theme="dark"] .map-legend__label,
+body.dark-mode .map-legend__label {
+  color: var(--text-primary, #e5e7eb) !important;
+}
+
+[data-theme="dark"] .map-legend__count,
+body.dark-mode .map-legend__count {
+  color: var(--text-tertiary, #9ca3af) !important;
+}
+
+[data-theme="dark"] .view-toggle__btn,
+body.dark-mode .view-toggle__btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .view-toggle__btn.view-controls__mode--active,
+body.dark-mode .view-toggle__btn.view-controls__mode--active {
+  background: var(--accent-500) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+}
+
+[data-theme="dark"] .map-legend,
+[data-theme="dark"] .map-radius,
+body.dark-mode .map-legend,
+body.dark-mode .map-radius {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .map-controls__btn,
+body.dark-mode .map-controls__btn {
+  background: rgba(2, 6, 23, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .map-empty-state,
+body.dark-mode .map-empty-state {
+  background: rgba(2, 6, 23, 0.9) !important;
+}
+
+[data-theme="dark"] .map-context-panel,
+body.dark-mode .map-context-panel {
+  background: linear-gradient(180deg, rgba(6, 11, 28, 0.95), rgba(6, 11, 28, 1)) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .network-modal__dialog,
+body.dark-mode .network-modal__dialog {
+  background: #10142a !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .network-modal__card,
+body.dark-mode .network-modal__card {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+}
+
 [data-theme="dark"] .selection-panel,
 [data-theme="dark"] .document-builder,
 [data-theme="dark"] .doc-builder-panel,
@@ -254,6 +344,89 @@ body.dark-mode .client-info {
   background-color: var(--card-bg) !important;
   border-color: var(--card-border) !important;
   color: var(--text-primary) !important;
+}
+
+/* Programs & Docs – Builder simple list (all views) */
+[data-theme="dark"] .builder-simple-list,
+body.dark-mode .builder-simple-list {
+  background-color: var(--bg-surface-elevated) !important;
+  border-color: var(--border-default) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .builder-simple-list__section,
+body.dark-mode .builder-simple-list__section {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-default) !important;
+}
+
+[data-theme="dark"] .builder-simple-list__header,
+body.dark-mode .builder-simple-list__header {
+  border-bottom-color: var(--border-default) !important;
+}
+
+[data-theme="dark"] .builder-simple-list__title,
+body.dark-mode .builder-simple-list__title {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .builder-simple-list__count,
+body.dark-mode .builder-simple-list__count {
+  background-color: rgba(15, 23, 42, 0.8) !important;
+  color: var(--accent-200, #a5b4fc) !important;
+}
+
+[data-theme="dark"] .builder-simple-list__content,
+body.dark-mode .builder-simple-list__content {
+  background-color: var(--bg-surface-sunken) !important;
+  border-color: var(--border-default) !important;
+}
+
+[data-theme="dark"] .builder-simple-list__empty,
+body.dark-mode .builder-simple-list__empty {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .builder-simple-list__tip,
+body.dark-mode .builder-simple-list__tip {
+  background: linear-gradient(
+    135deg,
+    rgba(56, 189, 248, 0.15),
+    rgba(129, 140, 248, 0.2)
+  ) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .builder-simple-list__section--athome,
+body.dark-mode .builder-simple-list__section--athome {
+  border-top-color: rgba(129, 140, 248, 0.4) !important;
+}
+
+[data-theme="dark"] .builder-athome-mode,
+body.dark-mode .builder-athome-mode {
+  background-color: var(--bg-surface-sunken) !important;
+  border-color: var(--border-default) !important;
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .builder-simple-list__subtitle,
+body.dark-mode .builder-simple-list__subtitle {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .builder-simple-list__content--athome,
+body.dark-mode .builder-simple-list__content--athome {
+  background: linear-gradient(
+    135deg,
+    rgba(129, 140, 248, 0.25),
+    rgba(56, 189, 248, 0.22)
+  ) !important;
+  border-color: rgba(129, 140, 248, 0.7) !important;
+}
+
+[data-theme="dark"] .builder-simple-list__empty--athome,
+body.dark-mode .builder-simple-list__empty--athome {
+  color: var(--accent-100, #e0e7ff) !important;
 }
 
 [data-theme="dark"] .history-panel,
@@ -728,6 +901,64 @@ body.dark-mode .daily-flight-plan {
   background-color: var(--card-bg) !important;
 }
 
+/* Client badges in flight plan and alerts */
+[data-theme="dark"] .client-badge,
+body.dark-mode .client-badge {
+  background: rgba(99, 102, 241, 0.25) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+}
+
+[data-theme="dark"] .house-badge,
+body.dark-mode .house-badge {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Priority item styling in flight plan */
+[data-theme="dark"] .priority-item,
+body.dark-mode .priority-item {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .priority-item:hover,
+body.dark-mode .priority-item:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .item-message,
+body.dark-mode .item-message {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+[data-theme="dark"] .due-date,
+body.dark-mode .due-date {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Zone headers */
+[data-theme="dark"] .zone-header,
+body.dark-mode .zone-header {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Action buttons in flight plan */
+[data-theme="dark"] .btn-action,
+body.dark-mode .btn-action {
+  background: rgba(99, 102, 241, 0.9) !important;
+  color: white !important;
+  border: none !important;
+}
+
+[data-theme="dark"] .btn-action:hover,
+body.dark-mode .btn-action:hover {
+  background: rgba(99, 102, 241, 1) !important;
+}
+
 /* Tab content areas */
 [data-theme="dark"] .tab-content,
 body.dark-mode .tab-content {
@@ -1108,20 +1339,31 @@ body.dark-mode .client-context__tab--active {
 /* View controls */
 [data-theme="dark"] .view-controls,
 body.dark-mode .view-controls {
-  background: var(--bg-surface-elevated) !important;
-  border-color: var(--border-default) !important;
+  background: var(--bg-surface, #111827) !important;
+  border-bottom: 1px solid var(--border-default) !important;
+}
+
+[data-theme="dark"] .view-controls__modes,
+body.dark-mode .view-controls__modes {
+  background: var(--bg-surface-sunken, rgba(15, 13, 26, 0.85)) !important;
+  border-radius: 999px !important;
+  padding: 4px !important;
+  border: 1px solid var(--border-default, rgba(99, 102, 241, 0.4)) !important;
 }
 
 [data-theme="dark"] .view-controls__mode,
 body.dark-mode .view-controls__mode {
   background: transparent !important;
+  border-radius: 999px !important;
   color: var(--text-secondary) !important;
+  box-shadow: none !important;
 }
 
 [data-theme="dark"] .view-controls__mode--active,
 body.dark-mode .view-controls__mode--active {
   background: var(--btn-primary-bg) !important;
   color: var(--btn-primary-text) !important;
+  box-shadow: 0 0 0 1px rgba(129, 140, 248, 0.7) !important;
 }
 
 /* Compliance widget */

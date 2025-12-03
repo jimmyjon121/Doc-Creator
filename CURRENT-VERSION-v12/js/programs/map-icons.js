@@ -307,16 +307,21 @@
     if (count >= 50) size = 56;
     else if (count >= 10) size = 48;
 
+    const gradientId = `cluster-grad-${dominantLOC}-${count}-${Math.floor(Math.random() * 1000)}`;
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
         <defs>
           <filter id="cluster-shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.35"/>
           </filter>
+          <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="${color}" stop-opacity="0.85"/>
+            <stop offset="100%" stop-color="${color}" stop-opacity="1"/>
+          </linearGradient>
         </defs>
         <circle 
           cx="${size/2}" cy="${size/2}" r="${(size/2) - 4}" 
-          fill="${color}" 
+          fill="url(#${gradientId})" 
           stroke="white" 
           stroke-width="3"
           filter="url(#cluster-shadow)"
@@ -397,16 +402,31 @@
   function getMarkerStyles() {
     return `
       .cc-map-marker {
-        transition: transform 0.15s ease;
+        transition: transform 0.2s ease, filter 0.2s ease;
         cursor: pointer;
+        position: relative;
       }
       .cc-map-marker:hover {
-        transform: scale(1.1);
+        transform: scale(1.08);
         z-index: 1000 !important;
+        filter: drop-shadow(0 6px 16px rgba(99, 102, 241, 0.35));
+      }
+      .cc-map-marker::after {
+        content: '';
+        position: absolute;
+        inset: 10%;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.35);
+        opacity: 0;
+        transition: opacity 0.2s ease;
       }
       .cc-map-marker--selected {
-        transform: scale(1.25);
+        transform: scale(1.2);
         z-index: 1001 !important;
+        filter: drop-shadow(0 8px 20px rgba(79, 70, 229, 0.45));
+      }
+      .cc-map-marker--selected::after {
+        opacity: 1;
       }
       .cc-map-cluster {
         transition: transform 0.15s ease;

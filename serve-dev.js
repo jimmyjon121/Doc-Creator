@@ -3,8 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 
-const PORT = 8087;
-const PUBLIC_DIR = path.join(__dirname, 'dist');
+const PORT = 3000;
+const PUBLIC_DIR = path.join(__dirname, 'CURRENT-VERSION-v12');
 
 // MIME types
 const mimeTypes = {
@@ -28,66 +28,57 @@ const server = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url);
     let pathname = `.${parsedUrl.pathname}`;
     
-    // Default to CareConnect-Interactive.html if root is requested
+    // Default to CareConnect-Pro.html if root is requested
     if (pathname === './') {
-        pathname = './CareConnect-Interactive.html';
+        pathname = './CareConnect-Pro.html';
     }
     
     // Construct file path
     const filePath = path.join(PUBLIC_DIR, pathname.replace('./', ''));
     
-    // Check if file exists
-    fs.exists(filePath, (exist) => {
-        if (!exist) {
+    // Check if file exists and get stats
+    fs.stat(filePath, (err, stats) => {
+        if (err) {
             // File not found
             res.statusCode = 404;
             res.setHeader('Content-Type', 'text/html');
-            res.end(`<h1>404 - File Not Found</h1><p>The requested file ${pathname} was not found.</p>`);
+            res.end(`<h1>404 - File Not Found</h1><p>The requested file ${pathname} was not found.</p><p>Path: ${filePath}</p>`);
             return;
         }
         
-        // Check if it's a directory
-        fs.stat(filePath, (err, stats) => {
-            if (err) {
-                res.statusCode = 500;
-                res.end(`Error getting file stats: ${err}.`);
-                return;
-            }
+        if (stats.isDirectory()) {
+            // Look for CareConnect-Pro.html or index.html in the directory
+            const indexPath = path.join(filePath, 'CareConnect-Pro.html');
+            const altIndexPath = path.join(filePath, 'index.html');
             
-            if (stats.isDirectory()) {
-                // Look for index.html or CareConnect-Interactive.html in the directory
-                const indexPath = path.join(filePath, 'CareConnect-Interactive.html');
-                const altIndexPath = path.join(filePath, 'index.html');
-                
-                if (fs.existsSync(indexPath)) {
-                    serveFile(indexPath, res);
-                } else if (fs.existsSync(altIndexPath)) {
-                    serveFile(altIndexPath, res);
-                } else {
-                    // List directory contents
-                    fs.readdir(filePath, (err, files) => {
-                        if (err) {
-                            res.statusCode = 500;
-                            res.end(`Error reading directory: ${err}.`);
-                            return;
-                        }
-                        
-                        res.statusCode = 200;
-                        res.setHeader('Content-Type', 'text/html');
-                        let html = `<h1>Directory listing for ${pathname}</h1><ul>`;
-                        files.forEach(file => {
-                            const fileUrl = path.posix.join(pathname, file);
-                            html += `<li><a href="${fileUrl}">${file}</a></li>`;
-                        });
-                        html += '</ul>';
-                        res.end(html);
-                    });
-                }
+            if (fs.existsSync(indexPath)) {
+                serveFile(indexPath, res);
+            } else if (fs.existsSync(altIndexPath)) {
+                serveFile(altIndexPath, res);
             } else {
-                // Serve the file
-                serveFile(filePath, res);
+                // List directory contents
+                fs.readdir(filePath, (err, files) => {
+                    if (err) {
+                        res.statusCode = 500;
+                        res.end(`Error reading directory: ${err}.`);
+                        return;
+                    }
+                    
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'text/html');
+                    let html = `<h1>Directory listing for ${pathname}</h1><ul>`;
+                    files.forEach(file => {
+                        const fileUrl = path.posix.join(pathname, file);
+                        html += `<li><a href="${fileUrl}">${file}</a></li>`;
+                    });
+                    html += '</ul>';
+                    res.end(html);
+                });
             }
-        });
+        } else {
+            // Serve the file
+            serveFile(filePath, res);
+        }
     });
 });
 
@@ -118,19 +109,27 @@ function serveFile(filePath, res) {
 server.listen(PORT, () => {
     console.log('');
     console.log('========================================');
-    console.log('   CareConnect Pro - Onboarding Engine');
+    console.log('   CareConnect Pro - Dev Server');
     console.log('========================================');
     console.log('');
     console.log(`  Server running at: http://localhost:${PORT}`);
-    console.log(`  Main app: http://localhost:${PORT}/CareConnect-Interactive.html`);
+    console.log(`  Main app: http://localhost:${PORT}/CareConnect-Pro.html`);
+    console.log(`  Serving from: ${PUBLIC_DIR}`);
     console.log('');
     console.log('  Available files:');
-    console.log('  - CareConnect-Interactive.html (Onboarding + Learning)');
     console.log('  - CareConnect-Pro.html (Main Application)');
     console.log('  - CareConnect-Clinical-Suite.html (Clinical Suite)');
     console.log('');
     console.log('  Press Ctrl+C to stop the server');
     console.log('');
+}).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`\nError: Port ${PORT} is already in use.`);
+        console.error('Please stop the existing server or use a different port.\n');
+    } else {
+        console.error(`\nServer error: ${err.message}\n`);
+    }
+    process.exit(1);
 });
 
 // Handle server shutdown gracefully

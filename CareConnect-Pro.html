@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CareConnect Pro — Programs & Document Creator</title>
     <meta name="description" content="Three-pane Programs and Document Creator workspace for CareConnect Pro.">
+    
+    <!-- GSAP for onboarding animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <!-- Onboarding Styles -->
+    <link rel="stylesheet" href="css/onboarding.css">
+    
     <style>
         :root {
             --navy-900: #0F1020;
@@ -1640,12 +1647,196 @@
                 </button>
             </div>
             <button class="pill-button" type="button" id="saveDraftButton">Save Draft</button>
-            <button class="pill-button is-primary" type="button" id="generateDocumentButton">Generate Document</button>
+            <button class="pill-button is-primary" type="button" id="generateDocumentButton" data-tour-id="generate-btn">Generate Document</button>
+            
+            <!-- Help & Onboarding Menu -->
+            <div class="help-menu-container" style="position: relative; margin-left: 12px;">
+                <button class="pill-button help-menu-trigger" type="button" id="helpMenuTrigger" aria-haspopup="true" aria-expanded="false" title="Help & Onboarding" onclick="(function(e){ e.stopPropagation(); var d=document.getElementById('helpMenuDropdown'); var isOpen=d.style.display==='block'; d.style.display=isOpen?'none':'block'; console.log('Help menu toggled:', !isOpen); })(event)">
+                    <span style="font-size: 1.1rem;">❓</span>
+                </button>
+                <div class="help-menu-dropdown" id="helpMenuDropdown" role="menu" aria-hidden="true" style="
+                    display: none;
+                    position: absolute;
+                    top: 100%;
+                    right: 0;
+                    margin-top: 8px;
+                    min-width: 260px;
+                    background: #ffffff;
+                    border-radius: 16px;
+                    box-shadow: 0 16px 40px rgba(15, 16, 32, 0.25);
+                    border: 1px solid #D7DBF8;
+                    z-index: 99999;
+                    overflow: hidden;
+                ">
+                    <div style="padding: 12px 16px; border-bottom: 1px solid var(--neutral-200); font-weight: 600; color: var(--text-strong);">
+                        Help & Onboarding
+                    </div>
+                    <div style="padding: 8px;">
+                        <button class="help-menu-item" onclick="window.OnboardingController?.replayIntro()" style="
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            width: 100%;
+                            padding: 10px 12px;
+                            background: none;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            color: var(--text-strong);
+                            cursor: pointer;
+                            text-align: left;
+                        ">
+                            <span>🎬</span> Watch intro video
+                        </button>
+                        <button class="help-menu-item" onclick="window.OnboardingController?.startTour('dashboard')" style="
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            width: 100%;
+                            padding: 10px 12px;
+                            background: none;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            color: var(--text-strong);
+                            cursor: pointer;
+                            text-align: left;
+                        ">
+                            <span>📊</span> Dashboard tour
+                        </button>
+                        <button class="help-menu-item" onclick="window.OnboardingController?.startTour('programs')" style="
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            width: 100%;
+                            padding: 10px 12px;
+                            background: none;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            color: var(--text-strong);
+                            cursor: pointer;
+                            text-align: left;
+                        ">
+                            <span>🏥</span> Programs & Docs tour
+                        </button>
+                        <button class="help-menu-item" onclick="window.OnboardingController?.startTour('docBuilder')" style="
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            width: 100%;
+                            padding: 10px 12px;
+                            background: none;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            color: var(--text-strong);
+                            cursor: pointer;
+                            text-align: left;
+                        ">
+                            <span>📄</span> Doc Builder tour
+                        </button>
+                        <button class="help-menu-item" onclick="window.OnboardingController?.showChecklist()" style="
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            width: 100%;
+                            padding: 10px 12px;
+                            background: none;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            color: var(--text-strong);
+                            cursor: pointer;
+                            text-align: left;
+                        ">
+                            <span>✅</span> Quick-Start checklist
+                        </button>
+                    </div>
+                    <div style="padding: 8px; border-top: 1px solid var(--neutral-200);">
+                        <button class="help-menu-item" onclick="window.DemoClients?.clear(); window.OnboardingController?.showNotification?.('Training data cleared', 'success')" style="
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                            width: 100%;
+                            padding: 10px 12px;
+                            background: none;
+                            border: none;
+                            border-radius: 8px;
+                            font-size: 14px;
+                            color: var(--danger);
+                            cursor: pointer;
+                            text-align: left;
+                        ">
+                            <span>🗑️</span> Clear training data
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
+    
+    <!-- Help Menu Toggle Script -->
+    <script>
+        (function() {
+            const trigger = document.getElementById('helpMenuTrigger');
+            const dropdown = document.getElementById('helpMenuDropdown');
+            
+            console.log('[HelpMenu] Initializing...', { trigger: !!trigger, dropdown: !!dropdown });
+            
+            if (!trigger || !dropdown) {
+                console.error('[HelpMenu] Elements not found!');
+                return;
+            }
+            
+            trigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('[HelpMenu] Button clicked');
+                const isOpen = dropdown.style.display === 'block';
+                dropdown.style.display = isOpen ? 'none' : 'block';
+                console.log('[HelpMenu] Dropdown now:', isOpen ? 'closed' : 'open');
+                trigger.setAttribute('aria-expanded', !isOpen);
+                dropdown.setAttribute('aria-hidden', isOpen);
+            });
+            
+            // Close on outside click
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target) && e.target !== trigger) {
+                    dropdown.style.display = 'none';
+                    trigger.setAttribute('aria-expanded', 'false');
+                    dropdown.setAttribute('aria-hidden', 'true');
+                }
+            });
+            
+            // Close on Escape
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && dropdown.style.display === 'block') {
+                    dropdown.style.display = 'none';
+                    trigger.setAttribute('aria-expanded', 'false');
+                    dropdown.setAttribute('aria-hidden', 'true');
+                    trigger.focus();
+                }
+            });
+            
+            // Add hover effect to menu items
+            dropdown.querySelectorAll('.help-menu-item').forEach(function(item) {
+                item.addEventListener('mouseenter', function() {
+                    this.style.background = 'var(--neutral-100)';
+                });
+                item.addEventListener('mouseleave', function() {
+                    this.style.background = 'none';
+                });
+                item.addEventListener('click', function() {
+                    dropdown.style.display = 'none';
+                    trigger.setAttribute('aria-expanded', 'false');
+                });
+            });
+        })();
+    </script>
 
     <main class="app-shell">
-        <aside class="pane filters" aria-label="Program filters">
+        <aside class="pane filters" aria-label="Program filters" data-tour-id="filter-rail">
             <h2>Filter Programs</h2>
             <p style="margin:8px 0 0; color: var(--text-subtle); font-size:0.88rem;">
                 Narrow by focus, delivery format, or alignment to insurance resources. Filters stack to refine results.
@@ -1700,11 +1891,11 @@
                     <div class="results__filters" id="resultsSummary">Loading programs…</div>
                 </div>
                 <div class="results__controls">
-                    <div class="view-toggle" role="group" aria-label="Change program layout">
+                    <div class="view-toggle" role="group" aria-label="Change program layout" data-tour-id="view-toggle">
                         <button type="button" class="is-active" data-view="grid" aria-pressed="true">Grid</button>
                         <button type="button" data-view="rows" aria-pressed="false">Rows</button>
                         <button type="button" data-view="compare" aria-pressed="false">Compare</button>
-                        <button type="button" data-view="map" aria-pressed="false">Map</button>
+                        <button type="button" data-view="map" aria-pressed="false" data-tour-id="map-toggle">Map</button>
                     </div>
                     <label for="sortSelect" style="font-size:0.85rem; color: var(--text-subtle); display:flex; gap:8px; align-items:center;">
                         Sort
@@ -1715,7 +1906,7 @@
                     </label>
                 </div>
             </div>
-            <div class="results__grid" id="resultsGrid" role="list"></div>
+            <div class="results__grid" id="resultsGrid" role="list" data-tour-id="results-grid"></div>
             <section class="results__map" id="resultsMapContainer" aria-label="Program map workspace">
                 <div class="map-toolbar">
                     <div class="map-status" id="mapStatusLabel" role="status" aria-live="polite">
@@ -1759,7 +1950,7 @@
             </section>
         </section>
 
-        <aside class="pane builder" aria-label="Document builder">
+        <aside class="pane builder" aria-label="Document builder" data-tour-id="builder-pane">
             <header>
                 <h2>Document Builder</h2>
                 <div class="builder__meta">
@@ -4822,6 +5013,459 @@
          }
          window.CareConnectProgramsDocsReady = true;
         }());
+    </script>
+    
+    <!-- Onboarding System Scripts -->
+    <!-- Core -->
+    <script src="js/onboarding/core/state.js"></script>
+    <script src="js/onboarding/core/events.js"></script>
+    
+    <!-- Intro Animation -->
+    <script src="js/onboarding/intro/particles.js"></script>
+    <script src="js/onboarding/intro/cursor.js"></script>
+    <script src="js/onboarding/intro/svg-draw.js"></script>
+    <script src="js/onboarding/intro/intro.js"></script>
+    
+    <!-- Tours -->
+    <script src="js/onboarding/tour/engine.js"></script>
+    <script src="js/onboarding/tour/dashboard-tour.js"></script>
+    <script src="js/onboarding/tour/programs-tour.js"></script>
+    <script src="js/onboarding/tour/docbuilder-tour.js"></script>
+    
+    <!-- Checklist -->
+    <script src="js/onboarding/checklist/config.js"></script>
+    <script src="js/onboarding/checklist/checklist.js"></script>
+    
+    <!-- Demo Data -->
+    <script src="js/onboarding/demo-data/demo-clients.js"></script>
+    
+    <!-- Controller (must be last) -->
+    <script src="js/onboarding/core/controller.js"></script>
+    
+    <!-- Initialize onboarding after app is ready -->
+    <script>
+        // Initialize onboarding after DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit for other systems to initialize
+            setTimeout(function() {
+                if (window.OnboardingController) {
+                    window.OnboardingController.initialize().catch(function(err) {
+                        console.error('[Onboarding] Failed to initialize:', err);
+                    });
+                }
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
+
+
+
+                    state.sort = event.target.value;
+                    renderPrograms();
+                });
+                elements.resultsGrid.addEventListener("click", handleProgramCardClick);
+                elements.builderLanes.addEventListener("click", handleLaneAddClick);
+                elements.builderLanes.addEventListener("input", handleBuilderInput);
+                elements.builderLanes.addEventListener("change", handleBuilderInput);
+                elements.builderLanes.addEventListener("click", handleTileAction);
+                elements.builderLanes.addEventListener("mousedown", event => {
+                    const target = event.target;
+                    if (target instanceof HTMLButtonElement && target.dataset.editorCommand) {
+                        event.preventDefault();
+                    }
+                });
+                if (elements.mapRadiusInput) {
+                    elements.mapRadiusInput.value = String(state.map.radiusMiles);
+                    elements.mapRadiusValue.textContent = `${state.map.radiusMiles} mi`;
+                    elements.mapRadiusInput.addEventListener("input", event => {
+                        const value = Number(event.target.value);
+                        if (!Number.isNaN(value)) {
+                            setMapRadiusMiles(value);
+                            if (state.view === "map") {
+                                refreshMapDebounced();
+                            } else {
+                                renderPrograms();
+                            }
+                        }
+                    });
+                }
+                if (elements.mapDistanceFilter) {
+                    elements.mapDistanceFilter.value = state.map.distanceFilter || "all";
+                    elements.mapDistanceFilter.addEventListener("change", event => {
+                        state.map.distanceFilter = event.target.value;
+                        state.map.applyFiltersGlobally = true;
+                        renderPrograms();
+                    });
+                }
+                if (elements.mapZipInput) {
+                    elements.mapZipInput.addEventListener("keydown", event => {
+                        if (event.key === "Enter") {
+                            event.preventDefault();
+                            centerMapByZip(event.target.value);
+                        }
+                    });
+                }
+                if (elements.mapLocateButton) {
+                    elements.mapLocateButton.addEventListener("click", handleLocateButton);
+                }
+                if (elements.compareGrid) {
+                    elements.compareGrid.addEventListener("click", handleCompareGridClick);
+                }
+                if (elements.compareAddAllButton) {
+                    elements.compareAddAllButton.addEventListener("click", addComparisonProgramsToBuilder);
+                }
+                if (elements.compareExportButton) {
+                    elements.compareExportButton.addEventListener("click", () => exportComparisonSnapshot("preview"));
+                }
+                if (elements.comparePrintButton) {
+                    elements.comparePrintButton.addEventListener("click", () => exportComparisonSnapshot("print"));
+                }
+                overlays.overlay.addEventListener("click", closeDetails);
+                closeDetailsButton.addEventListener("click", closeDetails);
+                document.addEventListener("keydown", handleKeyboardShortcuts);
+
+                saveDraftButton.addEventListener("click", () => saveDraft("manual"));
+                generateButton.addEventListener("click", () => generateDocument());
+                elements.detailsAddButton.addEventListener("click", event => {
+                    const programId = event.currentTarget.getAttribute("data-program-id") || state.selectedProgramId;
+                    if (!programId) return;
+                    addToBuilder(programId, "bridge");
+                });
+                elements.detailsGenerateButton.addEventListener("click", event => {
+                    const programId = event.currentTarget.getAttribute("data-program-id");
+                    if (!programId) return;
+                    generateDocument(state.documentType, programId);
+                });
+
+                quickAddCancel.addEventListener("click", hideQuickAdd);
+                quickAddConfirm.addEventListener("click", () => {
+                    const programId = elements.quickAddProgram.value;
+                    const lane = elements.quickAddLane.value;
+                    if (programId && lane) {
+                        addToBuilder(programId, lane);
+                        hideQuickAdd();
+                    }
+                });
+
+                announce("Programs workspace ready");
+                emitProgramEvent("programs:ready", { timestamp: Date.now() });
+                emitProgramEvent("programs-docs:ready", { timestamp: Date.now() });
+            }
+
+         const programsDocsAPI = {
+             setClientContext(context = {}) {
+                 return Promise.resolve(setClientContext(context));
+             },
+             getClientContext() {
+                 if (!state.clientContext) {
+                     return null;
+                 }
+                 return {
+                     clientId: state.clientContext.clientId,
+                     initials: state.clientContext.initials,
+                     kipuId: state.clientContext.kipuId || null
+                 };
+             },
+             focusSearch() {
+                 if (elements.searchInput) {
+                     elements.searchInput.focus();
+                 }
+             },
+             refresh() {
+                 renderPrograms();
+                 renderBuilder();
+             }
+         };
+
+         window.CareConnectProgramsDocs = Object.assign(window.CareConnectProgramsDocs || {}, programsDocsAPI);
+
+         window.openDetails = openDetails;
+         window.addToBuilder = addToBuilder;
+         window.generateDocument = generateDocument;
+         window.saveDraft = saveDraft;
+
+            init();
+         if (window.CareConnectProgramsDocs) {
+             window.CareConnectProgramsDocs.ready = true;
+         }
+         window.CareConnectProgramsDocsReady = true;
+        }());
+    </script>
+    
+    <!-- Onboarding System Scripts -->
+    <!-- Core -->
+    <script src="js/onboarding/core/state.js"></script>
+    <script src="js/onboarding/core/events.js"></script>
+    
+    <!-- Intro Animation -->
+    <script src="js/onboarding/intro/particles.js"></script>
+    <script src="js/onboarding/intro/cursor.js"></script>
+    <script src="js/onboarding/intro/svg-draw.js"></script>
+    <script src="js/onboarding/intro/intro.js"></script>
+    
+    <!-- Tours -->
+    <script src="js/onboarding/tour/engine.js"></script>
+    <script src="js/onboarding/tour/dashboard-tour.js"></script>
+    <script src="js/onboarding/tour/programs-tour.js"></script>
+    <script src="js/onboarding/tour/docbuilder-tour.js"></script>
+    
+    <!-- Checklist -->
+    <script src="js/onboarding/checklist/config.js"></script>
+    <script src="js/onboarding/checklist/checklist.js"></script>
+    
+    <!-- Demo Data -->
+    <script src="js/onboarding/demo-data/demo-clients.js"></script>
+    
+    <!-- Controller (must be last) -->
+    <script src="js/onboarding/core/controller.js"></script>
+    
+    <!-- Initialize onboarding after app is ready -->
+    <script>
+        // Initialize onboarding after DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit for other systems to initialize
+            setTimeout(function() {
+                if (window.OnboardingController) {
+                    window.OnboardingController.initialize().catch(function(err) {
+                        console.error('[Onboarding] Failed to initialize:', err);
+                    });
+                }
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
+
+
+
+                    state.sort = event.target.value;
+                    renderPrograms();
+                });
+                elements.resultsGrid.addEventListener("click", handleProgramCardClick);
+                elements.builderLanes.addEventListener("click", handleLaneAddClick);
+                elements.builderLanes.addEventListener("input", handleBuilderInput);
+                elements.builderLanes.addEventListener("change", handleBuilderInput);
+                elements.builderLanes.addEventListener("click", handleTileAction);
+                elements.builderLanes.addEventListener("mousedown", event => {
+                    const target = event.target;
+                    if (target instanceof HTMLButtonElement && target.dataset.editorCommand) {
+                        event.preventDefault();
+                    }
+                });
+                if (elements.mapRadiusInput) {
+                    elements.mapRadiusInput.value = String(state.map.radiusMiles);
+                    elements.mapRadiusValue.textContent = `${state.map.radiusMiles} mi`;
+                    elements.mapRadiusInput.addEventListener("input", event => {
+                        const value = Number(event.target.value);
+                        if (!Number.isNaN(value)) {
+                            setMapRadiusMiles(value);
+                            if (state.view === "map") {
+                                refreshMapDebounced();
+                            } else {
+                                renderPrograms();
+                            }
+                        }
+                    });
+                }
+                if (elements.mapDistanceFilter) {
+                    elements.mapDistanceFilter.value = state.map.distanceFilter || "all";
+                    elements.mapDistanceFilter.addEventListener("change", event => {
+                        state.map.distanceFilter = event.target.value;
+                        state.map.applyFiltersGlobally = true;
+                        renderPrograms();
+                    });
+                }
+                if (elements.mapZipInput) {
+                    elements.mapZipInput.addEventListener("keydown", event => {
+                        if (event.key === "Enter") {
+                            event.preventDefault();
+                            centerMapByZip(event.target.value);
+                        }
+                    });
+                }
+                if (elements.mapLocateButton) {
+                    elements.mapLocateButton.addEventListener("click", handleLocateButton);
+                }
+                if (elements.compareGrid) {
+                    elements.compareGrid.addEventListener("click", handleCompareGridClick);
+                }
+                if (elements.compareAddAllButton) {
+                    elements.compareAddAllButton.addEventListener("click", addComparisonProgramsToBuilder);
+                }
+                if (elements.compareExportButton) {
+                    elements.compareExportButton.addEventListener("click", () => exportComparisonSnapshot("preview"));
+                }
+                if (elements.comparePrintButton) {
+                    elements.comparePrintButton.addEventListener("click", () => exportComparisonSnapshot("print"));
+                }
+                overlays.overlay.addEventListener("click", closeDetails);
+                closeDetailsButton.addEventListener("click", closeDetails);
+                document.addEventListener("keydown", handleKeyboardShortcuts);
+
+                saveDraftButton.addEventListener("click", () => saveDraft("manual"));
+                generateButton.addEventListener("click", () => generateDocument());
+                elements.detailsAddButton.addEventListener("click", event => {
+                    const programId = event.currentTarget.getAttribute("data-program-id") || state.selectedProgramId;
+                    if (!programId) return;
+                    addToBuilder(programId, "bridge");
+                });
+                elements.detailsGenerateButton.addEventListener("click", event => {
+                    const programId = event.currentTarget.getAttribute("data-program-id");
+                    if (!programId) return;
+                    generateDocument(state.documentType, programId);
+                });
+
+                quickAddCancel.addEventListener("click", hideQuickAdd);
+                quickAddConfirm.addEventListener("click", () => {
+                    const programId = elements.quickAddProgram.value;
+                    const lane = elements.quickAddLane.value;
+                    if (programId && lane) {
+                        addToBuilder(programId, lane);
+                        hideQuickAdd();
+                    }
+                });
+
+                announce("Programs workspace ready");
+                emitProgramEvent("programs:ready", { timestamp: Date.now() });
+                emitProgramEvent("programs-docs:ready", { timestamp: Date.now() });
+            }
+
+         const programsDocsAPI = {
+             setClientContext(context = {}) {
+                 return Promise.resolve(setClientContext(context));
+             },
+             getClientContext() {
+                 if (!state.clientContext) {
+                     return null;
+                 }
+                 return {
+                     clientId: state.clientContext.clientId,
+                     initials: state.clientContext.initials,
+                     kipuId: state.clientContext.kipuId || null
+                 };
+             },
+             focusSearch() {
+                 if (elements.searchInput) {
+                     elements.searchInput.focus();
+                 }
+             },
+             refresh() {
+                 renderPrograms();
+                 renderBuilder();
+             }
+         };
+
+         window.CareConnectProgramsDocs = Object.assign(window.CareConnectProgramsDocs || {}, programsDocsAPI);
+
+         window.openDetails = openDetails;
+         window.addToBuilder = addToBuilder;
+         window.generateDocument = generateDocument;
+         window.saveDraft = saveDraft;
+
+            init();
+         if (window.CareConnectProgramsDocs) {
+             window.CareConnectProgramsDocs.ready = true;
+         }
+         window.CareConnectProgramsDocsReady = true;
+        }());
+    </script>
+    
+    <!-- Onboarding System Scripts -->
+    <!-- Core -->
+    <script src="js/onboarding/core/state.js"></script>
+    <script src="js/onboarding/core/events.js"></script>
+    
+    <!-- Intro Animation -->
+    <script src="js/onboarding/intro/particles.js"></script>
+    <script src="js/onboarding/intro/cursor.js"></script>
+    <script src="js/onboarding/intro/svg-draw.js"></script>
+    <script src="js/onboarding/intro/intro.js"></script>
+    
+    <!-- Tours -->
+    <script src="js/onboarding/tour/engine.js"></script>
+    <script src="js/onboarding/tour/dashboard-tour.js"></script>
+    <script src="js/onboarding/tour/programs-tour.js"></script>
+    <script src="js/onboarding/tour/docbuilder-tour.js"></script>
+    
+    <!-- Checklist -->
+    <script src="js/onboarding/checklist/config.js"></script>
+    <script src="js/onboarding/checklist/checklist.js"></script>
+    
+    <!-- Demo Data -->
+    <script src="js/onboarding/demo-data/demo-clients.js"></script>
+    
+    <!-- Controller (must be last) -->
+    <script src="js/onboarding/core/controller.js"></script>
+    
+    <!-- Initialize onboarding after app is ready -->
+    <script>
+        // Initialize onboarding after DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit for other systems to initialize
+            setTimeout(function() {
+                if (window.OnboardingController) {
+                    window.OnboardingController.initialize().catch(function(err) {
+                        console.error('[Onboarding] Failed to initialize:', err);
+                    });
+                }
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+            init();
+         if (window.CareConnectProgramsDocs) {
+             window.CareConnectProgramsDocs.ready = true;
+         }
+         window.CareConnectProgramsDocsReady = true;
+        }());
+    </script>
+    
+    <!-- Onboarding System Scripts -->
+    <!-- Core -->
+    <script src="js/onboarding/core/state.js"></script>
+    <script src="js/onboarding/core/events.js"></script>
+    
+    <!-- Intro Animation -->
+    <script src="js/onboarding/intro/particles.js"></script>
+    <script src="js/onboarding/intro/cursor.js"></script>
+    <script src="js/onboarding/intro/svg-draw.js"></script>
+    <script src="js/onboarding/intro/intro.js"></script>
+    
+    <!-- Tours -->
+    <script src="js/onboarding/tour/engine.js"></script>
+    <script src="js/onboarding/tour/dashboard-tour.js"></script>
+    <script src="js/onboarding/tour/programs-tour.js"></script>
+    <script src="js/onboarding/tour/docbuilder-tour.js"></script>
+    
+    <!-- Checklist -->
+    <script src="js/onboarding/checklist/config.js"></script>
+    <script src="js/onboarding/checklist/checklist.js"></script>
+    
+    <!-- Demo Data -->
+    <script src="js/onboarding/demo-data/demo-clients.js"></script>
+    
+    <!-- Controller (must be last) -->
+    <script src="js/onboarding/core/controller.js"></script>
+    
+    <!-- Initialize onboarding after app is ready -->
+    <script>
+        // Initialize onboarding after DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a bit for other systems to initialize
+            setTimeout(function() {
+                if (window.OnboardingController) {
+                    window.OnboardingController.initialize().catch(function(err) {
+                        console.error('[Onboarding] Failed to initialize:', err);
+                    });
+                }
+            }, 1500);
+        });
     </script>
 </body>
 </html>

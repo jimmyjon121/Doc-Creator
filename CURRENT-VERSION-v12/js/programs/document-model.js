@@ -274,6 +274,13 @@ https://us06web.zoom.us/j/86864413744`,
     window.dispatchEvent(new CustomEvent('ccdocs:programAdded', {
       detail: { phase, programId, track }
     }));
+    
+    // Emit event for onboarding checklist
+    if (window.OnboardingEvents) {
+      OnboardingEvents.emit('cc:doc:programAdded', { phase, programId });
+    }
+    window.dispatchEvent(new CustomEvent('cc:doc:programAdded', { detail: { phase, programId } }));
+    console.log('[Document] Emitted cc:doc:programAdded to window');
   }
 
   /**

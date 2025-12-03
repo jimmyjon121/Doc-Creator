@@ -730,6 +730,12 @@
 
         hideLoginScreen();
 
+        // Emit login success event for first-login flow
+        window.dispatchEvent(new CustomEvent('ccpro-login-success', {
+          detail: { username: result.username, role: result.role, fullName: result.fullName }
+        }));
+        console.log('✅ Login success event dispatched');
+
         // Ensure nav/admin visibility reflects the new role
         try {
           if (window.ccShell && typeof window.ccShell.updateAdminNavVisibility === 'function') {
@@ -922,19 +928,31 @@
     }
   });
 
+  // Reduced frequency state check to prevent flickering
+  // Only check every 10 seconds instead of 2 seconds
+  let lastStateCheck = Date.now();
   setInterval(() => {
+    // Debounce: skip if checked recently (within 5 seconds)
+    const now = Date.now();
+    if (now - lastStateCheck < 5000) return;
+    
     if (LoginState.initialized && !LoginState.isProcessing) {
       const loggedIn = isLoggedIn();
       const loginVisible = LoginState.loginScreen && LoginState.loginScreen.style.display !== 'none';
+      
+      // Only fix if there's a genuine mismatch, and do it smoothly
       if (!loggedIn && !loginVisible) {
         console.warn('⚠️ Login state mismatch detected - fixing...');
-        showLoginScreen();
+        lastStateCheck = now;
+        // Use requestAnimationFrame to prevent visual flicker
+        requestAnimationFrame(() => showLoginScreen());
       } else if (loggedIn && loginVisible) {
         console.warn('⚠️ Login state mismatch detected - fixing...');
-        hideLoginScreen();
+        lastStateCheck = now;
+        requestAnimationFrame(() => hideLoginScreen());
       }
     }
-  }, 2000);
+  }, 10000); // Increased from 2000ms to 10000ms
 
   console.log('🔐 Robust login system loaded');
 

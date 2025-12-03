@@ -8,11 +8,14 @@ class DashboardWidget {
         this.container = container;
         this.initialized = false;
         this.loading = false;
+        this._renderDebounceTimer = null;
+        this._lastRenderTime = 0;
+        this._minRenderInterval = 150; // Minimum ms between renders to prevent flicker
     }
 
     showLoading() {
         this.loading = true;
-        if (this.container) {
+        if (this.container && !this.container.querySelector('.widget-skeleton')) {
             this.container.innerHTML = `
                 <div class="widget-skeleton">
                     <div class="skeleton-pulse"></div>
@@ -39,7 +42,26 @@ class DashboardWidget {
         this.hideLoading();
     }
 
+    /**
+     * Debounced refresh to prevent rapid re-renders causing flicker
+     */
     async refresh() {
+        const now = Date.now();
+        
+        // Prevent too-frequent renders
+        if (now - this._lastRenderTime < this._minRenderInterval) {
+            // Debounce: schedule a render after the interval
+            if (this._renderDebounceTimer) {
+                clearTimeout(this._renderDebounceTimer);
+            }
+            this._renderDebounceTimer = setTimeout(() => {
+                this._renderDebounceTimer = null;
+                this.refresh();
+            }, this._minRenderInterval);
+            return;
+        }
+        
+        this._lastRenderTime = now;
         await this.render();
     }
 }
@@ -1019,6 +1041,18 @@ class DashboardWidgets {
      * Handle segment click - normal click filters, shift+click shows modal
      */
     handleSegmentClick(event, segment) {
+        console.log('[DashboardWidgets] Journey segment clicked:', segment);
+        
+        // Emit event to WINDOW for onboarding checklist (direct binding)
+        const eventDetail = { segment, timestamp: Date.now() };
+        window.dispatchEvent(new CustomEvent('cc:journey:stageClicked', { detail: eventDetail }));
+        console.log('[DashboardWidgets] Emitted cc:journey:stageClicked to window');
+        
+        // Also emit via OnboardingEvents if available
+        if (window.OnboardingEvents) {
+            OnboardingEvents.emit('cc:journey:stageClicked', eventDetail);
+        }
+        
         if (event.shiftKey) {
             // Shift+click: show client list modal
             this.showSegmentClients(segment);
@@ -1212,6 +1246,17 @@ class DashboardWidgets {
      * Show clients with a specific gap type
      */
     showGapClients(gapType) {
+        console.log('[Gaps] Gap clicked:', gapType);
+        
+        // Emit event for onboarding checklist - dispatch to WINDOW
+        window.dispatchEvent(new CustomEvent('cc:gaps:itemClicked', { detail: { gapType } }));
+        console.log('[Gaps] Emitted cc:gaps:itemClicked to window');
+        
+        // Also emit via OnboardingEvents if available
+        if (window.OnboardingEvents) {
+            OnboardingEvents.emit('cc:gaps:itemClicked', { gapType });
+        }
+        
         const gaps = dashboardManager.cache?.gaps || {};
         const clients = gaps[gapType] || [];
         

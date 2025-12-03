@@ -115,6 +115,9 @@
     // Save state on map events
     _map.on('moveend', _saveMapState);
     _map.on('zoomend', _saveMapState);
+    _map.on('click', () => {
+      deselectAll();
+    });
 
     // Inject marker styles
     _injectStyles();
@@ -302,6 +305,13 @@
     // Re-render to update selected state
     _updateMarkerSelection(program.id);
 
+    // Emit event for onboarding checklist
+    if (window.OnboardingEvents) {
+      OnboardingEvents.emit('cc:map:markerClicked', { programId: program.id, programName: program.name });
+    }
+    window.dispatchEvent(new CustomEvent('cc:map:markerClicked', { detail: { programId: program.id, programName: program.name } }));
+    console.log('[Map] Emitted cc:map:markerClicked to window');
+
     // Dispatch event for UI to show profile modal
     window.dispatchEvent(new CustomEvent('ccmap:programSelected', {
       detail: { program, marker }
@@ -359,6 +369,7 @@
   function deselectAll() {
     _selectedMarkerId = null;
     _updateMarkerSelection(null);
+    window.dispatchEvent(new CustomEvent('ccmap:programDeselected'));
   }
 
   // ============================================================================

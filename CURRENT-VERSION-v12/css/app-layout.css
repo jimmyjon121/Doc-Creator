@@ -1340,6 +1340,25 @@ html, body {
     background: #F8F7FC !important;
 }
 
+/* Immersive map mode: remove ALL backgrounds so map is edge-to-edge */
+body.cc-map-immersive,
+body.cc-map-immersive #mainApp,
+body.cc-map-immersive .main-content,
+body.cc-map-immersive .tab-content,
+body.cc-map-immersive #programsTab,
+body.cc-map-immersive .programs-panel,
+body.cc-map-immersive .programs-docs-container,
+body.cc-map-immersive .programs-module,
+body.cc-map-immersive .main-layout,
+body.cc-map-immersive .results-area {
+    background: transparent !important;
+    background-color: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
 /* ========================================
    DARK MODE BACKGROUNDS
    ======================================== */
@@ -1475,13 +1494,13 @@ table {
 }
 
 /* Specific fixes for known elements */
+/* Programs module defaults (non-immersive) */
 .programs-module {
     width: 100% !important;
     max-width: 100% !important;
     background: #F8F7FC !important;
 }
 
-/* Programs module layout - seamless edges */
 .programs-module .main-layout {
     background: #F8F7FC !important;
 }
@@ -1497,6 +1516,8 @@ table {
 .programs-module .builder-pane {
     background: white !important;
 }
+
+/* Immersive map: handled above in consolidated rule */
 
 /* Dark mode overrides for programs module */
 html[data-theme="dark"] .programs-module,
@@ -1545,6 +1566,45 @@ body.dark-mode .programs-module .builder-pane {
         padding-left: 32px !important;
         padding-right: 32px !important;
     }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   WIDGET ANTI-FLICKER STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Smooth opacity transitions for all widget containers */
+.widget,
+.dashboard-card,
+.flight-plan-widget,
+.journey-radar-widget,
+.quick-actions-widget,
+.changes-today-widget,
+.gaps-widget,
+.pipeline-widget,
+.spotlight-widget,
+.house-health-widget,
+[id$="Widget"] {
+    transition: opacity 0.15s ease-out;
+}
+
+/* Prevent layout shift during widget updates */
+.widget-loading,
+.widget-skeleton {
+    min-height: 100px;
+}
+
+/* Use CSS containment to isolate widget repaints */
+[id$="Widget"] {
+    contain: layout style;
+}
+
+/* Ensure widgets maintain compositing layer for smoother updates */
+.dashboard-main-grid > *,
+.dashboard-column--primary > *,
+.dashboard-column--secondary > * {
+    will-change: contents;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

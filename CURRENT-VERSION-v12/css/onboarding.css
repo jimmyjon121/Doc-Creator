@@ -1,0 +1,1676 @@
+/**
+ * CareConnect Pro - Onboarding Styles
+ * 
+ * Contains styles for:
+ * - Intro animation scenes
+ * - Tour overlays and tooltips
+ * - Quick-start checklist
+ * - Modals and notifications
+ */
+
+/* ============================================
+   CSS Variables (Theme Integration)
+   ============================================ */
+:root {
+    --onboarding-primary: #0D9488;
+    --onboarding-primary-light: #14B8A6;
+    --onboarding-primary-dark: #0F766E;
+    --onboarding-success: #10B981;
+    --onboarding-warning: #F59E0B;
+    --onboarding-error: #EF4444;
+    --onboarding-bg: #0F172A;
+    --onboarding-bg-light: #1E293B;
+    --onboarding-surface: #ffffff;
+    --onboarding-text: #1E293B;
+    --onboarding-text-secondary: #64748B;
+    --onboarding-border: #E2E8F0;
+    --onboarding-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    --onboarding-shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    --onboarding-radius: 12px;
+    --onboarding-radius-lg: 16px;
+    --onboarding-transition: 0.3s ease;
+}
+
+/* Dark mode - Using body.dark-mode class (matches app theme system) */
+body.dark-mode {
+    --onboarding-surface: #1E293B;
+    --onboarding-text: #F1F5F9;
+    --onboarding-text-secondary: #94A3B8;
+    --onboarding-border: #334155;
+}
+
+/* Dark mode - Explicit overrides for checklist visibility */
+body.dark-mode .checklist-panel,
+.checklist-panel.dark-mode {
+    background: #1E293B !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .checklist-label,
+.checklist-panel.dark-mode .checklist-label {
+    color: #F1F5F9 !important;
+}
+
+body.dark-mode .checklist-group-title,
+.checklist-panel.dark-mode .checklist-group-title {
+    color: #94A3B8 !important;
+}
+
+body.dark-mode .checklist-item:hover,
+.checklist-panel.dark-mode .checklist-item:hover {
+    background: rgba(13, 148, 136, 0.15) !important;
+}
+
+body.dark-mode .checklist-checkbox,
+.checklist-panel.dark-mode .checklist-checkbox {
+    border-color: #475569 !important;
+    color: #10B981 !important;
+}
+
+body.dark-mode .checklist-item.is-complete .checklist-checkbox,
+.checklist-panel.dark-mode .checklist-item.is-complete .checklist-checkbox {
+    background: #10B981 !important;
+    border-color: #10B981 !important;
+    color: white !important;
+}
+
+body.dark-mode .checklist-hint-btn,
+.checklist-panel.dark-mode .checklist-hint-btn {
+    background: rgba(13, 148, 136, 0.2) !important;
+    color: #14B8A6 !important;
+}
+
+body.dark-mode .checklist-hint-btn:hover,
+.checklist-panel.dark-mode .checklist-hint-btn:hover {
+    background: #0D9488 !important;
+    color: #FFFFFF !important;
+}
+
+body.dark-mode .checklist-item.is-complete .checklist-label,
+.checklist-panel.dark-mode .checklist-item.is-complete .checklist-label {
+    color: #64748B !important;
+    text-decoration: line-through !important;
+    opacity: 0.6;
+}
+
+body.dark-mode .checklist-complete,
+.checklist-panel.dark-mode .checklist-complete {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08)) !important;
+    color: #F1F5F9 !important;
+}
+
+/* Also support [data-theme="dark"] for compatibility */
+[data-theme="dark"] {
+    --onboarding-surface: #1E293B;
+    --onboarding-text: #F1F5F9;
+    --onboarding-text-secondary: #94A3B8;
+    --onboarding-border: #334155;
+}
+
+[data-theme="dark"] .checklist-panel {
+    background: #1E293B !important;
+    border-color: #334155 !important;
+}
+
+[data-theme="dark"] .checklist-label {
+    color: #F1F5F9 !important;
+}
+
+[data-theme="dark"] .checklist-group-title {
+    color: #94A3B8 !important;
+}
+
+[data-theme="dark"] .checklist-item:hover {
+    background: rgba(13, 148, 136, 0.15) !important;
+}
+
+[data-theme="dark"] .checklist-checkbox {
+    border-color: #475569 !important;
+    color: #10B981 !important;
+}
+
+[data-theme="dark"] .checklist-item.is-complete .checklist-checkbox {
+    background: #10B981 !important;
+    border-color: #10B981 !important;
+    color: white !important;
+}
+
+[data-theme="dark"] .checklist-hint-btn {
+    background: rgba(13, 148, 136, 0.2) !important;
+    color: #14B8A6 !important;
+}
+
+[data-theme="dark"] .checklist-hint-btn:hover {
+    background: #0D9488 !important;
+    color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .checklist-item.is-complete .checklist-label {
+    color: #64748B !important;
+    text-decoration: line-through !important;
+    opacity: 0.6;
+}
+
+[data-theme="dark"] .checklist-complete {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08)) !important;
+    color: #F1F5F9 !important;
+}
+
+/* ============================================
+   INTRO ANIMATION STYLES
+   ============================================ */
+
+/* Main container */
+.intro-container {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.intro-container.visible {
+    opacity: 1;
+}
+
+.intro-backdrop {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%);
+}
+
+.intro-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Intro controls */
+.intro-controls {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    z-index: 10;
+}
+
+.intro-skip-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.intro-skip-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.skip-icon {
+    transition: transform 0.2s ease;
+}
+
+.intro-skip-btn:hover .skip-icon {
+    transform: translateX(4px);
+}
+
+.intro-progress {
+    width: 200px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.intro-progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--onboarding-primary), var(--onboarding-primary-light));
+    border-radius: 2px;
+    transition: width 0.1s linear;
+}
+
+/* Intro scenes base */
+.intro-scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+/* Particles canvas */
+.intro-particles,
+.intro-confetti {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+/* ============================================
+   Scene 1: Welcome
+   ============================================ */
+.intro-scene--welcome {
+    text-align: center;
+}
+
+.intro-logo-container {
+    margin-bottom: 40px;
+}
+
+.intro-logo {
+    width: 280px;
+    height: 70px;
+}
+
+.intro-logo .logo-icon,
+.intro-logo .logo-connect {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.intro-title {
+    font-size: 48px;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 16px 0;
+    letter-spacing: -0.02em;
+}
+
+.intro-subtitle {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+}
+
+/* ============================================
+   Scene 2: Dashboard
+   ============================================ */
+.intro-scene--dashboard {
+    padding: 60px;
+}
+
+.intro-mockup {
+    width: 100%;
+    max-width: 900px;
+    background: var(--onboarding-bg-light);
+    border-radius: var(--onboarding-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--onboarding-shadow-lg);
+}
+
+.mockup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mockup-nav {
+    display: flex;
+    gap: 24px;
+}
+
+.nav-item {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.nav-item.active {
+    color: white;
+}
+
+.mockup-user {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+}
+
+.mockup-body {
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.mockup-widget {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--onboarding-radius);
+    padding: 20px;
+}
+
+.widget-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 16px;
+}
+
+.journey-stages {
+    display: flex;
+    gap: 12px;
+}
+
+.journey-stages .stage {
+    flex: 1;
+    padding: 12px;
+    background: rgba(13, 148, 136, 0.2);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    text-align: center;
+}
+
+.flight-zones {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.flight-zones .zone {
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: white;
+}
+
+.zone-red { background: rgba(239, 68, 68, 0.3); }
+.zone-purple { background: rgba(124, 58, 237, 0.3); }
+.zone-yellow { background: rgba(245, 158, 11, 0.3); }
+
+/* Spotlight effect */
+.intro-spotlight {
+    position: absolute;
+    width: 200px;
+    height: 100px;
+    border: 3px solid var(--onboarding-primary);
+    border-radius: var(--onboarding-radius);
+    pointer-events: none;
+    box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2);
+}
+
+/* Caption */
+.intro-caption {
+    position: absolute;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    max-width: 600px;
+}
+
+.intro-caption h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 12px 0;
+}
+
+.intro-caption p {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* ============================================
+   Scene 3: Journey
+   ============================================ */
+.journey-visual {
+    width: 100%;
+    max-width: 800px;
+}
+
+.journey-path {
+    position: relative;
+    padding: 60px 0;
+}
+
+.journey-line {
+    width: 100%;
+    height: 100px;
+}
+
+.journey-path-draw {
+    stroke-linecap: round;
+}
+
+.journey-markers {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.marker-dot {
+    width: 16px;
+    height: 16px;
+    background: var(--onboarding-primary);
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(13, 148, 136, 0.4);
+}
+
+.marker-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+}
+
+.marker-count {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* ============================================
+   Scene 4: Flight Plan
+   ============================================ */
+.flightplan-visual {
+    width: 100%;
+    max-width: 500px;
+}
+
+.flightplan-zones {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.fp-zone {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--onboarding-radius);
+    overflow: hidden;
+}
+
+.zone-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.zone-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.fp-zone.zone-red .zone-indicator { background: #EF4444; }
+.fp-zone.zone-purple .zone-indicator { background: #7C3AED; }
+.fp-zone.zone-yellow .zone-indicator { background: #F59E0B; }
+.fp-zone.zone-green .zone-indicator { background: #10B981; }
+
+.zone-title {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+}
+
+.zone-count {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 10px;
+    border-radius: 10px;
+}
+
+.zone-tasks {
+    padding: 12px 20px;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.task-item:last-child {
+    border-bottom: none;
+}
+
+.task-type {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--onboarding-primary-light);
+    background: rgba(13, 148, 136, 0.2);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.task-client {
+    flex: 1;
+    font-size: 14px;
+    color: white;
+}
+
+.task-status {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.task-status.overdue {
+    color: #EF4444;
+}
+
+/* ============================================
+   Scene 5: Programs
+   ============================================ */
+.programs-visual {
+    width: 100%;
+    max-width: 900px;
+}
+
+.programs-layout {
+    display: grid;
+    grid-template-columns: 180px 1fr 220px;
+    gap: 20px;
+    background: var(--onboarding-bg-light);
+    border-radius: var(--onboarding-radius-lg);
+    padding: 20px;
+}
+
+.programs-filters {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--onboarding-radius);
+    padding: 16px;
+}
+
+.filter-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+}
+
+.filter-group {
+    margin-bottom: 16px;
+}
+
+.filter-item {
+    padding: 8px 12px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.6);
+    border-radius: 6px;
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+
+.filter-item.checked {
+    background: rgba(13, 148, 136, 0.2);
+    color: white;
+}
+
+.filter-item.checked::before {
+    content: '✓ ';
+    color: var(--onboarding-primary-light);
+}
+
+.programs-map {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--onboarding-radius);
+    overflow: hidden;
+    position: relative;
+}
+
+.map-placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.map-bg {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+}
+
+.map-marker {
+    filter: drop-shadow(0 2px 4px rgba(13, 148, 136, 0.5));
+}
+
+.map-label {
+    position: relative;
+    z-index: 1;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.programs-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.program-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--onboarding-radius);
+    padding: 16px;
+}
+
+.card-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    margin-bottom: 4px;
+}
+
+.card-loc {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 12px;
+}
+
+.card-tags {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.card-tags .tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    background: rgba(13, 148, 136, 0.2);
+    color: var(--onboarding-primary-light);
+    border-radius: 4px;
+}
+
+.card-btn {
+    width: 100%;
+    padding: 8px;
+    background: var(--onboarding-primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* ============================================
+   Scene 6: Ready
+   ============================================ */
+.intro-scene--ready {
+    text-align: center;
+}
+
+.ready-content {
+    position: relative;
+    z-index: 1;
+}
+
+.ready-checkmark {
+    margin-bottom: 32px;
+}
+
+.checkmark-svg {
+    width: 120px;
+    height: 120px;
+}
+
+.ready-title {
+    font-size: 56px;
+    font-weight: 700;
+    color: white;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.02em;
+}
+
+.ready-subtitle {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0 0 40px 0;
+}
+
+.ready-cta {
+    padding: 16px 48px;
+    background: linear-gradient(135deg, var(--onboarding-primary), var(--onboarding-primary-light));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 20px rgba(13, 148, 136, 0.4);
+}
+
+.ready-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(13, 148, 136, 0.5);
+}
+
+/* Animated cursor */
+.intro-cursor {
+    position: fixed;
+    pointer-events: none;
+    z-index: 100001;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.intro-cursor.visible {
+    opacity: 1;
+}
+
+.cursor-ripple {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    background: rgba(13, 148, 136, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+}
+
+.cursor-ripple.active {
+    animation: cursorRipple 0.6s ease-out;
+}
+
+@keyframes cursorRipple {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+}
+
+/* ============================================
+   TOUR STYLES
+   ============================================ */
+
+/* Tour overlay */
+.tour-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99998;
+    pointer-events: none;
+}
+
+.tour-spotlight-svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Tour tooltip */
+.tour-tooltip {
+    position: fixed;
+    z-index: 99999;
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    background: var(--onboarding-surface);
+    border-radius: var(--onboarding-radius-lg);
+    box-shadow: var(--onboarding-shadow-lg);
+    border: 1px solid var(--onboarding-border);
+    overflow: hidden;
+    pointer-events: auto;
+}
+
+.tour-tooltip-header {
+    padding: 20px 20px 0;
+}
+
+.tour-tooltip-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--onboarding-text);
+    margin: 0 0 8px 0;
+}
+
+.tour-tooltip-body {
+    padding: 0 20px;
+}
+
+.tour-tooltip-content {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--onboarding-text-secondary);
+    margin: 0;
+}
+
+.tour-tooltip-tip {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: rgba(13, 148, 136, 0.08);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--onboarding-primary);
+    font-style: italic;
+}
+
+.tour-tooltip-tip::before {
+    content: '💡 ';
+}
+
+.tour-tooltip-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    margin-top: 16px;
+    border-top: 1px solid var(--onboarding-border);
+}
+
+.tour-progress {
+    display: flex;
+    gap: 6px;
+}
+
+.tour-progress-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--onboarding-border);
+    transition: background 0.2s ease;
+}
+
+.tour-progress-dot.active,
+.tour-progress-dot.completed {
+    background: var(--onboarding-primary);
+}
+
+.tour-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.tour-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tour-btn-secondary {
+    background: transparent;
+    border: 1px solid var(--onboarding-border);
+    color: var(--onboarding-text-secondary);
+}
+
+.tour-btn-secondary:hover {
+    border-color: var(--onboarding-primary);
+    color: var(--onboarding-primary);
+}
+
+.tour-btn-primary {
+    background: var(--onboarding-primary);
+    border: none;
+    color: white;
+}
+
+.tour-btn-primary:hover {
+    background: var(--onboarding-primary-dark);
+}
+
+.tour-btn-skip {
+    background: transparent;
+    border: none;
+    color: var(--onboarding-text-secondary);
+    padding: 8px 12px;
+}
+
+.tour-btn-skip:hover {
+    color: var(--onboarding-error);
+}
+
+/* Tour overlay modal (for type: 'overlay' steps) */
+.tour-overlay-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 99999;
+    width: 480px;
+    max-width: calc(100vw - 32px);
+    background: var(--onboarding-surface);
+    border-radius: var(--onboarding-radius-lg);
+    box-shadow: var(--onboarding-shadow-lg);
+    padding: 32px;
+    text-align: center;
+}
+
+.tour-overlay-modal .tour-tooltip-title {
+    font-size: 24px;
+    margin-bottom: 16px;
+}
+
+.tour-overlay-modal .tour-tooltip-content {
+    font-size: 16px;
+}
+
+/* ============================================
+   CHECKLIST STYLES
+   ============================================ */
+
+.checklist-panel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 340px;
+    max-height: calc(100vh - 100px);
+    background: #ffffff;
+    border-radius: var(--onboarding-radius-lg);
+    box-shadow: var(--onboarding-shadow-lg);
+    border: 1px solid #E2E8F0;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: all var(--onboarding-transition);
+}
+
+/* Dark mode panel - direct color override */
+body.dark-mode .checklist-panel,
+.checklist-panel.dark-mode {
+    background: #1E293B;
+    border-color: #334155;
+}
+
+.checklist-panel.is-minimized {
+    max-height: 56px;
+}
+
+.checklist-panel.is-hidden {
+    transform: translateX(calc(100% + 40px));
+    opacity: 0;
+}
+
+.checklist-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--onboarding-primary), var(--onboarding-primary-light));
+    color: white;
+    cursor: pointer;
+}
+
+.checklist-icon {
+    font-size: 20px;
+}
+
+.checklist-title {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.checklist-progress {
+    font-size: 13px;
+    opacity: 0.9;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 10px;
+    border-radius: 10px;
+}
+
+.checklist-toggle,
+.checklist-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: background 0.2s ease;
+}
+
+.checklist-toggle:hover,
+.checklist-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.checklist-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
+
+.checklist-group {
+    padding: 8px 16px;
+}
+
+.checklist-group-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+}
+
+/* Dark mode group title */
+body.dark-mode .checklist-group-title,
+.checklist-panel.dark-mode .checklist-group-title {
+    color: #94A3B8;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    transition: background 0.2s ease;
+}
+
+.checklist-item:hover {
+    background: rgba(13, 148, 136, 0.05);
+}
+
+/* Dark mode item hover */
+body.dark-mode .checklist-item:hover,
+.checklist-panel.dark-mode .checklist-item:hover {
+    background: rgba(13, 148, 136, 0.15);
+}
+
+.checklist-item.is-complete {
+    opacity: 0.6;
+}
+
+.checklist-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #E2E8F0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #10B981;
+    transition: all 0.2s ease;
+}
+
+/* Dark mode checkbox */
+body.dark-mode .checklist-checkbox,
+.checklist-panel.dark-mode .checklist-checkbox {
+    border-color: #475569;
+}
+
+.checklist-item.is-complete .checklist-checkbox {
+    background: #10B981;
+    border-color: #10B981;
+    color: white;
+}
+
+.checklist-label {
+    flex: 1;
+    font-size: 14px;
+    color: #1E293B;
+}
+
+/* Dark mode label */
+body.dark-mode .checklist-label,
+.checklist-panel.dark-mode .checklist-label {
+    color: #F1F5F9;
+}
+
+.checklist-item.is-complete .checklist-label {
+    text-decoration: line-through !important;
+    opacity: 0.6;
+}
+
+.checklist-hint-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(13, 148, 136, 0.1);
+    border: none;
+    color: #0D9488;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.checklist-item:hover .checklist-hint-btn {
+    opacity: 1;
+}
+
+.checklist-hint-btn:hover {
+    background: #0D9488;
+    color: white;
+}
+
+/* Dark mode hint button */
+body.dark-mode .checklist-hint-btn,
+.checklist-panel.dark-mode .checklist-hint-btn {
+    background: rgba(13, 148, 136, 0.2);
+    color: #14B8A6;
+}
+
+body.dark-mode .checklist-hint-btn:hover,
+.checklist-panel.dark-mode .checklist-hint-btn:hover {
+    background: #0D9488;
+    color: white;
+}
+
+.checklist-complete {
+    padding: 20px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));
+    color: #1E293B;
+}
+
+/* Dark mode complete section */
+body.dark-mode .checklist-complete,
+.checklist-panel.dark-mode .checklist-complete {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08));
+    color: #F1F5F9;
+}
+
+.checklist-complete-icon {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+/* ============================================
+   MODAL STYLES
+   ============================================ */
+
+.onboarding-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+    padding: 20px;
+}
+
+.onboarding-modal {
+    background: var(--onboarding-surface);
+    border-radius: var(--onboarding-radius-lg);
+    box-shadow: var(--onboarding-shadow-lg);
+    width: 100%;
+    max-width: 480px;
+    overflow: hidden;
+}
+
+.modal-header {
+    padding: 32px 32px 0;
+    text-align: center;
+}
+
+.modal-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.modal-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--onboarding-text);
+    margin: 0;
+}
+
+.modal-body {
+    padding: 24px 32px;
+}
+
+.modal-body p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--onboarding-text-secondary);
+    margin: 0;
+    text-align: center;
+}
+
+.demo-data-notice {
+    margin-top: 20px;
+    padding: 16px;
+    background: rgba(13, 148, 136, 0.08);
+    border-radius: var(--onboarding-radius);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    text-align: left;
+}
+
+.notice-icon {
+    font-size: 20px;
+}
+
+.demo-data-notice span:last-child {
+    font-size: 14px;
+    color: var(--onboarding-text-secondary);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    padding: 0 32px 32px;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 14px 24px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 1px solid var(--onboarding-border);
+    color: var(--onboarding-text-secondary);
+}
+
+.btn-secondary:hover {
+    border-color: var(--onboarding-primary);
+    color: var(--onboarding-primary);
+}
+
+.btn-primary {
+    background: var(--onboarding-primary);
+    border: none;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--onboarding-primary-dark);
+}
+
+/* Completion modal */
+.completion-modal {
+    position: relative;
+    overflow: visible;
+}
+
+.confetti-container {
+    position: absolute;
+    inset: -100px;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    animation: confettiFall 3s ease-out forwards;
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(400px) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+.celebration-icon {
+    animation: celebrationBounce 0.6s ease infinite;
+}
+
+@keyframes celebrationBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.completion-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin: 24px 0;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--onboarding-success);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin: 0 auto 8px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--onboarding-text-secondary);
+}
+
+.pro-tip {
+    padding: 16px;
+    background: rgba(13, 148, 136, 0.08);
+    border-radius: var(--onboarding-radius);
+    font-size: 14px;
+    color: var(--onboarding-text-secondary);
+    text-align: center;
+}
+
+.pro-tip strong {
+    color: var(--onboarding-primary);
+}
+
+.btn-large {
+    padding: 16px 32px !important;
+    font-size: 16px !important;
+}
+
+/* ============================================
+   RESUME BANNER
+   ============================================ */
+
+.onboarding-resume-banner {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    z-index: 9998;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.onboarding-resume-banner.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.resume-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--onboarding-surface);
+    border-radius: var(--onboarding-radius);
+    box-shadow: var(--onboarding-shadow-lg);
+    border: 1px solid var(--onboarding-border);
+}
+
+.resume-icon {
+    font-size: 20px;
+}
+
+.resume-text {
+    font-size: 14px;
+    color: var(--onboarding-text);
+}
+
+.btn-resume {
+    padding: 8px 16px;
+    background: var(--onboarding-primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btn-dismiss {
+    width: 28px;
+    height: 28px;
+    background: transparent;
+    border: none;
+    color: var(--onboarding-text-secondary);
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.btn-dismiss:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* ============================================
+   NOTIFICATION
+   ============================================ */
+
+.onboarding-notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    padding: 14px 24px;
+    background: var(--onboarding-surface);
+    border-radius: var(--onboarding-radius);
+    box-shadow: var(--onboarding-shadow);
+    border: 1px solid var(--onboarding-border);
+    font-size: 14px;
+    color: var(--onboarding-text);
+    z-index: 100001;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.onboarding-notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.onboarding-notification.success {
+    border-left: 4px solid var(--onboarding-success);
+}
+
+.onboarding-notification.warning {
+    border-left: 4px solid var(--onboarding-warning);
+}
+
+.onboarding-notification.error {
+    border-left: 4px solid var(--onboarding-error);
+}
+
+.onboarding-notification.info {
+    border-left: 4px solid var(--onboarding-primary);
+}
+
+/* ============================================
+   DEMO BADGE
+   ============================================ */
+
+.demo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: white;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.demo-badge__icon {
+    font-size: 12px;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .intro-title {
+        font-size: 32px;
+    }
+    
+    .intro-subtitle {
+        font-size: 16px;
+    }
+    
+    .intro-caption h2 {
+        font-size: 22px;
+    }
+    
+    .intro-caption p {
+        font-size: 14px;
+    }
+    
+    .programs-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .checklist-panel {
+        width: calc(100% - 40px);
+        right: 20px;
+        left: 20px;
+    }
+    
+    .tour-tooltip {
+        width: calc(100vw - 32px);
+    }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .intro-container,
+    .checklist-panel,
+    .tour-tooltip,
+    .onboarding-notification,
+    .onboarding-resume-banner {
+        transition: none;
+    }
+    
+    .confetti,
+    .celebration-icon,
+    .cursor-ripple {
+        animation: none;
+    }
+}
+
+/* ============================================
+   DARK MODE OVERRIDES - HIGH SPECIFICITY
+   ============================================ */
+
+/* Force dark mode styles with maximum specificity */
+body.dark-mode #quick-start-checklist .checklist-panel,
+body.dark-mode .checklist-panel.dark-mode,
+#quick-start-checklist .checklist-panel.dark-mode {
+    background: #1E293B !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode #quick-start-checklist .checklist-label,
+body.dark-mode .checklist-panel.dark-mode .checklist-label,
+#quick-start-checklist .checklist-panel.dark-mode .checklist-label {
+    color: #F1F5F9 !important;
+}
+
+body.dark-mode #quick-start-checklist .checklist-group-title,
+body.dark-mode .checklist-panel.dark-mode .checklist-group-title,
+#quick-start-checklist .checklist-panel.dark-mode .checklist-group-title {
+    color: #94A3B8 !important;
+}
+
+body.dark-mode #quick-start-checklist .checklist-checkbox,
+body.dark-mode .checklist-panel.dark-mode .checklist-checkbox,
+#quick-start-checklist .checklist-panel.dark-mode .checklist-checkbox {
+    border-color: #475569 !important;
+    color: #10B981 !important;
+}
+
+body.dark-mode #quick-start-checklist .checklist-item.is-complete .checklist-checkbox,
+body.dark-mode .checklist-panel.dark-mode .checklist-item.is-complete .checklist-checkbox,
+#quick-start-checklist .checklist-panel.dark-mode .checklist-item.is-complete .checklist-checkbox {
+    background: #10B981 !important;
+    border-color: #10B981 !important;
+    color: white !important;
+}
+
+body.dark-mode #quick-start-checklist .checklist-hint-btn,
+body.dark-mode .checklist-panel.dark-mode .checklist-hint-btn,
+#quick-start-checklist .checklist-panel.dark-mode .checklist-hint-btn {
+    background: rgba(13, 148, 136, 0.2) !important;
+    color: #14B8A6 !important;
+}
+
+body.dark-mode #quick-start-checklist .checklist-hint-btn:hover,
+body.dark-mode .checklist-panel.dark-mode .checklist-hint-btn:hover,
+#quick-start-checklist .checklist-panel.dark-mode .checklist-hint-btn:hover {
+    background: #0D9488 !important;
+    color: #FFFFFF !important;
+}
+
+body.dark-mode #quick-start-checklist .checklist-item.is-complete .checklist-label,
+body.dark-mode .checklist-panel.dark-mode .checklist-item.is-complete .checklist-label,
+#quick-start-checklist .checklist-panel.dark-mode .checklist-item.is-complete .checklist-label {
+    color: #64748B !important;
+    text-decoration: line-through !important;
+    opacity: 0.6;
+}
+
+body.dark-mode #quick-start-checklist .checklist-complete,
+body.dark-mode .checklist-panel.dark-mode .checklist-complete,
+#quick-start-checklist .checklist-panel.dark-mode .checklist-complete {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08)) !important;
+    color: #F1F5F9 !important;
+}
+
+body.dark-mode #quick-start-checklist .checklist-item:hover,
+body.dark-mode .checklist-panel.dark-mode .checklist-item:hover,
+#quick-start-checklist .checklist-panel.dark-mode .checklist-item:hover {
+    background: rgba(13, 148, 136, 0.15) !important;
+}

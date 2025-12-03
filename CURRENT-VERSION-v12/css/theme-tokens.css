@@ -470,6 +470,156 @@
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   STABILITY & ANTI-FLICKER RULES
+   Prevents visual glitches, flickering, and improves animation performance
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* GPU acceleration for animated elements */
+.intro-container,
+.checklist-panel,
+.tour-tooltip,
+.tour-overlay,
+.onboarding-modal-overlay,
+.onboarding-notification,
+.onboarding-resume-banner,
+.layer-ambient,
+.layer-stage,
+.layer-soul {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Prevent layout shift during animations */
+.intro-scene,
+.journey-segment,
+.priority-zone,
+.dashboard-widget,
+.widget-card,
+.house-card,
+.pipeline-item,
+.change-item,
+.gap-category {
+  contain: layout style;
+}
+
+/* Smooth opacity transitions without flicker */
+.intro-container,
+.intro-scene,
+.checklist-panel,
+.tour-tooltip,
+.onboarding-modal-overlay {
+  will-change: opacity, transform;
+}
+
+/* Prevent text rendering flicker */
+body,
+.intro-title,
+.intro-subtitle,
+.subtitle-text,
+.greeting-text,
+.widget-header h3 {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Stabilize canvas rendering */
+canvas.layer-soul,
+canvas.intro-particles,
+canvas.intro-confetti {
+  image-rendering: optimizeSpeed;
+  will-change: contents;
+}
+
+/* Prevent backdrop-filter flicker */
+.glass,
+.glass-strong,
+.subtitle-text,
+.onboarding-modal {
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+/* Stabilize visibility transitions */
+#loginScreen,
+#mainApp {
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Prevent FOUC (Flash of Unstyled Content) */
+#loginScreen[style*="display: none"],
+#mainApp[style*="display: none"] {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Smooth widget transitions */
+.dashboard-widget,
+.widget-skeleton,
+.widget-empty,
+.widget-error {
+  transition: opacity 0.2s ease;
+}
+
+/* Prevent zone expansion flicker */
+.zone-content {
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.2s ease;
+}
+
+.zone-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+.zone-content.expanded {
+  max-height: 2000px;
+  opacity: 1;
+}
+
+/* Stabilize hover states */
+.priority-item,
+.journey-segment,
+.house-card,
+.quick-actions__btn,
+.kpi-badge {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+/* Prevent modal/overlay flicker */
+.onboarding-modal-overlay {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .intro-container,
+  .checklist-panel,
+  .tour-tooltip {
+    will-change: auto;
+  }
+}
+
 
 
 

@@ -37,6 +37,20 @@ class DashboardManager {
             this.filters[key] = null; // Toggle off
         } else {
             this.filters[key] = value;
+            
+            // Emit event for onboarding checklist when house is clicked
+            if (key === 'house' && value) {
+                console.log('[House] House clicked:', value);
+                
+                // Dispatch to WINDOW for checklist
+                window.dispatchEvent(new CustomEvent('cc:house:clicked', { detail: { houseId: value } }));
+                console.log('[House] Emitted cc:house:clicked to window');
+                
+                // Also emit via OnboardingEvents if available
+                if (window.OnboardingEvents) {
+                    OnboardingEvents.emit('cc:house:clicked', { houseId: value });
+                }
+            }
         }
         this.cache.lastCacheTime = 0; // Invalidate cache
         this.notifyWidgets();

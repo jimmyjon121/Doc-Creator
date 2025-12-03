@@ -199,10 +199,17 @@
     <script>
         // Global error handler to prevent white screen
         window.addEventListener('error', function(e) {
-            console.error('🔥 Global error caught:', e.error || e.message);
+            const errorMsg = e.error?.message || e.message || '';
+            
+            // Suppress benign ResizeObserver errors (common in complex layouts)
+            if (errorMsg.includes('ResizeObserver loop')) {
+                return true; // Suppress this error
+            }
+            
+            console.error('🔥 Global error caught:', errorMsg);
+            
             // Prevent white screen by showing error message
             if (e.error && e.error.message) {
-                const errorMsg = e.error.message;
                 if (errorMsg.includes('is not defined') || errorMsg.includes('is not a constructor')) {
                     console.error('⚠️ Critical script loading error detected');
                     // Don't reload automatically, just log
@@ -2820,6 +2827,13 @@ console.log('🔐 Login fix applied');
             
             alert(`Generated ${tasks.length} tasks from tracker gaps`);
             
+            // Emit event for onboarding checklist
+            if (window.OnboardingEvents?.emit) {
+                OnboardingEvents.emit('cc:flightPlan:taskCreated', { count: tasks.length });
+            }
+            window.dispatchEvent(new CustomEvent('cc:flightPlan:taskCreated', { detail: { count: tasks.length } }));
+            console.log('[Tasks] Emitted cc:flightPlan:taskCreated to window');
+            
             // Refresh dashboard
             if (window.dashboardManager.loadData) {
                 await window.dashboardManager.loadData();
@@ -4639,6 +4653,13 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             };
             
             window.navigateToAlert = function(clientId, type) {
+                // Emit event for onboarding checklist
+                if (window.OnboardingEvents) {
+                    OnboardingEvents.emit('cc:flightPlan:taskOpened', { clientId, type });
+                }
+                window.dispatchEvent(new CustomEvent('cc:flightPlan:taskOpened', { detail: { clientId, type } }));
+                console.log('[FlightPlan] Emitted cc:flightPlan:taskOpened to window (navigateToAlert)');
+                
                 window.closeModal();
                 window.viewClientDetails(clientId);
             };
@@ -6741,6 +6762,18 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             // Prevent default if clicking on action buttons
             if (event.target.closest('button')) {
                 return;
+            }
+            
+            console.log('[FlightPlan] Task clicked:', clientId, alertType, zone);
+            
+            // Emit event for onboarding checklist - dispatch to WINDOW
+            var eventDetail = { clientId: clientId, alertType: alertType, zone: zone };
+            window.dispatchEvent(new CustomEvent('cc:flightPlan:taskOpened', { detail: eventDetail }));
+            console.log('[FlightPlan] Emitted cc:flightPlan:taskOpened to window');
+            
+            // Also emit via OnboardingEvents if available
+            if (window.OnboardingEvents) {
+                OnboardingEvents.emit('cc:flightPlan:taskOpened', eventDetail);
             }
             
             // Show alert details modal
@@ -9645,7 +9678,8 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         'onboarding-manager.js',
         'onboarding-video.js',
         'onboarding-tour.js',
-        'onboarding-practice.js'
+        'onboarding-practice.js',
+        'user-agreement.js'
     ];
 
     // Track if scripts are loading to prevent duplicate loads
@@ -14783,6 +14817,59 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             color: #6b7280;
             line-height: 1.45;
             margin: 0 0 12px;
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            gap: 16px;
+        }
+        
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(209, 213, 219, 0.6);
+        }
+        
+        .auth-divider span {
+            font-size: 12px;
+            color: #9CA3AF;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .auth-create-account {
+            margin-bottom: 16px;
+        }
+        
+        .auth-create-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #0D9488, #14B8A6);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .auth-create-btn:hover {
+            background: linear-gradient(135deg, #0F766E, #0D9488);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(13, 148, 136, 0.3);
+        }
+        
+        .auth-create-icon {
+            font-size: 18px;
         }
 
         .auth-support {
@@ -25062,11 +25149,22 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                         </p>
                     </form>
 
+                    <div class="auth-divider">
+                        <span>or</span>
+                    </div>
+                    
+                    <div class="auth-create-account">
+                        <button type="button" class="auth-create-btn" onclick="showCreateAccountForm()">
+                            <span class="auth-create-icon">👤</span>
+                            <span>New Coach? Create Account</span>
+                        </button>
+                    </div>
+
                     <div class="auth-support">
-                        <div class="auth-support-label">Need access?</div>
+                        <div class="auth-support-label">Need help?</div>
                         <p>
-                            New to CareConnect or locked out of your account?<br>
-                            Please contact your supervisor or designated CareConnect admin.
+                            Locked out of your account?<br>
+                            Contact your supervisor or CareConnect admin.
                         </p>
                     </div>
                 </div>
@@ -29404,6 +29502,213 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 if (headerInitials) headerInitials.textContent = initials;
             };
             
+            // Show Create Account Form
+            window.showCreateAccountForm = function() {
+                // Remove any existing modal
+                const existing = document.getElementById('createAccountModal');
+                if (existing) existing.remove();
+                
+                const modal = document.createElement('div');
+                modal.id = 'createAccountModal';
+                modal.style.cssText = `
+                    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(4px);
+                    display: flex; align-items: center; justify-content: center; z-index: 100000;
+                `;
+                modal.innerHTML = `
+                    <div style="
+                        background: #ffffff; border-radius: 16px; width: 420px; max-width: 95%;
+                        box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden;
+                    ">
+                        <div style="
+                            background: linear-gradient(135deg, #0D9488, #0F766E); padding: 24px;
+                            text-align: center; color: white;
+                        ">
+                            <div style="font-size: 32px; margin-bottom: 8px;">👤</div>
+                            <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #ffffff;">Create Your Account</h2>
+                            <p style="margin: 6px 0 0; font-size: 13px; opacity: 0.9; color: #E0F2F1;">Set up your CareConnect Pro profile</p>
+                        </div>
+                        
+                        <form id="createAccountForm" style="padding: 20px 24px 24px;">
+                            <div style="margin-bottom: 14px;">
+                                <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px;">
+                                    Full Name <span style="color: #EF4444;">*</span>
+                                </label>
+                                <input type="text" id="newFullName" placeholder="e.g., Sarah Johnson" required
+                                       style="width: 100%; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                            
+                            <div style="margin-bottom: 14px;">
+                                <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px;">
+                                    Choose Username <span style="color: #EF4444;">*</span>
+                                </label>
+                                <input type="text" id="newUsername" placeholder="e.g., sjohnson" required pattern="[a-zA-Z0-9_]+" minlength="3"
+                                       style="width: 100%; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                                <small style="color: #94A3B8; font-size: 11px;">Letters, numbers, and underscores only</small>
+                            </div>
+                            
+                            <div style="margin-bottom: 14px;">
+                                <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px;">
+                                    Create Password <span style="color: #EF4444;">*</span>
+                                </label>
+                                <input type="password" id="newPassword" placeholder="At least 6 characters" required minlength="6"
+                                       style="width: 100%; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+                                <div>
+                                    <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px;">
+                                        Your Role <span style="color: #EF4444;">*</span>
+                                    </label>
+                                    <select id="newRole" required style="width: 100%; padding: 10px 12px; border: 1.5px solid #E2E8F0; border-radius: 8px; font-size: 14px; background: #fff; box-sizing: border-box;">
+                                        <option value="">Select...</option>
+                                        <option value="coach">Clinical Coach</option>
+                                        <option value="therapist">Therapist</option>
+                                        <option value="case_manager">Case Manager</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px;">
+                                        House/Location
+                                    </label>
+                                    <select id="newHouse" style="width: 100%; padding: 10px 12px; border: 1.5px solid #E2E8F0; border-radius: 8px; font-size: 14px; background: #fff; box-sizing: border-box;">
+                                        <option value="">Select...</option>
+                                        <option value="banyan">Banyan</option>
+                                        <option value="cove">Cove</option>
+                                        <option value="meridian">Meridian</option>
+                                        <option value="prosperity">Prosperity</option>
+                                        <option value="hedge">Hedge</option>
+                                        <option value="nest">NEST</option>
+                                        <option value="multiple">Multiple</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div id="createAccountError" style="display: none; background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; padding: 10px 12px; border-radius: 8px; margin-bottom: 14px; font-size: 13px;"></div>
+                            
+                            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                                <button type="button" onclick="document.getElementById('createAccountModal').remove();" 
+                                        style="flex: 1; padding: 12px 16px; background: #F1F5F9; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; color: #475569;">
+                                    Cancel
+                                </button>
+                                <button type="submit" 
+                                        style="flex: 2; padding: 12px 16px; background: linear-gradient(135deg, #0D9488, #14B8A6); border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; color: white;">
+                                    Create Account
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Focus first input
+                setTimeout(() => document.getElementById('newFullName').focus(), 100);
+                
+                // Handle form submit
+                document.getElementById('createAccountForm').addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const fullName = document.getElementById('newFullName').value.trim();
+                    const username = document.getElementById('newUsername').value.trim();
+                    const password = document.getElementById('newPassword').value;
+                    const role = document.getElementById('newRole').value;
+                    const house = document.getElementById('newHouse').value;
+                    const errorDiv = document.getElementById('createAccountError');
+                    
+                    // Validate
+                    if (!fullName || !username || !password || !role) {
+                        errorDiv.textContent = 'Please fill in all required fields.';
+                        errorDiv.style.display = 'block';
+                        return;
+                    }
+                    
+                    // Check if username already exists
+                    if (window.CareConnectAuth && window.CareConnectAuth.getUserAccounts) {
+                        const existingAccounts = window.CareConnectAuth.getUserAccounts();
+                        const exists = existingAccounts.some(acc => 
+                            acc.username && acc.username.toLowerCase() === username.toLowerCase()
+                        );
+                        if (exists) {
+                            errorDiv.textContent = 'Username already exists. Please choose a different one.';
+                            errorDiv.style.display = 'block';
+                            return;
+                        }
+                    }
+                    
+                    // Create account using the proper auth system
+                    try {
+                        // Use CareConnectAuth.addUserAccount (it's async!)
+                        if (window.CareConnectAuth && window.CareConnectAuth.addUserAccount) {
+                            await window.CareConnectAuth.addUserAccount(username, password, fullName);
+                            console.log('✅ Account created successfully via CareConnectAuth');
+                        } else {
+                            // Fallback: store in localStorage with proper format
+                            const accounts = JSON.parse(localStorage.getItem('ccpro-user-accounts-v1') || '[]');
+                            accounts.push({ 
+                                username, 
+                                password, // Note: This is plaintext fallback - not secure
+                                role: 'user', 
+                                fullName,
+                                created: new Date().toISOString()
+                            });
+                            localStorage.setItem('ccpro-user-accounts-v1', JSON.stringify(accounts));
+                            console.log('✅ Account created via localStorage fallback');
+                        }
+                        
+                        // Save profile data
+                        const profile = { fullName, role, house, setupDate: new Date().toISOString() };
+                        localStorage.setItem('ccpro-user-profile', JSON.stringify(profile));
+                        localStorage.setItem('ccpro-profile-complete', 'true');
+                        
+                        // Close modal
+                        modal.remove();
+                        
+                        // Fill in the login form with new credentials
+                        const usernameInput = document.getElementById('loginUsername');
+                        const passwordInput = document.getElementById('loginPassword');
+                        const submitBtn = document.querySelector('.auth-submit-btn, #loginForm button[type="submit"]');
+                        
+                        if (usernameInput && passwordInput) {
+                            usernameInput.value = username;
+                            passwordInput.value = password;
+                            
+                            // Auto-click the submit button after a brief delay to allow DOM update
+                            setTimeout(() => {
+                                if (submitBtn) {
+                                    console.log('🔐 Auto-submitting login form...');
+                                    submitBtn.click();
+                                } else {
+                                    // Fallback: manually trigger handleLogin
+                                    const form = document.getElementById('loginForm');
+                                    if (form && typeof handleLogin === 'function') {
+                                        const fakeEvent = {
+                                            preventDefault: () => {},
+                                            stopPropagation: () => {},
+                                            target: form,
+                                            currentTarget: form
+                                        };
+                                        handleLogin(fakeEvent);
+                                    }
+                                }
+                            }, 200);
+                        }
+                        
+                    } catch (err) {
+                        console.error('Account creation failed:', err);
+                        errorDiv.textContent = 'An error occurred: ' + (err.message || 'Please try again.');
+                        errorDiv.style.display = 'block';
+                    }
+                });
+                
+                // Close on overlay click
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            };
+            
             // Handle logout
             window.handleLogout = function() {
                 if (typeof window.logout === 'function') {
@@ -30135,6 +30440,653 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             color: var(--text-primary);
         }
     </style>
+
+    <!-- Coach Quick Start Guided Tour - v2.0 -->
+    <script>
+    (function() {
+        'use strict';
+        
+        console.log('%c[Guided Tour v2] Loading...', 'background: #0D9488; color: white; padding: 4px 8px; border-radius: 4px; font-size: 14px;');
+        
+        // =====================================================================
+        // CONFIGURATION - Each item has a target selector for highlighting
+        // =====================================================================
+        const STORAGE_KEY = 'ccpro_guided_tour_v2';
+        
+        const TOUR_ITEMS = [
+            {
+                group: 'Morning Routine',
+                icon: '☀️',
+                items: [
+                    { 
+                        id: 'journey', 
+                        label: 'Click a Client Journey stage', 
+                        event: 'cc:journey:stageClicked',
+                        target: '.journey-segment, .segment[onclick*="handleSegmentClick"]',
+                        tab: 'dashboard',
+                        hint: 'Click any colored stage box (Week 1, Day 14-16, etc.)'
+                    },
+                    { 
+                        id: 'flightplan', 
+                        label: 'Open a task from Flight Plan', 
+                        event: 'cc:flightPlan:taskOpened',
+                        target: '.flight-plan-alert, .alert-row, [onclick*="handleAlertClick"]',
+                        tab: 'dashboard',
+                        hint: 'Click any task/alert in the Daily Flight Plan'
+                    },
+                    { 
+                        id: 'newtask', 
+                        label: 'Create a new task', 
+                        event: 'cc:flightPlan:taskCreated',
+                        target: '[onclick*="Generate Tasks"], .btn-generate-tasks',
+                        tab: 'dashboard',
+                        hint: 'Open a client tracker, then click Generate Tasks'
+                    }
+                ]
+            },
+            {
+                group: 'Program Research',
+                icon: '🔍',
+                items: [
+                    { 
+                        id: 'filter', 
+                        label: 'Apply a program filter', 
+                        event: 'cc:programs:filterApplied',
+                        target: '.filter-checkbox, .filter-chip',
+                        tab: 'programs',
+                        hint: 'Check any filter checkbox on the left'
+                    },
+                    { 
+                        id: 'profile', 
+                        label: 'Open a program profile', 
+                        event: 'cc:programs:profileOpened',
+                        target: '.program-card, .card-programs',
+                        tab: 'programs',
+                        hint: 'Click View Details or expand any program card'
+                    },
+                    { 
+                        id: 'map', 
+                        label: 'Click a map marker', 
+                        event: 'cc:map:markerClicked',
+                        target: '.map-btn, [data-view="map"]',
+                        tab: 'programs',
+                        hint: 'Switch to Map view then click any pin'
+                    }
+                ]
+            },
+            {
+                group: 'Aftercare Planning',
+                icon: '📋',
+                items: [
+                    { 
+                        id: 'addprogram', 
+                        label: 'Add program to aftercare draft', 
+                        event: 'cc:doc:programAdded',
+                        target: '.btn-add-to-doc, [onclick*="addToDocument"]',
+                        tab: 'programs',
+                        hint: 'Click the green + Add button on any program'
+                    },
+                    { 
+                        id: 'preview', 
+                        label: 'Preview an aftercare document', 
+                        event: 'cc:doc:previewed',
+                        target: '.btn-preview-doc, [onclick*="previewDocument"]',
+                        tab: 'programs',
+                        hint: 'Add programs first, then click Preview'
+                    }
+                ]
+            },
+            {
+                group: 'Data Hygiene',
+                icon: '✅',
+                items: [
+                    { 
+                        id: 'gaps', 
+                        label: 'Review a Gaps panel item', 
+                        event: 'cc:gaps:itemClicked',
+                        target: '.gap-category, [data-widget="gaps"] .clickable',
+                        tab: 'dashboard',
+                        hint: 'Click any gap category to see affected clients'
+                    },
+                    { 
+                        id: 'house', 
+                        label: 'Check House Compliance', 
+                        event: 'cc:house:clicked',
+                        target: '.house-card, [data-widget="house-health"] .house',
+                        tab: 'dashboard',
+                        hint: 'Click any house card to filter by house'
+                    }
+                ]
+            }
+        ];
+        
+        // Flatten items for easy lookup
+        const ALL_ITEMS = {};
+        TOUR_ITEMS.forEach(g => g.items.forEach(item => ALL_ITEMS[item.id] = item));
+        
+        // =====================================================================
+        // STATE
+        // =====================================================================
+        function getState() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) return JSON.parse(stored);
+            } catch(e) {}
+            const completed = {};
+            Object.keys(ALL_ITEMS).forEach(id => completed[id] = false);
+            return { completed, minimized: false };
+        }
+        
+        function saveState(state) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+        
+        function resetProgress() {
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload();
+        }
+        
+        // =====================================================================
+        // CSS
+        // =====================================================================
+        const CSS = `
+            /* Checklist Panel */
+            #guided-tour-panel {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                width: 320px;
+                max-height: 75vh;
+                background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
+                border-radius: 16px;
+                box-shadow: 0 25px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                z-index: 100000;
+                overflow: hidden;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            #guided-tour-panel.minimized { max-height: 52px; }
+            
+            /* Header */
+            .tour-header {
+                background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
+                padding: 12px 16px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                cursor: pointer;
+            }
+            .tour-header:hover { filter: brightness(1.05); }
+            .tour-icon { font-size: 18px; }
+            .tour-title { flex: 1; font-weight: 600; font-size: 14px; color: white; }
+            .tour-progress {
+                background: rgba(255,255,255,0.25);
+                padding: 3px 10px;
+                border-radius: 10px;
+                font-size: 12px;
+                font-weight: 700;
+                color: white;
+            }
+            .tour-toggle {
+                background: none; border: none; color: white;
+                font-size: 12px; cursor: pointer; padding: 4px;
+            }
+            
+            /* Body */
+            .tour-body {
+                max-height: calc(75vh - 52px);
+                overflow-y: auto;
+                padding: 8px 0;
+            }
+            #guided-tour-panel.minimized .tour-body { display: none; }
+            
+            /* Groups */
+            .tour-group { padding: 6px 14px; }
+            .tour-group-title {
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.6px;
+                color: #64748B;
+                margin-bottom: 6px;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+            
+            /* Items */
+            .tour-item {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 10px;
+                margin: 3px 0;
+                background: rgba(255,255,255,0.04);
+                border-radius: 10px;
+                cursor: pointer;
+                transition: all 0.2s;
+                border: 1px solid transparent;
+            }
+            .tour-item:hover {
+                background: rgba(13, 148, 136, 0.2);
+                border-color: rgba(13, 148, 136, 0.3);
+            }
+            .tour-item.complete { opacity: 0.5; }
+            .tour-item.complete:hover { opacity: 0.7; }
+            
+            .tour-check {
+                width: 20px; height: 20px;
+                border-radius: 50%;
+                border: 2px solid #475569;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 11px;
+                color: transparent;
+                transition: all 0.2s;
+                flex-shrink: 0;
+            }
+            .tour-item.complete .tour-check {
+                background: #10B981;
+                border-color: #10B981;
+                color: white;
+            }
+            .tour-label { flex: 1; font-size: 12px; color: #E2E8F0; }
+            .tour-item.complete .tour-label {
+                text-decoration: line-through;
+                color: #64748B;
+            }
+            .tour-arrow {
+                font-size: 14px;
+                color: #0D9488;
+                opacity: 0;
+                transition: opacity 0.2s, transform 0.2s;
+            }
+            .tour-item:hover .tour-arrow {
+                opacity: 1;
+                transform: translateX(2px);
+            }
+            .tour-item.complete .tour-arrow { display: none; }
+            
+            /* Footer */
+            .tour-footer {
+                padding: 10px 14px;
+                border-top: 1px solid rgba(255,255,255,0.08);
+                display: flex;
+                justify-content: space-between;
+            }
+            #guided-tour-panel.minimized .tour-footer { display: none; }
+            .tour-reset {
+                font-size: 10px;
+                color: #64748B;
+                background: none;
+                border: none;
+                cursor: pointer;
+                padding: 4px 8px;
+                border-radius: 4px;
+            }
+            .tour-reset:hover { color: #EF4444; background: rgba(239,68,68,0.1); }
+            .tour-done-msg { font-size: 11px; color: #10B981; font-weight: 600; }
+            
+            /* All done state */
+            #guided-tour-panel.all-done .tour-header {
+                background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            }
+            
+            /* Spotlight overlay */
+            #tour-spotlight-overlay {
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(0,0,0,0.7);
+                z-index: 99998;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s;
+            }
+            #tour-spotlight-overlay.active {
+                opacity: 1;
+                pointer-events: auto;
+            }
+            
+            /* Spotlight cutout */
+            .tour-spotlight {
+                position: absolute;
+                border: 3px solid #0D9488;
+                border-radius: 12px;
+                box-shadow: 0 0 0 9999px rgba(0,0,0,0.7), 0 0 30px rgba(13,148,136,0.6);
+                animation: spotlight-pulse 1.5s ease-in-out infinite;
+                z-index: 99999;
+            }
+            @keyframes spotlight-pulse {
+                0%, 100% { box-shadow: 0 0 0 9999px rgba(0,0,0,0.7), 0 0 30px rgba(13,148,136,0.6); }
+                50% { box-shadow: 0 0 0 9999px rgba(0,0,0,0.7), 0 0 50px rgba(13,148,136,0.9); }
+            }
+            
+            /* Tooltip */
+            .tour-tooltip {
+                position: absolute;
+                background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
+                color: white;
+                padding: 14px 18px;
+                border-radius: 12px;
+                max-width: 280px;
+                font-size: 13px;
+                line-height: 1.4;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+                z-index: 100000;
+            }
+            .tour-tooltip::after {
+                content: '';
+                position: absolute;
+                border: 8px solid transparent;
+            }
+            .tour-tooltip.above::after {
+                bottom: -16px;
+                left: 50%;
+                transform: translateX(-50%);
+                border-top-color: #0D9488;
+            }
+            .tour-tooltip.below::after {
+                top: -16px;
+                left: 50%;
+                transform: translateX(-50%);
+                border-bottom-color: #0D9488;
+            }
+            .tour-tooltip-text { margin-bottom: 10px; font-weight: 500; }
+            .tour-tooltip-action {
+                font-size: 11px;
+                opacity: 0.8;
+            }
+            .tour-tooltip-close {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                background: rgba(0,0,0,0.2);
+                border: none;
+                color: white;
+                width: 22px;
+                height: 22px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .tour-tooltip-close:hover { background: rgba(0,0,0,0.4); }
+        `;
+        
+        // =====================================================================
+        // SPOTLIGHT / GUIDED TOUR
+        // =====================================================================
+        let spotlightActive = false;
+        
+        function showSpotlight(itemId) {
+            const item = ALL_ITEMS[itemId];
+            if (!item) return;
+            
+            // Switch tab if needed
+            if (item.tab === 'programs') {
+                const programsTab = document.querySelector('[data-tab="programs"], [onclick*="programs"]');
+                if (programsTab) programsTab.click();
+                setTimeout(() => doSpotlight(item), 300);
+            } else if (item.tab === 'dashboard') {
+                const dashTab = document.querySelector('[data-tab="dashboard"], [onclick*="dashboard"]');
+                if (dashTab) dashTab.click();
+                setTimeout(() => doSpotlight(item), 300);
+            } else {
+                doSpotlight(item);
+            }
+        }
+        
+        function doSpotlight(item) {
+            // Find target element
+            const targets = item.target.split(',').map(s => s.trim());
+            let targetEl = null;
+            for (const sel of targets) {
+                targetEl = document.querySelector(sel);
+                if (targetEl) break;
+            }
+            
+            if (!targetEl) {
+                // Couldn't find element - show notification instead
+                if (typeof showNotification === 'function') {
+                    showNotification('💡 ' + item.hint, 'info');
+                }
+                return;
+            }
+            
+            // Create overlay if needed
+            let overlay = document.getElementById('tour-spotlight-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'tour-spotlight-overlay';
+                document.body.appendChild(overlay);
+                overlay.onclick = hideSpotlight;
+            }
+            
+            // Get element position
+            const rect = targetEl.getBoundingClientRect();
+            const padding = 8;
+            
+            // Create spotlight
+            const spotlight = document.createElement('div');
+            spotlight.className = 'tour-spotlight';
+            spotlight.style.left = (rect.left - padding) + 'px';
+            spotlight.style.top = (rect.top - padding) + 'px';
+            spotlight.style.width = (rect.width + padding * 2) + 'px';
+            spotlight.style.height = (rect.height + padding * 2) + 'px';
+            
+            // Create tooltip
+            const tooltip = document.createElement('div');
+            const isAbove = rect.top > window.innerHeight / 2;
+            tooltip.className = 'tour-tooltip ' + (isAbove ? 'above' : 'below');
+            tooltip.innerHTML = `
+                <button class="tour-tooltip-close" onclick="event.stopPropagation(); window.GuidedTour.hideSpotlight();">✕</button>
+                <div class="tour-tooltip-text">${item.hint}</div>
+                <div class="tour-tooltip-action">👆 Click the highlighted area to complete this step</div>
+            `;
+            
+            // Position tooltip
+            if (isAbove) {
+                tooltip.style.bottom = (window.innerHeight - rect.top + 20) + 'px';
+                tooltip.style.left = Math.max(10, rect.left + rect.width/2 - 140) + 'px';
+            } else {
+                tooltip.style.top = (rect.bottom + 20) + 'px';
+                tooltip.style.left = Math.max(10, rect.left + rect.width/2 - 140) + 'px';
+            }
+            
+            // Clear old and add new
+            overlay.innerHTML = '';
+            overlay.appendChild(spotlight);
+            overlay.appendChild(tooltip);
+            overlay.classList.add('active');
+            spotlightActive = true;
+            
+            // Scroll element into view
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        function hideSpotlight() {
+            const overlay = document.getElementById('tour-spotlight-overlay');
+            if (overlay) {
+                overlay.classList.remove('active');
+                setTimeout(() => overlay.innerHTML = '', 300);
+            }
+            spotlightActive = false;
+        }
+        
+        // =====================================================================
+        // RENDER
+        // =====================================================================
+        function render(state) {
+            const existing = document.getElementById('guided-tour-panel');
+            if (existing) existing.remove();
+            
+            // Inject CSS once
+            if (!document.getElementById('guided-tour-styles')) {
+                const style = document.createElement('style');
+                style.id = 'guided-tour-styles';
+                style.textContent = CSS;
+                document.head.appendChild(style);
+            }
+            
+            const completedCount = Object.values(state.completed).filter(Boolean).length;
+            const totalCount = Object.keys(state.completed).length;
+            const allDone = completedCount === totalCount;
+            
+            const panel = document.createElement('div');
+            panel.id = 'guided-tour-panel';
+            if (state.minimized) panel.classList.add('minimized');
+            if (allDone) panel.classList.add('all-done');
+            
+            let itemsHTML = '';
+            TOUR_ITEMS.forEach(group => {
+                itemsHTML += `<div class="tour-group">
+                    <div class="tour-group-title"><span>${group.icon}</span>${group.group}</div>`;
+                group.items.forEach(item => {
+                    const done = state.completed[item.id];
+                    itemsHTML += `
+                        <div class="tour-item ${done ? 'complete' : ''}" data-id="${item.id}">
+                            <div class="tour-check">${done ? '✓' : ''}</div>
+                            <span class="tour-label">${item.label}</span>
+                            <span class="tour-arrow">→</span>
+                        </div>`;
+                });
+                itemsHTML += '</div>';
+            });
+            
+            panel.innerHTML = `
+                <div class="tour-header">
+                    <span class="tour-icon">🎯</span>
+                    <span class="tour-title">Coach Quick Start</span>
+                    <span class="tour-progress">${completedCount}/${totalCount}</span>
+                    <button class="tour-toggle">${state.minimized ? '▲' : '▼'}</button>
+                </div>
+                <div class="tour-body">${itemsHTML}</div>
+                <div class="tour-footer">
+                    <button class="tour-reset">↺ Reset</button>
+                    ${allDone ? '<span class="tour-done-msg">🎉 All complete!</span>' : ''}
+                </div>
+            `;
+            
+            document.body.appendChild(panel);
+            
+            // Header toggle
+            panel.querySelector('.tour-header').onclick = () => {
+                state.minimized = !state.minimized;
+                saveState(state);
+                render(state);
+            };
+            
+            // Reset button
+            panel.querySelector('.tour-reset').onclick = (e) => {
+                e.stopPropagation();
+                if (confirm('Reset tour progress?')) resetProgress();
+            };
+            
+            // Item clicks - trigger spotlight
+            panel.querySelectorAll('.tour-item').forEach(el => {
+                el.onclick = (e) => {
+                    e.stopPropagation();
+                    const id = el.dataset.id;
+                    if (!el.classList.contains('complete')) {
+                        showSpotlight(id);
+                    }
+                };
+            });
+            
+            console.log('[Guided Tour] Rendered:', completedCount + '/' + totalCount);
+        }
+        
+        // =====================================================================
+        // MARK COMPLETE
+        // =====================================================================
+        function markComplete(itemId) {
+            const state = getState();
+            if (!state.completed[itemId]) {
+                console.log('%c[Guided Tour] ✓ Complete: ' + itemId, 'color: #10B981; font-weight: bold;');
+                state.completed[itemId] = true;
+                saveState(state);
+                
+                // Hide spotlight if active
+                hideSpotlight();
+                
+                // Re-render
+                render(state);
+                
+                // Notification
+                if (typeof showNotification === 'function') {
+                    showNotification('✓ Step completed!', 'success');
+                }
+                
+                // Check all done
+                if (Object.values(state.completed).every(Boolean)) {
+                    setTimeout(() => {
+                        if (typeof showNotification === 'function') {
+                            showNotification('🎉 Quick Start complete! You\'re ready to go!', 'success');
+                        }
+                    }, 600);
+                }
+            }
+        }
+        
+        // =====================================================================
+        // EVENT BINDING
+        // =====================================================================
+        function bindEvents() {
+            // Build event map
+            const eventMap = {};
+            Object.values(ALL_ITEMS).forEach(item => {
+                eventMap[item.event] = item.id;
+            });
+            
+            // Listen on window
+            Object.keys(eventMap).forEach(eventName => {
+                window.addEventListener(eventName, () => {
+                    console.log('[Guided Tour] Event:', eventName);
+                    markComplete(eventMap[eventName]);
+                });
+            });
+            
+            // Also bubble from document
+            Object.keys(eventMap).forEach(eventName => {
+                document.addEventListener(eventName, (e) => {
+                    window.dispatchEvent(new CustomEvent(eventName, { detail: e.detail }));
+                });
+            });
+            
+            console.log('[Guided Tour] Listening for', Object.keys(eventMap).length, 'events');
+        }
+        
+        // =====================================================================
+        // INIT
+        // =====================================================================
+        function init() {
+            if (localStorage.getItem('isLoggedIn') !== 'true') {
+                console.log('[Guided Tour] Not logged in');
+                return;
+            }
+            
+            const state = getState();
+            render(state);
+            bindEvents();
+            
+            console.log('%c[Guided Tour] Ready!', 'background: #10B981; color: white; padding: 4px 12px; border-radius: 4px; font-size: 14px;');
+        }
+        
+        // Start
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => setTimeout(init, 500));
+        } else {
+            setTimeout(init, 500);
+        }
+        
+        // Expose globally
+        window.GuidedTour = { getState, resetProgress, markComplete, showSpotlight, hideSpotlight, render: () => render(getState()) };
+        
+    })();
+    </script>
 </body>
 </html>
 

@@ -14,6 +14,7 @@
   const state = {
     currentView: 'grid',
     selectedProgramId: null,
+    networkProgramId: null,
     compareList: [],
     filters: {},
     sortBy: 'name',
@@ -36,6 +37,7 @@
     dom.clientSelector = document.getElementById('clientSelector');
     dom.toggleBuilderBtn = document.getElementById('toggleBuilderBtn');
     dom.preferencesBtn = document.getElementById('preferencesBtn');
+    dom.mainLayout = document.getElementById('mainLayout');
 
     // Client Context
     dom.clientContext = document.getElementById('clientContext');
@@ -43,6 +45,7 @@
 
     // Filter Rail
     dom.filterRail = document.getElementById('filterRail');
+    dom.filterSearch = document.getElementById('filterSearch');
     dom.locFilters = document.getElementById('locFilters');
     dom.stateFilter = document.getElementById('stateFilter');
     dom.ageMin = document.getElementById('ageMin');
@@ -60,6 +63,7 @@
     dom.resultsTableBody = document.getElementById('resultsTableBody');
     dom.emptyState = document.getElementById('emptyState');
     dom.sortSelect = document.getElementById('sortSelect');
+    dom.mapEmptyState = document.getElementById('mapEmptyState');
 
     // Map
     dom.mapLegend = document.getElementById('mapLegend');
@@ -67,6 +71,21 @@
     dom.radiusSlider = document.getElementById('radiusSlider');
     dom.radiusValue = document.getElementById('radiusValue');
     dom.radiusPresets = document.getElementById('radiusPresets');
+    dom.mapContextPanel = document.getElementById('mapContextPanel');
+    dom.mapContextEmpty = document.getElementById('mapContextEmptyState');
+    dom.mapContextContent = document.getElementById('mapContextContent');
+    dom.mapContextLoc = document.getElementById('mapContextLoc');
+    dom.mapContextName = document.getElementById('mapContextName');
+    dom.mapContextLocation = document.getElementById('mapContextLocation');
+    dom.mapContextAges = document.getElementById('mapContextAges');
+    dom.mapContextFormat = document.getElementById('mapContextFormat');
+    dom.mapContextInsurance = document.getElementById('mapContextInsurance');
+    dom.mapContextTags = document.getElementById('mapContextTags');
+    dom.mapContextClient = document.getElementById('mapContextClient');
+    dom.mapContextAddBtn = document.getElementById('mapContextAddBtn');
+    dom.mapContextExplore = document.getElementById('mapContextExploreNetwork');
+    dom.mapContextOpenProfile = document.getElementById('mapContextOpenProfile');
+    dom.mapContextClose = document.getElementById('mapContextClose');
 
     // Builder
     dom.builderPane = document.getElementById('builderPane');
@@ -79,6 +98,11 @@
     dom.profileModal = document.getElementById('profileModal');
     dom.preferencesModal = document.getElementById('preferencesModal');
     dom.kipuModal = document.getElementById('kipuModal');
+    dom.networkModal = document.getElementById('networkModal');
+    dom.networkModalTitle = document.getElementById('networkModalTitle');
+    dom.networkModalSummary = document.getElementById('networkModalSummary');
+    dom.networkModalList = document.getElementById('networkModalList');
+    dom.networkModalClose = document.getElementById('networkModalClose');
   }
 
   // ============================================================================
@@ -89,6 +113,7 @@
     console.log('🚀 Initializing App Controller...');
 
     cacheDom();
+    updateMapContextClientLabel();
     
     // CRITICAL: Ensure all modals are hidden on load
     hideAllModals();
@@ -239,6 +264,7 @@
   function bindEvents() {
     // Search
     dom.globalSearch?.addEventListener('input', debounce(handleSearch, 300));
+    dom.filterSearch?.addEventListener('input', debounce(handleFilterSearch, 300));
 
     // Client selector
     dom.clientSelector?.addEventListener('change', handleClientChange);
@@ -348,6 +374,7 @@
     document.getElementById('mapCenterClient')?.addEventListener('click', () => window.ccMapController?.centerOnHome());
     document.getElementById('mapToggleTiles')?.addEventListener('click', handleToggleTiles);
     document.getElementById('mapFullscreen')?.addEventListener('click', () => window.ccMapController?.enterFullscreen());
+    document.getElementById('mapFitBounds')?.addEventListener('click', () => window.ccMapController?.fitToMarkers());
     document.getElementById('showAllLoc')?.addEventListener('click', () => {
       window.ccMapController?.showAllLOC();
       updateLegend();
@@ -380,11 +407,51 @@
     dom.kipuModal?.addEventListener('click', (e) => {
       if (e.target === dom.kipuModal) closeKipuModal();
     });
+    
+    dom.mapContextAddBtn?.addEventListener('click', handleMapContextAdd);
+    dom.mapContextExplore?.addEventListener('click', handleNetworkExplore);
+    dom.mapContextOpenProfile?.addEventListener('click', handleMapContextOpenProfile);
+    dom.mapContextClose?.addEventListener('click', () => setMapContextPanelVisibility(false));
+    
+    dom.networkModalClose?.addEventListener('click', closeNetworkModal);
+    dom.networkModal?.addEventListener('click', (e) => {
+      if (e.target === dom.networkModal) closeNetworkModal();
+    });
+    dom.networkModalList?.addEventListener('click', handleNetworkModalListClick);
 
     // Program events
-    window.addEventListener('ccmap:programSelected', (e) => {
-      openProfile(e.detail.program);
-    });
+    window.addEventListener('ccmap:programSelected', handleMapProgramSelected);
+    window.addEventListener('ccmap:programDeselected', () => clearMapContextPanel());
+    window.addEventListener('ccmap:markersRendered', updateLegend);
+    
+    // Map panel toggles
+    document.getElementById('mapLeftPanelToggle')?.addEventListener('click', toggleLeftMapPanel);
+    document.getElementById('mapRightPanelToggle')?.addEventListener('click', toggleRightMapPanel);
+  }
+  
+  // ============================================================================
+  // MAP PANEL TOGGLES
+  // ============================================================================
+  
+  function toggleLeftMapPanel() {
+    const filterRail = document.getElementById('filterRail');
+    const toggleBtn = document.getElementById('mapLeftPanelToggle');
+    
+    if (filterRail && toggleBtn) {
+      filterRail.classList.toggle('map-panel--open');
+      toggleBtn.classList.toggle('map-panel--open');
+    }
+  }
+  
+  function toggleRightMapPanel() {
+    const builderPane = document.getElementById('builderPane');
+    const toggleBtn = document.getElementById('mapRightPanelToggle');
+    
+    if (builderPane && toggleBtn) {
+      builderPane.classList.toggle('map-panel--open');
+      builderPane.classList.remove('hidden');
+      toggleBtn.classList.toggle('map-panel--open');
+    }
   }
 
   // ============================================================================
@@ -461,6 +528,11 @@
       dom.clientContext.hidden = true;
       const mapCenterBtn = document.getElementById('mapCenterClient');
       if (mapCenterBtn) mapCenterBtn.disabled = true;
+      updateMapContextClientLabel();
+      if (state.selectedProgramId) {
+        const selectedProgram = window.ccPrograms?.byId(state.selectedProgramId);
+        if (selectedProgram) updateMapContextActionState(selectedProgram);
+      }
       return;
     }
 
@@ -489,6 +561,11 @@
     if (client) {
       state.currentClient = client;
       updateClientContext(client);
+      updateMapContextClientLabel();
+      if (state.selectedProgramId) {
+        const selectedProgram = window.ccPrograms?.byId(state.selectedProgramId);
+        if (selectedProgram) updateMapContextActionState(selectedProgram);
+      }
       // Don't show the client context panel - just update the document builder
       // User can click a button to see full client context if needed
       // dom.clientContext.hidden = false;
@@ -651,6 +728,7 @@
 
   function switchView(viewId) {
     state.currentView = viewId;
+    const isMapView = viewId === 'map';
 
     // Update buttons
     document.querySelectorAll('[data-view]').forEach(btn => {
@@ -661,19 +739,40 @@
     dom.resultsGrid.hidden = viewId !== 'grid';
     dom.resultsRows.hidden = viewId !== 'rows';
     dom.resultsCompare.hidden = viewId !== 'compare';
-    dom.resultsMap.hidden = viewId !== 'map';
+    dom.resultsMap.hidden = !isMapView;
+
+    document.body.classList.toggle('cc-map-immersive', isMapView);
+    dom.mainLayout?.classList.toggle('main-layout--immersive-map', isMapView);
+    dom.filterRail?.classList.toggle('filter-rail--map-mode', isMapView);
+
+    if (isMapView) {
+      dom.mapContextPanel?.removeAttribute('hidden');
+      setMapContextPanelVisibility(true);
+    } else if (dom.mapContextPanel) {
+      dom.mapContextPanel.setAttribute('hidden', 'hidden');
+      setMapContextPanelVisibility(false);
+      clearMapContextPanel(true);
+    }
 
     // Initialize map if needed
-    if (viewId === 'map' && !state.mapInitialized) {
+    if (isMapView && !state.mapInitialized) {
       initMap();
     }
 
     // Update layout
-    dom.builderPane.classList.toggle('hidden', viewId === 'map');
+    dom.builderPane?.classList.toggle('hidden', isMapView);
 
     // Render appropriate view
-    if (viewId === 'map') {
+    if (isMapView) {
       renderMap();
+      // Give layout a tick to settle, then refresh Leaflet sizing for a steadier transition
+      setTimeout(() => {
+        try {
+          window.ccMapController?.getMap()?.invalidateSize();
+        } catch (e) {
+          console.warn('Map invalidateSize failed:', e);
+        }
+      }, 50);
     } else if (viewId === 'compare') {
       renderCompare();
     } else {
@@ -1127,12 +1226,208 @@ function createUniversalCard(program) {
 
     const programs = getFilteredPrograms();
     window.ccMapController?.renderMarkers(programs);
+    if (dom.mapEmptyState) {
+      dom.mapEmptyState.hidden = programs.length > 0;
+    }
+    if (state.selectedProgramId && !programs.some(p => p.id === state.selectedProgramId)) {
+      clearMapContextPanel(true);
+    }
 
     // Show home location if set
     const home = window.ccPrograms?.getHomeLocation();
     if (home) {
       window.ccMapController?.showHomeLocation(home.lat, home.lng);
     }
+  }
+
+  function setMapContextPanelVisibility(shouldShow) {
+    if (!dom.mapContextPanel) return;
+    if (shouldShow) {
+      dom.mapContextPanel.classList.add('map-context-panel--visible');
+    } else {
+      dom.mapContextPanel.classList.remove('map-context-panel--visible');
+    }
+  }
+
+  function handleMapProgramSelected(event) {
+    const program = event.detail?.program;
+    if (!program) return;
+    state.selectedProgramId = program.id;
+    populateMapContextPanel(program);
+    setMapContextPanelVisibility(true);
+  }
+
+  function populateMapContextPanel(program) {
+    if (!dom.mapContextPanel || !dom.mapContextContent) return;
+    if (dom.mapContextEmpty) dom.mapContextEmpty.hidden = true;
+    dom.mapContextContent.hidden = false;
+
+    const networkMeta = getNetworkMeta(program);
+    const locColor = window.ccMapIcons?.colors?.[program.primaryLOC] || '#6E7BFF';
+    if (dom.mapContextLoc) {
+      dom.mapContextLoc.textContent = program.isUmbrellaParent ? 'Network' : (program.primaryLOC || 'Program');
+      dom.mapContextLoc.style.background = `${locColor}26`;
+      dom.mapContextLoc.style.color = locColor;
+    }
+    if (dom.mapContextName) dom.mapContextName.textContent = program.name || 'Program';
+    if (dom.mapContextLocation) dom.mapContextLocation.textContent = getProgramLocationText(program, networkMeta);
+    if (dom.mapContextAges) dom.mapContextAges.textContent = formatAgeRange(program);
+    if (dom.mapContextFormat) dom.mapContextFormat.textContent = formatProgramFormat(program);
+    if (dom.mapContextInsurance) dom.mapContextInsurance.textContent = formatInsurance(program);
+    if (dom.mapContextTags) {
+      const tags = getCardTags(program);
+      dom.mapContextTags.innerHTML = tags.slice(0, 5).map(tag => `<span>${tag}</span>`).join('');
+    }
+    if (dom.mapContextExplore) {
+      dom.mapContextExplore.hidden = !program.isUmbrellaParent;
+    }
+    updateMapContextClientLabel();
+    updateMapContextActionState(program);
+  }
+
+  function updateMapContextActionState(program) {
+    if (!dom.mapContextAddBtn || !program) return;
+    const isAdded = isProgramAdded(program.id);
+    const isNetwork = Boolean(program.isUmbrellaParent);
+    dom.mapContextAddBtn.disabled = isAdded || isNetwork;
+    if (isNetwork) {
+      dom.mapContextAddBtn.textContent = 'Explore network to add';
+    } else if (isAdded) {
+      dom.mapContextAddBtn.textContent = 'Already in Aftercare Plan';
+    } else {
+      const clientInitials = state.currentClient?.initials || 'Client';
+      dom.mapContextAddBtn.textContent = `+ Add to ${clientInitials}'s Options`;
+    }
+  }
+
+  function updateMapContextClientLabel() {
+    if (!dom.mapContextClient) return;
+    if (!state.currentClient) {
+      dom.mapContextClient.textContent = 'No client selected • Choose a client to personalize recommendations.';
+      return;
+    }
+    const initials = state.currentClient.initials || 'Client';
+    const house = state.currentClient.houseId 
+      ? ` • ${state.currentClient.houseId.replace('house_', '').toUpperCase()}`
+      : '';
+    dom.mapContextClient.textContent = `Working on ${initials}${house}`;
+  }
+
+  function clearMapContextPanel(resetSelection = false) {
+    if (resetSelection) {
+      state.selectedProgramId = null;
+    }
+    if (dom.mapContextEmpty) dom.mapContextEmpty.hidden = false;
+    if (dom.mapContextContent) dom.mapContextContent.hidden = true;
+    updateMapContextClientLabel();
+  }
+
+  function handleMapContextAdd() {
+    if (!state.selectedProgramId) return;
+    window.ccDocumentModel?.addProgram('simple', state.selectedProgramId);
+    updateBuilderUI();
+    const program = window.ccPrograms?.byId(state.selectedProgramId);
+    if (program) {
+      updateMapContextActionState(program);
+      window.showNotification?.('Program added to Aftercare Options', 'success');
+    }
+  }
+
+  function handleMapContextOpenProfile() {
+    if (!state.selectedProgramId) return;
+    const program = window.ccPrograms?.byId(state.selectedProgramId);
+    if (program) {
+      openProfile(program);
+    }
+  }
+
+  function handleNetworkExplore() {
+    if (!state.selectedProgramId) return;
+    const program = window.ccPrograms?.byId(state.selectedProgramId);
+    if (program?.isUmbrellaParent) {
+      openNetworkModal(program);
+    }
+  }
+
+  function openNetworkModal(program) {
+    if (!dom.networkModal || !dom.networkModalList) return;
+    const networkMeta = getNetworkMeta(program);
+    const children = networkMeta?.children || [];
+    state.networkProgramId = program.id;
+    if (dom.networkModalTitle) dom.networkModalTitle.textContent = program.name || 'Network';
+    if (dom.networkModalSummary) {
+      const states = networkMeta?.childStates?.size || 0;
+      dom.networkModalSummary.textContent = `${children.length} program${children.length === 1 ? '' : 's'} • ${states} state${states === 1 ? '' : 's'}`;
+    }
+    dom.networkModalList.innerHTML = children.map(child => `
+      <div class="network-modal__card">
+        <div>
+          <h4>${child.name}</h4>
+          <p class="network-modal__location">${getProgramLocationText(child)}</p>
+        </div>
+        <div class="network-modal__card-actions">
+          <button type="button" class="btn btn--primary" data-network-add="${child.id}">Add to Options</button>
+          <button type="button" class="btn btn--secondary" data-network-focus="${child.id}">View on Map</button>
+        </div>
+      </div>
+    `).join('') || '<p>No locations available.</p>';
+    dom.networkModal.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeNetworkModal() {
+    if (!dom.networkModal) return;
+    dom.networkModal.hidden = true;
+    document.body.style.overflow = '';
+    state.networkProgramId = null;
+  }
+
+  function handleNetworkModalListClick(event) {
+    const button = event.target.closest('button');
+    if (!button) return;
+    const addId = button.dataset.networkAdd;
+    const focusId = button.dataset.networkFocus;
+    if (addId) {
+      window.ccDocumentModel?.addProgram('simple', addId);
+      updateBuilderUI();
+      window.showNotification?.('Program added to Aftercare Options', 'success');
+      updateMapContextActionState(window.ccPrograms?.byId(state.selectedProgramId));
+    } else if (focusId) {
+      closeNetworkModal();
+      switchView('map');
+      window.ccMapController?.selectProgram(focusId);
+    }
+  }
+
+  function formatAgeRange(program) {
+    const min = program.ageMin ?? program.minAge ?? '';
+    const max = program.ageMax ?? program.maxAge ?? '';
+    if (!min && !max) return '--';
+    return `${min || '?'}-${max || '?'}`;
+  }
+
+  function formatProgramFormat(program) {
+    if (Array.isArray(program.format) && program.format.length) {
+      return program.format.join(', ');
+    }
+    if (program.format) return program.format;
+    if (Array.isArray(program.levelOfCare) && program.levelOfCare.length) {
+      return program.levelOfCare.join(', ');
+    }
+    return '--';
+  }
+
+  function formatInsurance(program) {
+    if (Array.isArray(program.insuranceAccepted) && program.insuranceAccepted.length) {
+      return program.insuranceAccepted.slice(0, 3).join(', ');
+    }
+    if (program.acceptsInsurance === false) {
+      return 'Private pay';
+    }
+    if (program.insuranceNotes) {
+      return program.insuranceNotes;
+    }
+    return 'Case-by-case';
   }
 
   function updateLegend() {
@@ -1284,8 +1579,23 @@ function createUniversalCard(program) {
   }
 
   function handleSearch() {
-    state.filters.search = dom.globalSearch.value.trim() || undefined;
+    const value = dom.globalSearch.value.trim();
+    state.filters.search = value || undefined;
+    if (dom.filterSearch && dom.filterSearch.value !== dom.globalSearch.value) {
+      dom.filterSearch.value = dom.globalSearch.value;
+    }
     renderPrograms();
+    if (state.currentView === 'map') {
+      renderMap();
+    }
+  }
+
+  function handleFilterSearch() {
+    if (!dom.filterSearch) return;
+    if (dom.globalSearch) {
+      dom.globalSearch.value = dom.filterSearch.value;
+    }
+    handleSearch();
   }
 
   function clearFilterGroup(group) {
@@ -1304,6 +1614,7 @@ function createUniversalCard(program) {
     dom.ageMin.value = '';
     dom.ageMax.value = '';
     dom.globalSearch.value = '';
+    if (dom.filterSearch) dom.filterSearch.value = '';
     state.filters = {};
     renderPrograms();
   }
@@ -1362,6 +1673,13 @@ function createUniversalCard(program) {
 
   function openProfile(program) {
     if (!program || !dom.profileModal) return;
+    
+    // Emit event for onboarding checklist
+    if (window.OnboardingEvents) {
+      OnboardingEvents.emit('cc:programs:profileOpened', { programId: program.id, programName: program.name });
+    }
+    window.dispatchEvent(new CustomEvent('cc:programs:profileOpened', { detail: { programId: program.id, programName: program.name } }));
+    console.log('[Programs] Emitted cc:programs:profileOpened to window');
     
     state.selectedProgramId = program.id;
 
@@ -2564,6 +2882,13 @@ function createUniversalCard(program) {
       </html>
     `);
     previewWin.document.close();
+    
+    // Emit event for onboarding checklist
+    if (window.OnboardingEvents?.emit) {
+      OnboardingEvents.emit('cc:doc:previewed', { timestamp: Date.now() });
+    }
+    window.dispatchEvent(new CustomEvent('cc:doc:previewed', { detail: { timestamp: Date.now() } }));
+    console.log('[Document] Emitted cc:doc:previewed to window');
   }
 
   async function exportDocument() {

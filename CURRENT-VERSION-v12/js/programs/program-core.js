@@ -239,6 +239,13 @@
           criteria 
         }
       }));
+      
+      // Emit event for onboarding checklist
+      if (window.OnboardingEvents) {
+        OnboardingEvents.emit('cc:programs:filterApplied', { count: results.length, criteria });
+      }
+      window.dispatchEvent(new CustomEvent('cc:programs:filterApplied', { detail: { count: results.length, criteria } }));
+      console.log('[Programs] Emitted cc:programs:filterApplied to window');
 
       return results;
     },
