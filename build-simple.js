@@ -10,7 +10,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 const CONFIG = {
-    version: '4.0.0',
+    version: '13.0.0-beta.1',
     originalFile: 'CURRENT-VERSION-v12/CareConnect-Pro.html',
     outputFile: 'dist/CareConnect-Pro.html',
     enhancementsDir: 'enhancements',

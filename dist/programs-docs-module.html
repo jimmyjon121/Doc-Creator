@@ -9,34 +9,78 @@
   <link rel="stylesheet" href="libs/leaflet.css">
   <link rel="stylesheet" href="css/programs-explorer.css">
   
-  <!-- Leaflet Marker Cluster CSS (optional) -->
+  <!-- Leaflet Marker Cluster CSS -->
   <style>
-    .marker-cluster-small { background-color: rgba(110, 123, 255, 0.6); }
-    .marker-cluster-small div { background-color: rgba(110, 123, 255, 0.8); }
-    .marker-cluster-medium { background-color: rgba(110, 123, 255, 0.6); }
-    .marker-cluster-medium div { background-color: rgba(110, 123, 255, 0.8); }
-    .marker-cluster-large { background-color: rgba(110, 123, 255, 0.6); }
-    .marker-cluster-large div { background-color: rgba(110, 123, 255, 0.8); }
-    .marker-cluster {
-            border-radius: 50%;
-            text-align: center;
+    /* Cluster icons - using custom SVG icons */
+    .cc-map-cluster {
+      transition: transform 0.15s ease-out;
+      cursor: pointer;
+    }
+    .cc-map-cluster:hover {
+      transform: scale(1.1);
+      z-index: 1000 !important;
+    }
+    
+    /* Spiderfy animation */
+    .leaflet-cluster-anim .leaflet-marker-icon,
+    .leaflet-cluster-anim .leaflet-marker-shadow {
+      transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    }
+    
+    /* Spider legs (connecting lines) */
+    .leaflet-cluster-spider-leg {
+      transition: stroke-dashoffset 0.3s ease-out;
+    }
+    
+    /* Fallback for basic cluster styles if custom icon doesn't load */
+    .marker-cluster-small,
+    .marker-cluster-medium,
+    .marker-cluster-large {
+      background-color: rgba(110, 123, 255, 0.5);
+      border: 3px solid rgba(110, 123, 255, 0.8);
+      border-radius: 50%;
       color: white;
       font-weight: bold;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
-    .marker-cluster div {
-      width: 30px;
-      height: 30px;
-      margin-left: 5px;
-      margin-top: 5px;
-            border-radius: 50%;
-      line-height: 30px;
-    }
+    .marker-cluster-small { width: 30px; height: 30px; line-height: 30px; font-size: 12px; }
+    .marker-cluster-medium { width: 40px; height: 40px; line-height: 40px; font-size: 14px; }
+    .marker-cluster-large { width: 50px; height: 50px; line-height: 50px; font-size: 16px; }
+    
     /* Tooltip override */
     .cc-map-tooltip {
-            padding: 8px 12px;
+      padding: 8px 12px;
       font-family: var(--font-sans, system-ui);
-        }
-    </style>
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Dark mode for tooltips */
+    @media (prefers-color-scheme: dark) {
+      .cc-map-tooltip {
+        background: #1f2937;
+        color: #f3f4f6;
+        border: 1px solid #374151;
+      }
+      .cc-map-tooltip::before {
+        border-top-color: #1f2937 !important;
+      }
+    }
+  </style>
+  <!-- Light mode border removal -->
+  <style>
+    html, body, body.programs-module {
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    /* Remove any potential blue border from parent embedding */
+    body.programs-module {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
 </head>
 <body class="programs-module">
 
@@ -147,6 +191,25 @@
         <h2 class="filter-rail__title">Filters</h2>
         <button id="clearAllFilters" class="filter-rail__clear">Clear All</button>
                 </div>
+      
+      <!-- View Switcher (visible in map mode) -->
+      <div class="filter-rail__views" id="filterViewSwitcher">
+        <div class="filter-rail__views-label">Switch View</div>
+        <div class="filter-rail__views-buttons">
+          <button class="filter-rail__view-btn" data-view="grid" title="Card View">
+            <span>🃏</span> Cards
+          </button>
+          <button class="filter-rail__view-btn" data-view="rows" title="Column View">
+            <span>📋</span> Rows
+          </button>
+          <button class="filter-rail__view-btn" data-view="compare" title="Compare View">
+            <span>⚖️</span> Compare
+          </button>
+          <button class="filter-rail__view-btn filter-rail__view-btn--active" data-view="map" title="Map View">
+            <span>🗺️</span> Map
+          </button>
+        </div>
+      </div>
       
       <!-- LOC Filter -->
       <div class="filter-group" data-filter-type="loc">
@@ -346,15 +409,16 @@
           <button class="map-controls__btn" id="mapFullscreen" title="Fullscreen">⛶</button>
         </div>
         
-        <!-- Panel Toggle Tabs (edge handles) -->
-        <button class="map-panel-toggle map-panel-toggle--left" id="mapLeftPanelToggle" title="Filters" aria-label="Toggle filters panel">
-          FILTERS
-        </button>
-        <button class="map-panel-toggle map-panel-toggle--right" id="mapRightPanelToggle" title="Builder" aria-label="Toggle builder panel">
-          BUILDER
-        </button>
       </div>
     </section>
+    
+    <!-- Panel Toggle Tabs (edge handles) - OUTSIDE resultsMap for better event handling -->
+    <button class="map-panel-toggle map-panel-toggle--left" id="mapLeftPanelToggle" title="Filters" aria-label="Toggle filters panel">
+      FILTERS
+    </button>
+    <button class="map-panel-toggle map-panel-toggle--right" id="mapRightPanelToggle" title="Builder" aria-label="Toggle builder panel">
+      BUILDER
+    </button>
     
     <!-- BUILDER PANE -->
     <aside class="builder-pane" id="builderPane">
@@ -615,6 +679,8 @@
        ============================================ -->
   <!-- Leaflet -->
   <script src="libs/leaflet.js"></script>
+  <!-- Leaflet Marker Cluster (for grouping nearby pins when zoomed out) -->
+  <script src="libs/leaflet.markercluster.js"></script>
   
   <!-- Program Data Loader -->
   <script src="js/programs-loader.js"></script>

@@ -589,8 +589,7 @@
             // Load dashboard scripts after core scripts
             const dashboardScripts = [
                 'dashboard-manager.js',
-                'dashboard-widgets.js',
-                // 'enhancements/onboarding-integration.js' // REMOVED: Unused
+                'dashboard-widgets.js'
             ];
             return Promise.all(dashboardScripts.map(src => loadScript(src)));
         }).then(() => {
@@ -15933,41 +15932,9 @@ body.dark-mode .stat-label,
             }
         }
         
-        // Ensure tab navigation is visible
+        // Tab navigation stub - drawer navigation is now used
         function ensureTabNavigationVisible() {
-            return; // Disabled - using drawer navigation instead
-            const tabNav = document.querySelector('.tab-navigation');
-            if (!tabNav) {
-                // Tab navigation doesn't exist, create it
-                const programsPanel = document.querySelector('.programs-panel');
-                if (programsPanel) {
-                    const tabNavHTML = `
-                        <div class="tab-navigation">
-                            <button class="tab-btn" data-tab-target="dashboard" onclick="window.switchTab && window.switchTab('dashboard')">
-                                <span>🎯 Dashboard</span>
-                            </button>
-                            <button class="tab-btn active" data-tab-target="programs" onclick="window.switchTab && window.switchTab('programs')">
-                                <span>📑 Programs &amp; Docs</span>
-                            </button>
-                            <button class="tab-btn" data-tab-target="clients" onclick="window.switchTab && window.switchTab('clients')">
-                                <span>👥 Clients</span>
-                            </button>
-                        </div>
-                    `;
-                    // Insert at the beginning of programs-panel
-                    programsPanel.insertAdjacentHTML('afterbegin', tabNavHTML);
-                    document.body.classList.add('tab-nav-fallback');
-                    console.log('✅ Tab navigation created dynamically');
-                }
-            } else {
-                // Ensure fallback visibility is enabled
-                document.body.classList.add('tab-nav-fallback');
-                tabNav.style.display = '';
-                tabNav.style.visibility = '';
-                tabNav.style.zIndex = '';
-                tabNav.style.position = '';
-                console.log('✅ Tab navigation fallback activated');
-            }
+            // No-op: drawer navigation replaced tab navigation
         }
         
         // Initialize Client Tracker (for backward compatibility)
@@ -25295,17 +25262,6 @@ body.dark-mode .stat-label,
     </style>
 </head>
 <body>
-    
-    <!-- AUTO-LOGIN DISABLED FOR PRODUCTION -->
-    <script>
-        // Disabled: do not auto-login in production
-        (function(){ /* intentionally empty */ })();
-    </script>
-    <!-- END AUTO-LOGIN (DISABLED) -->
-    
-    
-                <!-- LEGACY MAP TOGGLE BUTTON REMOVED - Non-functional, used old purple gradient -->
-    
     <!-- Login Screen -->
     <div id="loginScreen" class="auth-screen">
         <div class="auth-orb auth-orb--1"></div>

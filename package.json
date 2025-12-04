@@ -1,6 +1,6 @@
 {
   "name": "careconnect-pro",
-  "version": "4.0.0",
+  "version": "13.0.0-beta.1",
   "description": "Professional Aftercare Document Builder - Modular Build System",
   "scripts": {
     "build": "node build-simple.js && npm run map:build",
