@@ -286,6 +286,7 @@ class OnboardingIntro {
     }
 
     updateProgress(percent) {
+        if (!this.container) return;
         const fill = this.container.querySelector('.progress-fill');
         if (fill) fill.style.width = `${percent}%`;
     }
@@ -393,6 +394,7 @@ class OnboardingIntro {
     }
 
     showSubtitle(text) {
+        if (!this.container) return;
         const subtitleEl = this.container.querySelector('.subtitle-text');
         if (!subtitleEl) return;
         
@@ -402,6 +404,7 @@ class OnboardingIntro {
     }
 
     hideSubtitle() {
+        if (!this.container) return;
         const subtitleEl = this.container.querySelector('.subtitle-text');
         if (!subtitleEl) return;
         
@@ -443,38 +446,48 @@ class OnboardingIntro {
     // ═══════════════════════════════════════════════════════════════
 
     async playDirectorsCut() {
+        if (!this.container) {
+            console.warn('[Intro] Container not available, completing intro early');
+            this.complete();
+            return;
+        }
+        
         const stage = this.container.querySelector('.layer-stage');
         
-        // Scene 1: The Chaos (Problem Statement)
-        this.updateProgress(0);
-        await this.sceneChaosToOrder(stage);
-        
-        // Scene 2: The Sanctuary (Dashboard Overview)
-        this.updateProgress(12);
-        await this.sceneSanctuary(stage);
-        
-        // Scene 3: Program Database (Cinematic Showcase)
-        this.updateProgress(24);
-        await this.sceneProgramDatabase(stage);
-        
-        // Scene 4: The Map (Geographic Discovery)
-        this.updateProgress(36);
-        await this.sceneTheWorld(stage);
-        
-        // Scene 5: Document Builder
-        this.updateProgress(48);
-        await this.sceneDocumentBuilder(stage);
-        
-        // Scene 6: The Safety Net (Tracking & Compliance)
-        this.updateProgress(62);
-        await this.sceneSafetyNet(stage);
-        
-        // Scene 7: Transcendence (Finale)
-        this.updateProgress(85);
-        await this.sceneTranscendence(stage);
-        
-        this.updateProgress(100);
-        this.complete();
+        try {
+            // Scene 1: The Chaos (Problem Statement)
+            this.updateProgress(0);
+            await this.sceneChaosToOrder(stage);
+            
+            // Scene 2: The Sanctuary (Dashboard Overview)
+            this.updateProgress(12);
+            await this.sceneSanctuary(stage);
+            
+            // Scene 3: Program Database (Cinematic Showcase)
+            this.updateProgress(24);
+            await this.sceneProgramDatabase(stage);
+            
+            // Scene 4: The Map (Geographic Discovery)
+            this.updateProgress(36);
+            await this.sceneTheWorld(stage);
+            
+            // Scene 5: Document Builder
+            this.updateProgress(48);
+            await this.sceneDocumentBuilder(stage);
+            
+            // Scene 6: The Safety Net (Tracking & Compliance)
+            this.updateProgress(62);
+            await this.sceneSafetyNet(stage);
+            // Scene 7: Transcendence (Finale)
+            this.updateProgress(85);
+            await this.sceneTranscendence(stage);
+            
+            this.updateProgress(100);
+            this.complete();
+        } catch (error) {
+            console.warn('[Intro] Scene error, completing intro:', error.message);
+            this.complete();
+        }
     }
 
     // =========================================
@@ -2517,9 +2530,6 @@ class OnboardingIntro {
             duration: 0.4,
             ease: 'power2.out'
         });
-        
-        // Confetti burst
-        tl.call(() => this.fireConfetti(this.canvas));
         
         tl.to(toast, {
             opacity: 0,
@@ -5697,20 +5707,29 @@ class OnboardingIntro {
                     p.vy *= 0.98;
                     
                 } else if (this.mode === 'converge') {
-                    // Aggressively pull toward center point (will be hidden behind logo)
-                    const dx = cx - p.x;
-                    const dy = cy - p.y;
+                    // Pull toward target point (convergeTarget if set, else center)
+                    const targetX = this.convergeTarget ? this.convergeTarget.x : cx;
+                    const targetY = this.convergeTarget ? this.convergeTarget.y : cy;
+                    const dx = targetX - p.x;
+                    const dy = targetY - p.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
                     
-                    // Strong pull - particles should reach center quickly
-                    const force = 0.04 + (1 - Math.min(dist / 300, 1)) * 0.06;
+                    // Strong pull - particles should reach target quickly
+                    // Use stronger force when converging to tour position
+                    const baseForce = this.convergeTarget ? 0.08 : 0.04;
+                    const force = baseForce + (1 - Math.min(dist / 300, 1)) * 0.06;
                     p.vx += dx * force;
                     p.vy += dy * force;
                     p.vx *= 0.88;
                     p.vy *= 0.88;
                     
-                    // Shrink particles as they get closer to center (fade behind logo)
+                    // Shrink particles as they get closer to target
                     p.convergeScale = Math.max(0.1, Math.min(dist / 150, 1));
+                    
+                    // Extra: fade out particles when close to tour target
+                    if (this.convergeTarget && dist < 50) {
+                        p.alpha = Math.max(0, p.alpha - 0.05);
+                    }
                     
                 } else if (this.mode === 'ring') {
                     // Reset scale for ring mode
@@ -5838,33 +5857,314 @@ class OnboardingIntro {
     }
 
     skip() {
-        console.log('[Intro] Skipped');
-        this.cleanup();
-        if (window.OnboardingState) OnboardingState.update({ skippedIntro: true });
-        if (window.OnboardingEvents) OnboardingEvents.emit(OnboardingEvents.EVENTS.INTRO_SKIPPED);
+        console.log('[Intro] Skip requested - showing confirmation');
+        
+        // Show confirmation dialog before skipping
+        this.showSkipConfirmation().then(confirmed => {
+            if (confirmed) {
+                console.log('[Intro] User confirmed skip - transitioning to tour');
+                if (window.OnboardingState) OnboardingState.update({ skippedIntro: true });
+                if (window.OnboardingEvents) OnboardingEvents.emit(OnboardingEvents.EVENTS.INTRO_SKIPPED);
+                
+                // Even when skipping, transition to tour (user cannot escape the tour!)
+                this.complete();
+            } else {
+                console.log('[Intro] User chose to continue watching');
+                // Video continues playing
+            }
+        });
+    }
+    
+    showSkipConfirmation() {
+        return new Promise(resolve => {
+            // Create confirmation overlay
+            const modal = document.createElement('div');
+            modal.id = 'skip-confirm-modal';
+            modal.style.cssText = `
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.85);
+                backdrop-filter: blur(8px);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000001;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            modal.innerHTML = `
+                <div class="skip-confirm-dialog" style="
+                    background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+                    border: 1px solid rgba(13, 148, 136, 0.3);
+                    border-radius: 16px;
+                    padding: 32px;
+                    max-width: 420px;
+                    text-align: center;
+                    box-shadow: 0 25px 80px rgba(0,0,0,0.5), 0 0 40px rgba(13, 148, 136, 0.2);
+                    transform: translateY(20px);
+                    transition: transform 0.3s ease;
+                ">
+                    <div style="
+                        width: 64px;
+                        height: 64px;
+                        background: linear-gradient(135deg, #0D9488, #14B8A6);
+                        border-radius: 16px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin: 0 auto 20px;
+                        box-shadow: 0 8px 24px rgba(13, 148, 136, 0.4);
+                    ">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                        </svg>
+                    </div>
+                    <h3 style="
+                        color: #F8FAFC;
+                        font-size: 22px;
+                        font-weight: 700;
+                        margin: 0 0 12px;
+                        letter-spacing: -0.02em;
+                    ">Skip the Tour Video?</h3>
+                    <p style="
+                        color: #94A3B8;
+                        font-size: 15px;
+                        line-height: 1.6;
+                        margin: 0 0 28px;
+                    ">
+                        You'll still need to complete the <strong style="color: #14B8A6;">interactive walkthrough</strong> 
+                        to learn CareConnect Pro's key features before getting started.
+                    </p>
+                    <div style="display: flex; gap: 12px; justify-content: center;">
+                        <button class="btn-continue" style="
+                            padding: 14px 24px;
+                            background: transparent;
+                            border: 2px solid #475569;
+                            border-radius: 10px;
+                            color: #E2E8F0;
+                            font-size: 15px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                        ">Continue Watching</button>
+                        <button class="btn-skip" style="
+                            padding: 14px 24px;
+                            background: linear-gradient(135deg, #0D9488, #0F766E);
+                            border: none;
+                            border-radius: 10px;
+                            color: white;
+                            font-size: 15px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+                            box-shadow: 0 4px 16px rgba(13, 148, 136, 0.4);
+                        ">Skip to Walkthrough</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Animate in
+            requestAnimationFrame(() => {
+                modal.style.opacity = '1';
+                modal.querySelector('.skip-confirm-dialog').style.transform = 'translateY(0)';
+            });
+            
+            // Button handlers
+            const continueBtn = modal.querySelector('.btn-continue');
+            const skipBtn = modal.querySelector('.btn-skip');
+            
+            // Hover effects
+            continueBtn.addEventListener('mouseenter', () => {
+                continueBtn.style.borderColor = '#0D9488';
+                continueBtn.style.color = '#14B8A6';
+            });
+            continueBtn.addEventListener('mouseleave', () => {
+                continueBtn.style.borderColor = '#475569';
+                continueBtn.style.color = '#E2E8F0';
+            });
+            skipBtn.addEventListener('mouseenter', () => {
+                skipBtn.style.transform = 'translateY(-2px)';
+                skipBtn.style.boxShadow = '0 6px 20px rgba(13, 148, 136, 0.5)';
+            });
+            skipBtn.addEventListener('mouseleave', () => {
+                skipBtn.style.transform = 'translateY(0)';
+                skipBtn.style.boxShadow = '0 4px 16px rgba(13, 148, 136, 0.4)';
+            });
+            
+            // Click handlers
+            continueBtn.addEventListener('click', () => {
+                modal.style.opacity = '0';
+                setTimeout(() => modal.remove(), 300);
+                resolve(false);
+            });
+            
+            skipBtn.addEventListener('click', () => {
+                modal.style.opacity = '0';
+                setTimeout(() => modal.remove(), 300);
+                resolve(true);
+            });
+        });
     }
 
     complete() {
         console.log('[Intro] Complete');
-        this.cleanup();
-        if (window.OnboardingState) OnboardingState.update({ seenIntro: true });
-        if (window.OnboardingEvents) OnboardingEvents.emit(OnboardingEvents.EVENTS.INTRO_COMPLETED);
         
-        // Mark onboarding as complete for first-login flow
-        localStorage.setItem('ccpro-onboarding-complete', 'true');
+        // Create the tour transition effect before cleanup
+        this.transitionToTour().then(() => {
+            if (window.OnboardingState) OnboardingState.update({ seenIntro: true });
+            if (window.OnboardingEvents) OnboardingEvents.emit(OnboardingEvents.EVENTS.INTRO_COMPLETED);
+            
+            // Mark onboarding as complete for first-login flow
+            // Set both global key (for backward compatibility) AND user-specific key
+            localStorage.setItem('ccpro-onboarding-complete', 'true');
+            
+            // Also set user-specific key if username is available
+            try {
+                const username = localStorage.getItem('username');
+                if (username && username !== 'User' && username !== 'anonymous') {
+                    localStorage.setItem(`ccpro-onboarding-complete-${username.toLowerCase()}`, 'true');
+                    localStorage.setItem(`ccpro-profile-complete-${username.toLowerCase()}`, 'true');
+                    console.log(`[Intro] Set user-specific onboarding keys for ${username}`);
+                }
+            } catch (e) {
+                console.warn('[Intro] Could not set user-specific keys:', e);
+            }
+            
+            // Check if agreement still needs to be shown (first-login flow handles navigation)
+            const agreementNeeded = localStorage.getItem('ccpro-agreement-accepted') !== 'true';
+            
+            if (agreementNeeded) {
+                // First-login flow will show agreement and then navigate
+                // Dispatch event so first-login flow knows video is done
+                window.dispatchEvent(new CustomEvent('ccpro:introComplete'));
+                console.log('[Intro] Agreement pending, deferring navigation to first-login flow');
+            } else {
+                // Navigate to dashboard directly (for replay or already-agreed users)
+                this.navigateToDashboard();
+            }
+        });
+    }
+    
+    async transitionToTour() {
+        console.log('[Intro] Starting transition to tour...');
         
-        // Check if agreement still needs to be shown (first-login flow handles navigation)
-        const agreementNeeded = localStorage.getItem('ccpro-agreement-accepted') !== 'true';
+        // Target position: bottom-right corner (where tour panel appears)
+        const targetX = window.innerWidth - 220;
+        const targetY = window.innerHeight - 80;
         
-        if (agreementNeeded) {
-            // First-login flow will show agreement and then navigate
-            // Dispatch event so first-login flow knows video is done
-            window.dispatchEvent(new CustomEvent('ccpro:introComplete'));
-            console.log('[Intro] Agreement pending, deferring navigation to first-login flow');
-        } else {
-            // Navigate to dashboard directly (for replay or already-agreed users)
-            this.navigateToDashboard();
+        // Animate all particles to converge toward the tour panel position
+        if (this.particles && this.particles.length > 0) {
+            this.mode = 'converge';
+            this.convergeTarget = { x: targetX, y: targetY };
+            
+            // Let particles converge for a moment
+            await new Promise(r => setTimeout(r, 800));
         }
+        
+        // Create the tour seed - a glowing orb that will become the tour panel
+        const tourSeed = document.createElement('div');
+        tourSeed.id = 'tour-seed';
+        tourSeed.style.cssText = `
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, ${this.colors.primary}, ${this.colors.secondary});
+            border-radius: 50%;
+            box-shadow: 0 0 40px ${this.colors.primary}, 0 0 80px ${this.colors.primary}40;
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: scale(0);
+            opacity: 0;
+        `;
+        tourSeed.innerHTML = `
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+            </svg>
+        `;
+        document.body.appendChild(tourSeed);
+        
+        // Animate the seed appearing
+        gsap.to(tourSeed, {
+            scale: 1,
+            opacity: 1,
+            duration: 0.5,
+            ease: 'back.out(1.7)'
+        });
+        
+        // Fade out the intro container while keeping the seed
+        if (this.container) {
+            await new Promise(resolve => {
+                gsap.to(this.container, {
+                    opacity: 0,
+                    duration: 0.6,
+                    onComplete: () => {
+                        this.container?.remove();
+                        this.container = null;
+                        resolve();
+                    }
+                });
+            });
+        }
+        
+        // Stop particle animation
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+        if (this.keyHandler) {
+            document.removeEventListener('keydown', this.keyHandler);
+        }
+        
+        // Pulse the seed to draw attention
+        gsap.to(tourSeed, {
+            scale: 1.1,
+            duration: 0.4,
+            yoyo: true,
+            repeat: 2,
+            ease: 'power1.inOut'
+        });
+        
+        // Transform seed into tour indicator shape
+        await new Promise(r => setTimeout(r, 600));
+        
+        gsap.to(tourSeed, {
+            width: 200,
+            height: 60,
+            borderRadius: '14px',
+            duration: 0.4,
+            ease: 'power2.out'
+        });
+        
+        // Update content to show "Tour Starting..."
+        tourSeed.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 12px; padding: 0 16px;">
+                <span style="font-size: 20px;">🎯</span>
+                <div>
+                    <div style="color: white; font-size: 13px; font-weight: 600;">Quick Start Tour</div>
+                    <div style="color: rgba(255,255,255,0.7); font-size: 11px;">Loading...</div>
+                </div>
+            </div>
+        `;
+        
+        await new Promise(r => setTimeout(r, 800));
+        
+        // Fade out the seed - the real tour will take over
+        gsap.to(tourSeed, {
+            opacity: 0,
+            scale: 0.9,
+            duration: 0.3,
+            onComplete: () => tourSeed.remove()
+        });
+        
+        await new Promise(r => setTimeout(r, 300));
+        
+        console.log('[Intro] Transition complete, tour ready to start');
     }
     
     navigateToDashboard() {

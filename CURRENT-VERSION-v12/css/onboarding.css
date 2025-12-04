@@ -821,13 +821,16 @@ body.dark-mode .checklist-complete,
 
 /* ============================================
    TOUR STYLES
+   Note: The interactive tour v3 (interactive-tour.js) injects its own 
+   styles with ID selectors and higher z-index. These class-based styles 
+   are fallback/legacy styles.
    ============================================ */
 
-/* Tour overlay */
+/* Tour overlay - legacy styles */
 .tour-overlay {
     position: fixed;
     inset: 0;
-    z-index: 99998;
+    z-index: 2000000;
     pointer-events: none;
 }
 
@@ -839,7 +842,7 @@ body.dark-mode .checklist-complete,
 /* Tour tooltip */
 .tour-tooltip {
     position: fixed;
-    z-index: 99999;
+    z-index: 2000002;
     width: 360px;
     max-width: calc(100vw - 32px);
     background: var(--onboarding-surface);
@@ -965,7 +968,7 @@ body.dark-mode .checklist-complete,
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 99999;
+    z-index: 2000002;
     width: 480px;
     max-width: calc(100vw - 32px);
     background: var(--onboarding-surface);

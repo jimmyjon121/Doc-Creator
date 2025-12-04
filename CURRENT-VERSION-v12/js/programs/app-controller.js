@@ -383,6 +383,9 @@
       window.ccMapController?.hideAllLOC();
       updateLegend();
     });
+    
+    // Legend toggle (minimize/expand)
+    document.getElementById('toggleLegend')?.addEventListener('click', toggleLegend);
 
     // Radius controls
     dom.radiusSlider?.addEventListener('input', handleRadiusChange);
@@ -424,33 +427,86 @@
     window.addEventListener('ccmap:programDeselected', () => clearMapContextPanel());
     window.addEventListener('ccmap:markersRendered', updateLegend);
     
-    // Map panel toggles
+    // Map panel toggles - direct binding
     document.getElementById('mapLeftPanelToggle')?.addEventListener('click', toggleLeftMapPanel);
     document.getElementById('mapRightPanelToggle')?.addEventListener('click', toggleRightMapPanel);
+    
+    // Fallback: event delegation on document for toggle buttons (in case direct binding fails)
+    document.addEventListener('click', (e) => {
+      const target = e.target.closest('#mapLeftPanelToggle');
+      if (target) {
+        console.log('🔘 Filter toggle clicked via delegation');
+        toggleLeftMapPanel(e);
+        return;
+      }
+      const rightTarget = e.target.closest('#mapRightPanelToggle');
+      if (rightTarget) {
+        console.log('🔘 Builder toggle clicked via delegation');
+        toggleRightMapPanel(e);
+        return;
+      }
+    });
   }
   
   // ============================================================================
   // MAP PANEL TOGGLES
   // ============================================================================
   
-  function toggleLeftMapPanel() {
+  function toggleLeftMapPanel(e) {
+    // Prevent event from bubbling to map
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
+    console.log('📂 toggleLeftMapPanel called');
+    
     const filterRail = document.getElementById('filterRail');
     const toggleBtn = document.getElementById('mapLeftPanelToggle');
     
-    if (filterRail && toggleBtn) {
-      filterRail.classList.toggle('map-panel--open');
-      toggleBtn.classList.toggle('map-panel--open');
+    console.log('📂 filterRail:', filterRail ? 'found' : 'NOT FOUND');
+    console.log('📂 toggleBtn:', toggleBtn ? 'found' : 'NOT FOUND');
+    
+    if (filterRail) {
+      const isOpen = filterRail.classList.toggle('map-panel--open');
+      if (toggleBtn) {
+        toggleBtn.classList.toggle('map-panel--open', isOpen);
+      }
+      console.log(`📂 Filter panel ${isOpen ? 'opened' : 'closed'}, classes:`, filterRail.classList.toString());
+      
+      // Refresh map after panel animation completes
+      if (window.ccMapController?.isInitialized()) {
+        setTimeout(() => {
+          window.ccMapController?.getMap()?.invalidateSize({ animate: false });
+        }, 350);
+      }
+    } else {
+      console.error('❌ Filter rail not found!');
     }
   }
   
-  function toggleRightMapPanel() {
+  function toggleRightMapPanel(e) {
+    // Prevent event from bubbling to map
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     const builderPane = document.getElementById('builderPane');
     const toggleBtn = document.getElementById('mapRightPanelToggle');
     
     if (builderPane && toggleBtn) {
-      builderPane.classList.toggle('map-panel--open');
+      const isOpen = builderPane.classList.toggle('map-panel--open');
       builderPane.classList.remove('hidden');
-      toggleBtn.classList.toggle('map-panel--open');
+      toggleBtn.classList.toggle('map-panel--open', isOpen);
+      console.log(`📝 Builder panel ${isOpen ? 'opened' : 'closed'}`);
+      
+      // Refresh map after panel animation completes
+      if (window.ccMapController?.isInitialized()) {
+        setTimeout(() => {
+          window.ccMapController?.getMap()?.invalidateSize({ animate: false });
+        }, 350);
+      }
     }
   }
 
@@ -730,9 +786,14 @@
     state.currentView = viewId;
     const isMapView = viewId === 'map';
 
-    // Update buttons
-    document.querySelectorAll('[data-view]').forEach(btn => {
+    // Update view control buttons (toolbar)
+    document.querySelectorAll('.view-controls__mode[data-view]').forEach(btn => {
       btn.classList.toggle('view-controls__mode--active', btn.dataset.view === viewId);
+    });
+    
+    // Update filter rail view buttons (for map mode navigation)
+    document.querySelectorAll('.filter-rail__view-btn[data-view]').forEach(btn => {
+      btn.classList.toggle('filter-rail__view-btn--active', btn.dataset.view === viewId);
     });
 
     // Show/hide views
@@ -752,6 +813,11 @@
       dom.mapContextPanel.setAttribute('hidden', 'hidden');
       setMapContextPanelVisibility(false);
       clearMapContextPanel(true);
+      // Reset map panel toggle states when leaving map view
+      dom.filterRail?.classList.remove('map-panel--open');
+      dom.builderPane?.classList.remove('map-panel--open');
+      document.getElementById('mapLeftPanelToggle')?.classList.remove('map-panel--open');
+      document.getElementById('mapRightPanelToggle')?.classList.remove('map-panel--open');
     }
 
     // Initialize map if needed
@@ -765,14 +831,16 @@
     // Render appropriate view
     if (isMapView) {
       renderMap();
-      // Give layout a tick to settle, then refresh Leaflet sizing for a steadier transition
-      setTimeout(() => {
-        try {
-          window.ccMapController?.getMap()?.invalidateSize();
-        } catch (e) {
-          console.warn('Map invalidateSize failed:', e);
-        }
-      }, 50);
+      // Use requestAnimationFrame + setTimeout for stable map sizing after DOM settles
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          try {
+            window.ccMapController?.getMap()?.invalidateSize({ animate: false });
+          } catch (e) {
+            console.warn('Map invalidateSize failed:', e);
+          }
+        }, 100);
+      });
     } else if (viewId === 'compare') {
       renderCompare();
     } else {
@@ -953,13 +1021,42 @@ function isProgramAdded(programId) {
   return buckets.some(bucket => Array.isArray(phases[bucket]) && phases[bucket].includes(programId));
 }
 
+/**
+ * Get appropriate emoji icon based on program's Level of Care
+ * @param {string} loc - Primary Level of Care
+ * @returns {string} Emoji icon
+ */
+function getLOCEmoji(loc) {
+  const locEmojis = {
+    'RTC': '🏠',              // Residential - Home/House
+    'TBS': '🎓',              // Therapeutic Boarding School - Graduation cap
+    'Wilderness': '🏕️',       // Wilderness Therapy - Camping/Nature
+    'PHP': '🏥',              // Partial Hospitalization - Hospital
+    'IOP': '📆',              // Intensive Outpatient - Calendar/Schedule
+    'OP': '💬',               // Outpatient - Conversation/Therapy
+    'Sober Living': '🔑',     // Sober Living - Key (independence)
+    'Virtual': '💻',          // Virtual/Telehealth - Laptop
+    'Network': '🔗',          // Network/Umbrella - Connected links
+  };
+  return locEmojis[loc] || '🏥';
+}
+
 function getProgramIconMarkup(program) {
+  // Use logo for umbrella parent organizations
   if (program.isUmbrellaParent && program.logoUrl) {
     const safeAlt = `${program.name || 'Program'} logo`;
     return `<img src="${program.logoUrl}" alt="${safeAlt}" class="universal-card__icon universal-card__icon--image">`;
   }
 
-  const emoji = program.isUmbrellaParent ? '🏢' : (program.format?.includes('Virtual') ? '💻' : '🏥');
+  // Network/umbrella without logo
+  if (program.isUmbrellaParent) {
+    return `<div class="universal-card__icon">🔗</div>`;
+  }
+
+  // Get emoji based on primary Level of Care
+  const primaryLOC = program.primaryLOC || program.levelOfCare?.[0] || '';
+  const emoji = getLOCEmoji(primaryLOC);
+  
   return `<div class="universal-card__icon">${emoji}</div>`;
 }
 
@@ -1224,7 +1321,51 @@ function createUniversalCard(program) {
   function renderMap() {
     if (!state.mapInitialized) initMap();
 
-    const programs = getFilteredPrograms();
+    // For map view, show ALL programs with coordinates (including umbrella children)
+    // Each facility location should have its own marker
+    const allPrograms = window.ccPrograms?.core || [];
+    const mappablePrograms = allPrograms.filter(p => 
+      p.lat !== null && p.lng !== null && 
+      typeof p.lat === 'number' && typeof p.lng === 'number'
+    );
+    
+    // Apply any active filters (LOC, format, state, etc) but don't exclude umbrella children
+    const hasFilters = Object.keys(state.filters).some(key => {
+      const val = state.filters[key];
+      if (Array.isArray(val)) return val.length > 0;
+      if (typeof val === 'object') return Object.keys(val).length > 0;
+      return val !== undefined && val !== null && val !== '';
+    });
+    
+    let programs = mappablePrograms;
+    if (hasFilters) {
+      // Filter the mappable programs using the same filter logic
+      programs = mappablePrograms.filter(p => {
+        // LOC filter
+        if (state.filters.loc?.length > 0) {
+          const programLOC = p.primaryLOC || (p.levelOfCare?.[0]) || 'Network';
+          if (!state.filters.loc.includes(programLOC)) return false;
+        }
+        // Format filter
+        if (state.filters.format?.length > 0) {
+          if (!state.filters.format.includes(p.format)) return false;
+        }
+        // State filter
+        if (state.filters.state?.length > 0) {
+          if (!state.filters.state.includes(p.state)) return false;
+        }
+        // Clinical flags
+        if (state.filters.flags?.lgbtqAffirming && !p.lgbtqAffirming) return false;
+        if (state.filters.flags?.transAffirming && !p.transAffirming) return false;
+        if (state.filters.flags?.treatsASD && !p.treatsASD) return false;
+        if (state.filters.flags?.treatsSUD && !p.treatsSUD) return false;
+        if (state.filters.flags?.highAcuityMH && !p.highAcuityMH) return false;
+        return true;
+      });
+    }
+    
+    console.log(`🗺️ Map view: ${programs.length} of ${allPrograms.length} programs (${mappablePrograms.length} have coordinates)`);
+    
     window.ccMapController?.renderMarkers(programs);
     if (dom.mapEmptyState) {
       dom.mapEmptyState.hidden = programs.length > 0;
@@ -1435,19 +1576,23 @@ function createUniversalCard(program) {
     const counts = window.ccMapController?.getVisibleCountsByLOC() || {};
     const visibility = window.ccMapController?.getLOCVisibility() || {};
 
+    if (!dom.legendItems) return;
+
     dom.legendItems.innerHTML = items.map(item => `
-      <label class="map-legend__item ${visibility[item.loc] === false ? 'map-legend__item--disabled' : ''}">
-        <input type="checkbox" ${visibility[item.loc] !== false ? 'checked' : ''} data-loc="${item.loc}">
-        <span class="map-legend__icon">${item.svg}</span>
+      <div class="map-legend__item ${visibility[item.loc] === false ? 'map-legend__item--hidden' : ''}" data-loc="${item.loc}">
+        <span class="map-legend__swatch" style="background: ${item.color}"></span>
+        <span class="map-legend__emoji">${item.emoji}</span>
         <span class="map-legend__label">${item.loc}</span>
         <span class="map-legend__count">${counts[item.loc] || 0}</span>
-      </label>
+      </div>
     `).join('');
 
-    // Bind events
-    dom.legendItems.querySelectorAll('input').forEach(input => {
-      input.addEventListener('change', () => {
-        window.ccMapController?.setLOCVisibility(input.dataset.loc, input.checked);
+    // Bind click events to toggle visibility
+    dom.legendItems.querySelectorAll('.map-legend__item').forEach(item => {
+      item.addEventListener('click', () => {
+        const loc = item.dataset.loc;
+        const currentlyVisible = visibility[loc] !== false;
+        window.ccMapController?.setLOCVisibility(loc, !currentlyVisible);
         updateLegend();
       });
     });
@@ -1497,6 +1642,17 @@ function createUniversalCard(program) {
     const newLayer = window.ccMapController?.toggleTileLayer();
     const btn = document.getElementById('mapToggleTiles');
     btn.textContent = newLayer === 'dark' ? '☀️' : '🌙';
+  }
+
+  function toggleLegend() {
+    const legend = dom.mapLegend;
+    const toggleBtn = document.getElementById('toggleLegend');
+    if (!legend) return;
+    
+    const isCollapsed = legend.classList.toggle('map-legend--collapsed');
+    if (toggleBtn) {
+      toggleBtn.textContent = isCollapsed ? '+' : '−';
+    }
   }
 
   // ============================================================================
@@ -2895,11 +3051,41 @@ function createUniversalCard(program) {
     try {
       const result = await window.ccDocumentModel?.exportDocument('both');
       if (result) {
+        // Save to vault for future access
+        saveDocumentToVault(result);
         showKipuModal(result);
       }
     } catch (e) {
       console.error('Export failed:', e);
       alert('Export failed: ' + e.message);
+    }
+  }
+  
+  function saveDocumentToVault(result) {
+    try {
+      const draft = window.ccDocumentModel?.getCurrentDraft();
+      const htmlContent = window.ccDocumentModel?.generateDocument();
+      
+      if (window.saveToVault && htmlContent) {
+        const vaultDoc = {
+          clientName: state.currentClient?.initials || 'Client',
+          clientInitials: state.currentClient?.initials || '??',
+          type: draft?.type === 'aftercare-plan' ? 'Aftercare Plan' : 'Aftercare Options',
+          content: htmlContent,
+          htmlContent: htmlContent,
+          programs: draft?.programs?.simple || [],
+          metadata: {
+            exportDate: new Date().toISOString(),
+            docType: draft?.type,
+            programCount: (draft?.programs?.simple || []).length
+          }
+        };
+        
+        window.saveToVault(vaultDoc);
+        console.log('✅ Document auto-saved to vault');
+      }
+    } catch (e) {
+      console.warn('Failed to save to vault:', e);
     }
   }
 

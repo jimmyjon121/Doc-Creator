@@ -17,6 +17,21 @@
         ONBOARDING_COMPLETE: 'ccpro-onboarding-complete'
     };
     
+    function getCurrentUsername() {
+        // Try to get from auth manager first, then localStorage
+        try {
+            const user = window.authManager?.getCurrentUser?.();
+            if (user && user.username) return user.username;
+        } catch (e) {}
+        return localStorage.getItem('username') || 'User';
+    }
+
+    function getUserKey(baseKey) {
+        const username = getCurrentUsername();
+        if (!username || username === 'User') return baseKey;
+        return `${baseKey}-${username.toLowerCase()}`;
+    }
+    
     // =============================================
     // USER AGREEMENT
     // =============================================
@@ -261,8 +276,9 @@
             
             agreeBtn.addEventListener('click', () => {
                 if (checkbox.checked) {
-                    localStorage.setItem(STORAGE_KEYS.AGREEMENT_ACCEPTED, 'true');
-                    localStorage.setItem(STORAGE_KEYS.AGREEMENT_ACCEPTED + '-date', new Date().toISOString());
+                    const key = getUserKey(STORAGE_KEYS.AGREEMENT_ACCEPTED);
+                    localStorage.setItem(key, 'true');
+                    localStorage.setItem(key + '-date', new Date().toISOString());
                     
                     overlay.style.opacity = '0';
                     setTimeout(() => {
@@ -407,8 +423,12 @@
                 };
                 
                 // Save profile
-                localStorage.setItem(STORAGE_KEYS.PROFILE_COMPLETE, 'true');
-                localStorage.setItem('ccpro-user-profile', JSON.stringify(profile));
+                localStorage.setItem(getUserKey(STORAGE_KEYS.PROFILE_COMPLETE), 'true');
+                // Note: Profile data itself is not namespaced in this call, but maybe should be?
+                // For now, we rely on the 'profile complete' flag being namespaced.
+                // But wait, if we switch users, we don't want to load the wrong profile.
+                // Let's namespace the profile data too.
+                localStorage.setItem(`ccpro-user-profile-${getCurrentUsername().toLowerCase()}`, JSON.stringify(profile));
                 
                 // Update the current user's full name if authManager is available
                 try {
@@ -438,13 +458,15 @@
     async function runFirstLoginFlow() {
         console.log('[FirstLogin] Starting first login flow...');
         
-        const username = localStorage.getItem('username') || 'User';
+        const username = getCurrentUsername();
+        console.log('[FirstLogin] Current user:', username);
         
         // Hide transition overlay
         hideTransitionOverlay();
         
-        // Step 1: Check if profile is complete (may already be done if they used Create Account)
-        const profileComplete = localStorage.getItem(STORAGE_KEYS.PROFILE_COMPLETE) === 'true';
+        // Step 1: Check if profile is complete
+        const profileKey = getUserKey(STORAGE_KEYS.PROFILE_COMPLETE);
+        const profileComplete = localStorage.getItem(profileKey) === 'true';
         let profile = null;
         
         if (!profileComplete) {
@@ -453,7 +475,7 @@
             let existingFullName = '';
             try {
                 const user = window.authManager?.getCurrentUser?.();
-                existingFullName = user?.fullName || username;
+                existingFullName = user?.fullName || (username !== 'User' ? username : '');
             } catch (e) {
                 existingFullName = username !== 'User' ? username : '';
             }
@@ -461,7 +483,7 @@
             profile = await showProfileSetup(existingProfile);
         } else {
             try {
-                profile = JSON.parse(localStorage.getItem('ccpro-user-profile') || '{}');
+                profile = JSON.parse(localStorage.getItem(`ccpro-user-profile-${username.toLowerCase()}`) || localStorage.getItem('ccpro-user-profile') || '{}');
             } catch (e) {
                 profile = {};
             }
@@ -474,288 +496,513 @@
         }
         
         // Step 2: Check if onboarding video is complete
-        const onboardingComplete = localStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETE) === 'true';
-        const agreementAccepted = localStorage.getItem(STORAGE_KEYS.AGREEMENT_ACCEPTED) === 'true';
+        const onboardingKey = getUserKey(STORAGE_KEYS.ONBOARDING_COMPLETE);
+        const onboardingComplete = localStorage.getItem(onboardingKey) === 'true';
+        
+        const agreementKey = getUserKey(STORAGE_KEYS.AGREEMENT_ACCEPTED);
+        const agreementAccepted = localStorage.getItem(agreementKey) === 'true';
         
         if (!onboardingComplete) {
-            console.log('[FirstLogin] Starting onboarding video...');
+            console.log('[FirstLogin] Starting onboarding video sequence...');
             
-            // Show a brief transition before video
-            showVideoTransition();
-            
-            // Wait for OnboardingController to be ready
-            await waitForOnboarding();
-            
-            // Small delay for smooth transition
-            await new Promise(r => setTimeout(r, 800));
-            
-            // Hide video transition
-            hideVideoTransition();
-            
-            // Check if OnboardingIntro is available
-            if (window.OnboardingIntro) {
-                // Set up listener for intro completion BEFORE starting
-                const introCompletePromise = new Promise(resolve => {
-                    const handler = () => {
-                        window.removeEventListener('ccpro:introComplete', handler);
-                        resolve();
-                    };
-                    window.addEventListener('ccpro:introComplete', handler);
-                });
+            try {
+                // Show a brief transition before video
+                showTransitionOverlay();
                 
-                const intro = new window.OnboardingIntro();
-                intro.start();
+                // Wait for OnboardingController to be ready
+                await waitForOnboarding();
                 
-                // Wait for intro to complete
-                await introCompletePromise;
-                console.log('[FirstLogin] Intro video completed');
+                // Small delay for smooth transition
+                await new Promise(r => setTimeout(r, 800));
                 
-            } else if (window.OnboardingController?.replayIntro) {
-                window.OnboardingController.replayIntro();
-                // Wait a moment for old-style replay
-                await new Promise(r => setTimeout(r, 2000));
-            } else {
-                console.warn('[FirstLogin] Onboarding intro not available, skipping video');
-                localStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETE, 'true');
+                // Check GSAP
+                if (typeof window.gsap === 'undefined') {
+                    console.error('[FirstLogin] GSAP not loaded! Cannot play video.');
+                    hideTransitionOverlay();
+                } else if (window.OnboardingIntro) {
+                    console.log('[FirstLogin] Initializing OnboardingIntro...');
+                    
+                    // Set up listener for intro completion BEFORE starting
+                    const introCompletePromise = new Promise(resolve => {
+                        const handler = () => {
+                            window.removeEventListener('ccpro:introComplete', handler);
+                            resolve();
+                        };
+                        window.addEventListener('ccpro:introComplete', handler);
+                        
+                        // Safety timeout
+                        setTimeout(() => {
+                            console.warn('[FirstLogin] Video timeout reached, forcing progression');
+                            window.removeEventListener('ccpro:introComplete', handler);
+                            resolve();
+                        }, 180000);
+                    });
+                    
+                    const intro = new window.OnboardingIntro();
+                    // Don't await start() - let it run in background so we can handle overlay
+                    intro.start().catch(e => console.error('[FirstLogin] Intro start error:', e));
+                    
+                    // Hide overlay shortly after start to ensure smooth visual transition
+                    // The video container (z-index 999999) covers this overlay (z-index 99999) anyway
+                    setTimeout(() => hideTransitionOverlay(), 1000);
+                    
+                    // Wait for intro to complete via event
+                    console.log('[FirstLogin] Waiting for video completion event...');
+                    await introCompletePromise;
+                    console.log('[FirstLogin] Intro video completed successfully');
+                    
+                    // Mark video as complete for THIS USER
+                    localStorage.setItem(onboardingKey, 'true');
+                    console.log(`[FirstLogin] Marked onboarding video complete for ${getCurrentUsername()}`);
+                    
+                } else if (window.OnboardingController?.replayIntro) {
+                    window.OnboardingController.replayIntro();
+                    await new Promise(r => setTimeout(r, 2000));
+                } else {
+                    console.warn('[FirstLogin] Onboarding intro not available, skipping video');
+                    localStorage.setItem(onboardingKey, 'true');
+                    hideTransitionOverlay();
+                }
+            } catch (err) {
+                console.error('[FirstLogin] Video sequence error:', err);
+                hideTransitionOverlay();
             }
         }
         
-        // Step 3: Show User Agreement AFTER video (before entering dashboard)
-        if (!agreementAccepted) {
-            console.log('[FirstLogin] Showing user agreement...');
-            await showUserAgreement();
-        }
+        // Step 3: User Agreement SKIPPED (per requirements)
+        // if (!agreementAccepted) {
+        //    console.log('[FirstLogin] Showing user agreement...');
+        //    await showUserAgreement();
+        // }
         
         // Now navigate to dashboard
         navigateToDashboard();
-        showNotification('Welcome to CareConnect Pro!', 'success');
+        
+        // Step 4: Start Interactive Tour with smooth transition
+        console.log('[FirstLogin] Preparing interactive tour...');
+        
+        // Show a brief welcome overlay during transition
+        showTourTransition();
+        
+        // Wait for dashboard to fully render, then start tour
+        setTimeout(() => {
+            hideTourTransition();
+            setTimeout(() => {
+                startInteractiveTour();
+                showNotification('Welcome to CareConnect Pro!', 'success');
+            }, 300);
+        }, 1500);
         
         console.log('[FirstLogin] First login flow complete');
     }
     
-    function showVideoTransition() {
-        const overlay = document.createElement('div');
-        overlay.id = 'videoTransition';
-        overlay.style.cssText = `
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
-            z-index: 99999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 20px;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        `;
-        overlay.innerHTML = `
-            <div style="
-                width: 80px; height: 80px;
-                background: linear-gradient(135deg, #0D9488, #14B8A6);
-                border-radius: 20px;
+    function startInteractiveTour() {
+        const username = getCurrentUsername();
+        console.log(`%c[FirstLogin] Starting interactive tour for ${username}...`, 'background: #F59E0B; color: black; padding: 4px 8px; font-weight: bold;');
+        
+        // Clear any old tour state (user-specific and legacy global)
+        // Tour now uses user-specific keys, so each new user starts fresh
+        const userTourKey = `ccpro_tour_v3-${username.toLowerCase()}`;
+        localStorage.removeItem(userTourKey);
+        localStorage.removeItem('ccpro_tour_v3'); // Legacy cleanup
+        localStorage.removeItem(`ccpro_tour_started-${username.toLowerCase()}`);
+        localStorage.removeItem('ccpro_tour_started'); // Legacy cleanup
+        
+        console.log(`[FirstLogin] Cleared tour state for new user: ${username}`);
+        
+        // Try to start the interactive tour
+        if (window.InteractiveTour && typeof window.InteractiveTour.start === 'function') {
+            console.log('%c[FirstLogin] Launching InteractiveTour.start()', 'background: #10B981; color: white; padding: 4px 8px;');
+            window.InteractiveTour.start();
+        } else {
+            // Wait for tour to be available and retry
+            console.log('%c[FirstLogin] InteractiveTour not ready, waiting...', 'background: #EF4444; color: white; padding: 4px 8px;');
+            let attempts = 0;
+            const checkTour = setInterval(() => {
+                attempts++;
+                console.log('[FirstLogin] Checking for InteractiveTour, attempt', attempts);
+                if (window.InteractiveTour && typeof window.InteractiveTour.start === 'function') {
+                    clearInterval(checkTour);
+                    console.log('%c[FirstLogin] InteractiveTour now available, starting...', 'background: #10B981; color: white; padding: 4px 8px;');
+                    window.InteractiveTour.start();
+                } else if (attempts > 10) {
+                    clearInterval(checkTour);
+                    console.error('[FirstLogin] InteractiveTour not available after 10 attempts');
+                }
+            }, 500);
+        }
+    }
+    
+    // =============================================
+    // TOUR TRANSITION (video to tour)
+    // =============================================
+    
+    function showTourTransition() {
+        let overlay = document.getElementById('tourTransitionOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'tourTransitionOverlay';
+            overlay.style.cssText = `
+                position: fixed;
+                inset: 0;
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+                z-index: 1999999;
                 display: flex;
+                flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                animation: breathe 2s ease-in-out infinite;
-                box-shadow: 0 8px 32px rgba(13, 148, 136, 0.4);
-            ">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                    <polygon points="5 3 19 12 5 21 5 3"/>
-                </svg>
-            </div>
-            <div style="text-align: center;">
-                <p style="color: #F8FAFC; font-size: 20px; font-weight: 600; margin: 0 0 8px;">
-                    Quick Tour Starting
-                </p>
-                <p style="color: #94A3B8; font-size: 14px; margin: 0;">
-                    A 2-minute overview of your workspace
-                </p>
-            </div>
-            <style>
-                @keyframes breathe {
-                    0%, 100% { transform: scale(1); }
-                    50% { transform: scale(1.05); }
-                }
-            </style>
-        `;
-        document.body.appendChild(overlay);
-        requestAnimationFrame(() => overlay.style.opacity = '1');
-    }
-    
-    function hideVideoTransition() {
-        const overlay = document.getElementById('videoTransition');
-        if (overlay) {
-            overlay.style.opacity = '0';
-            setTimeout(() => overlay.remove(), 400);
+                opacity: 0;
+                transition: opacity 0.5s ease;
+            `;
+            overlay.innerHTML = `
+                <div style="text-align: center; color: #E2E8F0;">
+                    <div style="font-size: 40px; margin-bottom: 16px;">🎯</div>
+                    <div style="font-size: 22px; font-weight: 600; margin-bottom: 8px;">Let's Get You Started</div>
+                    <div style="font-size: 14px; color: #94A3B8;">A quick guided tour of the key features</div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
         }
-    }
-    
-    function waitForOnboarding() {
-        return new Promise((resolve) => {
-            let attempts = 0;
-            const check = setInterval(() => {
-                attempts++;
-                if (window.OnboardingIntro || window.OnboardingController || attempts > 50) {
-                    clearInterval(check);
-                    resolve();
-                }
-            }, 100);
+        requestAnimationFrame(() => {
+            overlay.style.opacity = '1';
         });
     }
     
-    function navigateToDashboard() {
-        console.log('[FirstLogin] Navigating to dashboard...');
-        
-        // If there's a shell navigation system, use it
-        if (window.ccShell?.navigateTo) {
-            window.ccShell.navigateTo('dashboard');
-        } else if (typeof window.showDashboard === 'function') {
-            window.showDashboard();
-        } else {
-            // Fallback: find and click dashboard nav
-            const dashboardNav = document.querySelector('[data-nav-target="dashboard"]');
-            if (dashboardNav) {
-                dashboardNav.click();
-            }
-        }
-        
-        // Show success notification
-        showNotification('Welcome to CareConnect Pro! 🎉', 'success');
-    }
-    
-    function updateUserDisplayName(name) {
-        // Update initials in header
-        const userInitials = document.getElementById('userInitials');
-        if (userInitials && name) {
-            const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-            userInitials.textContent = initials;
-        }
-        
-        // Update user menu
-        const userMenuName = document.getElementById('userMenuName');
-        if (userMenuName && name) {
-            userMenuName.textContent = name;
-        }
-    }
-    
-    function showNotification(message, type = 'info') {
-        if (window.showNotification) {
-            window.showNotification(message, type);
-            return;
-        }
-        
-        // Fallback
-        const notification = document.createElement('div');
-        notification.className = `first-login-notification ${type}`;
-        notification.textContent = message;
-        notification.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 16px 24px;
-            background: ${type === 'success' ? '#10B981' : '#6366F1'};
-            color: white;
-            border-radius: 12px;
-            font-weight: 600;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            z-index: 100001;
-            animation: slideIn 0.3s ease;
-        `;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transform = 'translateX(100%)';
-            setTimeout(() => notification.remove(), 300);
-        }, 4000);
-    }
-    
-    // =============================================
-    // CHECK IF FIRST LOGIN
-    // =============================================
-    
-    function isFirstLogin() {
-        const agreementAccepted = localStorage.getItem(STORAGE_KEYS.AGREEMENT_ACCEPTED) === 'true';
-        const profileComplete = localStorage.getItem(STORAGE_KEYS.PROFILE_COMPLETE) === 'true';
-        const onboardingComplete = localStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETE) === 'true';
-        
-        return !agreementAccepted || !profileComplete || !onboardingComplete;
-    }
-    
-    // =============================================
-    // HOOK INTO LOGIN SUCCESS
-    // =============================================
-    
-    function hookLoginSuccess() {
-        // Listen for successful login
-        window.addEventListener('ccpro-login-success', async (event) => {
-            console.log('[FirstLogin] Login success detected');
-            
-            // Check if this is a first-time user BEFORE dashboard shows
-            if (isFirstLogin()) {
-                // Immediately cover the screen to prevent dashboard flash
-                showTransitionOverlay();
-                
-                // Run the first login flow
-                setTimeout(async () => {
-                    await runFirstLoginFlow();
-                }, 100);
-            }
-        });
-        
-        console.log('[FirstLogin] Login hook installed');
-    }
-    
-    // =============================================
-    // TRANSITION OVERLAY (prevents dashboard flash)
-    // =============================================
-    
-    function showTransitionOverlay() {
-        // Remove any existing
-        const existing = document.getElementById('firstLoginTransition');
-        if (existing) existing.remove();
-        
-        const overlay = document.createElement('div');
-        overlay.id = 'firstLoginTransition';
-        overlay.style.cssText = `
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(135deg, #0F172A, #1E293B);
-            z-index: 99999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 20px;
-        `;
-        overlay.innerHTML = `
-            <div style="
-                width: 60px; height: 60px;
-                border: 3px solid rgba(13, 148, 136, 0.2);
-                border-top-color: #14B8A6;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-            "></div>
-            <p style="color: #94A3B8; font-size: 14px; margin: 0;">Preparing your workspace...</p>
-            <style>
-                @keyframes spin {
-                    to { transform: rotate(360deg); }
-                }
-            </style>
-        `;
-        document.body.appendChild(overlay);
-    }
-    
-    function hideTransitionOverlay() {
-        const overlay = document.getElementById('firstLoginTransition');
+    function hideTourTransition() {
+        const overlay = document.getElementById('tourTransitionOverlay');
         if (overlay) {
-            overlay.style.transition = 'opacity 0.5s ease';
             overlay.style.opacity = '0';
             setTimeout(() => overlay.remove(), 500);
         }
     }
     
+    // =============================================
+    // TRANSITION OVERLAY
+    // =============================================
+    
+    function showTransitionOverlay() {
+        let overlay = document.getElementById('firstLoginTransition');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'firstLoginTransition';
+            overlay.style.cssText = `
+                position: fixed;
+                inset: 0;
+                background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%);
+                z-index: 99999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+            overlay.innerHTML = `
+                <div style="text-align: center; color: #E2E8F0;">
+                    <div style="font-size: 24px; font-weight: 600; margin-bottom: 16px;">Welcome to CareConnect Pro</div>
+                    <div style="font-size: 14px; color: #94A3B8;">Preparing your workspace...</div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+        overlay.style.display = 'flex';
+        requestAnimationFrame(() => {
+            overlay.style.opacity = '1';
+        });
+    }
+    
+    function hideTransitionOverlay() {
+        const overlay = document.getElementById('firstLoginTransition');
+        if (overlay) {
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 300);
+        }
+    }
+    
+    // =============================================
+    // WAIT FOR ONBOARDING CONTROLLER
+    // =============================================
+    
+    async function waitForOnboarding() {
+        const maxWait = 5000; // 5 seconds max
+        const checkInterval = 100;
+        let elapsed = 0;
+        
+        while (elapsed < maxWait) {
+            if (window.OnboardingController || window.OnboardingIntro) {
+                return true;
+            }
+            await new Promise(r => setTimeout(r, checkInterval));
+            elapsed += checkInterval;
+        }
+        console.warn('[FirstLogin] OnboardingController not found after timeout');
+        return false;
+    }
+    
+    // =============================================
+    // NAVIGATION
+    // =============================================
+    
+    function navigateToDashboard() {
+        try {
+            // Try shell navigation first
+            if (window.ccShell && typeof window.ccShell.navigateTo === 'function') {
+                window.ccShell.navigateTo('dashboard');
+                return;
+            }
+            
+            // Fallback: click dashboard nav item
+            const dashboardNav = document.querySelector('[data-nav-target="dashboard"], [data-tab="dashboard"], .nav-item[data-target="dashboard"]');
+            if (dashboardNav) {
+                dashboardNav.click();
+                return;
+            }
+            
+            // Last resort: try showDashboard if it exists
+            if (typeof window.showDashboard === 'function') {
+                window.showDashboard();
+                return;
+            }
+            
+            console.warn('[FirstLogin] Could not navigate to dashboard - no navigation method found');
+        } catch (error) {
+            console.error('[FirstLogin] Navigation error:', error);
+        }
+    }
+    
+    // =============================================
+    // USER DISPLAY UPDATE
+    // =============================================
+    
+    function updateUserDisplayName(fullName) {
+        try {
+            // Update various possible display name elements
+            const selectors = [
+                '#userDisplayName',
+                '.user-display-name',
+                '[data-user-name]',
+                '.nav-user-name'
+            ];
+            
+            selectors.forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(el => {
+                    el.textContent = fullName;
+                });
+            });
+            
+            // Also update localStorage for other modules
+            localStorage.setItem('fullName', fullName);
+            
+            // Update authManager if available
+            if (window.authManager && typeof window.authManager.updateUser === 'function') {
+                window.authManager.updateUser({ fullName });
+            }
+        } catch (error) {
+            console.warn('[FirstLogin] Could not update user display name:', error);
+        }
+    }
+    
+    // =============================================
+    // NOTIFICATIONS
+    // =============================================
+    
+    function showNotification(message, type = 'info') {
+        try {
+            // Try to use existing notification system
+            if (window.showNotification && typeof window.showNotification === 'function') {
+                window.showNotification(message, type);
+                return;
+            }
+            
+            // Fallback: create a simple notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 16px 24px;
+                background: ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6'};
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 100001;
+                opacity: 0;
+                transform: translateX(20px);
+                transition: all 0.3s ease;
+                max-width: 400px;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            requestAnimationFrame(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            });
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(20px)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        } catch (error) {
+            console.warn('[FirstLogin] Could not show notification:', error);
+        }
+    }
+    
+    // =============================================
+    // EVENT LISTENER SETUP
+    // =============================================
+    
+    function hookLoginSuccess() {
+        window.addEventListener('ccpro-login-success', async (event) => {
+            console.log('[FirstLogin] Login success event received:', event.detail);
+            
+            // Small delay to ensure UI has updated
+            await new Promise(r => setTimeout(r, 100));
+            
+            if (isFirstLogin()) {
+                console.log('[FirstLogin] First login detected, starting flow...');
+                await runFirstLoginFlow();
+            } else {
+                console.log('[FirstLogin] Returning user, skipping onboarding');
+            }
+        });
+    }
+    
+    // =============================================
+    // ON LOAD CHECK
+    // =============================================
+    
+    function checkOnLoad() {
+        // Check if user is logged in
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true' || 
+                          localStorage.getItem('username') !== null;
+        
+        if (isLoggedIn && isFirstLogin()) {
+            console.log('[FirstLogin] On load check: First login detected, starting flow...');
+            // Small delay to ensure DOM is ready
+            setTimeout(() => {
+                runFirstLoginFlow().catch(err => {
+                    console.error('[FirstLogin] Flow error on load:', err);
+                });
+            }, 500);
+        } else if (isLoggedIn) {
+            console.log('[FirstLogin] On load check: Returning user, skipping onboarding');
+        }
+    }
+
+    // =============================================
+    // CHECK IF FIRST LOGIN
+    // =============================================
+    
+    /**
+     * Marks the current user as having completed all onboarding steps.
+     * Call this when onboarding is finished to prevent re-prompting.
+     */
+    function markOnboardingComplete() {
+        const username = getCurrentUsername();
+        const profileKey = getUserKey(STORAGE_KEYS.PROFILE_COMPLETE);
+        const onboardingKey = getUserKey(STORAGE_KEYS.ONBOARDING_COMPLETE);
+        const tourKey = `ccpro_tour_v3-${username.toLowerCase()}`;
+        
+        // Set all completion flags
+        localStorage.setItem(profileKey, 'true');
+        localStorage.setItem(onboardingKey, 'true');
+        localStorage.setItem(STORAGE_KEYS.PROFILE_COMPLETE, 'true');
+        localStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETE, 'true');
+        
+        // Clear any stale tour-started flags (tour is complete, not "in progress")
+        localStorage.removeItem('ccpro_tour_started');
+        localStorage.removeItem(`ccpro_tour_started-${username.toLowerCase()}`);
+        
+        // Mark tour as complete
+        const tourState = {
+            currentStep: 9,
+            completed: true,
+            dismissed: true,
+            completedAt: new Date().toISOString(),
+            username: username
+        };
+        localStorage.setItem(tourKey, JSON.stringify(tourState));
+        
+        console.log(`[FirstLogin] ✅ Marked onboarding complete for ${username}`);
+    }
+    
+    /**
+     * Determines if this is a first-time login for the current user.
+     * 
+     * Flow for NEW profiles:
+     * 1. Create Account form sets: ccpro-profile-complete-{username} = 'true'
+     * 2. Create Account form does NOT set: ccpro-onboarding-complete-{username}
+     * 3. User logs in → isFirstLogin() returns true (onboarding-complete missing)
+     * 4. runFirstLoginFlow() runs → Video plays → Tour starts
+     * 5. After video: ccpro-onboarding-complete-{username} = 'true' is set
+     * 6. After tour: Tour completion saved per user
+     * 
+     * Flow for RETURNING users:
+     * 1. User logs in → isFirstLogin() checks keys
+     * 2. Finds ccpro-onboarding-complete-{username} = 'true' → returns false
+     * 3. No onboarding flow runs
+     * 
+     * Each user has their own onboarding state - new profiles always get onboarding.
+     */
+    function isFirstLogin() {
+        const username = getCurrentUsername();
+        const usernameLower = username.toLowerCase();
+        
+        // Known master/admin usernames that should ALWAYS skip onboarding
+        const MASTER_USERNAMES = ['masteradmin', 'doc232', 'admin'];
+        
+        // Master/Legacy/Admin accounts skip onboarding entirely
+        const isMaster = localStorage.getItem('isMaster') === 'true';
+        const userRole = localStorage.getItem('userRole');
+        const isKnownMaster = MASTER_USERNAMES.includes(usernameLower);
+        
+        if (isMaster || userRole === 'admin' || isKnownMaster) {
+            console.log(`[FirstLogin] Master/Admin account detected (${username}) - skipping onboarding`);
+            // Auto-mark as complete so we never check again
+            markOnboardingComplete();
+            return false;
+        }
+        
+        // Check profile completion - both user-specific AND global fallback
+        const profileKey = getUserKey(STORAGE_KEYS.PROFILE_COMPLETE);
+        const profileComplete = localStorage.getItem(profileKey) === 'true' || 
+                               localStorage.getItem(STORAGE_KEYS.PROFILE_COMPLETE) === 'true';
+        
+        // Check onboarding completion - both user-specific AND global fallback
+        // This ensures users who completed onboarding before user-specific keys were added
+        // are still recognized as returning users
+        const onboardingKey = getUserKey(STORAGE_KEYS.ONBOARDING_COMPLETE);
+        const onboardingComplete = localStorage.getItem(onboardingKey) === 'true' || 
+                                   localStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETE) === 'true';
+        
+        // Also check if the tour was completed for this user (another indicator of returning user)
+        const tourKey = `ccpro_tour_v3-${username.toLowerCase()}`;
+        let tourCompleted = false;
+        try {
+            const tourState = JSON.parse(localStorage.getItem(tourKey) || '{}');
+            tourCompleted = tourState.completed === true;
+        } catch (e) {}
+        
+        console.log(`[FirstLogin] Checking status for ${username}: Profile=${profileComplete}, Onboarding=${onboardingComplete}, TourComplete=${tourCompleted}`);
+        
+        // If ANY indicator shows the user has completed onboarding, they're returning
+        if (profileComplete || onboardingComplete || tourCompleted) {
+            console.log(`[FirstLogin] Returning user detected - ensuring all flags are set`);
+            // Migrate: ensure all keys are set so we don't check individual flags again
+            if (!profileComplete) localStorage.setItem(profileKey, 'true');
+            if (!onboardingComplete) localStorage.setItem(onboardingKey, 'true');
+            return false;
+        }
+        
+        // If we get here, this is a first-time user
+        console.log(`[FirstLogin] First-time user detected`);
+        return true;
+    }
+
     // =============================================
     // PUBLIC API
     // =============================================
@@ -765,22 +1012,44 @@
         isFirstLogin,
         showUserAgreement,
         showProfileSetup,
+        markOnboardingComplete,
         STORAGE_KEYS,
         
         // For testing/admin
         reset: function() {
+            // Clear global keys
             localStorage.removeItem(STORAGE_KEYS.AGREEMENT_ACCEPTED);
             localStorage.removeItem(STORAGE_KEYS.AGREEMENT_ACCEPTED + '-date');
             localStorage.removeItem(STORAGE_KEYS.PROFILE_COMPLETE);
             localStorage.removeItem(STORAGE_KEYS.ONBOARDING_COMPLETE);
             localStorage.removeItem('ccpro-user-profile');
+            
+            // Clear current user keys
+            const user = getCurrentUsername();
+            if (user && user !== 'User') {
+                const suffix = `-${user.toLowerCase()}`;
+                localStorage.removeItem(STORAGE_KEYS.AGREEMENT_ACCEPTED + suffix);
+                localStorage.removeItem(STORAGE_KEYS.AGREEMENT_ACCEPTED + suffix + '-date');
+                localStorage.removeItem(STORAGE_KEYS.PROFILE_COMPLETE + suffix);
+                localStorage.removeItem(STORAGE_KEYS.ONBOARDING_COMPLETE + suffix);
+                localStorage.removeItem('ccpro-user-profile' + suffix);
+            }
             console.log('[FirstLogin] State reset');
         }
     };
     
     // Initialize
-    hookLoginSuccess();
-    console.log('[FirstLogin] Module loaded');
+    try {
+        hookLoginSuccess();
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            checkOnLoad();
+        } else {
+            window.addEventListener('DOMContentLoaded', checkOnLoad);
+        }
+        console.log('[FirstLogin] Module loaded and initialized');
+    } catch (error) {
+        console.error('[FirstLogin] Initialization failed:', error);
+    }
     
 })();
 

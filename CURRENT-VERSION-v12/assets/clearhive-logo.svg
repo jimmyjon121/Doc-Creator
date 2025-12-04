@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <!-- Honey drip gradient -->
+    <linearGradient id="honeyGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#E5A83B"/>
+      <stop offset="100%" style="stop-color:#D4942F"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Main hexagon outline -->
+  <path d="M50 5 L90 27.5 L90 72.5 L50 95 L10 72.5 L10 27.5 Z" 
+        fill="none" 
+        stroke="#1e3a5f" 
+        stroke-width="4"/>
+  
+  <!-- Inner honeycomb pattern - left side cells -->
+  <path d="M10 27.5 L30 16 L30 38 L10 49.5 Z" 
+        fill="none" 
+        stroke="#1e3a5f" 
+        stroke-width="2.5"/>
+  <path d="M10 49.5 L30 38 L30 60 L10 72.5 Z" 
+        fill="none" 
+        stroke="#1e3a5f" 
+        stroke-width="2.5"/>
+  <path d="M30 16 L50 5 L50 27 L30 38 Z" 
+        fill="none" 
+        stroke="#1e3a5f" 
+        stroke-width="2.5"/>
+  
+  <!-- Honey drip area (top right) -->
+  <path d="M70 16 L90 27.5 L90 49.5 L70 60 L70 38 L70 16 Z" 
+        fill="url(#honeyGradient)"/>
+  
+  <!-- Honey drip -->
+  <path d="M85 50 Q88 58 85 66 Q82 72 78 68 Q76 64 78 58 Q80 52 85 50 Z" 
+        fill="url(#honeyGradient)"/>
+  
+  <!-- Center medical cross -->
+  <rect x="42" y="30" width="16" height="40" rx="3" fill="#1e3a5f"/>
+  <rect x="30" y="42" width="40" height="16" rx="3" fill="#1e3a5f"/>
+</svg>
+

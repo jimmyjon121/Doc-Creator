@@ -10,7 +10,7 @@
 .morning-header {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     color: white;
-    padding: 30px;
+    padding: 36px 40px;
     margin: -30px -30px 20px -30px;
     border-radius: 12px 12px 0 0;
 }
@@ -19,13 +19,17 @@
     margin: 0;
     font-size: 32px;
     font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
 }
 
 .review-date {
-    margin: 8px 0 0 0;
-    font-size: 18px;
-    opacity: 0.9;
+    margin: 10px 0 0 0;
+    font-size: 17px;
+    opacity: 0.92;
+    font-weight: 400;
+    letter-spacing: 0.2px;
 }
 
 .morning-header .btn-close {
@@ -51,41 +55,43 @@
 }
 
 .stat-card {
-    background: white;
-    padding: 24px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 26px 24px;
     border-radius: 12px;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 2px solid transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 2px solid rgba(229, 231, 235, 0.8);
     transition: all 0.2s ease;
 }
 
 .stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    border-color: rgba(229, 231, 235, 1);
 }
 
 .stat-card.alert {
-    border-color: #ef4444;
-    background: #fef2f2;
+    border-color: rgba(239, 68, 68, 0.5);
+    background: rgba(254, 242, 242, 0.95);
 }
 
 .stat-card.primary {
-    border-color: #3b82f6;
-    background: #eff6ff;
+    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(239, 246, 255, 0.95);
 }
 
 .stat-card.success {
-    border-color: #10b981;
-    background: #f0fdf4;
+    border-color: rgba(16, 185, 129, 0.5);
+    background: rgba(240, 253, 244, 0.95);
 }
 
 .stat-number {
-    font-size: 36px;
+    font-size: 38px;
     font-weight: 700;
     color: #1f2937;
     line-height: 1;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
 }
 
 .stat-card.alert .stat-number {
@@ -101,11 +107,11 @@
 }
 
 .stat-label {
-    font-size: 14px;
+    font-size: 13px;
     color: #6b7280;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
 }
 
 /* Daily Insights */
@@ -180,16 +186,16 @@
 }
 
 .batch-action-card {
-    background: white;
-    border: 2px solid #e5e7eb;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(229, 231, 235, 0.8);
     border-radius: 12px;
     padding: 22px;
     transition: all 0.2s ease;
 }
 
 .batch-action-card:hover {
-    border-color: #3b82f6;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.12);
 }
 
 .batch-header {
@@ -253,10 +259,10 @@
 }
 
 .review-section {
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 12px;
     padding: 24px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .review-section h3 {
@@ -490,6 +496,93 @@
 .btn-morning-review:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .morning-review-modal .modal-content {
+        background: #1f2937;
+    }
+    
+    .stat-card {
+        background: rgba(31, 41, 55, 0.95);
+        border-color: rgba(75, 85, 99, 0.6);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .stat-card:hover {
+        border-color: rgba(75, 85, 99, 0.9);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+    
+    .stat-card.alert {
+        background: rgba(127, 29, 29, 0.4);
+        border-color: rgba(239, 68, 68, 0.5);
+    }
+    
+    .stat-card.primary {
+        background: rgba(30, 58, 138, 0.4);
+        border-color: rgba(59, 130, 246, 0.5);
+    }
+    
+    .stat-card.success {
+        background: rgba(6, 78, 59, 0.4);
+        border-color: rgba(16, 185, 129, 0.5);
+    }
+    
+    .stat-number {
+        color: #f9fafb;
+    }
+    
+    .stat-label {
+        color: #9ca3af;
+    }
+    
+    .review-section {
+        background: rgba(31, 41, 55, 0.95);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .review-section h3 {
+        color: #f9fafb;
+    }
+    
+    .batch-action-card {
+        background: rgba(31, 41, 55, 0.95);
+        border-color: rgba(75, 85, 99, 0.6);
+    }
+    
+    .batch-action-card:hover {
+        border-color: rgba(59, 130, 246, 0.6);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    }
+    
+    .batch-title {
+        color: #f9fafb;
+    }
+    
+    .review-task-item {
+        background: rgba(17, 24, 39, 0.6);
+        border-color: rgba(75, 85, 99, 0.5);
+    }
+    
+    .review-task-item:hover {
+        background: rgba(17, 24, 39, 0.8);
+        border-color: rgba(75, 85, 99, 0.7);
+    }
+    
+    .task-name {
+        color: #f3f4f6;
+    }
+    
+    .followup-item {
+        background: rgba(17, 24, 39, 0.6);
+        border-color: rgba(75, 85, 99, 0.5);
+    }
+    
+    .followup-client {
+        color: #f9fafb;
+    }
 }
 
 /* Responsive */

@@ -27,6 +27,31 @@
     'Network': '#6E7BFF',       // Accent blue
   };
 
+  /**
+   * LOC emoji map - intentionally chosen for instant recognition
+   * 
+   * RTC = 24/7 live-in treatment FACILITY (not a cozy home)
+   * TBS = Therapeutic Boarding SCHOOL (academics + therapy)
+   * Wilderness = Outdoor nature-based therapy
+   * PHP = Day program AT a hospital (most intensive outpatient)
+   * IOP = Structured sessions 3+ hrs, 3+ days/week
+   * OP = Regular weekly talk therapy/counseling
+   * Sober Living = Transitional housing (their actual home now)
+   * Virtual = Online/telehealth programs
+   * Network = Umbrella org or corporate parent
+   */
+  const LOC_EMOJI = {
+    'RTC': '🏨',            // Residential Treatment = live-in FACILITY (hotel-like)
+    'TBS': '🎓',            // Therapeutic Boarding SCHOOL
+    'Wilderness': '🏕️',     // Wilderness = outdoor/camping
+    'PHP': '🏥',            // Partial Hospitalization = hospital-based
+    'IOP': '📅',            // Intensive Outpatient = scheduled sessions
+    'OP': '🗣️',             // Outpatient = talk therapy/counseling
+    'Sober Living': '🏡',   // Sober Living = their actual HOME now
+    'Virtual': '💻',        // Virtual = online/computer
+    'Network': '🏢',        // Network = organization/corporate
+  };
+
   // Rainbow colors for LGBTQ+ indicator
   const rainbowColors = ['#E40303', '#FF8C00', '#FFED00', '#008026', '#24408E', '#732982'];
   
@@ -178,50 +203,39 @@
     } = options;
 
     const color = colors[loc] || colors.Network;
-    const iconPath = iconPaths[loc] || iconPaths.Network;
-    const viewBox = 24;
-    const scale = (size - 8) / viewBox; // Leave padding for effects
-    const offset = 4;
+    const emoji = LOC_EMOJI[loc] || LOC_EMOJI.Network || '🏥';
 
     let svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+      <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size + 4}" viewBox="0 0 ${size} ${size + 4}">
         <defs>
-          <filter id="shadow-${loc}" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.25"/>
+          <filter id="pin-shadow-${loc}" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="1.5" stdDeviation="1.5" flood-color="#000" flood-opacity="0.2"/>
           </filter>
         </defs>
     `;
 
-    // LGBTQ+ rainbow ring (behind icon)
-    if (lgbtq) {
-      svg += generateRainbowRing(size);
-    }
-
-    // Icon background circle
+    // Clean solid circle with subtle drop shadow
     svg += `
       <circle 
-        cx="${size/2}" cy="${size/2}" r="${(size/2) - 4}" 
-        fill="white" 
-        stroke="${color}" 
-        stroke-width="2"
-        ${showShadow ? `filter="url(#shadow-${loc})"` : ''}
+        cx="${size/2}" cy="${size/2}" r="${(size/2) - 3}" 
+        fill="${color}" 
+        stroke="white" 
+        stroke-width="2.5"
+        ${showShadow ? `filter="url(#pin-shadow-${loc})"` : ''}
       />
     `;
 
-    // Icon content
+    // Emoji content in the center
     svg += `
-      <g 
-        transform="translate(${offset}, ${offset}) scale(${scale})" 
-        style="color: ${color};"
-      >
-        ${iconPath}
-      </g>
+      <text 
+        x="${size/2}" 
+        y="${size/2}" 
+        text-anchor="middle" 
+        dominant-baseline="central"
+        font-size="${size * 0.55}px"
+        style="font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;"
+      >${emoji}</text>
     `;
-
-    // Trans accent (top-right corner)
-    if (trans) {
-      svg += generateTransAccent(size);
-    }
 
     // Selected state pulse ring
     if (selected) {
@@ -307,32 +321,21 @@
     if (count >= 50) size = 56;
     else if (count >= 10) size = 48;
 
-    const gradientId = `cluster-grad-${dominantLOC}-${count}-${Math.floor(Math.random() * 1000)}`;
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-        <defs>
-          <filter id="cluster-shadow" x="-20%" y="-20%" width="140%" height="140%">
-            <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.35"/>
-          </filter>
-          <linearGradient id="${gradientId}" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="${color}" stop-opacity="0.85"/>
-            <stop offset="100%" stop-color="${color}" stop-opacity="1"/>
-          </linearGradient>
-        </defs>
         <circle 
-          cx="${size/2}" cy="${size/2}" r="${(size/2) - 4}" 
-          fill="url(#${gradientId})" 
+          cx="${size/2}" cy="${size/2}" r="${(size/2) - 3}" 
+          fill="${color}" 
           stroke="white" 
-          stroke-width="3"
-          filter="url(#cluster-shadow)"
+          stroke-width="2.5"
         />
         <text 
           x="${size/2}" y="${size/2}" 
           text-anchor="middle" 
           dominant-baseline="central" 
           fill="white" 
-          font-size="${size * 0.4}px" 
-          font-weight="bold"
+          font-size="${size * 0.42}px" 
+          font-weight="600"
           font-family="system-ui, -apple-system, sans-serif"
         >${count}</text>
       </svg>
@@ -441,12 +444,28 @@
     `;
   }
 
+  /**
+   * Get legend items for the map legend UI
+   * @returns {Array<{loc: string, label: string, color: string, emoji: string}>}
+   */
+  function getLegendItems() {
+    const { LOC_LABELS } = window.ccProgramTypes || {};
+    
+    return Object.keys(colors).map(loc => ({
+      loc,
+      label: LOC_LABELS?.[loc] || loc,
+      color: colors[loc],
+      emoji: LOC_EMOJI[loc] || '🏥',
+    }));
+  }
+
   // ============================================================================
   // EXPOSE API
   // ============================================================================
 
   window.ccMapIcons = {
     colors,
+    LOC_EMOJI,
     getIcon,
     getClusterIcon,
     getSvg,

@@ -543,20 +543,34 @@
 
   function hideLoginScreen() {
     try {
+      // Re-query just in case DOM reference is stale
+      if (!LoginState.loginScreen) {
+        LoginState.loginScreen = document.getElementById('loginScreen');
+      }
+      
       if (LoginState.loginScreen) {
         LoginState.loginScreen.style.display = 'none';
         LoginState.loginScreen.style.visibility = 'hidden';
-        // Don't modify other styles - just hide it
+        // Force it out of the way
+        LoginState.loginScreen.style.zIndex = '-1';
+      } else {
+        // Fallback query
+        const screen = document.getElementById('loginScreen');
+        if (screen) {
+            screen.style.display = 'none';
+            screen.style.visibility = 'hidden';
+            screen.style.zIndex = '-1';
+        }
       }
+      
       if (LoginState.mainApp) {
         LoginState.mainApp.style.display = 'block';
         LoginState.mainApp.style.visibility = 'visible';
         // Only set opacity if it was explicitly set to 0, otherwise preserve existing
         const currentOpacity = window.getComputedStyle(LoginState.mainApp).opacity;
         if (currentOpacity === '0' || LoginState.mainApp.style.opacity === '0') {
-        LoginState.mainApp.style.opacity = '1';
+          LoginState.mainApp.style.opacity = '1';
         }
-        // Don't modify any other styles - preserve dashboard/module layouts
       }
       return true;
     } catch (error) {
@@ -646,10 +660,23 @@
         return false;
       }
 
-      setLoginButtonState(submitBtn, true, 'Verifying...');
+      // Add a timeout safety net to reset button if verification hangs
+      const verificationTimeout = setTimeout(() => {
+        if (LoginState.isProcessing) {
+            console.warn('Verification timed out - resetting UI');
+            setLoginButtonState(submitBtn, false);
+            LoginState.isProcessing = false;
+            showLoginError('Verification took too long. Please try again.');
+        }
+      }, 10000);
+
       const result = await verifyCredentials(username, password);
+      clearTimeout(verificationTimeout);
 
       if (result.valid) {
+        // Force update UI immediately
+        if (submitBtn) submitBtn.innerHTML = 'Success!';
+        
         setSession(CONFIG.SESSION_KEY, 'true');
         setSession(CONFIG.USERNAME_KEY, result.username);
         setSession(CONFIG.FULLNAME_KEY, result.fullName || result.username);
@@ -728,13 +755,19 @@
           }
         }
 
-        hideLoginScreen();
-
-        // Emit login success event for first-login flow
-        window.dispatchEvent(new CustomEvent('ccpro-login-success', {
-          detail: { username: result.username, role: result.role, fullName: result.fullName }
-        }));
-        console.log('✅ Login success event dispatched');
+        // Force hide login screen before dispatching events
+        requestAnimationFrame(() => {
+            hideLoginScreen();
+            
+            // Emit login success event for first-login flow
+            // Use a small timeout to ensure UI has updated
+            setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('ccpro-login-success', {
+                  detail: { username: result.username, role: result.role, fullName: result.fullName }
+                }));
+                console.log('✅ Login success event dispatched');
+            }, 50);
+        });
 
         // Ensure nav/admin visibility reflects the new role
         try {

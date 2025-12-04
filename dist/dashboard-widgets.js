@@ -48,7 +48,7 @@ class FlightPlanWidget extends DashboardWidget {
             const timeContext = dashboardManager.getTimeAwareGreeting();
             
             let html = `
-                <div class="flight-plan-widget">
+                <div class="flight-plan-widget" data-tour-id="flight-plan">
                     <div class="widget-header">
                         <h3>📋 Daily Flight Plan</h3>
                         <span class="time-context">${timeContext.focus}</span>
@@ -193,7 +193,7 @@ class HouseWeatherWidget extends DashboardWidget {
             if (!data) return;
             
             let html = `
-                <div class="house-weather-widget">
+                <div class="house-weather-widget" data-tour-id="house-health">
                     <div class="widget-header">
                         <h3>🏠 House Weather System</h3>
                         <label class="filter-toggle">
@@ -302,7 +302,7 @@ class JourneyRadarWidget extends DashboardWidget {
             ];
             
             let html = `
-                <div class="journey-radar-widget">
+                <div class="journey-radar-widget" data-tour-id="journey-radar">
                     <div class="widget-header">
                         <h3>🧭 Client Journey Radar</h3>
                     </div>
@@ -434,7 +434,7 @@ class MissionsWidget extends DashboardWidget {
             const completedCount = this.completedMissions.size;
             
             let html = `
-                <div class="missions-widget">
+                <div class="missions-widget" data-tour-id="missions">
                     <div class="widget-header">
                         <h3>🎯 Today's Missions</h3>
                         <div class="mission-progress">
@@ -719,7 +719,7 @@ class QuickActionsWidget extends DashboardWidget {
         const suggestions = await dashboardManager.generateSmartSuggestions();
         
         let html = `
-            <div class="quick-actions-widget">
+            <div class="quick-actions-widget" data-tour-id="quick-actions">
                 <div class="actions-row">
                     <button class="quick-action-btn" onclick="showAddClientModal()">
                         <span class="action-icon">➕</span>
@@ -848,6 +848,11 @@ class DashboardWidgets {
     }
 
     async takeAction(actionId, type, clientId) {
+        // Dispatch onboarding event for checklist tracking
+        window.dispatchEvent(new CustomEvent('cc:flightPlan:taskOpened', {
+            detail: { actionId, type, clientId }
+        }));
+        
         // Handle different action types
         if (type === 'aftercare_urgent' || type === 'aftercare_critical') {
             // Open aftercare options modal
@@ -932,6 +937,11 @@ class DashboardWidgets {
     }
 
     navigateToHouse(houseId) {
+        // Dispatch onboarding event for checklist tracking
+        window.dispatchEvent(new CustomEvent('cc:house:clicked', {
+            detail: { houseId }
+        }));
+        
         // Switch to Clients tab and select house
         switchTab('clients');
         setTimeout(() => switchToHouse(houseId), 100);
@@ -967,6 +977,11 @@ class DashboardWidgets {
     showSegmentClients(segment) {
         const clients = dashboardManager.cache.journeyData[segment];
         if (!clients || clients.length === 0) return;
+        
+        // Dispatch onboarding event for checklist tracking
+        window.dispatchEvent(new CustomEvent('cc:journey:stageClicked', {
+            detail: { stage: segment, clientCount: clients.length }
+        }));
         
         let content = '<div class="segment-clients-list">';
         for (const client of clients) {

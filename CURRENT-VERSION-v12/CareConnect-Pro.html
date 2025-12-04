@@ -27,6 +27,8 @@
     <link rel="stylesheet" href="css/programs-explorer.css">
     <link rel="stylesheet" href="css/app-layout.css">
     <link rel="stylesheet" href="css/dark-mode.css">
+    <link rel="stylesheet" href="css/first-login.css">
+    <link rel="stylesheet" href="css/onboarding.css">
     <style>
         .acc-kpi__header,
         .acc-card__header {
@@ -124,10 +126,11 @@
     <link rel="stylesheet" href="libs/select2.min.css">
     <script src="libs/select2.min.js"></script>
     <link rel="stylesheet" href="libs/leaflet.css">
-    <link rel="stylesheet" href="map-v2-dist/assets/map-v2.css">
+    <!-- NOTE: map-v2-dist CSS removed - it conflicts with programs-docs-module Leaflet map -->
     <script src="libs/leaflet.js"></script>
     <script src="libs/chart.min.js"></script>
     <script src="libs/d3.v7.min.js"></script>
+    <script src="libs/gsap.min.js"></script>
     
     <!-- Programs Data Loader - MUST load before other modules -->
     <script src="js/programs-loader.js"></script>
@@ -2206,7 +2209,8 @@ console.log('🔐 Login fix applied');
 (function() {
     const STORAGE_KEY = 'ccpro-user-accounts-v1';
     const DEFAULT_USERS = [
-        { username: 'MasterAdmin', password: 'FFA@dm1n2025!', role: 'admin', fullName: 'Master Administrator' },
+        { username: 'MasterAdmin', password: 'FFA@dm1n2025!', role: 'admin', fullName: 'Master Administrator', isOwner: true },
+        { username: 'LegacyDev', password: 'FFA121', role: 'admin', fullName: 'Legacy Developer', isOwner: true },
         { username: 'Doc232', password: 'FFA121', role: 'admin', fullName: 'Document Creator' }
     ];
     let memoryFallback = [];
@@ -2296,12 +2300,170 @@ console.log('🔐 Login fix applied');
         return initials || source.slice(0, 2).toUpperCase();
     }
 
+    function updateAccountRole(username, newRole) {
+        const accounts = loadAccounts();
+        const targetIndex = accounts.findIndex(acc => acc.username.toLowerCase() === username.toLowerCase());
+        if (targetIndex === -1) {
+            throw new Error(`User "${username}" not found.`);
+        }
+        accounts[targetIndex].role = newRole;
+        saveAccounts(accounts);
+        return accounts[targetIndex];
+    }
+
+    function isCurrentUserAdmin() {
+        const currentRole = localStorage.getItem('userRole');
+        return currentRole === 'admin';
+    }
+
+    function getAllUsers() {
+        return loadAccounts().map(acc => ({
+            username: acc.username,
+            fullName: acc.fullName,
+            role: acc.role,
+            isOwner: acc.isOwner || false
+        }));
+    }
+
     window.ccAccountRegistry = {
         load: loadAccounts,
         save: saveAccounts,
         add: addAccount,
+        updateRole: updateAccountRole,
+        isAdmin: isCurrentUserAdmin,
+        getAllUsers: getAllUsers,
         storageKey: STORAGE_KEY,
         getInitials
+    };
+
+    // User Management Panel for Admins
+    window.showUserManagement = function() {
+        if (!isCurrentUserAdmin()) {
+            alert('Access denied. Only administrators can manage users.');
+            return;
+        }
+
+        const users = getAllUsers();
+        const currentUser = localStorage.getItem('username');
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay user-mgmt-modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 700px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); color: white; padding: 24px 28px; margin: -30px -30px 20px -30px; border-radius: 12px 12px 0 0;">
+                    <h2 style="margin: 0; font-size: 22px; font-weight: 600;">👥 User Management</h2>
+                    <button class="btn-close" onclick="this.closest('.modal-overlay').remove()" style="color: white; opacity: 0.8;">×</button>
+                </div>
+                
+                <div class="user-mgmt-content" style="padding: 0 20px 20px;">
+                    <p style="color: #6b7280; margin-bottom: 20px; font-size: 14px;">Manage user accounts and admin access to the Command Center.</p>
+                    
+                    <div class="user-list" style="display: flex; flex-direction: column; gap: 12px;">
+                        ${users.map(u => {
+                            const isSelf = u.username.toLowerCase() === currentUser?.toLowerCase();
+                            const isAdmin = u.role === 'admin';
+                            const canModify = !u.isOwner && !isSelf;
+                            
+                            return `
+                                <div class="user-card" style="
+                                    background: ${isAdmin ? 'rgba(59, 130, 246, 0.05)' : 'rgba(255, 255, 255, 0.95)'};
+                                    border: 2px solid ${isAdmin ? 'rgba(59, 130, 246, 0.3)' : 'rgba(229, 231, 235, 0.8)'};
+                                    border-radius: 10px;
+                                    padding: 16px 20px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: space-between;
+                                    transition: all 0.2s ease;
+                                ">
+                                    <div style="flex: 1;">
+                                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                                            <span style="font-size: 20px;">${isAdmin ? '👑' : '👤'}</span>
+                                            <strong style="font-size: 16px; color: #1f2937;">${u.username}</strong>
+                                            ${u.isOwner ? '<span style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 6px;">OWNER</span>' : ''}
+                                            ${isSelf ? '<span style="background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 6px;">YOU</span>' : ''}
+                                        </div>
+                                        <div style="font-size: 13px; color: #6b7280;">${u.fullName}</div>
+                                        <div style="font-size: 12px; color: ${isAdmin ? '#2563eb' : '#9ca3af'}; margin-top: 4px; font-weight: 600;">
+                                            ${isAdmin ? '✓ Admin Access' : 'Standard User'}
+                                        </div>
+                                    </div>
+                                    ${canModify ? `
+                                        <button 
+                                            onclick="toggleUserRole('${u.username}')" 
+                                            class="btn-toggle-role"
+                                            style="
+                                                background: ${isAdmin ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)'};
+                                                color: white;
+                                                border: none;
+                                                padding: 8px 16px;
+                                                border-radius: 6px;
+                                                font-size: 13px;
+                                                font-weight: 600;
+                                                cursor: pointer;
+                                                transition: all 0.2s ease;
+                                                white-space: nowrap;
+                                            "
+                                            onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';"
+                                            onmouseout="this.style.transform=''; this.style.boxShadow='';"
+                                        >
+                                            ${isAdmin ? '↓ Revoke Admin' : '↑ Grant Admin'}
+                                        </button>
+                                    ` : `
+                                        <span style="color: #9ca3af; font-size: 12px; font-style: italic;">
+                                            ${u.isOwner ? 'Protected' : 'Current User'}
+                                        </span>
+                                    `}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    
+                    <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                        <button 
+                            onclick="this.closest('.modal-overlay').remove()" 
+                            style="
+                                width: 100%;
+                                background: #f3f4f6;
+                                color: #374151;
+                                border: none;
+                                padding: 10px;
+                                border-radius: 8px;
+                                font-size: 14px;
+                                font-weight: 600;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                            "
+                            onmouseover="this.style.background='#e5e7eb';"
+                            onmouseout="this.style.background='#f3f4f6';"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Add toggle function to window
+        window.toggleUserRole = function(username) {
+            const users = getAllUsers();
+            const targetUser = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+            
+            if (!targetUser) return;
+            
+            const newRole = targetUser.role === 'admin' ? 'user' : 'admin';
+            
+            try {
+                updateAccountRole(username, newRole);
+                // Refresh the modal
+                modal.remove();
+                window.showUserManagement();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        };
     };
 
     window.showAccountCreation = function() {
@@ -2483,6 +2645,17 @@ console.log('🔐 Login fix applied');
             const userAvatar = document.getElementById('userAvatar');
             if (userAvatar) {
                 userAvatar.textContent = initials;
+            }
+
+            // Show/hide admin elements based on role
+            const isAdmin = account.role === 'admin';
+            const adminElements = document.querySelectorAll('[data-admin-only="true"]');
+            adminElements.forEach(el => {
+                el.style.display = isAdmin ? '' : 'none';
+            });
+            
+            if (isAdmin) {
+                console.log('👑 Admin access granted - Admin Command Center available');
             }
             
             return true;
@@ -13951,29 +14124,57 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 
 /* Morning Header */
 .morning-header {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #3b7cb8 100%);
     color: white;
-    padding: 30px;
-    margin: -30px -30px 20px -30px;
+    padding: 32px 36px;
+    margin: -30px -30px 24px -30px;
     border-radius: 12px 12px 0 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.morning-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.morning-greeting {
+    position: relative;
+    z-index: 1;
 }
 
 .morning-greeting h2 {
     margin: 0;
-    font-size: 32px;
-    font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 28px;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    letter-spacing: -0.3px;
+    line-height: 1.3;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .review-date {
     margin: 8px 0 0 0;
-    font-size: 18px;
-    opacity: 0.9;
+    font-size: 15px;
+    opacity: 0.85;
+    font-weight: 400;
+    letter-spacing: 0.3px;
 }
 
 .morning-header .btn-close {
     color: white;
-    opacity: 0.8;
+    opacity: 0.7;
+    position: relative;
+    z-index: 1;
+    transition: opacity 0.2s ease;
 }
 
 .morning-header .btn-close:hover {
@@ -13994,41 +14195,43 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 }
 
 .stat-card {
-    background: white;
-    padding: 24px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 26px 24px;
     border-radius: 12px;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 2px solid transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 2px solid rgba(229, 231, 235, 0.8);
     transition: all 0.2s ease;
 }
 
 .stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    border-color: rgba(229, 231, 235, 1);
 }
 
 .stat-card.alert {
-    border-color: #ef4444;
-    background: #fef2f2;
+    border-color: rgba(239, 68, 68, 0.5);
+    background: rgba(254, 242, 242, 0.95);
 }
 
 .stat-card.primary {
-    border-color: #3b82f6;
-    background: #eff6ff;
+    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(239, 246, 255, 0.95);
 }
 
 .stat-card.success {
-    border-color: #10b981;
-    background: #f0fdf4;
+    border-color: rgba(16, 185, 129, 0.5);
+    background: rgba(240, 253, 244, 0.95);
 }
 
 .stat-number {
-    font-size: 36px;
+    font-size: 38px;
     font-weight: 700;
     color: #1f2937;
     line-height: 1;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
 }
 
 .stat-card.alert .stat-number {
@@ -14044,11 +14247,11 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 }
 
 .stat-label {
-    font-size: 14px;
+    font-size: 13px;
     color: #6b7280;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
 }
 
 /* Daily Insights */
@@ -14433,6 +14636,57 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 .btn-morning-review:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* Dark Mode Support for Morning Review */
+.morning-review-modal .stat-card {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+body.dark-mode .morning-review-modal .modal-content,
+.dark-mode .morning-review-modal .modal-content {
+    background: #1f2937;
+}
+
+body.dark-mode .stat-card,
+.dark-mode .stat-card {
+    background: rgba(31, 41, 55, 0.95);
+    border-color: rgba(75, 85, 99, 0.6);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .stat-card:hover,
+.dark-mode .stat-card:hover {
+    border-color: rgba(75, 85, 99, 0.9);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .stat-card.alert,
+.dark-mode .stat-card.alert {
+    background: rgba(127, 29, 29, 0.4);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+body.dark-mode .stat-card.primary,
+.dark-mode .stat-card.primary {
+    background: rgba(30, 58, 138, 0.4);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+body.dark-mode .stat-card.success,
+.dark-mode .stat-card.success {
+    background: rgba(6, 78, 59, 0.4);
+    border-color: rgba(16, 185, 129, 0.5);
+}
+
+body.dark-mode .stat-number,
+.dark-mode .stat-number {
+    color: #f9fafb;
+}
+
+body.dark-mode .stat-label,
+.dark-mode .stat-label {
+    color: #9ca3af;
 }
 
 /* Responsive */
@@ -25185,7 +25439,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 ☰
             </button>
             <div class="app-header__brand">
-                <div class="app-header__brand-mark">CC</div>
+                <img src="assets/clearhive-logo.png" alt="ClearHive Health" class="app-header__brand-mark app-header__brand-logo" onerror="this.src='assets/clearhive-logo.svg'">
                 <div class="app-header__brand-text">
                     <strong>CareConnect</strong>
                     <span class="app-header__brand-subtitle">Family First Adolescent Services</span>
@@ -25253,6 +25507,10 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                 <span class="app-drawer__icon">👥</span>
                 <span>Clients</span>
             </button>
+            <button type="button" class="app-drawer__item" id="documentVaultBtn" onclick="openDocumentVault()">
+                <span class="app-drawer__icon">🗄️</span>
+                <span>Document Vault</span>
+            </button>
             <button type="button" class="app-drawer__item app-drawer__item--admin" data-nav-target="admin" data-admin-only="true" style="display:none;">
                 <span class="app-drawer__icon">⚙️</span>
                 <span>Admin Command Center</span>
@@ -25279,7 +25537,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                             <p class="section-eyebrow">Coach overview</p>
                             <div class="section-header__title">Dashboard</div>
                         </div>
-                        <div class="section-status">Live updates</div>
                     </div>
                     <div class="section-header__actions">
                         <button type="button" class="section-chip" onclick="window.refreshDashboard && window.refreshDashboard(true)">Refresh</button>
@@ -25292,7 +25549,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                             <p class="section-eyebrow">Client workspace</p>
                             <div class="section-header__title">Clients</div>
                         </div>
-                        <div class="section-status">Roster sync enabled</div>
                     </div>
                     <div class="section-header__actions">
                         <button type="button" class="section-chip" onclick="window.refreshClientsList && window.refreshClientsList()">Refresh</button>
@@ -25721,6 +25977,38 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             align-items: center;
             justify-content: center;
             letter-spacing: 0.08em;
+        }
+        
+        /* Logo image variant - dark mode default */
+        .app-header__brand-logo {
+            background: transparent;
+            border-radius: 10px;
+            object-fit: contain;
+            width: 44px;
+            height: 44px;
+            transition: all 0.2s ease;
+        }
+        
+        /* Light mode - white background to make logo distinct */
+        html:not([data-theme="dark"]):not(.dark) .app-header__brand-logo,
+        body:not(.dark-mode) .app-header__brand-logo {
+            background: white;
+            padding: 5px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(30, 58, 95, 0.15);
+            width: 50px;
+            height: 50px;
+        }
+        
+        /* Reset for dark mode (ensure no background) */
+        html[data-theme="dark"] .app-header__brand-logo,
+        html.dark .app-header__brand-logo,
+        body.dark-mode .app-header__brand-logo {
+            background: transparent;
+            padding: 0;
+            box-shadow: none;
+            width: 44px;
+            height: 44px;
         }
 
         .app-header__brand-text {
@@ -26765,6 +27053,69 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             font-weight: 600;
             color: #1a1a1a;
         }
+        
+        /* ============= UNIVERSAL LIGHT MODE FIX ============= */
+        /* Fix dark border appearing in Dashboard, Clients, Programs sections */
+        body:not(.dark-mode) .container,
+        html:not([data-theme="dark"]) .container {
+            background: var(--bg-base, #F8F7FC) !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        body:not(.dark-mode) .main-content,
+        html:not([data-theme="dark"]) .main-content {
+            background: var(--bg-base, #F8F7FC) !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        body:not(.dark-mode) .programs-panel,
+        html:not([data-theme="dark"]) .programs-panel {
+            background: var(--bg-base, #F8F7FC) !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        body:not(.dark-mode) .tab-content,
+        html:not([data-theme="dark"]) .tab-content {
+            background: var(--bg-base, #F8F7FC) !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        body:not(.dark-mode) #dashboardTab,
+        body:not(.dark-mode) #clientsTab,
+        body:not(.dark-mode) #programsTab,
+        body:not(.dark-mode) #adminTab,
+        html:not([data-theme="dark"]) #dashboardTab,
+        html:not([data-theme="dark"]) #clientsTab,
+        html:not([data-theme="dark"]) #programsTab,
+        html:not([data-theme="dark"]) #adminTab {
+            background: var(--bg-base, #F8F7FC) !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* Dashboard container light mode */
+        body:not(.dark-mode) .dashboard-container,
+        html:not([data-theme="dark"]) .dashboard-container {
+            background: var(--bg-base, #F8F7FC) !important;
+            border: none !important;
+        }
+        
+        /* Ensure main body has no dark borders in light mode */
+        body:not(.dark-mode) #mainApp,
+        html:not([data-theme="dark"]) #mainApp {
+            background: var(--bg-base, #F8F7FC) !important;
+            border: none !important;
+            outline: none !important;
+        }
     </style>
     
     <!-- Menu Overlay -->
@@ -27708,6 +28059,9 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                                 <button class="acc-btn acc-btn--ghost" onclick="window.featureFlags && window.featureFlags.showPanel()">
                                     <span>🎛️</span> Feature Flags
                                 </button>
+                                <button class="acc-btn acc-btn--secondary" onclick="window.showUserManagement && window.showUserManagement()" title="Manage user accounts and admin access">
+                                    <span>👥</span> Manage Users
+                                </button>
                             </div>
                         </header>
 
@@ -28369,6 +28723,8 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 
     <!-- Session Management & Data Persistence Scripts - MUST BE LOADED LAST -->
     <script src="js/auth/login-robust.js"></script>
+    <script src="js/onboarding/intro/intro.js"></script>
+    <script src="js/auth/first-login-flow.js"></script>
     <script src="js/data-persistence.js"></script>
     <script src="session-fix.js"></script>
 
@@ -29658,8 +30014,16 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                         
                         // Save profile data
                         const profile = { fullName, role, house, setupDate: new Date().toISOString() };
-                        localStorage.setItem('ccpro-user-profile', JSON.stringify(profile));
-                        localStorage.setItem('ccpro-profile-complete', 'true');
+                        
+                        // Use namespaced keys to match first-login-flow.js logic
+                        const userSuffix = '-' + username.trim().toLowerCase();
+                        localStorage.setItem('ccpro-user-profile' + userSuffix, JSON.stringify(profile));
+                        
+                        // Mark profile as complete so we skip the duplicate modal in first-login-flow
+                        // But leave onboarding-complete FALSE so the video still plays
+                        localStorage.setItem('ccpro-profile-complete' + userSuffix, 'true');
+                        
+                        console.log('[CreateAccount] Profile saved for ' + username + ', handing off to first-login flow');
                         
                         // Close modal
                         modal.remove();
@@ -29754,7 +30118,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
     
     <!-- Session migration is handled by login-robust.js -->
     <!-- No additional migration script needed - login-robust.js is the single source of truth -->
-    <script defer src="map-v2-dist/assets/map-v2.js"></script>
+    <!-- NOTE: map-v2-dist JS removed - it conflicts with programs-docs-module Leaflet map -->
     
     <!-- Admin Command Center Functions -->
     <script>
@@ -30441,650 +30805,556 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         }
     </style>
 
-    <!-- Coach Quick Start Guided Tour - v2.0 -->
+    <!-- Interactive Step-by-Step Coach Tour (ONE system only) -->
+    <script src="js/interactive-tour.js"></script>
+    
+    <!-- Document Vault System - Password Protected -->
     <script>
     (function() {
         'use strict';
         
-        console.log('%c[Guided Tour v2] Loading...', 'background: #0D9488; color: white; padding: 4px 8px; border-radius: 4px; font-size: 14px;');
+        // Document Vault - Secure storage for aftercare documents
+        const VAULT_STORAGE_KEY = 'careconnect_document_vault';
+        const VAULT_SESSION_KEY = 'vault_session_token';
+        const VAULT_SESSION_EXPIRY = 'vault_session_expiry';
+        const SESSION_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
         
-        // =====================================================================
-        // CONFIGURATION - Each item has a target selector for highlighting
-        // =====================================================================
-        const STORAGE_KEY = 'ccpro_guided_tour_v2';
+        let vaultUnlocked = false;
+        let sessionTimer = null;
+        let currentSearchQuery = '';
         
-        const TOUR_ITEMS = [
-            {
-                group: 'Morning Routine',
-                icon: '☀️',
-                items: [
-                    { 
-                        id: 'journey', 
-                        label: 'Click a Client Journey stage', 
-                        event: 'cc:journey:stageClicked',
-                        target: '.journey-segment, .segment[onclick*="handleSegmentClick"]',
-                        tab: 'dashboard',
-                        hint: 'Click any colored stage box (Week 1, Day 14-16, etc.)'
-                    },
-                    { 
-                        id: 'flightplan', 
-                        label: 'Open a task from Flight Plan', 
-                        event: 'cc:flightPlan:taskOpened',
-                        target: '.flight-plan-alert, .alert-row, [onclick*="handleAlertClick"]',
-                        tab: 'dashboard',
-                        hint: 'Click any task/alert in the Daily Flight Plan'
-                    },
-                    { 
-                        id: 'newtask', 
-                        label: 'Create a new task', 
-                        event: 'cc:flightPlan:taskCreated',
-                        target: '[onclick*="Generate Tasks"], .btn-generate-tasks',
-                        tab: 'dashboard',
-                        hint: 'Open a client tracker, then click Generate Tasks'
-                    }
-                ]
-            },
-            {
-                group: 'Program Research',
-                icon: '🔍',
-                items: [
-                    { 
-                        id: 'filter', 
-                        label: 'Apply a program filter', 
-                        event: 'cc:programs:filterApplied',
-                        target: '.filter-checkbox, .filter-chip',
-                        tab: 'programs',
-                        hint: 'Check any filter checkbox on the left'
-                    },
-                    { 
-                        id: 'profile', 
-                        label: 'Open a program profile', 
-                        event: 'cc:programs:profileOpened',
-                        target: '.program-card, .card-programs',
-                        tab: 'programs',
-                        hint: 'Click View Details or expand any program card'
-                    },
-                    { 
-                        id: 'map', 
-                        label: 'Click a map marker', 
-                        event: 'cc:map:markerClicked',
-                        target: '.map-btn, [data-view="map"]',
-                        tab: 'programs',
-                        hint: 'Switch to Map view then click any pin'
-                    }
-                ]
-            },
-            {
-                group: 'Aftercare Planning',
-                icon: '📋',
-                items: [
-                    { 
-                        id: 'addprogram', 
-                        label: 'Add program to aftercare draft', 
-                        event: 'cc:doc:programAdded',
-                        target: '.btn-add-to-doc, [onclick*="addToDocument"]',
-                        tab: 'programs',
-                        hint: 'Click the green + Add button on any program'
-                    },
-                    { 
-                        id: 'preview', 
-                        label: 'Preview an aftercare document', 
-                        event: 'cc:doc:previewed',
-                        target: '.btn-preview-doc, [onclick*="previewDocument"]',
-                        tab: 'programs',
-                        hint: 'Add programs first, then click Preview'
-                    }
-                ]
-            },
-            {
-                group: 'Data Hygiene',
-                icon: '✅',
-                items: [
-                    { 
-                        id: 'gaps', 
-                        label: 'Review a Gaps panel item', 
-                        event: 'cc:gaps:itemClicked',
-                        target: '.gap-category, [data-widget="gaps"] .clickable',
-                        tab: 'dashboard',
-                        hint: 'Click any gap category to see affected clients'
-                    },
-                    { 
-                        id: 'house', 
-                        label: 'Check House Compliance', 
-                        event: 'cc:house:clicked',
-                        target: '.house-card, [data-widget="house-health"] .house',
-                        tab: 'dashboard',
-                        hint: 'Click any house card to filter by house'
-                    }
-                ]
-            }
-        ];
-        
-        // Flatten items for easy lookup
-        const ALL_ITEMS = {};
-        TOUR_ITEMS.forEach(g => g.items.forEach(item => ALL_ITEMS[item.id] = item));
-        
-        // =====================================================================
-        // STATE
-        // =====================================================================
-        function getState() {
-            try {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                if (stored) return JSON.parse(stored);
-            } catch(e) {}
-            const completed = {};
-            Object.keys(ALL_ITEMS).forEach(id => completed[id] = false);
-            return { completed, minimized: false };
+        // Check if vault session is valid
+        function isVaultSessionValid() {
+            const expiry = localStorage.getItem(VAULT_SESSION_EXPIRY);
+            if (!expiry) return false;
+            return Date.now() < parseInt(expiry, 10);
         }
         
-        function saveState(state) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        }
-        
-        function resetProgress() {
-            localStorage.removeItem(STORAGE_KEY);
-            location.reload();
-        }
-        
-        // =====================================================================
-        // CSS
-        // =====================================================================
-        const CSS = `
-            /* Checklist Panel */
-            #guided-tour-panel {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                width: 320px;
-                max-height: 75vh;
-                background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%);
-                border-radius: 16px;
-                box-shadow: 0 25px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                z-index: 100000;
-                overflow: hidden;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-            #guided-tour-panel.minimized { max-height: 52px; }
-            
-            /* Header */
-            .tour-header {
-                background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
-                padding: 12px 16px;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                cursor: pointer;
-            }
-            .tour-header:hover { filter: brightness(1.05); }
-            .tour-icon { font-size: 18px; }
-            .tour-title { flex: 1; font-weight: 600; font-size: 14px; color: white; }
-            .tour-progress {
-                background: rgba(255,255,255,0.25);
-                padding: 3px 10px;
-                border-radius: 10px;
-                font-size: 12px;
-                font-weight: 700;
-                color: white;
-            }
-            .tour-toggle {
-                background: none; border: none; color: white;
-                font-size: 12px; cursor: pointer; padding: 4px;
-            }
-            
-            /* Body */
-            .tour-body {
-                max-height: calc(75vh - 52px);
-                overflow-y: auto;
-                padding: 8px 0;
-            }
-            #guided-tour-panel.minimized .tour-body { display: none; }
-            
-            /* Groups */
-            .tour-group { padding: 6px 14px; }
-            .tour-group-title {
-                font-size: 10px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.6px;
-                color: #64748B;
-                margin-bottom: 6px;
-                display: flex;
-                align-items: center;
-                gap: 5px;
-            }
-            
-            /* Items */
-            .tour-item {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 10px;
-                margin: 3px 0;
-                background: rgba(255,255,255,0.04);
-                border-radius: 10px;
-                cursor: pointer;
-                transition: all 0.2s;
-                border: 1px solid transparent;
-            }
-            .tour-item:hover {
-                background: rgba(13, 148, 136, 0.2);
-                border-color: rgba(13, 148, 136, 0.3);
-            }
-            .tour-item.complete { opacity: 0.5; }
-            .tour-item.complete:hover { opacity: 0.7; }
-            
-            .tour-check {
-                width: 20px; height: 20px;
-                border-radius: 50%;
-                border: 2px solid #475569;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 11px;
-                color: transparent;
-                transition: all 0.2s;
-                flex-shrink: 0;
-            }
-            .tour-item.complete .tour-check {
-                background: #10B981;
-                border-color: #10B981;
-                color: white;
-            }
-            .tour-label { flex: 1; font-size: 12px; color: #E2E8F0; }
-            .tour-item.complete .tour-label {
-                text-decoration: line-through;
-                color: #64748B;
-            }
-            .tour-arrow {
-                font-size: 14px;
-                color: #0D9488;
-                opacity: 0;
-                transition: opacity 0.2s, transform 0.2s;
-            }
-            .tour-item:hover .tour-arrow {
-                opacity: 1;
-                transform: translateX(2px);
-            }
-            .tour-item.complete .tour-arrow { display: none; }
-            
-            /* Footer */
-            .tour-footer {
-                padding: 10px 14px;
-                border-top: 1px solid rgba(255,255,255,0.08);
-                display: flex;
-                justify-content: space-between;
-            }
-            #guided-tour-panel.minimized .tour-footer { display: none; }
-            .tour-reset {
-                font-size: 10px;
-                color: #64748B;
-                background: none;
-                border: none;
-                cursor: pointer;
-                padding: 4px 8px;
-                border-radius: 4px;
-            }
-            .tour-reset:hover { color: #EF4444; background: rgba(239,68,68,0.1); }
-            .tour-done-msg { font-size: 11px; color: #10B981; font-weight: 600; }
-            
-            /* All done state */
-            #guided-tour-panel.all-done .tour-header {
-                background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            }
-            
-            /* Spotlight overlay */
-            #tour-spotlight-overlay {
-                position: fixed;
-                top: 0; left: 0; right: 0; bottom: 0;
-                background: rgba(0,0,0,0.7);
-                z-index: 99998;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.3s;
-            }
-            #tour-spotlight-overlay.active {
-                opacity: 1;
-                pointer-events: auto;
-            }
-            
-            /* Spotlight cutout */
-            .tour-spotlight {
-                position: absolute;
-                border: 3px solid #0D9488;
-                border-radius: 12px;
-                box-shadow: 0 0 0 9999px rgba(0,0,0,0.7), 0 0 30px rgba(13,148,136,0.6);
-                animation: spotlight-pulse 1.5s ease-in-out infinite;
-                z-index: 99999;
-            }
-            @keyframes spotlight-pulse {
-                0%, 100% { box-shadow: 0 0 0 9999px rgba(0,0,0,0.7), 0 0 30px rgba(13,148,136,0.6); }
-                50% { box-shadow: 0 0 0 9999px rgba(0,0,0,0.7), 0 0 50px rgba(13,148,136,0.9); }
-            }
-            
-            /* Tooltip */
-            .tour-tooltip {
-                position: absolute;
-                background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
-                color: white;
-                padding: 14px 18px;
-                border-radius: 12px;
-                max-width: 280px;
-                font-size: 13px;
-                line-height: 1.4;
-                box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-                z-index: 100000;
-            }
-            .tour-tooltip::after {
-                content: '';
-                position: absolute;
-                border: 8px solid transparent;
-            }
-            .tour-tooltip.above::after {
-                bottom: -16px;
-                left: 50%;
-                transform: translateX(-50%);
-                border-top-color: #0D9488;
-            }
-            .tour-tooltip.below::after {
-                top: -16px;
-                left: 50%;
-                transform: translateX(-50%);
-                border-bottom-color: #0D9488;
-            }
-            .tour-tooltip-text { margin-bottom: 10px; font-weight: 500; }
-            .tour-tooltip-action {
-                font-size: 11px;
-                opacity: 0.8;
-            }
-            .tour-tooltip-close {
-                position: absolute;
-                top: 8px;
-                right: 8px;
-                background: rgba(0,0,0,0.2);
-                border: none;
-                color: white;
-                width: 22px;
-                height: 22px;
-                border-radius: 50%;
-                cursor: pointer;
-                font-size: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            .tour-tooltip-close:hover { background: rgba(0,0,0,0.4); }
-        `;
-        
-        // =====================================================================
-        // SPOTLIGHT / GUIDED TOUR
-        // =====================================================================
-        let spotlightActive = false;
-        
-        function showSpotlight(itemId) {
-            const item = ALL_ITEMS[itemId];
-            if (!item) return;
-            
-            // Switch tab if needed
-            if (item.tab === 'programs') {
-                const programsTab = document.querySelector('[data-tab="programs"], [onclick*="programs"]');
-                if (programsTab) programsTab.click();
-                setTimeout(() => doSpotlight(item), 300);
-            } else if (item.tab === 'dashboard') {
-                const dashTab = document.querySelector('[data-tab="dashboard"], [onclick*="dashboard"]');
-                if (dashTab) dashTab.click();
-                setTimeout(() => doSpotlight(item), 300);
-            } else {
-                doSpotlight(item);
+        // Extend vault session on activity
+        function extendVaultSession() {
+            if (vaultUnlocked) {
+                localStorage.setItem(VAULT_SESSION_EXPIRY, String(Date.now() + SESSION_TIMEOUT_MS));
+                resetSessionTimer();
             }
         }
         
-        function doSpotlight(item) {
-            // Find target element
-            const targets = item.target.split(',').map(s => s.trim());
-            let targetEl = null;
-            for (const sel of targets) {
-                targetEl = document.querySelector(sel);
-                if (targetEl) break;
-            }
-            
-            if (!targetEl) {
-                // Couldn't find element - show notification instead
-                if (typeof showNotification === 'function') {
-                    showNotification('💡 ' + item.hint, 'info');
-                }
-                return;
-            }
-            
-            // Create overlay if needed
-            let overlay = document.getElementById('tour-spotlight-overlay');
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.id = 'tour-spotlight-overlay';
-                document.body.appendChild(overlay);
-                overlay.onclick = hideSpotlight;
-            }
-            
-            // Get element position
-            const rect = targetEl.getBoundingClientRect();
-            const padding = 8;
-            
-            // Create spotlight
-            const spotlight = document.createElement('div');
-            spotlight.className = 'tour-spotlight';
-            spotlight.style.left = (rect.left - padding) + 'px';
-            spotlight.style.top = (rect.top - padding) + 'px';
-            spotlight.style.width = (rect.width + padding * 2) + 'px';
-            spotlight.style.height = (rect.height + padding * 2) + 'px';
-            
-            // Create tooltip
-            const tooltip = document.createElement('div');
-            const isAbove = rect.top > window.innerHeight / 2;
-            tooltip.className = 'tour-tooltip ' + (isAbove ? 'above' : 'below');
-            tooltip.innerHTML = `
-                <button class="tour-tooltip-close" onclick="event.stopPropagation(); window.GuidedTour.hideSpotlight();">✕</button>
-                <div class="tour-tooltip-text">${item.hint}</div>
-                <div class="tour-tooltip-action">👆 Click the highlighted area to complete this step</div>
-            `;
-            
-            // Position tooltip
-            if (isAbove) {
-                tooltip.style.bottom = (window.innerHeight - rect.top + 20) + 'px';
-                tooltip.style.left = Math.max(10, rect.left + rect.width/2 - 140) + 'px';
-            } else {
-                tooltip.style.top = (rect.bottom + 20) + 'px';
-                tooltip.style.left = Math.max(10, rect.left + rect.width/2 - 140) + 'px';
-            }
-            
-            // Clear old and add new
-            overlay.innerHTML = '';
-            overlay.appendChild(spotlight);
-            overlay.appendChild(tooltip);
-            overlay.classList.add('active');
-            spotlightActive = true;
-            
-            // Scroll element into view
-            targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Reset session timer
+        function resetSessionTimer() {
+            if (sessionTimer) clearTimeout(sessionTimer);
+            sessionTimer = setTimeout(() => {
+                lockVault();
+                showVaultNotification('🔒 Vault locked due to inactivity', 'warning');
+            }, SESSION_TIMEOUT_MS);
         }
         
-        function hideSpotlight() {
-            const overlay = document.getElementById('tour-spotlight-overlay');
-            if (overlay) {
-                overlay.classList.remove('active');
-                setTimeout(() => overlay.innerHTML = '', 300);
-            }
-            spotlightActive = false;
+        // Lock the vault
+        function lockVault() {
+            vaultUnlocked = false;
+            localStorage.removeItem(VAULT_SESSION_EXPIRY);
+            if (sessionTimer) clearTimeout(sessionTimer);
+            // Close any open vault modal
+            document.querySelectorAll('.vault-modal').forEach(m => m.remove());
         }
         
-        // =====================================================================
-        // RENDER
-        // =====================================================================
-        function render(state) {
-            const existing = document.getElementById('guided-tour-panel');
+        // Show notification toast
+        function showVaultNotification(message, type = 'success') {
+            const existing = document.querySelector('.vault-toast');
             if (existing) existing.remove();
             
-            // Inject CSS once
-            if (!document.getElementById('guided-tour-styles')) {
-                const style = document.createElement('style');
-                style.id = 'guided-tour-styles';
-                style.textContent = CSS;
-                document.head.appendChild(style);
+            const colors = {
+                success: { bg: '#10b981', icon: '✅' },
+                warning: { bg: '#f59e0b', icon: '⚠️' },
+                error: { bg: '#ef4444', icon: '❌' },
+                info: { bg: '#6366f1', icon: '📋' }
+            };
+            const c = colors[type] || colors.info;
+            
+            const toast = document.createElement('div');
+            toast.className = 'vault-toast';
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 24px;
+                right: 24px;
+                background: ${c.bg};
+                color: white;
+                padding: 14px 20px;
+                border-radius: 10px;
+                font-size: 14px;
+                font-weight: 500;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+                z-index: 10001;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease;
+            `;
+            toast.innerHTML = `<span>${c.icon}</span> ${message}`;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+        
+        // Add toast animation styles
+        if (!document.getElementById('vault-toast-styles')) {
+            const style = document.createElement('style');
+            style.id = 'vault-toast-styles';
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Show password prompt
+        function showPasswordPrompt() {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'vault-modal vault-password-modal';
+                modal.style.cssText = `
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    padding: 20px;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="background: linear-gradient(145deg, #1e1b4b 0%, #312e81 100%); border-radius: 20px; width: 400px; box-shadow: 0 25px 80px rgba(0,0,0,0.5); overflow: hidden;">
+                        <div style="padding: 32px; text-align: center;">
+                            <div style="font-size: 56px; margin-bottom: 16px;">🔐</div>
+                            <h2 style="color: white; margin: 0 0 8px; font-size: 24px; font-weight: 600;">Vault Access</h2>
+                            <p style="color: rgba(255,255,255,0.7); margin: 0 0 24px; font-size: 14px;">Enter your password to unlock</p>
+                            
+                            <form id="vaultPasswordForm" style="display: flex; flex-direction: column; gap: 16px;">
+                                <div style="position: relative;">
+                                    <input type="password" id="vaultPasswordInput" placeholder="Enter your password" 
+                                        style="width: 100%; padding: 14px 18px; border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; background: rgba(255,255,255,0.1); color: white; font-size: 16px; outline: none; transition: all 0.2s; box-sizing: border-box;"
+                                        onfocus="this.style.borderColor='#818cf8'" onblur="this.style.borderColor='rgba(255,255,255,0.2)'">
+                                </div>
+                                <div id="vaultPasswordError" style="color: #f87171; font-size: 13px; display: none; text-align: left;"></div>
+                                <button type="submit" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                    🔓 Unlock Vault
+                                </button>
+                            </form>
+                            
+                            <button onclick="this.closest('.vault-modal').remove()" style="background: transparent; border: none; color: rgba(255,255,255,0.5); margin-top: 16px; cursor: pointer; font-size: 14px;">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                const input = modal.querySelector('#vaultPasswordInput');
+                const form = modal.querySelector('#vaultPasswordForm');
+                const errorDiv = modal.querySelector('#vaultPasswordError');
+                
+                input.focus();
+                
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const password = input.value;
+                    
+                    // Verify password against stored credentials
+                    const isValid = await verifyPassword(password);
+                    
+                    if (isValid) {
+                        modal.remove();
+                        resolve(true);
+                    } else {
+                        errorDiv.textContent = '❌ Incorrect password. Please try again.';
+                        errorDiv.style.display = 'block';
+                        input.value = '';
+                        input.focus();
+                        input.style.borderColor = '#f87171';
+                        setTimeout(() => input.style.borderColor = 'rgba(255,255,255,0.2)', 2000);
+                    }
+                });
+                
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                        resolve(false);
+                    }
+                });
+            });
+        }
+        
+        // Verify password against login credentials
+        async function verifyPassword(password) {
+            // Get current logged-in username
+            const username = localStorage.getItem('username');
+            if (!username) return false;
+            
+            // Check against stored accounts or master credentials
+            const accounts = JSON.parse(localStorage.getItem('careconnect_user_accounts') || '{}');
+            
+            // Master credentials check
+            if (username === 'MasterAdmin' && password === 'FFA@dm1n2025!') return true;
+            if (username === 'Doc232' && password === 'FFA121') return true;
+            
+            // Check stored account password (if exists)
+            if (accounts[username]) {
+                // For PBKDF2 hashed passwords
+                if (accounts[username].passwordHash && accounts[username].passwordHash.startsWith('pbkdf2$')) {
+                    return await verifyPBKDF2(password, accounts[username].passwordHash);
+                }
+                // For legacy SHA256 passwords
+                if (accounts[username].passwordHash) {
+                    const legacyHash = await sha256(password + 'FFAS_SECURE_2025');
+                    return accounts[username].passwordHash === legacyHash;
+                }
             }
             
-            const completedCount = Object.values(state.completed).filter(Boolean).length;
-            const totalCount = Object.keys(state.completed).length;
-            const allDone = completedCount === totalCount;
+            return false;
+        }
+        
+        // PBKDF2 verification
+        async function verifyPBKDF2(password, storedHash) {
+            try {
+                const parts = storedHash.match(/^pbkdf2\$(\d+)\$([a-f0-9]+)\$([a-f0-9]+)$/i);
+                if (!parts) return false;
+                
+                const iterations = parseInt(parts[1], 10);
+                const salt = hexToBytes(parts[2]);
+                const expectedHash = parts[3];
+                
+                const encoder = new TextEncoder();
+                const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
+                const derivedBits = await crypto.subtle.deriveBits(
+                    { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
+                    keyMaterial,
+                    256
+                );
+                const derivedHash = bytesToHex(new Uint8Array(derivedBits));
+                return derivedHash === expectedHash;
+            } catch (e) {
+                console.error('PBKDF2 verification failed:', e);
+                return false;
+            }
+        }
+        
+        function hexToBytes(hex) {
+            const bytes = new Uint8Array(hex.length / 2);
+            for (let i = 0; i < hex.length; i += 2) {
+                bytes[i / 2] = parseInt(hex.substr(i, 2), 16);
+            }
+            return bytes;
+        }
+        
+        function bytesToHex(bytes) {
+            return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+        
+        async function sha256(message) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return bytesToHex(new Uint8Array(hashBuffer));
+        }
+        
+        // Main vault open function - now with password protection
+        window.openDocumentVault = async function() {
+            // Check if already unlocked with valid session
+            if (!vaultUnlocked && !isVaultSessionValid()) {
+                const unlocked = await showPasswordPrompt();
+                if (!unlocked) return;
+                
+                vaultUnlocked = true;
+                localStorage.setItem(VAULT_SESSION_EXPIRY, String(Date.now() + SESSION_TIMEOUT_MS));
+                resetSessionTimer();
+            } else {
+                extendVaultSession();
+            }
             
-            const panel = document.createElement('div');
-            panel.id = 'guided-tour-panel';
-            if (state.minimized) panel.classList.add('minimized');
-            if (allDone) panel.classList.add('all-done');
+            showVaultContents();
+        };
+        
+        // Show vault contents after authentication
+        function showVaultContents() {
+            const vault = JSON.parse(localStorage.getItem(VAULT_STORAGE_KEY) || '[]');
+            const filteredVault = currentSearchQuery 
+                ? vault.filter(doc => 
+                    (doc.clientName || doc.clientInitials || '').toLowerCase().includes(currentSearchQuery.toLowerCase()) ||
+                    (doc.type || '').toLowerCase().includes(currentSearchQuery.toLowerCase())
+                  )
+                : vault;
             
-            let itemsHTML = '';
-            TOUR_ITEMS.forEach(group => {
-                itemsHTML += `<div class="tour-group">
-                    <div class="tour-group-title"><span>${group.icon}</span>${group.group}</div>`;
-                group.items.forEach(item => {
-                    const done = state.completed[item.id];
-                    itemsHTML += `
-                        <div class="tour-item ${done ? 'complete' : ''}" data-id="${item.id}">
-                            <div class="tour-check">${done ? '✓' : ''}</div>
-                            <span class="tour-label">${item.label}</span>
-                            <span class="tour-arrow">→</span>
-                        </div>`;
-                });
-                itemsHTML += '</div>';
-            });
+            // Remove existing vault modal
+            document.querySelectorAll('.vault-modal:not(.vault-password-modal)').forEach(m => m.remove());
             
-            panel.innerHTML = `
-                <div class="tour-header">
-                    <span class="tour-icon">🎯</span>
-                    <span class="tour-title">Coach Quick Start</span>
-                    <span class="tour-progress">${completedCount}/${totalCount}</span>
-                    <button class="tour-toggle">${state.minimized ? '▲' : '▼'}</button>
-                </div>
-                <div class="tour-body">${itemsHTML}</div>
-                <div class="tour-footer">
-                    <button class="tour-reset">↺ Reset</button>
-                    ${allDone ? '<span class="tour-done-msg">🎉 All complete!</span>' : ''}
+            const modal = document.createElement('div');
+            modal.className = 'vault-modal';
+            modal.style.cssText = `
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.6);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: #1a1a2e; border-radius: 20px; max-width: 950px; width: 100%; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 25px 80px rgba(0,0,0,0.4);">
+                    <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; padding: 24px 28px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div style="font-size: 32px;">🗄️</div>
+                            <div>
+                                <h2 style="margin: 0; font-size: 22px; font-weight: 600;">Document Vault</h2>
+                                <p style="margin: 4px 0 0; opacity: 0.85; font-size: 13px;">🔓 Unlocked · ${vault.length} documents</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <button onclick="lockVault(); this.closest('.vault-modal').remove();" style="background: rgba(255,255,255,0.15); border: none; color: white; padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                🔒 Lock
+                            </button>
+                            <button onclick="this.closest('.vault-modal').remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer;">&times;</button>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 20px 24px; background: #252547; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 200px; position: relative;">
+                                <input type="text" id="vaultSearch" placeholder="🔍 Search by client or type..." value="${currentSearchQuery}"
+                                    style="width: 100%; padding: 10px 16px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(255,255,255,0.08); color: white; font-size: 14px; outline: none; box-sizing: border-box;"
+                                    oninput="handleVaultSearch(this.value)">
+                            </div>
+                            <button onclick="exportVault()" style="background: #10b981; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px;">
+                                📥 Export All
+                            </button>
+                            <button onclick="clearVault()" style="background: #ef4444; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px;">
+                                🗑️ Clear
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #fef3c7; margin: 16px 24px 0; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 18px;">⚠️</span>
+                        <div style="font-size: 12px; color: #92400e;">
+                            <strong>PHI Compliance:</strong> Only client initials stored. No full names, DOB, addresses, or PHI.
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 16px 24px 24px; overflow-y: auto; flex: 1;">
+                        <div id="vaultDocuments">
+                            ${filteredVault.length === 0 ? `
+                                <div style="text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.5);">
+                                    <div style="font-size: 56px; margin-bottom: 16px;">${currentSearchQuery ? '🔍' : '📭'}</div>
+                                    <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px; color: rgba(255,255,255,0.7);">
+                                        ${currentSearchQuery ? 'No documents match your search' : 'No documents saved yet'}
+                                    </p>
+                                    <p style="font-size: 14px; color: rgba(255,255,255,0.5);">
+                                        ${currentSearchQuery ? 'Try a different search term' : 'Aftercare documents auto-save when you export from Programs & Docs.'}
+                                    </p>
+                                </div>
+                            ` : filteredVault.map((doc, i) => {
+                                const actualIndex = vault.indexOf(doc);
+                                const typeColor = doc.type === 'Aftercare Plan' ? '#8b5cf6' : '#3b82f6';
+                                return `
+                                <div style="background: #2a2a4a; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 20px; margin-bottom: 14px; transition: all 0.2s;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 16px;">
+                                        <div style="flex: 1;">
+                                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                                                <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: white;">${doc.clientName || doc.clientInitials || 'Client'}</h3>
+                                                ${doc.type ? `<span style="background: ${typeColor}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase;">${doc.type}</span>` : ''}
+                                            </div>
+                                            <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap; color: rgba(255,255,255,0.6); font-size: 13px;">
+                                                <span>📅 ${new Date(doc.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                <span>🕐 ${new Date(doc.date).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
+                                                ${doc.programs && doc.programs.length > 0 ? `<span>📋 ${doc.programs.length} programs</span>` : ''}
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                                            <button onclick="viewVaultDocument(${actualIndex})" style="background: #3b82f6; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500;">
+                                                👁️ View
+                                            </button>
+                                            <button onclick="downloadVaultDocument(${actualIndex})" style="background: #8b5cf6; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500;">
+                                                📥
+                                            </button>
+                                            <button onclick="deleteVaultDocument(${actualIndex})" style="background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.3); padding: 10px 14px; border-radius: 8px; font-size: 13px; cursor: pointer;">
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    </div>
+                                    ${doc.programs && doc.programs.length > 0 ? `
+                                        <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: rgba(255,255,255,0.5);">
+                                            <strong style="color: rgba(255,255,255,0.7);">Programs:</strong> ${doc.programs.slice(0, 5).map(p => p.name || p).join(', ')}${doc.programs.length > 5 ? ` +${doc.programs.length - 5} more` : ''}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `}).join('')}
+                        </div>
+                    </div>
                 </div>
             `;
             
-            document.body.appendChild(panel);
+            document.body.appendChild(modal);
             
-            // Header toggle
-            panel.querySelector('.tour-header').onclick = () => {
-                state.minimized = !state.minimized;
-                saveState(state);
-                render(state);
-            };
+            // Extend session on interaction
+            modal.addEventListener('click', extendVaultSession);
+            modal.addEventListener('keydown', extendVaultSession);
             
-            // Reset button
-            panel.querySelector('.tour-reset').onclick = (e) => {
-                e.stopPropagation();
-                if (confirm('Reset tour progress?')) resetProgress();
-            };
-            
-            // Item clicks - trigger spotlight
-            panel.querySelectorAll('.tour-item').forEach(el => {
-                el.onclick = (e) => {
-                    e.stopPropagation();
-                    const id = el.dataset.id;
-                    if (!el.classList.contains('complete')) {
-                        showSpotlight(id);
-                    }
-                };
+            // Close on backdrop click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
             });
             
-            console.log('[Guided Tour] Rendered:', completedCount + '/' + totalCount);
+            // Focus search
+            setTimeout(() => modal.querySelector('#vaultSearch')?.focus(), 100);
         }
         
-        // =====================================================================
-        // MARK COMPLETE
-        // =====================================================================
-        function markComplete(itemId) {
-            const state = getState();
-            if (!state.completed[itemId]) {
-                console.log('%c[Guided Tour] ✓ Complete: ' + itemId, 'color: #10B981; font-weight: bold;');
-                state.completed[itemId] = true;
-                saveState(state);
-                
-                // Hide spotlight if active
-                hideSpotlight();
-                
-                // Re-render
-                render(state);
-                
-                // Notification
-                if (typeof showNotification === 'function') {
-                    showNotification('✓ Step completed!', 'success');
-                }
-                
-                // Check all done
-                if (Object.values(state.completed).every(Boolean)) {
-                    setTimeout(() => {
-                        if (typeof showNotification === 'function') {
-                            showNotification('🎉 Quick Start complete! You\'re ready to go!', 'success');
-                        }
-                    }, 600);
+        // Handle search
+        window.handleVaultSearch = function(query) {
+            currentSearchQuery = query;
+            extendVaultSession();
+            showVaultContents();
+        };
+        
+        // View document in new window
+        window.viewVaultDocument = function(index) {
+            extendVaultSession();
+            const vault = JSON.parse(localStorage.getItem(VAULT_STORAGE_KEY) || '[]');
+            if (vault[index]) {
+                const win = window.open('', '_blank', 'width=850,height=1000');
+                win.document.write(vault[index].content || vault[index].htmlContent || '<p>No content available</p>');
+                win.document.close();
+            }
+        };
+        
+        // Download document
+        window.downloadVaultDocument = function(index) {
+            extendVaultSession();
+            const vault = JSON.parse(localStorage.getItem(VAULT_STORAGE_KEY) || '[]');
+            const doc = vault[index];
+            if (doc) {
+                const content = doc.content || doc.htmlContent || '';
+                const blob = new Blob([content], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${doc.clientName || doc.clientInitials || 'client'}_aftercare_${new Date(doc.date).toISOString().split('T')[0]}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showVaultNotification('Document downloaded!', 'success');
+            }
+        };
+        
+        // Delete document
+        window.deleteVaultDocument = function(index) {
+            extendVaultSession();
+            if (confirm('Delete this document from the vault? This cannot be undone.')) {
+                const vault = JSON.parse(localStorage.getItem(VAULT_STORAGE_KEY) || '[]');
+                const docName = vault[index]?.clientName || vault[index]?.clientInitials || 'Document';
+                vault.splice(index, 1);
+                localStorage.setItem(VAULT_STORAGE_KEY, JSON.stringify(vault));
+                showVaultNotification(`"${docName}" deleted from vault`, 'info');
+                showVaultContents();
+            }
+        };
+        
+        // Clear entire vault
+        window.clearVault = function() {
+            extendVaultSession();
+            if (confirm('⚠️ Clear entire vault? This will permanently delete ALL saved documents.')) {
+                if (confirm('Are you absolutely sure? This cannot be undone.')) {
+                    const count = JSON.parse(localStorage.getItem(VAULT_STORAGE_KEY) || '[]').length;
+                    localStorage.setItem(VAULT_STORAGE_KEY, '[]');
+                    showVaultNotification(`Vault cleared (${count} documents removed)`, 'warning');
+                    showVaultContents();
                 }
             }
-        }
+        };
         
-        // =====================================================================
-        // EVENT BINDING
-        // =====================================================================
-        function bindEvents() {
-            // Build event map
-            const eventMap = {};
-            Object.values(ALL_ITEMS).forEach(item => {
-                eventMap[item.event] = item.id;
-            });
-            
-            // Listen on window
-            Object.keys(eventMap).forEach(eventName => {
-                window.addEventListener(eventName, () => {
-                    console.log('[Guided Tour] Event:', eventName);
-                    markComplete(eventMap[eventName]);
-                });
-            });
-            
-            // Also bubble from document
-            Object.keys(eventMap).forEach(eventName => {
-                document.addEventListener(eventName, (e) => {
-                    window.dispatchEvent(new CustomEvent(eventName, { detail: e.detail }));
-                });
-            });
-            
-            console.log('[Guided Tour] Listening for', Object.keys(eventMap).length, 'events');
-        }
-        
-        // =====================================================================
-        // INIT
-        // =====================================================================
-        function init() {
-            if (localStorage.getItem('isLoggedIn') !== 'true') {
-                console.log('[Guided Tour] Not logged in');
+        // Export vault as JSON
+        window.exportVault = function() {
+            extendVaultSession();
+            const vault = JSON.parse(localStorage.getItem(VAULT_STORAGE_KEY) || '[]');
+            if (vault.length === 0) {
+                showVaultNotification('No documents to export', 'warning');
                 return;
             }
+            const dataStr = JSON.stringify(vault, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `document_vault_backup_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showVaultNotification(`Exported ${vault.length} documents`, 'success');
+        };
+        
+        // Lock vault function (global)
+        window.lockVault = lockVault;
+        
+        // Save document to vault (called from Programs & Docs module)
+        window.saveToVault = function(document) {
+            const vault = JSON.parse(localStorage.getItem(VAULT_STORAGE_KEY) || '[]');
             
-            const state = getState();
-            render(state);
-            bindEvents();
+            // Check for duplicate (same client + same day)
+            const today = new Date().toDateString();
+            const isDuplicate = vault.some(doc => 
+                (doc.clientName === document.clientName || doc.clientInitials === document.clientInitials) &&
+                new Date(doc.date).toDateString() === today &&
+                doc.type === (document.type || 'Aftercare Options')
+            );
             
-            console.log('%c[Guided Tour] Ready!', 'background: #10B981; color: white; padding: 4px 12px; border-radius: 4px; font-size: 14px;');
-        }
+            if (isDuplicate) {
+                console.log('⚠️ Duplicate document detected, updating existing...');
+                // Update existing instead of adding new
+                const existingIndex = vault.findIndex(doc => 
+                    (doc.clientName === document.clientName || doc.clientInitials === document.clientInitials) &&
+                    new Date(doc.date).toDateString() === today &&
+                    doc.type === (document.type || 'Aftercare Options')
+                );
+                if (existingIndex !== -1) {
+                    vault[existingIndex] = {
+                        ...vault[existingIndex],
+                        date: new Date().toISOString(),
+                        content: document.content,
+                        htmlContent: document.htmlContent || document.content,
+                        programs: document.programs || [],
+                        metadata: document.metadata || {}
+                    };
+                }
+            } else {
+                vault.unshift({
+                    id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    date: new Date().toISOString(),
+                    clientName: document.clientName,
+                    clientInitials: document.clientInitials,
+                    type: document.type || 'Aftercare Options',
+                    content: document.content,
+                    htmlContent: document.htmlContent || document.content,
+                    programs: document.programs || [],
+                    metadata: document.metadata || {}
+                });
+            }
+            
+            localStorage.setItem(VAULT_STORAGE_KEY, JSON.stringify(vault));
+            console.log('✅ Document saved to vault');
+            showVaultNotification(`📋 ${document.type || 'Document'} saved to vault`, 'success');
+            return true;
+        };
         
-        // Start
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => setTimeout(init, 500));
-        } else {
-            setTimeout(init, 500);
-        }
-        
-        // Expose globally
-        window.GuidedTour = { getState, resetProgress, markComplete, showSpotlight, hideSpotlight, render: () => render(getState()) };
-        
+        console.log('✅ Document Vault initialized (password protected)');
     })();
     </script>
 </body>

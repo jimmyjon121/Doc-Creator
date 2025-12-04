@@ -161,15 +161,45 @@
     // Check if markercluster is available
     if (typeof L.markerClusterGroup === 'function') {
       _clusterGroup = L.markerClusterGroup({
-        showCoverageOnHover: false,
-        maxClusterRadius: 50,
-        spiderfyOnMaxZoom: true,
+        // Clustering behavior
+        maxClusterRadius: 60,              // Group pins within 60px of each other
+        disableClusteringAtZoom: 16,       // Show individual pins at street level
+        spiderfyOnMaxZoom: true,           // Spread overlapping pins at max zoom
+        zoomToBoundsOnClick: true,         // Zoom into cluster on click
+        
+        // Visual settings
+        showCoverageOnHover: true,         // Show cluster coverage area on hover
         iconCreateFunction: _createClusterIcon,
+        
+        // Spiderfy settings for overlapping pins
+        spiderfyDistanceMultiplier: 1.5,   // Spread pins further apart
+        spiderLegPolylineOptions: {
+          weight: 2,
+          color: 'rgba(110, 123, 255, 0.5)',
+          opacity: 0.7
+        },
+        
+        // Performance
+        chunkedLoading: true,              // Load markers in chunks for better performance
+        chunkDelay: 50,                    // Delay between chunks
+        animate: true,                     // Smooth animations
+        animateAddingMarkers: true,        // Animate markers being added
+        
+        // Polygon options for cluster coverage on hover
+        polygonOptions: {
+          fillColor: 'rgba(110, 123, 255, 0.15)',
+          color: '#6E7BFF',
+          weight: 2,
+          opacity: 0.6,
+          fillOpacity: 0.15
+        }
       });
       _map.addLayer(_clusterGroup);
       _markerLayer = _clusterGroup;
+      console.log('✅ MarkerCluster enabled - pins will group when zoomed out');
     } else {
       // Fallback to regular layer group
+      console.warn('⚠️ Leaflet.markercluster not loaded - pins will not group');
       _markerLayer = L.layerGroup();
       _map.addLayer(_markerLayer);
     }

@@ -136,6 +136,28 @@
       return this.core.filter(p => !p.isUmbrellaChild);
     },
 
+    /**
+     * Get all programs with valid map coordinates (lat/lng)
+     * Includes all programs and subprograms that can be placed on a map
+     * @returns {UiProgram[]}
+     */
+    getMappable() {
+      return this.core.filter(p => 
+        p.lat !== null && 
+        p.lng !== null && 
+        typeof p.lat === 'number' && 
+        typeof p.lng === 'number'
+      );
+    },
+
+    /**
+     * Get count of mappable programs
+     * @returns {number}
+     */
+    getMappableCount() {
+      return this.getMappable().length;
+    },
+
     // =========================================================================
     // FILTERING
     // =========================================================================

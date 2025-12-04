@@ -116,6 +116,16 @@ class OnboardingManager {
     async start() {
         console.log('🎬 Launching onboarding flow');
 
+        // Require User Agreement once per version before continuing onboarding.
+        // The agreement text itself stays neutral; this is enforced only via app logic.
+        if (typeof window !== 'undefined' && typeof window.ensureUserAgreementAccepted === 'function') {
+            const accepted = await window.ensureUserAgreementAccepted();
+            if (!accepted) {
+                // If somehow not accepted, stop the onboarding flow.
+                return;
+            }
+        }
+
         this.state.started = true;
         this.saveState();
 
