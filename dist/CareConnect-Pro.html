@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!-- 
     CareConnect Pro v13.0.0-beta.1
-    Build Date: 2025-12-04T23:51:49.999Z
-    Build Hash: 4c6f7280
+    Build Date: 2025-12-05T00:17:25.783Z
+    Build Hash: c0f339c1
     Copyright (c) Family First Adolescent Services
 -->
 
@@ -14623,7 +14623,11 @@ if (!document.querySelector('#morning-review-badge-styles')) {
     });
     
     // Wait for dependencies and initialize
-    function initialize() {
+    let eventSystemInitialized = false;
+    function initializeEventSystem() {
+        if (eventSystemInitialized) return;
+        eventSystemInitialized = true;
+        
         enhanceClientManager();
         setupDashboardSubscriptions();
         enhanceWidgetRefresh();
@@ -14633,21 +14637,23 @@ if (!document.querySelector('#morning-review-badge-styles')) {
     
     // Check if dependencies are loaded
     if (window.clientManager && window.dashboardManager) {
-        initialize();
+        initializeEventSystem();
     } else {
         // Wait for dependencies
         const checkInterval = setInterval(() => {
             if (window.clientManager && window.dashboardManager) {
                 clearInterval(checkInterval);
-                initialize();
+                initializeEventSystem();
             }
         }, 100);
         
         // Timeout after 10 seconds
         setTimeout(() => {
             clearInterval(checkInterval);
-            console.warn('Event system: Some dependencies not loaded');
-            initialize(); // Try anyway
+            if (!eventSystemInitialized) {
+                console.info('Event system: proceeding without full dependency confirmation');
+                initializeEventSystem(); // Try anyway
+            }
         }, 10000);
     }
     
@@ -14780,20 +14786,21 @@ window.initializeEnhancedFeatures ??= function initializeEnhancedFeatures() {
 
 // Fix for database initialization issues
 document.addEventListener('DOMContentLoaded', () => {
-    // Ensure programs are loaded
-    if (!window.programs?.length) {
-        console.warn('⚠️ Programs not loaded, attempting to initialize...');
+    // Ensure programs are loaded (use programsData as the source of truth)
+    const programsLoaded = () => Array.isArray(window.programsData) && window.programsData.length > 0;
+    if (!programsLoaded()) {
+        console.warn('⚠️ Programs not loaded yet, waiting for loader...');
         
-        // Check again after a delay
+        // Check again after a short delay before logging an error
         setTimeout(() => {
-            if (!window.programs?.length) {
-                console.error('❌ Programs still not loaded - check main HTML file');
+            if (!programsLoaded()) {
+                console.error('❌ Programs still not loaded - check programs-loader.js');
             } else {
-                console.log('✅ Programs loaded:', window.programs.length, 'programs');
+                console.log('✅ Programs loaded:', window.programsData.length, 'programs');
             }
         }, 1000);
     } else {
-        console.log('✅ Programs already loaded:', window.programs.length, 'programs');
+        console.log('✅ Programs already loaded:', window.programsData.length, 'programs');
     }
     
     // Fix for dashboard not showing

@@ -21,18 +21,18 @@
   --bg-overlay: rgba(0, 0, 0, 0.5);   /* Modal/drawer backdrop */
   
   /* --- Sidebar & Navigation --- */
-  --sidebar-bg: #1E1B4B;              /* Indigo-950 - Dark sidebar in light mode */
-  --sidebar-bg-hover: #312E81;        /* Indigo-900 */
-  --sidebar-text: #C7D2FE;            /* Indigo-200 */
-  --sidebar-text-active: #FFFFFF;
-  --sidebar-icon: #A5B4FC;            /* Indigo-300 */
-  --sidebar-icon-active: #FFFFFF;
-  --sidebar-divider: #3730A3;         /* Indigo-800 */
+  --sidebar-bg: #F8F7FC;              /* Light surface in light mode */
+  --sidebar-bg-hover: #EEF2FF;
+  --sidebar-text: #4B5563;
+  --sidebar-text-active: #1F2937;
+  --sidebar-icon: #6B7280;
+  --sidebar-icon-active: #4338CA;
+  --sidebar-divider: #E5E7EB;
   
-  /* --- Header Bar --- */
-  --header-bg: #1E1B4B;               /* Matches sidebar */
-  --header-text: #FFFFFF;
-  --header-text-muted: #C7D2FE;
+  /* --- Header Bar (light mode) --- */
+  --header-bg: #FFFFFF;
+  --header-text: #1F2937;
+  --header-text-muted: #6B7280;
   
   /* --- Toolbar (Programs & Docs) --- */
   --toolbar-bg: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #818cf8 100%);
