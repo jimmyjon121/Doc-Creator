@@ -1445,6 +1445,24 @@ body.dark-mode .programs-panel:has(#adminTab) {
     margin: 0 !important;
 }
 
+/* Light mode backgrounds for main containers */
+html:not([data-theme="dark"]) .container,
+html:not([data-theme="dark"]) .app-container,
+html:not([data-theme="dark"]) .main-container,
+html:not([data-theme="dark"]) .content-wrapper,
+html:not([data-theme="dark"]) .main-content,
+html:not([data-theme="dark"]) .app-shell,
+html:not([data-theme="dark"]) .app-main,
+body:not(.dark-mode) .container,
+body:not(.dark-mode) .app-container,
+body:not(.dark-mode) .main-container,
+body:not(.dark-mode) .content-wrapper,
+body:not(.dark-mode) .main-content,
+body:not(.dark-mode) .app-shell,
+body:not(.dark-mode) .app-main {
+    background-color: var(--bg-base, #F8F7FC) !important;
+}
+
 /* Dashboard Layout */
 #dashboard,
 .dashboard-content {
