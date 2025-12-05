@@ -1290,25 +1290,29 @@ body:not(.dark-mode) .quick-win-item:hover {
 /* Full Screen Layout Overrides */
 
 /* ========================================
-   LAYOUT OVERRIDES
-   Background colors handled by theme-tokens.css
+   LIGHT MODE BACKGROUNDS (Default)
    ======================================== */
 
-/* Full width on root elements */
+/* Force full width on root elements */
 html, body {
-    width: 100vw;
-    max-width: 100vw;
+    width: 100vw !important;
+    max-width: 100vw !important;
     overflow-x: hidden;
-    /* Background and color set in theme-tokens.css using var(--bg-base) */
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: #F8F7FC !important;
+    background: #F8F7FC !important;
+    color: var(--text-primary);
 }
 
-/* Main app container */
+/* Main app container background */
 #mainApp {
-    background-color: var(--bg-base);
+    background-color: #F8F7FC !important;
+    background: #F8F7FC !important;
     min-height: 100vh;
 }
 
-/* Main content areas use theme token */
+/* Ensure main content area has proper background */
 .main-content,
 .app-main,
 .tab-content,
@@ -1316,21 +1320,24 @@ html, body {
 .cm-tracker-container,
 .acc-container,
 .dashboard-content {
-    background-color: var(--bg-base);
+    background-color: #F8F7FC !important;
+    background: #F8F7FC !important;
 }
 
-/* All tab panels - use theme token */
+/* All tab panels */
 #dashboardTab,
 #programsTab,
 #clientsTab,
 #adminTab {
-    background-color: var(--bg-base);
+    background-color: #F8F7FC !important;
+    background: #F8F7FC !important;
 }
 
 /* Programs panel */
 .programs-panel,
 .programs-panel:has(#adminTab) {
-    background-color: var(--bg-base);
+    background-color: #F8F7FC !important;
+    background: #F8F7FC !important;
 }
 
 /* Immersive map mode: remove ALL backgrounds so map is edge-to-edge */
@@ -1437,8 +1444,6 @@ body.dark-mode .programs-panel:has(#adminTab) {
     padding-right: 16px !important;
     margin: 0 !important;
 }
-
-/* Container backgrounds handled by theme-tokens.css via var(--bg-base) */
 
 /* Dashboard Layout */
 #dashboard,

@@ -87,15 +87,9 @@ class SimpleBuilder {
         
         // List of JS files that need to be in dist
         const requiredFiles = [
-            'feature-flags.js',
-            'performance-monitor.js',
             'indexed-db-manager.js',
-            'intelligent-matching.js',
-            'multi-client-workflow.js',
-            'advanced-filters.js',
             'client-manager.js',
             'tracker-engine.js',
-            'morning-review-dashboard.js',
             'tracker-timeline.js',
             'tracker-bulk-update.js',
             'tracker-aftercare-cascade.js',
@@ -105,8 +99,6 @@ class SimpleBuilder {
             'dashboard-manager.js',
             'dashboard-widgets.js',
             'dashboard-diagnostics.js',
-            'task-manager.js',
-            'notes-manager.js',
             'cm-tracker-export.js',
             'discharge-checklist.js',
             'document-generator.js',
@@ -152,7 +144,6 @@ class SimpleBuilder {
             'unified-design.css',
             'global-helpers.js',
             'event-system.js',
-            'scripts.js',
             'bugfixes.js',
             'features.js',
             'coach-profiles.js',
@@ -182,8 +173,7 @@ class SimpleBuilder {
             'client-data-validation.js',
             'discharge-packet-integration.js',
             'widget-rendering-optimization.js',
-            'indexeddb-optimization.js',
-            'onboarding-integration.js'
+            'indexeddb-optimization.js'
         ].map(f => path.join(CONFIG.enhancementsDir, f));
         
         enhancementFiles.forEach(file => {

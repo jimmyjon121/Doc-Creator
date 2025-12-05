@@ -3,45 +3,8 @@
  * Complete implementation for the Clients tab
  */
 
-// Create the switchTab function if it doesn't exist
-if (!window.switchTab) {
-    window.switchTab = function(tabName) {
-        console.log(`Switching to tab: ${tabName}`);
-        
-        // Hide all content sections
-        const sections = ['dashboard', 'clients', 'programs'];
-        sections.forEach(section => {
-            const el = document.getElementById(section);
-            if (el) {
-                el.style.display = section === tabName ? 'block' : 'none';
-            }
-        });
-        
-        // Update navigation state
-        if (window.ccShell && window.ccShell.setActiveNavItem) {
-            window.ccShell.setActiveNavItem(tabName);
-        }
-        if (window.ccShell && window.ccShell.setSectionState) {
-            window.ccShell.setSectionState(tabName);
-        }
-        
-        // Initialize tab-specific content
-        if (tabName === 'dashboard') {
-            if (typeof initializeDashboard === 'function') {
-                initializeDashboard(true);
-            }
-        } else if (tabName === 'clients') {
-            window.initializeCMTracker();
-        } else if (tabName === 'programs') {
-            if (window.mountProgramsDocsModule) {
-                window.mountProgramsDocsModule();
-            }
-        }
-        
-        // Save last active tab
-        localStorage.setItem('lastActiveTab', tabName);
-    };
-}
+// Note: switchTab is defined in CareConnect-Pro.html
+// This module relies on window.switchTab being available
 
 // Create the initializeCMTracker function for the Clients tab
 window.initializeCMTracker = async function() {

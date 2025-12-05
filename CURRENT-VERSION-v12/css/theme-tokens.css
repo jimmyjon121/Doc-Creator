@@ -471,21 +471,6 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ROOT ELEMENT BACKGROUNDS
-   Apply theme tokens to html/body - this is the single source of truth
-   Light mode: --bg-base is #F8F7FC
-   Dark mode: --bg-base is #0F0D1A
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-html, body {
-  background-color: var(--bg-base);
-  color: var(--text-primary);
-  min-height: 100vh;
-  margin: 0;
-  padding: 0;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════
    STABILITY & ANTI-FLICKER RULES
    Prevents visual glitches, flickering, and improves animation performance
    ═══════════════════════════════════════════════════════════════════════════ */

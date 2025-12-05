@@ -138,9 +138,6 @@
   color: var(--navy-900);
   background: var(--bg-base, var(--neutral-50));
   min-height: 100vh;
-  width: 100%;
-  margin: 0;
-  padding: 0;
 }
 
 /* Light mode - clean appearance without dark borders */
@@ -179,10 +176,8 @@
 }
 
 /* Embedded in parent app - remove any dark wrapper styling */
-html:not([data-theme="dark"]) .programs-module,
-html:not([data-theme="dark"]) .main-layout,
-body:not(.dark-mode) .programs-module,
-body:not(.dark-mode) .main-layout {
+html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .programs-module,
+html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .main-layout {
   border: none;
   outline: none;
   box-shadow: none;
@@ -191,95 +186,80 @@ body:not(.dark-mode) .main-layout {
 /* ============================================================================
    LIGHT MODE SPECIFIC OVERRIDES
    When NOT in dark mode, ensure clean light theme styling
-   Note: data-theme is set on <html>, not <body>
    ============================================================================ */
 
-html:not([data-theme="dark"]) .programs-module,
-body:not(.dark-mode) .programs-module {
+body:not(.dark-mode):not([data-theme="dark"]) .programs-module {
   background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
   border: none;
   box-shadow: none;
 }
 
-html:not([data-theme="dark"]) .main-layout,
-body:not(.dark-mode) .main-layout {
-  /* Use the same background as programs-module for consistency */
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+body:not(.dark-mode):not([data-theme="dark"]) .main-layout {
+  background: transparent;
   border: none;
   box-shadow: none;
   outline: none;
 }
 
-html:not([data-theme="dark"]) .toolbar,
-body:not(.dark-mode) .toolbar {
+body:not(.dark-mode):not([data-theme="dark"]) .toolbar {
   background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
   border: none;
   border-bottom: none;
   box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
 }
 
-html:not([data-theme="dark"]) .filter-rail,
-body:not(.dark-mode) .filter-rail {
+body:not(.dark-mode):not([data-theme="dark"]) .filter-rail {
   background: white;
   border: none;
   border-right: 1px solid rgba(226, 232, 240, 0.8);
   box-shadow: 4px 0 12px rgba(0, 0, 0, 0.02);
 }
 
-html:not([data-theme="dark"]) .builder-pane,
-body:not(.dark-mode) .builder-pane {
+body:not(.dark-mode):not([data-theme="dark"]) .builder-pane {
   background: white;
   border: none;
   border-left: 1px solid rgba(226, 232, 240, 0.8);
   box-shadow: -4px 0 12px rgba(0, 0, 0, 0.02);
 }
 
-html:not([data-theme="dark"]) .program-card,
-body:not(.dark-mode) .program-card {
+body:not(.dark-mode):not([data-theme="dark"]) .program-card {
   background: white;
   border: 1px solid rgba(226, 232, 240, 0.8);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-html:not([data-theme="dark"]) .program-card:hover,
-body:not(.dark-mode) .program-card:hover {
+body:not(.dark-mode):not([data-theme="dark"]) .program-card:hover {
   border-color: rgba(99, 102, 241, 0.3);
   box-shadow: 0 8px 24px rgba(99, 102, 241, 0.12);
 }
 
 /* View controls in light mode */
-html:not([data-theme="dark"]) .view-toggle,
-body:not(.dark-mode) .view-toggle {
+body:not(.dark-mode):not([data-theme="dark"]) .view-toggle {
   background: white;
   border: 1px solid #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-html:not([data-theme="dark"]) .view-toggle__btn,
-body:not(.dark-mode) .view-toggle__btn {
+body:not(.dark-mode):not([data-theme="dark"]) .view-toggle__btn {
   color: #64748b;
 }
 
-html:not([data-theme="dark"]) .view-toggle__btn--active,
-body:not(.dark-mode) .view-toggle__btn--active {
+body:not(.dark-mode):not([data-theme="dark"]) .view-toggle__btn--active {
   background: linear-gradient(135deg, #6366f1, #4f46e5);
   color: white;
 }
 
 /* Sort dropdown in light mode */
-html:not([data-theme="dark"]) .sort-select,
-body:not(.dark-mode) .sort-select {
+body:not(.dark-mode):not([data-theme="dark"]) .sort-select {
   background: white;
   border: 1px solid #e2e8f0;
   color: #334155;
 }
 
-/* Content area in light mode - use light gradient background */
-html:not([data-theme="dark"]) .results-area,
-body:not(.dark-mode) .results-area,
-html:not([data-theme="dark"]) .content-area,
-body:not(.dark-mode) .content-area {
-  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+/* Content area in light mode - ensure no dark borders */
+body:not(.dark-mode):not([data-theme="dark"]) .results-area,
+body:not(.dark-mode):not([data-theme="dark"]) .content-area {
+  background: transparent;
   border: none;
   box-shadow: none;
 }

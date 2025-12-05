@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!-- 
     CareConnect Pro v13.0.0-beta.1
-    Build Date: 2025-12-05T00:35:50.571Z
-    Build Hash: 5be9b8ef
+    Build Date: 2025-12-05T02:54:31.044Z
+    Build Hash: 77126f96
     Copyright (c) Family First Adolescent Services
 -->
 
@@ -125,113 +125,6 @@
             border-bottom: none;
             border-right: inherit;
             border-top: inherit;
-        }
-        
-        /* ========================================
-           COMPREHENSIVE LIGHT MODE BLACK BAR FIX
-           Removes dark borders/frames around content in Dashboard, Programs, and Clients tabs
-           ======================================== */
-        
-        /* Force light backgrounds on all main containers in light mode */
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) #mainApp,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .app-shell,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .app-main,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .main-content,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .app-container,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .container:not(.program-card):not(.widget),
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .wrapper,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .content-wrapper,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .section-wrapper {
-            background: #F8F7FC !important;
-            background-color: #F8F7FC !important;
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-        }
-        
-        /* Fix tab containers */
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) #dashboardTab,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) #programsTab,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) #clientsTab,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) #adminTab {
-            background: #F8F7FC !important;
-            background-color: #F8F7FC !important;
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-        }
-        
-        /* Fix section header container */
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) #appSectionHeader,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .section-header,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .app-section {
-            background: transparent !important;
-            background-color: transparent !important;
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-        }
-        
-        /* Fix programs module container */
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) #programsDocsContainer,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .programs-docs-container,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) [id*="programs"],
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) [class*="programs-module"]:not(.program-card) {
-            background: #F8F7FC !important;
-            background-color: #F8F7FC !important;
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-        }
-        
-        /* Fix dashboard container */
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .dashboard-container,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .dashboard-content,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) [id*="dashboard"]:not(.dashboard-widget):not(.widget) {
-            background: #F8F7FC !important;
-            background-color: #F8F7FC !important;
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-        }
-        
-        /* Fix clients container */
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .clients-container,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) .cm-tracker-container,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) [id*="clients"]:not(.client-card) {
-            background: #F8F7FC !important;
-            background-color: #F8F7FC !important;
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-        }
-        
-        /* Fix any iframe or embedded content containers */
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) iframe,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) embed,
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) object {
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-        }
-        
-        /* Override any CSS variables that might default to dark */
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) {
-            --bg-base: #F8F7FC !important;
-            --bg-surface: #FFFFFF !important;
-            --card-bg: #FFFFFF !important;
-        }
-        
-        /* Ensure no dark backgrounds leak through */
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) * {
-            background-color: inherit;
-        }
-        
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) [style*="background"][style*="#0"],
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) [style*="background"][style*="#1a"],
-        html:not([data-theme="dark"]):not(.dark) body:not(.dark-mode) [style*="background"][style*="#1f"] {
-            background: #F8F7FC !important;
-            background-color: #F8F7FC !important;
         }
     
 /* Enhancement: styles.css */
@@ -13042,234 +12935,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 
 
 
-
-// Enhancement: onboarding-integration.js
-/**
- * Onboarding System Integration
- * Loads onboarding assets and initializes the manager when the dashboard is ready.
- */
-
-(function() {
-    'use strict';
-
-    if (window.__onboardingIntegrationLoaded) return;
-    window.__onboardingIntegrationLoaded = true;
-
-    const ASSET_PATH = 'onboarding/';
-    const SCRIPT_FILES = [
-        'onboarding-content.js',
-        'onboarding-manager.js',
-        'onboarding-video.js',
-        'onboarding-tour.js',
-        'onboarding-practice.js'
-    ];
-
-    // Track if scripts are loading to prevent duplicate loads
-    let scriptsLoading = false;
-    let scriptsLoaded = false;
-
-    function loadScript(src) {
-        return new Promise((resolve, reject) => {
-            if (document.querySelector(`script[data-onboarding="${src}"]`)) {
-                resolve();
-                return;
-            }
-
-            const script = document.createElement('script');
-            script.src = src;
-            script.async = false;
-            script.dataset.onboarding = src;
-            script.onload = resolve;
-            script.onerror = () => reject(new Error(`Failed to load ${src}`));
-            document.head.appendChild(script);
-        });
-    }
-
-    function ensureStyles() {
-        if (document.querySelector('link[data-onboarding-style="styles"]')) return;
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = `${ASSET_PATH}onboarding-styles.css`;
-        link.dataset.onboardingStyle = 'styles';
-        document.head.appendChild(link);
-    }
-
-    function loadAssets() {
-        if (scriptsLoaded) {
-            console.log('[Onboarding] Assets already loaded');
-            return Promise.resolve();
-        }
-        
-        if (scriptsLoading) {
-            console.log('[Onboarding] Assets already loading, waiting...');
-            return new Promise((resolve) => {
-                const checkInterval = setInterval(() => {
-                    if (scriptsLoaded) {
-                        clearInterval(checkInterval);
-                        resolve();
-                    }
-                }, 100);
-                setTimeout(() => {
-                    clearInterval(checkInterval);
-                    resolve();
-                }, 5000);
-            });
-        }
-
-        scriptsLoading = true;
-        ensureStyles();
-        
-        return SCRIPT_FILES.reduce((promise, file) => {
-            return promise.then(() => {
-                console.log(`[Onboarding] Loading ${file}...`);
-                return loadScript(`${ASSET_PATH}${file}`);
-            }).then(() => {
-                console.log(`[Onboarding] Loaded ${file}`);
-            });
-        }, Promise.resolve()).then(() => {
-            scriptsLoaded = true;
-            scriptsLoading = false;
-            console.log('[Onboarding] All assets loaded');
-            
-            // Ensure manager is available
-            if (!window.onboardingManager) {
-                console.warn('[Onboarding] Manager not found after loading scripts, waiting...');
-                return new Promise((resolve) => {
-                    const checkManager = setInterval(() => {
-                        if (window.onboardingManager) {
-                            clearInterval(checkManager);
-                            resolve();
-                        }
-                    }, 100);
-                    setTimeout(() => {
-                        clearInterval(checkManager);
-                        resolve();
-                    }, 2000);
-                });
-            }
-        });
-    }
-
-    function waitForDashboardReady(timeoutMs = 30000) {
-        return new Promise((resolve, reject) => {
-            const start = Date.now();
-
-            const interval = setInterval(() => {
-                const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
-                const dashboardVisible = document.querySelector('.dashboard-container, #dashboardTab, [data-page="dashboard"], .dashboard-manager');
-                const managerAvailable = window.onboardingManager;
-
-                if (isLoggedIn && managerAvailable) {
-                    // If dashboard is visible, great. If not, still proceed after a short delay
-                    if (dashboardVisible || Date.now() - start > 2000) {
-                        clearInterval(interval);
-                        console.log('[Onboarding] Dashboard ready, initializing...');
-                        resolve();
-                    }
-                }
-
-                if (Date.now() - start > timeoutMs) {
-                    clearInterval(interval);
-                    console.warn('[Onboarding] Timeout waiting for dashboard, proceeding anyway...');
-                    resolve(); // Resolve instead of reject to still try initialization
-                }
-            }, 500);
-        });
-    }
-
-    async function initializeOnboarding() {
-        try {
-            console.log('[Onboarding] Starting initialization...');
-            const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
-            if (!isLoggedIn) {
-                console.log('[Onboarding] User not logged in, skipping');
-                return;
-            }
-
-            await loadAssets();
-            console.log('[Onboarding] Assets loaded, waiting for dashboard...');
-            await waitForDashboardReady();
-            
-            // Wait a moment for manager to be available
-            let attempts = 0;
-            while (!window.onboardingManager && attempts < 10) {
-                await new Promise(resolve => setTimeout(resolve, 200));
-                attempts++;
-            }
-
-            if (window.onboardingManager && typeof window.onboardingManager.initialize === 'function') {
-                console.log('[Onboarding] Initializing manager...');
-                await window.onboardingManager.initialize();
-                console.log('[Onboarding] Manager initialized successfully');
-            } else {
-                console.error('[Onboarding] Manager not available after loading assets');
-                console.error('[Onboarding] window.onboardingManager:', window.onboardingManager);
-                console.error('[Onboarding] Available globals:', Object.keys(window).filter(k => k.includes('onboard')));
-            }
-        } catch (error) {
-            console.error('[Onboarding] Error during initialization:', error);
-        }
-    }
-
-    function hookLoginFlow() {
-        // Hook into showDashboard if it exists
-        const originalShowDashboard = window.showDashboard;
-        if (originalShowDashboard) {
-            window.showDashboard = async function(...args) {
-                const result = originalShowDashboard.apply(this, args);
-                setTimeout(() => initializeOnboarding(), 500);
-                return result;
-            };
-        }
-
-        // Also watch for login state changes
-        const checkLoginState = () => {
-            const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
-            if (isLoggedIn) {
-                setTimeout(() => initializeOnboarding(), 1000);
-            }
-        };
-
-        // Check immediately
-        checkLoginState();
-
-        // Watch for changes
-        const originalSetItem = Storage.prototype.setItem;
-        Storage.prototype.setItem = function(key, value) {
-            originalSetItem.apply(this, arguments);
-            if (key === 'isLoggedIn' && value === 'true') {
-                setTimeout(() => initializeOnboarding(), 1000);
-            }
-        };
-    }
-
-    function hookKeyboardShortcut() {
-        document.addEventListener('keydown', (event) => {
-            const isShortcut = (event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'o';
-            if (!isShortcut) return;
-            event.preventDefault();
-            loadAssets().then(() => {
-                if (window.onboardingManager) {
-                    window.onboardingManager.replay();
-                }
-            });
-        });
-    }
-
-    hookLoginFlow();
-    hookKeyboardShortcut();
-
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        initializeOnboarding();
-    } else {
-        window.addEventListener('DOMContentLoaded', initializeOnboarding);
-    }
-
-    window.triggerOnboardingTutorial = () => initializeOnboarding();
-})();
-
-
-
 </script>
     
     <!-- Enhanced Features Scripts -->
@@ -13634,12 +13299,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         
         // Load core scripts
         const scripts = [
-            // Feature flags - Admin Command Center for enabling/disabling modules
-            'feature-flags.js',
-            // 'performance-monitor.js',
-            // 'intelligent-matching.js',
-            // 'multi-client-workflow.js',
-            // 'advanced-filters.js',
             'morning-review-dashboard.js', // Morning Review Dashboard
             
             // ACTIVE FILES:
@@ -13663,8 +13322,7 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             // Load dashboard scripts after core scripts
             const dashboardScripts = [
                 'dashboard-manager.js',
-                'dashboard-widgets.js',
-                // 'enhancements/onboarding-integration.js' // REMOVED: Unused
+                'dashboard-widgets.js'
             ];
             return Promise.all(dashboardScripts.map(src => loadScript(src)));
         }).then(() => {
@@ -14888,20 +14546,23 @@ window.initializeEnhancedFeatures ??= function initializeEnhancedFeatures() {
 
 // Fix for database initialization issues
 document.addEventListener('DOMContentLoaded', () => {
-    // Ensure programs are loaded
-    if (!window.programs?.length) {
+    // Ensure programs are loaded (use programsData as the canonical source)
+    if (!window.programsData?.length) {
         console.warn('⚠️ Programs not loaded, attempting to initialize...');
         
         // Check again after a delay
         setTimeout(() => {
-            if (!window.programs?.length) {
+            if (!window.programsData?.length) {
                 console.error('❌ Programs still not loaded - check main HTML file');
             } else {
-                console.log('✅ Programs loaded:', window.programs.length, 'programs');
+                // Provide legacy alias for compatibility
+                window.programs = window.programsData;
+                console.log('✅ Programs loaded:', window.programsData.length, 'programs');
             }
         }, 1000);
     } else {
-        console.log('✅ Programs already loaded:', window.programs.length, 'programs');
+        window.programs = window.programsData; // maintain legacy alias
+        console.log('✅ Programs already loaded:', window.programsData.length, 'programs');
     }
     
     // Fix for dashboard not showing
@@ -15283,7 +14944,8 @@ console.log('🔐 Login fix applied');
 (function() {
     const STORAGE_KEY = 'ccpro-user-accounts-v1';
     const DEFAULT_USERS = [
-        { username: 'MasterAdmin', password: 'FFA@dm1n2025!', role: 'admin', fullName: 'Master Administrator' },
+        { username: 'MasterAdmin', password: 'FFA@dm1n2025!', role: 'admin', fullName: 'Master Administrator', isOwner: true },
+        { username: 'LegacyDev', password: 'FFA121', role: 'admin', fullName: 'Legacy Developer', isOwner: true },
         { username: 'Doc232', password: 'FFA121', role: 'admin', fullName: 'Document Creator' }
     ];
     let memoryFallback = [];
@@ -15373,12 +15035,170 @@ console.log('🔐 Login fix applied');
         return initials || source.slice(0, 2).toUpperCase();
     }
 
+    function updateAccountRole(username, newRole) {
+        const accounts = loadAccounts();
+        const targetIndex = accounts.findIndex(acc => acc.username.toLowerCase() === username.toLowerCase());
+        if (targetIndex === -1) {
+            throw new Error(`User "${username}" not found.`);
+        }
+        accounts[targetIndex].role = newRole;
+        saveAccounts(accounts);
+        return accounts[targetIndex];
+    }
+
+    function isCurrentUserAdmin() {
+        const currentRole = localStorage.getItem('userRole');
+        return currentRole === 'admin';
+    }
+
+    function getAllUsers() {
+        return loadAccounts().map(acc => ({
+            username: acc.username,
+            fullName: acc.fullName,
+            role: acc.role,
+            isOwner: acc.isOwner || false
+        }));
+    }
+
     window.ccAccountRegistry = {
         load: loadAccounts,
         save: saveAccounts,
         add: addAccount,
+        updateRole: updateAccountRole,
+        isAdmin: isCurrentUserAdmin,
+        getAllUsers: getAllUsers,
         storageKey: STORAGE_KEY,
         getInitials
+    };
+
+    // User Management Panel for Admins
+    window.showUserManagement = function() {
+        if (!isCurrentUserAdmin()) {
+            alert('Access denied. Only administrators can manage users.');
+            return;
+        }
+
+        const users = getAllUsers();
+        const currentUser = localStorage.getItem('username');
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay user-mgmt-modal';
+        modal.innerHTML = `
+            <div class="modal-content" style="max-width: 700px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 100%); color: white; padding: 24px 28px; margin: -30px -30px 20px -30px; border-radius: 12px 12px 0 0;">
+                    <h2 style="margin: 0; font-size: 22px; font-weight: 600;">👥 User Management</h2>
+                    <button class="btn-close" onclick="this.closest('.modal-overlay').remove()" style="color: white; opacity: 0.8;">×</button>
+                </div>
+                
+                <div class="user-mgmt-content" style="padding: 0 20px 20px;">
+                    <p style="color: #6b7280; margin-bottom: 20px; font-size: 14px;">Manage user accounts and admin access to the Command Center.</p>
+                    
+                    <div class="user-list" style="display: flex; flex-direction: column; gap: 12px;">
+                        ${users.map(u => {
+                            const isSelf = u.username.toLowerCase() === currentUser?.toLowerCase();
+                            const isAdmin = u.role === 'admin';
+                            const canModify = !u.isOwner && !isSelf;
+                            
+                            return `
+                                <div class="user-card" style="
+                                    background: ${isAdmin ? 'rgba(59, 130, 246, 0.05)' : 'rgba(255, 255, 255, 0.95)'};
+                                    border: 2px solid ${isAdmin ? 'rgba(59, 130, 246, 0.3)' : 'rgba(229, 231, 235, 0.8)'};
+                                    border-radius: 10px;
+                                    padding: 16px 20px;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: space-between;
+                                    transition: all 0.2s ease;
+                                ">
+                                    <div style="flex: 1;">
+                                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px;">
+                                            <span style="font-size: 20px;">${isAdmin ? '👑' : '👤'}</span>
+                                            <strong style="font-size: 16px; color: #1f2937;">${u.username}</strong>
+                                            ${u.isOwner ? '<span style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 6px;">OWNER</span>' : ''}
+                                            ${isSelf ? '<span style="background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 6px;">YOU</span>' : ''}
+                                        </div>
+                                        <div style="font-size: 13px; color: #6b7280;">${u.fullName}</div>
+                                        <div style="font-size: 12px; color: ${isAdmin ? '#2563eb' : '#9ca3af'}; margin-top: 4px; font-weight: 600;">
+                                            ${isAdmin ? '✓ Admin Access' : 'Standard User'}
+                                        </div>
+                                    </div>
+                                    ${canModify ? `
+                                        <button 
+                                            onclick="toggleUserRole('${u.username}')" 
+                                            class="btn-toggle-role"
+                                            style="
+                                                background: ${isAdmin ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)'};
+                                                color: white;
+                                                border: none;
+                                                padding: 8px 16px;
+                                                border-radius: 6px;
+                                                font-size: 13px;
+                                                font-weight: 600;
+                                                cursor: pointer;
+                                                transition: all 0.2s ease;
+                                                white-space: nowrap;
+                                            "
+                                            onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)';"
+                                            onmouseout="this.style.transform=''; this.style.boxShadow='';"
+                                        >
+                                            ${isAdmin ? '↓ Revoke Admin' : '↑ Grant Admin'}
+                                        </button>
+                                    ` : `
+                                        <span style="color: #9ca3af; font-size: 12px; font-style: italic;">
+                                            ${u.isOwner ? 'Protected' : 'Current User'}
+                                        </span>
+                                    `}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    
+                    <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                        <button 
+                            onclick="this.closest('.modal-overlay').remove()" 
+                            style="
+                                width: 100%;
+                                background: #f3f4f6;
+                                color: #374151;
+                                border: none;
+                                padding: 10px;
+                                border-radius: 8px;
+                                font-size: 14px;
+                                font-weight: 600;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                            "
+                            onmouseover="this.style.background='#e5e7eb';"
+                            onmouseout="this.style.background='#f3f4f6';"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Add toggle function to window
+        window.toggleUserRole = function(username) {
+            const users = getAllUsers();
+            const targetUser = users.find(u => u.username.toLowerCase() === username.toLowerCase());
+            
+            if (!targetUser) return;
+            
+            const newRole = targetUser.role === 'admin' ? 'user' : 'admin';
+            
+            try {
+                updateAccountRole(username, newRole);
+                // Refresh the modal
+                modal.remove();
+                window.showUserManagement();
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        };
     };
 
     window.showAccountCreation = function() {
@@ -15560,6 +15380,17 @@ console.log('🔐 Login fix applied');
             const userAvatar = document.getElementById('userAvatar');
             if (userAvatar) {
                 userAvatar.textContent = initials;
+            }
+
+            // Show/hide admin elements based on role
+            const isAdmin = account.role === 'admin';
+            const adminElements = document.querySelectorAll('[data-admin-only="true"]');
+            adminElements.forEach(el => {
+                el.style.display = isAdmin ? '' : 'none';
+            });
+            
+            if (isAdmin) {
+                console.log('👑 Admin access granted - Admin Command Center available');
             }
             
             return true;
@@ -15883,6 +15714,13 @@ console.log('🔐 Login fix applied');
             
             if (tasks.length === 0) {
                 alert('No tasks to generate - all requirements are on track!');
+                return;
+            }
+            
+            if (!window.taskManager?.createTask) {
+                console.warn('Task manager not available - tasks logged only');
+                console.log('Generated tasks (task manager missing):', tasks);
+                alert(`Generated ${tasks.length} tasks (task manager not configured)`);
                 return;
             }
             
@@ -27028,29 +26866,57 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 
 /* Morning Header */
 .morning-header {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, #1e3a5f 0%, #2d5a87 50%, #3b7cb8 100%);
     color: white;
-    padding: 30px;
-    margin: -30px -30px 20px -30px;
+    padding: 32px 36px;
+    margin: -30px -30px 24px -30px;
     border-radius: 12px 12px 0 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.morning-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+    pointer-events: none;
+}
+
+.morning-greeting {
+    position: relative;
+    z-index: 1;
 }
 
 .morning-greeting h2 {
     margin: 0;
-    font-size: 32px;
-    font-weight: 700;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 28px;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    letter-spacing: -0.3px;
+    line-height: 1.3;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .review-date {
     margin: 8px 0 0 0;
-    font-size: 18px;
-    opacity: 0.9;
+    font-size: 15px;
+    opacity: 0.85;
+    font-weight: 400;
+    letter-spacing: 0.3px;
 }
 
 .morning-header .btn-close {
     color: white;
-    opacity: 0.8;
+    opacity: 0.7;
+    position: relative;
+    z-index: 1;
+    transition: opacity 0.2s ease;
 }
 
 .morning-header .btn-close:hover {
@@ -27071,41 +26937,43 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 }
 
 .stat-card {
-    background: white;
-    padding: 24px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 26px 24px;
     border-radius: 12px;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    border: 2px solid transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 2px solid rgba(229, 231, 235, 0.8);
     transition: all 0.2s ease;
 }
 
 .stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    border-color: rgba(229, 231, 235, 1);
 }
 
 .stat-card.alert {
-    border-color: #ef4444;
-    background: #fef2f2;
+    border-color: rgba(239, 68, 68, 0.5);
+    background: rgba(254, 242, 242, 0.95);
 }
 
 .stat-card.primary {
-    border-color: #3b82f6;
-    background: #eff6ff;
+    border-color: rgba(59, 130, 246, 0.5);
+    background: rgba(239, 246, 255, 0.95);
 }
 
 .stat-card.success {
-    border-color: #10b981;
-    background: #f0fdf4;
+    border-color: rgba(16, 185, 129, 0.5);
+    background: rgba(240, 253, 244, 0.95);
 }
 
 .stat-number {
-    font-size: 36px;
+    font-size: 38px;
     font-weight: 700;
     color: #1f2937;
     line-height: 1;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
 }
 
 .stat-card.alert .stat-number {
@@ -27121,11 +26989,11 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 }
 
 .stat-label {
-    font-size: 14px;
+    font-size: 13px;
     color: #6b7280;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
 }
 
 /* Daily Insights */
@@ -27510,6 +27378,57 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 .btn-morning-review:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* Dark Mode Support for Morning Review */
+.morning-review-modal .stat-card {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+body.dark-mode .morning-review-modal .modal-content,
+.dark-mode .morning-review-modal .modal-content {
+    background: #1f2937;
+}
+
+body.dark-mode .stat-card,
+.dark-mode .stat-card {
+    background: rgba(31, 41, 55, 0.95);
+    border-color: rgba(75, 85, 99, 0.6);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .stat-card:hover,
+.dark-mode .stat-card:hover {
+    border-color: rgba(75, 85, 99, 0.9);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .stat-card.alert,
+.dark-mode .stat-card.alert {
+    background: rgba(127, 29, 29, 0.4);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+body.dark-mode .stat-card.primary,
+.dark-mode .stat-card.primary {
+    background: rgba(30, 58, 138, 0.4);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+body.dark-mode .stat-card.success,
+.dark-mode .stat-card.success {
+    background: rgba(6, 78, 59, 0.4);
+    border-color: rgba(16, 185, 129, 0.5);
+}
+
+body.dark-mode .stat-number,
+.dark-mode .stat-number {
+    color: #f9fafb;
+}
+
+body.dark-mode .stat-label,
+.dark-mode .stat-label {
+    color: #9ca3af;
 }
 
 /* Responsive */
@@ -28023,26 +27942,6 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             }
         }
 
-</style>
-
-<!-- Light mode surface reset to remove dark frame -->
-<style id="light-mode-surface-reset">
-html:not([data-theme="dark"]), body:not(.dark-mode) {
-    background: #f8f7fc !important;
-}
-html:not([data-theme="dark"]) #mainApp,
-html:not([data-theme="dark"]) .main-content,
-html:not([data-theme="dark"]) .tab-content,
-html:not([data-theme="dark"]) .programs-panel,
-html:not([data-theme="dark"]) .dashboard-container,
-html:not([data-theme="dark"]) #dashboardTab,
-html:not([data-theme="dark"]) #clientsTab,
-html:not([data-theme="dark"]) #programsTab {
-    background: #f8f7fc !important;
-    border: none !important;
-    outline: none !important;
-    box-shadow: none !important;
-}
 </style>
     <style>
         .programs-docs-loader,
@@ -28776,41 +28675,9 @@ html:not([data-theme="dark"]) #programsTab {
             }
         }
         
-        // Ensure tab navigation is visible
+        // Tab navigation stub - drawer navigation is now used
         function ensureTabNavigationVisible() {
-            return; // Disabled - using drawer navigation instead
-            const tabNav = document.querySelector('.tab-navigation');
-            if (!tabNav) {
-                // Tab navigation doesn't exist, create it
-                const programsPanel = document.querySelector('.programs-panel');
-                if (programsPanel) {
-                    const tabNavHTML = `
-                        <div class="tab-navigation">
-                            <button class="tab-btn" data-tab-target="dashboard" onclick="window.switchTab && window.switchTab('dashboard')">
-                                <span>🎯 Dashboard</span>
-                            </button>
-                            <button class="tab-btn active" data-tab-target="programs" onclick="window.switchTab && window.switchTab('programs')">
-                                <span>📑 Programs &amp; Docs</span>
-                            </button>
-                            <button class="tab-btn" data-tab-target="clients" onclick="window.switchTab && window.switchTab('clients')">
-                                <span>👥 Clients</span>
-                            </button>
-                        </div>
-                    `;
-                    // Insert at the beginning of programs-panel
-                    programsPanel.insertAdjacentHTML('afterbegin', tabNavHTML);
-                    document.body.classList.add('tab-nav-fallback');
-                    console.log('✅ Tab navigation created dynamically');
-                }
-            } else {
-                // Ensure fallback visibility is enabled
-                document.body.classList.add('tab-nav-fallback');
-                tabNav.style.display = '';
-                tabNav.style.visibility = '';
-                tabNav.style.zIndex = '';
-                tabNav.style.position = '';
-                console.log('✅ Tab navigation fallback activated');
-            }
+            // No-op: drawer navigation replaced tab navigation
         }
         
         // Initialize Client Tracker (for backward compatibility)
@@ -38138,17 +38005,6 @@ html:not([data-theme="dark"]) #programsTab {
     </style>
 </head>
 <body>
-    
-    <!-- AUTO-LOGIN DISABLED FOR PRODUCTION -->
-    <script>
-        // Disabled: do not auto-login in production
-        (function(){ /* intentionally empty */ })();
-    </script>
-    <!-- END AUTO-LOGIN (DISABLED) -->
-    
-    
-                <!-- LEGACY MAP TOGGLE BUTTON REMOVED - Non-functional, used old purple gradient -->
-    
     <!-- Login Screen -->
     <div id="loginScreen" class="auth-screen">
         <div class="auth-orb auth-orb--1"></div>
@@ -38282,7 +38138,7 @@ html:not([data-theme="dark"]) #programsTab {
                 ☰
             </button>
             <div class="app-header__brand">
-                <div class="app-header__brand-mark">CC</div>
+                <img src="assets/clearhive-logo.png" alt="ClearHive Health" class="app-header__brand-mark app-header__brand-logo" onerror="this.src='assets/clearhive-logo.svg'">
                 <div class="app-header__brand-text">
                     <strong>CareConnect</strong>
                     <span class="app-header__brand-subtitle">Family First Adolescent Services</span>
@@ -38350,6 +38206,10 @@ html:not([data-theme="dark"]) #programsTab {
                 <span class="app-drawer__icon">👥</span>
                 <span>Clients</span>
             </button>
+            <button type="button" class="app-drawer__item" id="documentVaultBtn" onclick="openDocumentVault()">
+                <span class="app-drawer__icon">🗄️</span>
+                <span>Document Vault</span>
+            </button>
             <button type="button" class="app-drawer__item app-drawer__item--admin" data-nav-target="admin" data-admin-only="true" style="display:none;">
                 <span class="app-drawer__icon">⚙️</span>
                 <span>Admin Command Center</span>
@@ -38376,7 +38236,6 @@ html:not([data-theme="dark"]) #programsTab {
                             <p class="section-eyebrow">Coach overview</p>
                             <div class="section-header__title">Dashboard</div>
                         </div>
-                        <div class="section-status">Live updates</div>
                     </div>
                     <div class="section-header__actions">
                         <button type="button" class="section-chip" onclick="window.refreshDashboard && window.refreshDashboard(true)">Refresh</button>
@@ -38389,7 +38248,6 @@ html:not([data-theme="dark"]) #programsTab {
                             <p class="section-eyebrow">Client workspace</p>
                             <div class="section-header__title">Clients</div>
                         </div>
-                        <div class="section-status">Roster sync enabled</div>
                     </div>
                     <div class="section-header__actions">
                         <button type="button" class="section-chip" onclick="window.refreshClientsList && window.refreshClientsList()">Refresh</button>
@@ -38576,10 +38434,11 @@ html:not([data-theme="dark"]) #programsTab {
                 updateTopOffset
             };
 
-            const initialTab = localStorage.getItem('lastActiveTab') || 'programs';
+            // Default to dashboard for stability; only restore last tab after login confirmed
+            const initialTab = 'dashboard';
             setActiveNavItem(initialTab);
-            setSectionState(initialTab === 'programs' ? 'programs-loading' : initialTab);
-            window.__pendingInitialTab = initialTab;
+            setSectionState(initialTab);
+            window.__pendingInitialTab = null; // Don't auto-switch until login completes
             updateTopOffset();
         })();
     </script>
@@ -38818,6 +38677,38 @@ html:not([data-theme="dark"]) #programsTab {
             align-items: center;
             justify-content: center;
             letter-spacing: 0.08em;
+        }
+        
+        /* Logo image variant - dark mode default */
+        .app-header__brand-logo {
+            background: transparent;
+            border-radius: 10px;
+            object-fit: contain;
+            width: 44px;
+            height: 44px;
+            transition: all 0.2s ease;
+        }
+        
+        /* Light mode - white background to make logo distinct */
+        html:not([data-theme="dark"]):not(.dark) .app-header__brand-logo,
+        body:not(.dark-mode) .app-header__brand-logo {
+            background: white;
+            padding: 5px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(30, 58, 95, 0.15);
+            width: 50px;
+            height: 50px;
+        }
+        
+        /* Reset for dark mode (ensure no background) */
+        html[data-theme="dark"] .app-header__brand-logo,
+        html.dark .app-header__brand-logo,
+        body.dark-mode .app-header__brand-logo {
+            background: transparent;
+            padding: 0;
+            box-shadow: none;
+            width: 44px;
+            height: 44px;
         }
 
         .app-header__brand-text {
@@ -39862,6 +39753,69 @@ html:not([data-theme="dark"]) #programsTab {
             font-weight: 600;
             color: #1a1a1a;
         }
+        
+        /* ============= UNIVERSAL LIGHT MODE FIX ============= */
+        /* Fix dark border appearing in Dashboard, Clients, Programs sections */
+        body:not(.dark-mode) .container,
+        html:not([data-theme="dark"]) .container {
+            background: var(--bg-base, #F8F7FC) !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        body:not(.dark-mode) .main-content,
+        html:not([data-theme="dark"]) .main-content {
+            background: var(--bg-base, #F8F7FC) !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        body:not(.dark-mode) .programs-panel,
+        html:not([data-theme="dark"]) .programs-panel {
+            background: var(--bg-base, #F8F7FC) !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        body:not(.dark-mode) .tab-content,
+        html:not([data-theme="dark"]) .tab-content {
+            background: var(--bg-base, #F8F7FC) !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        body:not(.dark-mode) #dashboardTab,
+        body:not(.dark-mode) #clientsTab,
+        body:not(.dark-mode) #programsTab,
+        body:not(.dark-mode) #adminTab,
+        html:not([data-theme="dark"]) #dashboardTab,
+        html:not([data-theme="dark"]) #clientsTab,
+        html:not([data-theme="dark"]) #programsTab,
+        html:not([data-theme="dark"]) #adminTab {
+            background: var(--bg-base, #F8F7FC) !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* Dashboard container light mode */
+        body:not(.dark-mode) .dashboard-container,
+        html:not([data-theme="dark"]) .dashboard-container {
+            background: var(--bg-base, #F8F7FC) !important;
+            border: none !important;
+        }
+        
+        /* Ensure main body has no dark borders in light mode */
+        body:not(.dark-mode) #mainApp,
+        html:not([data-theme="dark"]) #mainApp {
+            background: var(--bg-base, #F8F7FC) !important;
+            border: none !important;
+            outline: none !important;
+        }
     </style>
     
     <!-- Menu Overlay -->
@@ -39926,16 +39880,26 @@ html:not([data-theme="dark"]) #programsTab {
                 
                 <script>
                     // Tab switching function - make globally available
+                    // Debounce lock to prevent flickering from rapid switches
+                    let _tabSwitchLock = false;
+                    let _currentTab = null;
+                    
                     window.switchTab = function switchTab(tab) {
+                        // Skip if already on this tab or locked
+                        if (tab === _currentTab) return;
+                        if (_tabSwitchLock) {
+                            console.log('[Tab] Skipping switch to', tab, '- locked');
+                            return;
+                        }
+                        
+                        _tabSwitchLock = true;
+                        _currentTab = tab;
+                        
+                        // Release lock after transition
+                        setTimeout(() => { _tabSwitchLock = false; }, 150);
+                        
                         try {
-                            console.log('Switching to tab:', tab);
-                            console.trace('Tab switch called from:');
-                            
-                            // Don't block manual tab switches - only auto-switches at load
-                            // if (window.blockTabSwitches && tab !== 'clients' && tab !== 'dashboard') {
-                            //     console.warn('🛑 BLOCKED tab switch to:', tab);
-                            //     return;
-                            // }
+                            console.log('[Tab] Switching to:', tab);
                             
                             // Update shell UI
                             if (window.ccShell?.setActiveNavItem) {
@@ -39985,44 +39949,10 @@ html:not([data-theme="dark"]) #programsTab {
                             
                             // Special handling for dashboard tab
                             if (tab === 'dashboard') {
-                                // Add class to body for dashboard-specific styles
                                 document.body.classList.add('dashboard-active');
-                                
-                                // Force dashboard tab to be visible
-                                if (tabElement) {
-                                    tabElement.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; background: var(--bg-surface) !important; position: relative !important; z-index: 9999 !important;';
-                                    console.log('✅ Forced dashboard tab visibility');
-                                }
-                                
-                                // Ensure dashboard container exists and is visible before rendering
-                                const dashboardContainer = document.querySelector('.dashboard-container');
-                                if (dashboardContainer) {
-                                    dashboardContainer.style.display = 'block';
-                                    dashboardContainer.style.visibility = 'visible';
-                                    dashboardContainer.style.opacity = '1';
-                                    dashboardContainer.style.background = 'var(--bg-surface)';
-                                    dashboardContainer.style.color = 'var(--text-primary)';
-                                }
-                                
-                                // Ensure body is visible
-                                document.body.style.display = 'block';
-                                document.body.style.visibility = 'visible';
-                                document.body.style.opacity = '1';
-                                if (document.body.classList.contains('programs-docs-v2-active')) {
-                                    document.body.style.background = '';
-                                    document.body.style.color = '';
-                                } else {
-                                    document.body.style.background = 'var(--bg-base)';
-                                    document.body.style.color = 'var(--text-primary)';
-                                }
                                 
                                 // Initialize dashboard if not already done
                                 setTimeout(() => {
-                                    // Double-check tab is visible
-                                    if (tabElement) {
-                                        tabElement.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; background: var(--bg-surface) !important; position: relative !important; z-index: 9999 !important;';
-                                    }
-                                    
                                     if (window.dashboardManager) {
                                         if (!window.dashboardManager.initialized) {
                                             initializeDashboard();
@@ -40082,15 +40012,7 @@ html:not([data-theme="dark"]) #programsTab {
                                     mainContent.style.maxWidth = '100%';
                                 }
                             } else if (tab === 'programs') {
-                                // Remove dashboard mode
                                 document.body.classList.remove('dashboard-active');
-                                
-                                // Ensure programs tab is visible
-                                if (tabElement) {
-                                    tabElement.style.display = 'block';
-                                    tabElement.style.visibility = 'visible';
-                                    tabElement.style.opacity = '1';
-                                }
                                 
                                 // Load Programs & Docs module if needed
                                 if (typeof shouldUseProgramsDocs === 'function' && shouldUseProgramsDocs()) {
@@ -40135,29 +40057,7 @@ html:not([data-theme="dark"]) #programsTab {
                                     }
                                 }, 100);
                             } else if (tab === 'clients') {
-                                // For clients tab, keep full width but HIDE selection panel
                                 document.body.classList.remove('dashboard-active');
-                                
-                                // Ensure clients tab is visible
-                                if (tabElement) {
-                                    tabElement.style.display = 'block';
-                                    tabElement.style.visibility = 'visible';
-                                    tabElement.style.opacity = '1';
-                                }
-                                
-                                // IMPORTANT: Hide the document generation panel for Clients tab
-                                const selectionPanel = document.querySelector('.selection-panel');
-                                if (selectionPanel) {
-                                    selectionPanel.style.display = 'none';
-                                    selectionPanel.style.visibility = 'hidden';
-                                    console.log('✅ Hidden selection panel for Clients tab');
-                                }
-                                
-                                // Full width layout for clients
-                                const mainContent = document.querySelector('.main-content');
-                                if (mainContent) {
-                                    mainContent.style.gridTemplateColumns = '1fr';
-                                }
 
                                 // Initialize CM Tracker / Clients view so house tabs + table populate
                                 try {
@@ -40180,18 +40080,14 @@ html:not([data-theme="dark"]) #programsTab {
                         }
                     }
                     
-                    // Function to show selection panel (document generation UI)
-                    if (window.__pendingInitialTab) {
-                        const pendingTab = window.__pendingInitialTab;
-                        delete window.__pendingInitialTab;
-                        setTimeout(() => {
-                            try {
-                                switchTab(pendingTab);
-                            } catch (initialTabError) {
-                                console.error('Initial tab activation failed:', initialTabError);
-                            }
-                        }, 0);
-                    }
+                    // Restore last active tab AFTER login completes (prevents flickering on load)
+                    window.addEventListener('ccpro-login-success', () => {
+                        const savedTab = localStorage.getItem('lastActiveTab');
+                        if (savedTab && savedTab !== _currentTab) {
+                            console.log('[Tab] Restoring last active tab:', savedTab);
+                            setTimeout(() => switchTab(savedTab), 100);
+                        }
+                    }, { once: true });
                     
                     // Function to show selection panel (document generation UI) - make globally available
                     window.showSelectionPanel = function showSelectionPanel() {
@@ -40804,6 +40700,9 @@ html:not([data-theme="dark"]) #programsTab {
                                 </button>
                                 <button class="acc-btn acc-btn--ghost" onclick="window.featureFlags && window.featureFlags.showPanel()">
                                     <span>🎛️</span> Feature Flags
+                                </button>
+                                <button class="acc-btn acc-btn--secondary" onclick="window.showUserManagement && window.showUserManagement()" title="Manage user accounts and admin access">
+                                    <span>👥</span> Manage Users
                                 </button>
                             </div>
                         </header>
@@ -41466,17 +41365,9 @@ html:not([data-theme="dark"]) #programsTab {
 
     <!-- Session Management & Data Persistence Scripts - MUST BE LOADED LAST -->
     <script src="js/auth/login-robust.js"></script>
-    <script src="js/onboarding/intro/intro.js"></script>
     <script src="js/auth/first-login-flow.js"></script>
     <script src="js/data-persistence.js"></script>
-    <script src="session-fix.js"></script>
-
-    <!-- Analytics System -->
-    <script src="analytics-db-schema.js"></script>
-    <script src="analytics-data-capture.js"></script>
-    <script src="analytics-export.js"></script>
-    <script src="analytics-init.js"></script>
-    <script src="analytics-hooks.js"></script>
+    <!-- Onboarding removed -->
     
     <!-- Admin Command Center Dashboard Functions -->
     <script>
@@ -41573,8 +41464,7 @@ html:not([data-theme="dark"]) #programsTab {
             console.log('🔄 ACC: Refreshing admin command center data...');
             
             if (!window.analyticsExport || !window.analyticsDB) {
-                console.warn('ACC: Analytics modules not ready, retrying in 500ms');
-                setTimeout(accRefreshData, 500);
+                console.warn('ACC: Analytics modules not available — skipping admin analytics refresh');
                 return;
             }
             
@@ -43550,6 +43440,556 @@ html:not([data-theme="dark"]) #programsTab {
 
     <!-- Interactive Step-by-Step Coach Tour (ONE system only) -->
     <script src="js/interactive-tour.js"></script>
+    
+    <!-- Document Vault System - Password Protected -->
+    <script>
+    (function() {
+        'use strict';
+        
+        // Document Vault - Secure storage for aftercare documents
+        const VAULT_STORAGE_KEY = 'careconnect_document_vault';
+        const VAULT_SESSION_KEY = 'vault_session_token';
+        const VAULT_SESSION_EXPIRY = 'vault_session_expiry';
+        const SESSION_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+        
+        let vaultUnlocked = false;
+        let sessionTimer = null;
+        let currentSearchQuery = '';
+        
+        // Check if vault session is valid
+        function isVaultSessionValid() {
+            const expiry = localStorage.getItem(VAULT_SESSION_EXPIRY);
+            if (!expiry) return false;
+            return Date.now() < parseInt(expiry, 10);
+        }
+        
+        // Extend vault session on activity
+        function extendVaultSession() {
+            if (vaultUnlocked) {
+                localStorage.setItem(VAULT_SESSION_EXPIRY, String(Date.now() + SESSION_TIMEOUT_MS));
+                resetSessionTimer();
+            }
+        }
+        
+        // Reset session timer
+        function resetSessionTimer() {
+            if (sessionTimer) clearTimeout(sessionTimer);
+            sessionTimer = setTimeout(() => {
+                lockVault();
+                showVaultNotification('🔒 Vault locked due to inactivity', 'warning');
+            }, SESSION_TIMEOUT_MS);
+        }
+        
+        // Lock the vault
+        function lockVault() {
+            vaultUnlocked = false;
+            localStorage.removeItem(VAULT_SESSION_EXPIRY);
+            if (sessionTimer) clearTimeout(sessionTimer);
+            // Close any open vault modal
+            document.querySelectorAll('.vault-modal').forEach(m => m.remove());
+        }
+        
+        // Show notification toast
+        function showVaultNotification(message, type = 'success') {
+            const existing = document.querySelector('.vault-toast');
+            if (existing) existing.remove();
+            
+            const colors = {
+                success: { bg: '#10b981', icon: '✅' },
+                warning: { bg: '#f59e0b', icon: '⚠️' },
+                error: { bg: '#ef4444', icon: '❌' },
+                info: { bg: '#6366f1', icon: '📋' }
+            };
+            const c = colors[type] || colors.info;
+            
+            const toast = document.createElement('div');
+            toast.className = 'vault-toast';
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 24px;
+                right: 24px;
+                background: ${c.bg};
+                color: white;
+                padding: 14px 20px;
+                border-radius: 10px;
+                font-size: 14px;
+                font-weight: 500;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+                z-index: 10001;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease;
+            `;
+            toast.innerHTML = `<span>${c.icon}</span> ${message}`;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+        
+        // Add toast animation styles
+        if (!document.getElementById('vault-toast-styles')) {
+            const style = document.createElement('style');
+            style.id = 'vault-toast-styles';
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        // Show password prompt
+        function showPasswordPrompt() {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'vault-modal vault-password-modal';
+                modal.style.cssText = `
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 10000;
+                    padding: 20px;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="background: linear-gradient(145deg, #1e1b4b 0%, #312e81 100%); border-radius: 20px; width: 400px; box-shadow: 0 25px 80px rgba(0,0,0,0.5); overflow: hidden;">
+                        <div style="padding: 32px; text-align: center;">
+                            <div style="font-size: 56px; margin-bottom: 16px;">🔐</div>
+                            <h2 style="color: white; margin: 0 0 8px; font-size: 24px; font-weight: 600;">Vault Access</h2>
+                            <p style="color: rgba(255,255,255,0.7); margin: 0 0 24px; font-size: 14px;">Enter your password to unlock</p>
+                            
+                            <form id="vaultPasswordForm" style="display: flex; flex-direction: column; gap: 16px;">
+                                <div style="position: relative;">
+                                    <input type="password" id="vaultPasswordInput" placeholder="Enter your password" 
+                                        style="width: 100%; padding: 14px 18px; border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; background: rgba(255,255,255,0.1); color: white; font-size: 16px; outline: none; transition: all 0.2s; box-sizing: border-box;"
+                                        onfocus="this.style.borderColor='#818cf8'" onblur="this.style.borderColor='rgba(255,255,255,0.2)'">
+                                </div>
+                                <div id="vaultPasswordError" style="color: #f87171; font-size: 13px; display: none; text-align: left;"></div>
+                                <button type="submit" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                    🔓 Unlock Vault
+                                </button>
+                            </form>
+                            
+                            <button onclick="this.closest('.vault-modal').remove()" style="background: transparent; border: none; color: rgba(255,255,255,0.5); margin-top: 16px; cursor: pointer; font-size: 14px;">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                const input = modal.querySelector('#vaultPasswordInput');
+                const form = modal.querySelector('#vaultPasswordForm');
+                const errorDiv = modal.querySelector('#vaultPasswordError');
+                
+                input.focus();
+                
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const password = input.value;
+                    
+                    // Verify password against stored credentials
+                    const isValid = await verifyPassword(password);
+                    
+                    if (isValid) {
+                        modal.remove();
+                        resolve(true);
+                    } else {
+                        errorDiv.textContent = '❌ Incorrect password. Please try again.';
+                        errorDiv.style.display = 'block';
+                        input.value = '';
+                        input.focus();
+                        input.style.borderColor = '#f87171';
+                        setTimeout(() => input.style.borderColor = 'rgba(255,255,255,0.2)', 2000);
+                    }
+                });
+                
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                        resolve(false);
+                    }
+                });
+            });
+        }
+        
+        // Verify password against login credentials
+        async function verifyPassword(password) {
+            // Get current logged-in username
+            const username = localStorage.getItem('username');
+            if (!username) return false;
+            
+            // Check against stored accounts or master credentials
+            const accounts = JSON.parse(localStorage.getItem('careconnect_user_accounts') || '{}');
+            
+            // Master credentials check
+            if (username === 'MasterAdmin' && password === 'FFA@dm1n2025!') return true;
+            if (username === 'Doc232' && password === 'FFA121') return true;
+            
+            // Check stored account password (if exists)
+            if (accounts[username]) {
+                // For PBKDF2 hashed passwords
+                if (accounts[username].passwordHash && accounts[username].passwordHash.startsWith('pbkdf2$')) {
+                    return await verifyPBKDF2(password, accounts[username].passwordHash);
+                }
+                // For legacy SHA256 passwords
+                if (accounts[username].passwordHash) {
+                    const legacyHash = await sha256(password + 'FFAS_SECURE_2025');
+                    return accounts[username].passwordHash === legacyHash;
+                }
+            }
+            
+            return false;
+        }
+        
+        // PBKDF2 verification
+        async function verifyPBKDF2(password, storedHash) {
+            try {
+                const parts = storedHash.match(/^pbkdf2\$(\d+)\$([a-f0-9]+)\$([a-f0-9]+)$/i);
+                if (!parts) return false;
+                
+                const iterations = parseInt(parts[1], 10);
+                const salt = hexToBytes(parts[2]);
+                const expectedHash = parts[3];
+                
+                const encoder = new TextEncoder();
+                const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
+                const derivedBits = await crypto.subtle.deriveBits(
+                    { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
+                    keyMaterial,
+                    256
+                );
+                const derivedHash = bytesToHex(new Uint8Array(derivedBits));
+                return derivedHash === expectedHash;
+            } catch (e) {
+                console.error('PBKDF2 verification failed:', e);
+                return false;
+            }
+        }
+        
+        function hexToBytes(hex) {
+            const bytes = new Uint8Array(hex.length / 2);
+            for (let i = 0; i < hex.length; i += 2) {
+                bytes[i / 2] = parseInt(hex.substr(i, 2), 16);
+            }
+            return bytes;
+        }
+        
+        function bytesToHex(bytes) {
+            return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+        
+        async function sha256(message) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            return bytesToHex(new Uint8Array(hashBuffer));
+        }
+        
+        // Main vault open function - now with password protection
+        window.openDocumentVault = async function() {
+            // Check if already unlocked with valid session
+            if (!vaultUnlocked && !isVaultSessionValid()) {
+                const unlocked = await showPasswordPrompt();
+                if (!unlocked) return;
+                
+                vaultUnlocked = true;
+                localStorage.setItem(VAULT_SESSION_EXPIRY, String(Date.now() + SESSION_TIMEOUT_MS));
+                resetSessionTimer();
+            } else {
+                extendVaultSession();
+            }
+            
+            showVaultContents();
+        };
+        
+        // Show vault contents after authentication
+        function showVaultContents() {
+            const vault = JSON.parse(localStorage.getItem(VAULT_STORAGE_KEY) || '[]');
+            const filteredVault = currentSearchQuery 
+                ? vault.filter(doc => 
+                    (doc.clientName || doc.clientInitials || '').toLowerCase().includes(currentSearchQuery.toLowerCase()) ||
+                    (doc.type || '').toLowerCase().includes(currentSearchQuery.toLowerCase())
+                  )
+                : vault;
+            
+            // Remove existing vault modal
+            document.querySelectorAll('.vault-modal:not(.vault-password-modal)').forEach(m => m.remove());
+            
+            const modal = document.createElement('div');
+            modal.className = 'vault-modal';
+            modal.style.cssText = `
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.6);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                padding: 20px;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: #1a1a2e; border-radius: 20px; max-width: 950px; width: 100%; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 25px 80px rgba(0,0,0,0.4);">
+                    <div style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; padding: 24px 28px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div style="font-size: 32px;">🗄️</div>
+                            <div>
+                                <h2 style="margin: 0; font-size: 22px; font-weight: 600;">Document Vault</h2>
+                                <p style="margin: 4px 0 0; opacity: 0.85; font-size: 13px;">🔓 Unlocked · ${vault.length} documents</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <button onclick="lockVault(); this.closest('.vault-modal').remove();" style="background: rgba(255,255,255,0.15); border: none; color: white; padding: 8px 14px; border-radius: 8px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                🔒 Lock
+                            </button>
+                            <button onclick="this.closest('.vault-modal').remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer;">&times;</button>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 20px 24px; background: #252547; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 200px; position: relative;">
+                                <input type="text" id="vaultSearch" placeholder="🔍 Search by client or type..." value="${currentSearchQuery}"
+                                    style="width: 100%; padding: 10px 16px; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; background: rgba(255,255,255,0.08); color: white; font-size: 14px; outline: none; box-sizing: border-box;"
+                                    oninput="handleVaultSearch(this.value)">
+                            </div>
+                            <button onclick="exportVault()" style="background: #10b981; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px;">
+                                📥 Export All
+                            </button>
+                            <button onclick="clearVault()" style="background: #ef4444; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 6px;">
+                                🗑️ Clear
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #fef3c7; margin: 16px 24px 0; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 18px;">⚠️</span>
+                        <div style="font-size: 12px; color: #92400e;">
+                            <strong>PHI Compliance:</strong> Only client initials stored. No full names, DOB, addresses, or PHI.
+                        </div>
+                    </div>
+                    
+                    <div style="padding: 16px 24px 24px; overflow-y: auto; flex: 1;">
+                        <div id="vaultDocuments">
+                            ${filteredVault.length === 0 ? `
+                                <div style="text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.5);">
+                                    <div style="font-size: 56px; margin-bottom: 16px;">${currentSearchQuery ? '🔍' : '📭'}</div>
+                                    <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px; color: rgba(255,255,255,0.7);">
+                                        ${currentSearchQuery ? 'No documents match your search' : 'No documents saved yet'}
+                                    </p>
+                                    <p style="font-size: 14px; color: rgba(255,255,255,0.5);">
+                                        ${currentSearchQuery ? 'Try a different search term' : 'Aftercare documents auto-save when you export from Programs & Docs.'}
+                                    </p>
+                                </div>
+                            ` : filteredVault.map((doc, i) => {
+                                const actualIndex = vault.indexOf(doc);
+                                const typeColor = doc.type === 'Aftercare Plan' ? '#8b5cf6' : '#3b82f6';
+                                return `
+                                <div style="background: #2a2a4a; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 20px; margin-bottom: 14px; transition: all 0.2s;" onmouseover="this.style.borderColor='#6366f1'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+                                    <div style="display: flex; justify-content: space-between; align-items: start; gap: 16px;">
+                                        <div style="flex: 1;">
+                                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                                                <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: white;">${doc.clientName || doc.clientInitials || 'Client'}</h3>
+                                                ${doc.type ? `<span style="background: ${typeColor}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase;">${doc.type}</span>` : ''}
+                                            </div>
+                                            <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap; color: rgba(255,255,255,0.6); font-size: 13px;">
+                                                <span>📅 ${new Date(doc.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                <span>🕐 ${new Date(doc.date).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</span>
+                                                ${doc.programs && doc.programs.length > 0 ? `<span>📋 ${doc.programs.length} programs</span>` : ''}
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                                            <button onclick="viewVaultDocument(${actualIndex})" style="background: #3b82f6; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500;">
+                                                👁️ View
+                                            </button>
+                                            <button onclick="downloadVaultDocument(${actualIndex})" style="background: #8b5cf6; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 500;">
+                                                📥
+                                            </button>
+                                            <button onclick="deleteVaultDocument(${actualIndex})" style="background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.3); padding: 10px 14px; border-radius: 8px; font-size: 13px; cursor: pointer;">
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    </div>
+                                    ${doc.programs && doc.programs.length > 0 ? `
+                                        <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 12px; color: rgba(255,255,255,0.5);">
+                                            <strong style="color: rgba(255,255,255,0.7);">Programs:</strong> ${doc.programs.slice(0, 5).map(p => p.name || p).join(', ')}${doc.programs.length > 5 ? ` +${doc.programs.length - 5} more` : ''}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `}).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Extend session on interaction
+            modal.addEventListener('click', extendVaultSession);
+            modal.addEventListener('keydown', extendVaultSession);
+            
+            // Close on backdrop click
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+            
+            // Focus search
+            setTimeout(() => modal.querySelector('#vaultSearch')?.focus(), 100);
+        }
+        
+        // Handle search
+        window.handleVaultSearch = function(query) {
+            currentSearchQuery = query;
+            extendVaultSession();
+            showVaultContents();
+        };
+        
+        // View document in new window
+        window.viewVaultDocument = function(index) {
+            extendVaultSession();
+            const vault = JSON.parse(localStorage.getItem(VAULT_STORAGE_KEY) || '[]');
+            if (vault[index]) {
+                const win = window.open('', '_blank', 'width=850,height=1000');
+                win.document.write(vault[index].content || vault[index].htmlContent || '<p>No content available</p>');
+                win.document.close();
+            }
+        };
+        
+        // Download document
+        window.downloadVaultDocument = function(index) {
+            extendVaultSession();
+            const vault = JSON.parse(localStorage.getItem(VAULT_STORAGE_KEY) || '[]');
+            const doc = vault[index];
+            if (doc) {
+                const content = doc.content || doc.htmlContent || '';
+                const blob = new Blob([content], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${doc.clientName || doc.clientInitials || 'client'}_aftercare_${new Date(doc.date).toISOString().split('T')[0]}.html`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showVaultNotification('Document downloaded!', 'success');
+            }
+        };
+        
+        // Delete document
+        window.deleteVaultDocument = function(index) {
+            extendVaultSession();
+            if (confirm('Delete this document from the vault? This cannot be undone.')) {
+                const vault = JSON.parse(localStorage.getItem(VAULT_STORAGE_KEY) || '[]');
+                const docName = vault[index]?.clientName || vault[index]?.clientInitials || 'Document';
+                vault.splice(index, 1);
+                localStorage.setItem(VAULT_STORAGE_KEY, JSON.stringify(vault));
+                showVaultNotification(`"${docName}" deleted from vault`, 'info');
+                showVaultContents();
+            }
+        };
+        
+        // Clear entire vault
+        window.clearVault = function() {
+            extendVaultSession();
+            if (confirm('⚠️ Clear entire vault? This will permanently delete ALL saved documents.')) {
+                if (confirm('Are you absolutely sure? This cannot be undone.')) {
+                    const count = JSON.parse(localStorage.getItem(VAULT_STORAGE_KEY) || '[]').length;
+                    localStorage.setItem(VAULT_STORAGE_KEY, '[]');
+                    showVaultNotification(`Vault cleared (${count} documents removed)`, 'warning');
+                    showVaultContents();
+                }
+            }
+        };
+        
+        // Export vault as JSON
+        window.exportVault = function() {
+            extendVaultSession();
+            const vault = JSON.parse(localStorage.getItem(VAULT_STORAGE_KEY) || '[]');
+            if (vault.length === 0) {
+                showVaultNotification('No documents to export', 'warning');
+                return;
+            }
+            const dataStr = JSON.stringify(vault, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `document_vault_backup_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showVaultNotification(`Exported ${vault.length} documents`, 'success');
+        };
+        
+        // Lock vault function (global)
+        window.lockVault = lockVault;
+        
+        // Save document to vault (called from Programs & Docs module)
+        window.saveToVault = function(document) {
+            const vault = JSON.parse(localStorage.getItem(VAULT_STORAGE_KEY) || '[]');
+            
+            // Check for duplicate (same client + same day)
+            const today = new Date().toDateString();
+            const isDuplicate = vault.some(doc => 
+                (doc.clientName === document.clientName || doc.clientInitials === document.clientInitials) &&
+                new Date(doc.date).toDateString() === today &&
+                doc.type === (document.type || 'Aftercare Options')
+            );
+            
+            if (isDuplicate) {
+                console.log('⚠️ Duplicate document detected, updating existing...');
+                // Update existing instead of adding new
+                const existingIndex = vault.findIndex(doc => 
+                    (doc.clientName === document.clientName || doc.clientInitials === document.clientInitials) &&
+                    new Date(doc.date).toDateString() === today &&
+                    doc.type === (document.type || 'Aftercare Options')
+                );
+                if (existingIndex !== -1) {
+                    vault[existingIndex] = {
+                        ...vault[existingIndex],
+                        date: new Date().toISOString(),
+                        content: document.content,
+                        htmlContent: document.htmlContent || document.content,
+                        programs: document.programs || [],
+                        metadata: document.metadata || {}
+                    };
+                }
+            } else {
+                vault.unshift({
+                    id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                    date: new Date().toISOString(),
+                    clientName: document.clientName,
+                    clientInitials: document.clientInitials,
+                    type: document.type || 'Aftercare Options',
+                    content: document.content,
+                    htmlContent: document.htmlContent || document.content,
+                    programs: document.programs || [],
+                    metadata: document.metadata || {}
+                });
+            }
+            
+            localStorage.setItem(VAULT_STORAGE_KEY, JSON.stringify(vault));
+            console.log('✅ Document saved to vault');
+            showVaultNotification(`📋 ${document.type || 'Document'} saved to vault`, 'success');
+            return true;
+        };
+        
+        console.log('✅ Document Vault initialized (password protected)');
+    })();
+    </script>
 </body>
 </html>
 

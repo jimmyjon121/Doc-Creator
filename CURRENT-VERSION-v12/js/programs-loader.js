@@ -8,10 +8,7 @@
     
     console.log('📥 Initializing programs loader...');
     
-    // Primary data container
     window.programsData = window.programsData || [];
-    // Legacy alias some scripts still reference
-    window.programs = window.programs || [];
     
     async function loadPrograms() {
         try {
@@ -23,7 +20,6 @@
                     if (Array.isArray(parsed) && parsed.length > 0) {
                         console.log(`📦 Loaded ${parsed.length} programs from localStorage cache`);
                         window.programsData = parsed;
-                        window.programs = parsed;
                         notifyProgramsLoaded();
                         // We can still fetch in background to update cache
                     }
@@ -44,7 +40,6 @@
             
             if (Array.isArray(data)) {
                 window.programsData = data;
-                window.programs = data; // keep legacy alias populated
                 console.log(`✅ Successfully loaded ${data.length} programs from file`);
                 
                 // Update cache
