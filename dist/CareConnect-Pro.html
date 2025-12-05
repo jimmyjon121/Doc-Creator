@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!-- 
     CareConnect Pro v13.0.0-beta.1
-    Build Date: 2025-12-05T02:54:31.044Z
-    Build Hash: 77126f96
+    Build Date: 2025-12-05T03:02:57.713Z
+    Build Hash: ac1685b6
     Copyright (c) Family First Adolescent Services
 -->
 
@@ -4123,6 +4123,7 @@
             
             // Initialize client manager
             window.clientManager = new ClientManager(window.dbManager);
+            await window.clientManager.initialize();
 
             // Initialize task service (ensures TaskSchema state is populated)
             if (typeof ClientTaskService !== 'undefined') {
@@ -41359,9 +41360,7 @@ body.dark-mode .stat-label,
         Document Creator by <strong>ClearHive Health LLC</strong>
     </div>
 
-    <!-- Programs Data Loader - Load before other scripts -->
-    <script src="js/programs-loader.js"></script>
-    <script src="js/programs-init.js"></script>
+    <!-- Programs Data Loader already loaded in <head> -->
 
     <!-- Session Management & Data Persistence Scripts - MUST BE LOADED LAST -->
     <script src="js/auth/login-robust.js"></script>

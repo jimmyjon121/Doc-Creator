@@ -179,6 +179,7 @@
             
             // Initialize client manager
             window.clientManager = new ClientManager(window.dbManager);
+            await window.clientManager.initialize();
 
             // Initialize task service (ensures TaskSchema state is populated)
             if (typeof ClientTaskService !== 'undefined') {
@@ -28620,9 +28621,7 @@ body.dark-mode .stat-label,
         Document Creator by <strong>ClearHive Health LLC</strong>
     </div>
 
-    <!-- Programs Data Loader - Load before other scripts -->
-    <script src="js/programs-loader.js"></script>
-    <script src="js/programs-init.js"></script>
+    <!-- Programs Data Loader already loaded in <head> -->
 
     <!-- Session Management & Data Persistence Scripts - MUST BE LOADED LAST -->
     <script src="js/auth/login-robust.js"></script>
