@@ -126,12 +126,17 @@ class SimpleBuilder {
             console.log('  [OK] Copied libs folder');
         }
 
-        // Copy onboarding assets
-        const onboardingSource = './onboarding';
-        const onboardingDest = path.join(CONFIG.distDir, 'onboarding');
+        // Copy onboarding assets (the full intro system with particles)
+        const onboardingSource = './CURRENT-VERSION-v12/js/onboarding';
+        const onboardingDest = path.join(CONFIG.distDir, 'js/onboarding');
         if (fs.existsSync(onboardingSource)) {
+            // Ensure js directory exists
+            const jsDir = path.join(CONFIG.distDir, 'js');
+            if (!fs.existsSync(jsDir)) {
+                fs.mkdirSync(jsDir, { recursive: true });
+            }
             this.copyDirectory(onboardingSource, onboardingDest);
-            console.log('  [OK] Copied onboarding assets');
+            console.log('  [OK] Copied js/onboarding folder (particle intro)');
         }
     }
     
@@ -173,7 +178,12 @@ class SimpleBuilder {
             'client-data-validation.js',
             'discharge-packet-integration.js',
             'widget-rendering-optimization.js',
-            'indexeddb-optimization.js'
+            'indexeddb-optimization.js',
+            // Onboarding flow scripts - ORDER MATTERS!
+            // OnboardingIntro is loaded via <script src="js/onboarding/intro/intro.js"> in HTML
+            // (the 520KB particle animation version, not the old enhancement file)
+            'interactive-tour.js',
+            'first-login-flow.js'
         ].map(f => path.join(CONFIG.enhancementsDir, f));
         
         enhancementFiles.forEach(file => {
