@@ -15107,7 +15107,8 @@ html:not([data-theme="dark"]) .app-main {
             border-radius: 0 !important;
             min-height: 100vh !important;
             box-shadow: none !important;
-            background: transparent !important;
+            /* Use light background for light mode, inherit for dark mode */
+            background: var(--bg-base, #f8f7fc) !important;
         }
         
         /* Apply purple gradient background to html and body when Programs & Docs is active */
@@ -15131,10 +15132,10 @@ html:not([data-theme="dark"]) .app-main {
             z-index: -1 !important;
         }
         
-        /* Ensure #mainApp is transparent */
+        /* Ensure #mainApp has proper background */
         body.programs-docs-v2-active #mainApp {
             padding: 0 !important;
-            background: transparent !important;
+            background: var(--bg-base, #f8f7fc) !important;
         }
         
         body.programs-docs-v2-active .main-content {
@@ -15145,7 +15146,8 @@ html:not([data-theme="dark"]) .app-main {
         body.programs-docs-v2-active .main-content {
             padding: clamp(16px, 2vw, 36px) !important;
             grid-template-columns: 1fr !important; /* Override grid layout */
-            background: transparent !important;
+            /* Use light background for light mode */
+            background: var(--bg-base, #f8f7fc) !important;
         }
         
         /* Override module's fixed layout */
@@ -15961,16 +15963,18 @@ html:not([data-theme="dark"]) .app-main {
                             outerContainer.style.borderRadius = '0';
                             outerContainer.style.minHeight = '100vh';
                             outerContainer.style.boxShadow = 'none';
-                            outerContainer.style.background = 'transparent';
+                            // Use theme token for background - light mode gets #f8f7fc, dark mode gets dark
+                            outerContainer.style.background = 'var(--bg-base, #f8f7fc)';
                         }
                         
-                        // Override .main-content - make it transparent
+                        // Override .main-content
                         const mainContent = document.querySelector('.main-content');
                         if (mainContent) {
                             mainContent.style.gridTemplateColumns = '1fr';
                             mainContent.style.maxWidth = '100%';
                             mainContent.style.padding = 'clamp(16px, 2vw, 36px)';
-                            mainContent.style.background = 'transparent';
+                            // Use theme token for background
+                            mainContent.style.background = 'var(--bg-base, #f8f7fc)';
                         }
                         
                         // Override #mainApp - make it transparent
