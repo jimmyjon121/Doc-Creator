@@ -9894,10 +9894,11 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 </script>
     <!-- Client Tracking Styles -->
     <style>
-        /* Base Styles */
+        /* Base Styles - background handled by theme-tokens.css */
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            /* Use theme token for background - removed legacy purple gradient */
+            background: var(--bg-base, #F8F7FC);
             min-height: 100vh;
             color: #333;
             margin: 0;
@@ -15915,22 +15916,25 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                         // The purple gradient (legacy) has been removed as requested
                         const cleanBg = '#f8f9fa'; // Standard dashboard background
                         
-                        document.documentElement.style.background = cleanBg;
+                        // Force light background on root elements
+                        document.documentElement.style.setProperty('background', cleanBg, 'important');
+                        document.documentElement.style.setProperty('background-color', cleanBg, 'important');
                         document.documentElement.style.minHeight = '100vh';
-                        document.body.style.background = cleanBg;
+                        document.body.style.setProperty('background', cleanBg, 'important');
+                        document.body.style.setProperty('background-color', cleanBg, 'important');
                         document.body.style.minHeight = '100vh';
                         
-                        // Override .container layout (background handled by CSS)
+                        // Override .container layout - must use setProperty for !important
                         const outerContainer = document.querySelector('.container');
                         if (outerContainer) {
-                            outerContainer.style.width = '100%';
-                            outerContainer.style.maxWidth = '100%';
-                            outerContainer.style.margin = '0';
-                            outerContainer.style.padding = 'clamp(16px, 2.5vw, 44px) clamp(16px, 2.5vw, 56px)';
-                            outerContainer.style.borderRadius = '0';
-                            outerContainer.style.minHeight = '100vh';
-                            outerContainer.style.boxShadow = 'none';
-                            // Let CSS handle background via theme tokens
+                            outerContainer.style.setProperty('width', '100%', 'important');
+                            outerContainer.style.setProperty('max-width', '100%', 'important');
+                            outerContainer.style.setProperty('margin', '0', 'important');
+                            outerContainer.style.setProperty('padding', 'clamp(16px, 2.5vw, 44px) clamp(16px, 2.5vw, 56px)', 'important');
+                            outerContainer.style.setProperty('border-radius', '0', 'important');
+                            outerContainer.style.setProperty('min-height', '100vh', 'important');
+                            outerContainer.style.setProperty('box-shadow', 'none', 'important');
+                            outerContainer.style.setProperty('background', cleanBg, 'important');
                         }
                         
                         // Override .main-content layout (background handled by CSS)
@@ -22938,33 +22942,29 @@ if (!document.querySelector('#morning-review-badge-styles')) {
             box-sizing: border-box;
         }
 
+        /* Body styling - background handled by theme-tokens.css */
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
             min-height: 100vh;
             color: #333;
             margin: 0;
             padding: 0;
-            background: #f5f6ff;
+            /* Use theme token - removed legacy purple gradient overlay */
+            background: var(--bg-base, #F8F7FC);
             position: relative;
         }
 
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            opacity: 0.85;
-            z-index: -1;
-        }
+        /* Removed body::before purple gradient overlay - no longer needed */
 
+        /* Container - fullscreen layout (removed legacy floating card style) */
         .container {
             max-width: 100%;
-            margin: calc(var(--app-shell-total-header, 128px) + 20px) auto 60px;
+            margin: 0;
             padding: 32px;
-            background: white;
-            min-height: calc(100vh - var(--app-shell-total-header, 128px) - 80px);
-            border-radius: 28px;
-            box-shadow: 0 25px 60px rgba(102, 126, 234, 0.25);
+            background: var(--bg-base, #F8F7FC);
+            min-height: 100vh;
+            border-radius: 0;
+            box-shadow: none;
             overflow: hidden;
             display: block !important;
             visibility: visible !important;
