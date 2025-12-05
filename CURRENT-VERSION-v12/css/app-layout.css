@@ -1290,29 +1290,25 @@ body:not(.dark-mode) .quick-win-item:hover {
 /* Full Screen Layout Overrides */
 
 /* ========================================
-   LIGHT MODE BACKGROUNDS (Default)
+   LAYOUT OVERRIDES
+   Background colors handled by theme-tokens.css
    ======================================== */
 
-/* Force full width on root elements */
+/* Full width on root elements */
 html, body {
-    width: 100vw !important;
-    max-width: 100vw !important;
+    width: 100vw;
+    max-width: 100vw;
     overflow-x: hidden;
-    margin: 0 !important;
-    padding: 0 !important;
-    background-color: #F8F7FC !important;
-    background: #F8F7FC !important;
-    color: var(--text-primary);
+    /* Background and color set in theme-tokens.css using var(--bg-base) */
 }
 
-/* Main app container background */
+/* Main app container */
 #mainApp {
-    background-color: #F8F7FC !important;
-    background: #F8F7FC !important;
+    background-color: var(--bg-base);
     min-height: 100vh;
 }
 
-/* Ensure main content area has proper background */
+/* Main content areas use theme token */
 .main-content,
 .app-main,
 .tab-content,
@@ -1320,24 +1316,21 @@ html, body {
 .cm-tracker-container,
 .acc-container,
 .dashboard-content {
-    background-color: #F8F7FC !important;
-    background: #F8F7FC !important;
+    background-color: var(--bg-base);
 }
 
-/* All tab panels */
+/* All tab panels - use theme token */
 #dashboardTab,
 #programsTab,
 #clientsTab,
 #adminTab {
-    background-color: #F8F7FC !important;
-    background: #F8F7FC !important;
+    background-color: var(--bg-base);
 }
 
 /* Programs panel */
 .programs-panel,
 .programs-panel:has(#adminTab) {
-    background-color: #F8F7FC !important;
-    background: #F8F7FC !important;
+    background-color: var(--bg-base);
 }
 
 /* Immersive map mode: remove ALL backgrounds so map is edge-to-edge */
@@ -1445,23 +1438,7 @@ body.dark-mode .programs-panel:has(#adminTab) {
     margin: 0 !important;
 }
 
-/* Light mode backgrounds for main containers */
-html:not([data-theme="dark"]) .container,
-html:not([data-theme="dark"]) .app-container,
-html:not([data-theme="dark"]) .main-container,
-html:not([data-theme="dark"]) .content-wrapper,
-html:not([data-theme="dark"]) .main-content,
-html:not([data-theme="dark"]) .app-shell,
-html:not([data-theme="dark"]) .app-main,
-body:not(.dark-mode) .container,
-body:not(.dark-mode) .app-container,
-body:not(.dark-mode) .main-container,
-body:not(.dark-mode) .content-wrapper,
-body:not(.dark-mode) .main-content,
-body:not(.dark-mode) .app-shell,
-body:not(.dark-mode) .app-main {
-    background-color: var(--bg-base, #F8F7FC) !important;
-}
+/* Container backgrounds handled by theme-tokens.css via var(--bg-base) */
 
 /* Dashboard Layout */
 #dashboard,
