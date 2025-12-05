@@ -1550,7 +1550,8 @@
         if (dashboardTab && dashboardTab.classList.contains('active')) {
             document.body.classList.add('dashboard-active');
             document.body.classList.remove('programs-docs-v2-active');
-            document.body.style.background = 'white';
+            // Use theme token color
+            document.body.style.background = '#F8F7FC'; // var(--bg-base)
             document.body.style.color = '#1a1a1a';
         }
     }
@@ -15912,29 +15913,26 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                     
                     // Apply inline styles to override parent containers
                     const applyFullViewportStyles = () => {
-                        // Apply clean white/gray background for modern look
-                        // The purple gradient (legacy) has been removed as requested
-                        const cleanBg = '#f8f9fa'; // Standard dashboard background
+                        // Apply clean light background - use theme token
+                        const lightBg = '#F8F7FC'; // Same as --bg-base in theme-tokens.css
                         
-                        // Force light background on root elements
-                        document.documentElement.style.setProperty('background', cleanBg, 'important');
-                        document.documentElement.style.setProperty('background-color', cleanBg, 'important');
+                        // Set background on html and body
+                        document.documentElement.style.background = lightBg;
                         document.documentElement.style.minHeight = '100vh';
-                        document.body.style.setProperty('background', cleanBg, 'important');
-                        document.body.style.setProperty('background-color', cleanBg, 'important');
+                        document.body.style.background = lightBg;
                         document.body.style.minHeight = '100vh';
                         
-                        // Override .container layout - must use setProperty for !important
+                        // Override .container layout
                         const outerContainer = document.querySelector('.container');
                         if (outerContainer) {
-                            outerContainer.style.setProperty('width', '100%', 'important');
-                            outerContainer.style.setProperty('max-width', '100%', 'important');
-                            outerContainer.style.setProperty('margin', '0', 'important');
-                            outerContainer.style.setProperty('padding', 'clamp(16px, 2.5vw, 44px) clamp(16px, 2.5vw, 56px)', 'important');
-                            outerContainer.style.setProperty('border-radius', '0', 'important');
-                            outerContainer.style.setProperty('min-height', '100vh', 'important');
-                            outerContainer.style.setProperty('box-shadow', 'none', 'important');
-                            outerContainer.style.setProperty('background', cleanBg, 'important');
+                            outerContainer.style.width = '100%';
+                            outerContainer.style.maxWidth = '100%';
+                            outerContainer.style.margin = '0';
+                            outerContainer.style.padding = 'clamp(16px, 2.5vw, 44px) clamp(16px, 2.5vw, 56px)';
+                            outerContainer.style.borderRadius = '0';
+                            outerContainer.style.minHeight = '100vh';
+                            outerContainer.style.boxShadow = 'none';
+                            outerContainer.style.background = lightBg;
                         }
                         
                         // Override .main-content layout (background handled by CSS)
@@ -15946,13 +15944,13 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                             // Let CSS handle background via theme tokens
                         }
                         
-                        // Override #mainApp - make it transparent
+                        // Override #mainApp - use light background
                         const mainApp = document.getElementById('mainApp');
                         if (mainApp) {
                             mainApp.style.padding = '0';
                             mainApp.style.width = '100%';
                             mainApp.style.maxWidth = '100%';
-                            mainApp.style.background = 'transparent';
+                            mainApp.style.background = '#F8F7FC';
                         }
                         
                         // Hide selection panel
@@ -15989,11 +15987,34 @@ if (!document.querySelector('#morning-review-badge-styles')) {
                     // Apply styles immediately
                     applyFullViewportStyles();
                     
+                    // FIX: Force remove rounded corners and margins from programs-module
+                    const programsModule = container.querySelector('.programs-module');
+                    if (programsModule) {
+                        programsModule.style.borderRadius = '0';
+                        programsModule.style.margin = '0';
+                        programsModule.style.marginTop = '0';
+                        programsModule.style.boxShadow = 'none';
+                        programsModule.style.background = '#F8F7FC';
+                    }
+                    
+                    // FIX: Force remove rounded corners from main-layout
+                    const mainLayout = container.querySelector('.main-layout');
+                    if (mainLayout) {
+                        mainLayout.style.borderRadius = '0';
+                        mainLayout.style.margin = '0';
+                        mainLayout.style.marginTop = '0';
+                        mainLayout.style.boxShadow = 'none';
+                        mainLayout.style.background = '#F8F7FC';
+                    }
+                    
                     // Ensure container takes full space
                     container.style.width = '100%';
                     container.style.height = '100%';
                     container.style.minHeight = 'calc(100vh - 200px)';
                     container.style.display = 'block';
+                    container.style.background = '#F8F7FC';
+                    container.style.borderRadius = '0';
+                    container.style.marginTop = '0';
                     
                     // Hide legacy wrapper if it exists
                     const legacyWrapper = document.getElementById('legacyProgramsWrapper');
@@ -22956,15 +22977,15 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 
         /* Removed body::before purple gradient overlay - no longer needed */
 
-        /* Container - fullscreen layout (removed legacy floating card style) */
+        /* Container - floating card layout */
         .container {
             max-width: 100%;
-            margin: 0;
+            margin: calc(var(--app-shell-total-header, 128px) + 20px) auto 60px;
             padding: 32px;
-            background: var(--bg-base, #F8F7FC);
-            min-height: 100vh;
-            border-radius: 0;
-            box-shadow: none;
+            background: white;
+            min-height: calc(100vh - var(--app-shell-total-header, 128px) - 80px);
+            border-radius: 28px;
+            box-shadow: 0 25px 60px rgba(102, 126, 234, 0.25);
             overflow: hidden;
             display: block !important;
             visibility: visible !important;
@@ -25032,6 +25053,94 @@ if (!document.querySelector('#morning-review-badge-styles')) {
         
         .user-profile-btn:active {
             transform: scale(0.95);
+        }
+    </style>
+    
+    <!-- LIGHT MODE FIX: Force light background on all container elements -->
+    <style id="light-mode-container-fix">
+        /* DEBUG: Make body RED to verify CSS is loading */
+        html:not([data-theme="dark"]) {
+            background: #F8F7FC !important;
+        }
+        body:not(.dark-mode) {
+            background: #F8F7FC !important;
+        }
+        /* Force ALL elements to remove floating card effect */
+        * {
+            --floating-card-bg: #F8F7FC;
+        }
+        html:not([data-theme="dark"]) .container,
+        html:not([data-theme="dark"]) .main-content,
+        html:not([data-theme="dark"]) .programs-panel,
+        html:not([data-theme="dark"]) #mainApp,
+        html:not([data-theme="dark"]) #dashboardTab,
+        html:not([data-theme="dark"]) #programsTab,
+        html:not([data-theme="dark"]) #clientsTab,
+        html:not([data-theme="dark"]) .dashboard-container,
+        html:not([data-theme="dark"]) .programs-module,
+        html:not([data-theme="dark"]) .main-layout,
+        html:not([data-theme="dark"]) .programs-docs-container,
+        body:not(.dark-mode) .container,
+        body:not(.dark-mode) .main-content,
+        body:not(.dark-mode) .programs-panel,
+        body:not(.dark-mode) #mainApp,
+        body:not(.dark-mode) #dashboardTab,
+        body:not(.dark-mode) #programsTab,
+        body:not(.dark-mode) #clientsTab,
+        body:not(.dark-mode) .dashboard-container,
+        body:not(.dark-mode) .programs-module,
+        body:not(.dark-mode) .main-layout,
+        body:not(.dark-mode) .programs-docs-container {
+            background: #F8F7FC !important;
+            background-color: #F8F7FC !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+    </style>
+    <style id="light-mode-container-fix-secondary">
+        /* Root elements - force light background */
+        html:not([data-theme="dark"]),
+        body:not(.dark-mode) {
+            background: #F8F7FC !important;
+            background-color: #F8F7FC !important;
+        }
+        
+        /* Main app container */
+        html:not([data-theme="dark"]) #mainApp,
+        body:not(.dark-mode) #mainApp {
+            background: #F8F7FC !important;
+        }
+        
+        /* All container elements - remove floating card effect */
+        html:not([data-theme="dark"]) .container,
+        body:not(.dark-mode) .container {
+            margin: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: #F8F7FC !important;
+        }
+        
+        /* Main content - remove floating card effect */
+        html:not([data-theme="dark"]) .main-content,
+        body:not(.dark-mode) .main-content {
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: #F8F7FC !important;
+        }
+        
+        /* Programs panel and tab content */
+        html:not([data-theme="dark"]) .programs-panel,
+        html:not([data-theme="dark"]) .tab-content,
+        html:not([data-theme="dark"]) #dashboardTab,
+        html:not([data-theme="dark"]) #programsTab,
+        html:not([data-theme="dark"]) #clientsTab,
+        body:not(.dark-mode) .programs-panel,
+        body:not(.dark-mode) .tab-content,
+        body:not(.dark-mode) #dashboardTab,
+        body:not(.dark-mode) #programsTab,
+        body:not(.dark-mode) #clientsTab {
+            background: #F8F7FC !important;
         }
     </style>
 </head>
@@ -30448,6 +30557,9 @@ if (!document.querySelector('#morning-review-badge-styles')) {
 
     <!-- Interactive Step-by-Step Coach Tour (ONE system only) -->
     <script src="js/interactive-tour.js"></script>
+    
+    <!-- Note: Light mode background fix attempts documented in DARK-BAR-ISSUE.md -->
+    
 </body>
 </html>
 
