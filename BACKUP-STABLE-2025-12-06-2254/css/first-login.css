@@ -1,0 +1,402 @@
+/**
+ * First Login Flow Styles
+ * User Agreement, Profile Setup, and Onboarding Flow
+ */
+
+/* =============================================
+   OVERLAY
+   ============================================= */
+.first-login-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.first-login-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* =============================================
+   MODAL BASE
+   ============================================= */
+.first-login-modal {
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 
+        0 24px 80px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    max-width: 600px;
+    width: 90%;
+    max-height: 85vh;
+    overflow: hidden;
+    transform: scale(0.95) translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.first-login-overlay.show .first-login-modal {
+    transform: scale(1) translateY(0);
+}
+
+.modal-icon {
+    font-size: 48px;
+    text-align: center;
+    padding-top: 32px;
+}
+
+.modal-header {
+    text-align: center;
+    padding: 32px 32px 16px;
+}
+
+.modal-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1E293B;
+    margin: 16px 0 8px;
+}
+
+.modal-header p {
+    color: #64748B;
+    font-size: 16px;
+}
+
+.modal-actions {
+    padding: 24px 32px 32px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+/* =============================================
+   AGREEMENT MODAL
+   ============================================= */
+.agreement-modal {
+    max-width: 700px;
+}
+
+.agreement-content {
+    padding: 24px 32px;
+    max-height: 400px;
+    overflow-y: auto;
+    color: #334155;
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.agreement-content h3 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1E293B;
+    margin-bottom: 8px;
+}
+
+.agreement-content h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1E293B;
+    margin: 20px 0 8px;
+}
+
+.agreement-content p {
+    margin-bottom: 12px;
+}
+
+.agreement-content ul {
+    margin: 8px 0 16px 20px;
+}
+
+.agreement-content li {
+    margin-bottom: 6px;
+}
+
+.agreement-checkbox {
+    padding: 0 32px;
+    border-top: 1px solid #E2E8F0;
+    padding-top: 20px;
+}
+
+.agreement-checkbox label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 15px;
+    color: #1E293B;
+    font-weight: 500;
+}
+
+.agreement-checkbox input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    accent-color: #0D9488;
+    cursor: pointer;
+}
+
+/* =============================================
+   PROFILE MODAL
+   ============================================= */
+.profile-modal {
+    max-width: 500px;
+}
+
+.profile-form {
+    padding: 0 32px 32px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 8px;
+}
+
+.form-group label .required {
+    color: #EF4444;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #E2E8F0;
+    border-radius: 12px;
+    font-size: 15px;
+    color: #1E293B;
+    background: #F8FAFC;
+    transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #0D9488;
+    background: #ffffff;
+    box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1);
+}
+
+.form-group input::placeholder {
+    color: #94A3B8;
+}
+
+.form-actions {
+    margin-top: 28px;
+}
+
+/* =============================================
+   BUTTONS
+   ============================================= */
+.btn-primary {
+    background: linear-gradient(135deg, #0D9488, #14B8A6);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0F766E, #0D9488);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(13, 148, 136, 0.3);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: #F1F5F9;
+    color: #475569;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: #E2E8F0;
+}
+
+/* =============================================
+   NOTIFICATION
+   ============================================= */
+.first-login-notification {
+    animation: slideIn 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* =============================================
+   DARK MODE
+   ============================================= */
+body.dark-mode .first-login-overlay {
+    background: rgba(2, 6, 23, 0.9);
+}
+
+body.dark-mode .first-login-modal {
+    background: #1E293B;
+    box-shadow: 
+        0 24px 80px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .modal-header h2 {
+    color: #F1F5F9;
+}
+
+body.dark-mode .modal-header p {
+    color: #94A3B8;
+}
+
+body.dark-mode .agreement-content {
+    color: #CBD5E1;
+}
+
+body.dark-mode .agreement-content h3,
+body.dark-mode .agreement-content h4 {
+    color: #F1F5F9;
+}
+
+body.dark-mode .agreement-checkbox {
+    border-color: #334155;
+}
+
+body.dark-mode .agreement-checkbox label {
+    color: #F1F5F9;
+}
+
+body.dark-mode .form-group label {
+    color: #E2E8F0;
+}
+
+body.dark-mode .form-group input,
+body.dark-mode .form-group select {
+    background: #0F172A;
+    border-color: #334155;
+    color: #F1F5F9;
+}
+
+body.dark-mode .form-group input:focus,
+body.dark-mode .form-group select:focus {
+    background: #1E293B;
+    border-color: #14B8A6;
+}
+
+body.dark-mode .form-group input::placeholder {
+    color: #64748B;
+}
+
+body.dark-mode .btn-secondary {
+    background: #334155;
+    color: #E2E8F0;
+}
+
+body.dark-mode .btn-secondary:hover {
+    background: #475569;
+}
+
+/* =============================================
+   SCROLLBAR STYLING
+   ============================================= */
+.agreement-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.agreement-content::-webkit-scrollbar-track {
+    background: #F1F5F9;
+    border-radius: 4px;
+}
+
+.agreement-content::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 4px;
+}
+
+.agreement-content::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+}
+
+body.dark-mode .agreement-content::-webkit-scrollbar-track {
+    background: #0F172A;
+}
+
+body.dark-mode .agreement-content::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
+body.dark-mode .agreement-content::-webkit-scrollbar-thumb:hover {
+    background: #64748B;
+}
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 640px) {
+    .first-login-modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .modal-header {
+        padding: 24px 24px 12px;
+    }
+    
+    .modal-header h2 {
+        font-size: 22px;
+    }
+    
+    .agreement-content {
+        padding: 20px 24px;
+        max-height: 300px;
+    }
+    
+    .agreement-checkbox {
+        padding: 16px 24px;
+    }
+    
+    .modal-actions {
+        padding: 20px 24px 24px;
+    }
+    
+    .profile-form {
+        padding: 0 24px 24px;
+    }
+}
+
+
+
+
+
+

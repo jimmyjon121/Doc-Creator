@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 350" class="hand-drawn">
+  <defs>
+    <filter id="handWobble" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="2" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.8" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    
+    <filter id="pinShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.2"/>
+    </filter>
+    
+    <!-- Topographic pattern -->
+    <pattern id="topoPattern" patternUnits="userSpaceOnUse" width="100" height="100">
+      <path d="M0 50 Q25 30 50 50 Q75 70 100 50" stroke="#E5E7EB" stroke-width="0.5" fill="none"/>
+      <path d="M0 70 Q25 50 50 70 Q75 90 100 70" stroke="#E5E7EB" stroke-width="0.5" fill="none"/>
+      <path d="M0 30 Q25 10 50 30 Q75 50 100 30" stroke="#E5E7EB" stroke-width="0.5" fill="none"/>
+    </pattern>
+    
+    <linearGradient id="mapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F0FDF4"/>
+      <stop offset="50%" style="stop-color:#ECFDF5"/>
+      <stop offset="100%" style="stop-color:#D1FAE5"/>
+    </linearGradient>
+    
+    <linearGradient id="oceanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#CFFAFE"/>
+      <stop offset="100%" style="stop-color:#A5F3FC"/>
+    </linearGradient>
+  </defs>
+  
+  <style>
+    .stroke-draw { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .map-border { stroke: #D1D5DB; stroke-width: 1.5; }
+    .land { stroke: #86EFAC; stroke-width: 1; }
+    .road { stroke: #FDE68A; stroke-width: 1.5; }
+    .pin { stroke-width: 1.5; }
+  </style>
+  
+  <g filter="url(#handWobble)">
+    <!-- Left sidebar (filters) -->
+    <g id="filter-sidebar">
+      <rect x="10" y="10" width="100" height="330" rx="6" style="fill: #F9FAFB; stroke: #E5E7EB; stroke-width: 1;" data-draw-order="1"/>
+      
+      <text x="20" y="35" style="font-size: 10px; fill: #374151; font-weight: 600;">Filters</text>
+      
+      <!-- Filter options -->
+      <rect x="20" y="50" width="80" height="20" rx="4" style="fill: #CCFBF1; stroke: #0D9488; stroke-width: 1;" data-draw-order="2"/>
+      <text x="60" y="64" text-anchor="middle" style="font-size: 8px; fill: #0D9488;">Level of Care</text>
+      
+      <rect x="20" y="80" width="80" height="20" rx="4" style="fill: white; stroke: #D1D5DB; stroke-width: 1;" data-draw-order="3"/>
+      <text x="60" y="94" text-anchor="middle" style="font-size: 8px; fill: #6B7280;">Format</text>
+      
+      <rect x="20" y="110" width="80" height="20" rx="4" style="fill: white; stroke: #D1D5DB; stroke-width: 1;" data-draw-order="4"/>
+      <text x="60" y="124" text-anchor="middle" style="font-size: 8px; fill: #6B7280;">State</text>
+      
+      <rect x="20" y="140" width="80" height="20" rx="4" style="fill: white; stroke: #D1D5DB; stroke-width: 1;" data-draw-order="5"/>
+      <text x="60" y="154" text-anchor="middle" style="font-size: 8px; fill: #6B7280;">Age Range</text>
+      
+      <rect x="20" y="170" width="80" height="20" rx="4" style="fill: white; stroke: #D1D5DB; stroke-width: 1;" data-draw-order="6"/>
+      <text x="60" y="184" text-anchor="middle" style="font-size: 8px; fill: #6B7280;">Specialty</text>
+      
+      <!-- Results count -->
+      <text x="20" y="220" style="font-size: 9px; fill: #6B7280;">Showing</text>
+      <text x="20" y="235" style="font-size: 14px; fill: #0D9488; font-weight: 600;">24 programs</text>
+    </g>
+    
+    <!-- Main map area -->
+    <g id="map-area">
+      <rect x="120" y="10" width="260" height="330" rx="6" fill="url(#mapGrad)" data-draw-order="7"/>
+      <rect x="120" y="10" width="260" height="330" rx="6" fill="url(#topoPattern)" style="opacity: 0.5;" data-draw-order="8"/>
+      <rect class="stroke-draw map-border" x="120" y="10" width="260" height="330" rx="6" data-draw-order="9"/>
+      
+      <!-- Simplified coastline (California-ish) -->
+      <path class="stroke-draw land" d="M120 50 Q140 80 135 120 Q130 160 140 200 Q150 240 145 280 Q140 320 120 340" data-draw-order="10"/>
+      
+      <!-- Ocean area -->
+      <rect x="120" y="10" width="30" height="330" fill="url(#oceanGrad)" style="opacity: 0.3;" data-draw-order="11"/>
+      
+      <!-- Major roads -->
+      <path class="stroke-draw road" d="M160 20 L160 330" data-draw-order="12"/>
+      <path class="stroke-draw road" d="M200 20 L200 330" data-draw-order="13"/>
+      <path class="stroke-draw road" d="M130 100 L370 100" data-draw-order="14"/>
+      <path class="stroke-draw road" d="M130 200 L370 200" data-draw-order="15"/>
+      
+      <!-- Map pins -->
+      <g id="map-pins">
+        <!-- Pin 1 - Malibu -->
+        <g id="pin-1" filter="url(#pinShadow)">
+          <path class="stroke-draw pin" d="M175 80 Q175 65 185 65 Q195 65 195 80 Q195 90 185 100 Q175 90 175 80" style="stroke: #0D9488; fill: #0D9488;" data-draw-order="16"/>
+          <circle cx="185" cy="78" r="4" style="fill: white;" data-draw-order="17"/>
+        </g>
+        
+        <!-- Pin 2 - San Diego -->
+        <g id="pin-2" filter="url(#pinShadow)">
+          <path class="stroke-draw pin" d="M155 260 Q155 245 165 245 Q175 245 175 260 Q175 270 165 280 Q155 270 155 260" style="stroke: #6366F1; fill: #6366F1;" data-draw-order="18"/>
+          <circle cx="165" cy="258" r="4" style="fill: white;" data-draw-order="19"/>
+        </g>
+        
+        <!-- Pin 3 - LA area -->
+        <g id="pin-3" filter="url(#pinShadow)">
+          <path class="stroke-draw pin" d="M200 140 Q200 125 210 125 Q220 125 220 140 Q220 150 210 160 Q200 150 200 140" style="stroke: #A78BFA; fill: #A78BFA;" data-draw-order="20"/>
+          <circle cx="210" cy="138" r="4" style="fill: white;" data-draw-order="21"/>
+        </g>
+        
+        <!-- Pin 4 - SF area -->
+        <g id="pin-4" filter="url(#pinShadow)">
+          <path class="stroke-draw pin" d="M170 45 Q170 30 180 30 Q190 30 190 45 Q190 55 180 65 Q170 55 170 45" style="stroke: #10B981; fill: #10B981;" data-draw-order="22"/>
+          <circle cx="180" cy="43" r="4" style="fill: white;" data-draw-order="23"/>
+        </g>
+        
+        <!-- Pin cluster indicator -->
+        <g id="pin-cluster" filter="url(#pinShadow)">
+          <circle cx="240" cy="170" r="15" style="fill: #F97316; stroke: white; stroke-width: 2;" data-draw-order="24"/>
+          <text x="240" y="175" text-anchor="middle" style="font-size: 11px; fill: white; font-weight: bold;">5</text>
+        </g>
+        
+        <!-- More pins -->
+        <g id="pin-5" filter="url(#pinShadow)">
+          <path class="stroke-draw pin" d="M300 90 Q300 75 310 75 Q320 75 320 90 Q320 100 310 110 Q300 100 300 90" style="stroke: #0D9488; fill: #0D9488;" data-draw-order="25"/>
+          <circle cx="310" cy="88" r="4" style="fill: white;" data-draw-order="26"/>
+        </g>
+        
+        <g id="pin-6" filter="url(#pinShadow)">
+          <path class="stroke-draw pin" d="M340 220 Q340 205 350 205 Q360 205 360 220 Q360 230 350 240 Q340 230 340 220" style="stroke: #6366F1; fill: #6366F1;" data-draw-order="27"/>
+          <circle cx="350" cy="218" r="4" style="fill: white;" data-draw-order="28"/>
+        </g>
+      </g>
+    </g>
+    
+    <!-- Right panel (selected program) -->
+    <g id="detail-panel">
+      <rect x="390" y="10" width="100" height="330" rx="6" style="fill: white; stroke: #E5E7EB; stroke-width: 1;" data-draw-order="29"/>
+      
+      <!-- Selected program preview -->
+      <rect x="395" y="15" width="90" height="60" rx="4" style="fill: #F0FDFA;" data-draw-order="30"/>
+      
+      <text x="400" y="35" style="font-size: 9px; fill: #0D9488; font-weight: 600;">Sunrise Recovery</text>
+      <text x="400" y="48" style="font-size: 7px; fill: #6B7280;">Malibu, CA</text>
+      <text x="400" y="65" style="font-size: 7px; fill: #6B7280;">RTC • Ages 13-17</text>
+      
+      <!-- Quick actions -->
+      <rect x="400" y="85" width="80" height="22" rx="4" style="fill: #0D9488;" data-draw-order="31"/>
+      <text x="440" y="100" text-anchor="middle" style="font-size: 8px; fill: white; font-weight: 500;">+ Add to Plan</text>
+      
+      <rect x="400" y="115" width="80" height="22" rx="4" style="fill: white; stroke: #D1D5DB; stroke-width: 1;" data-draw-order="32"/>
+      <text x="440" y="130" text-anchor="middle" style="font-size: 8px; fill: #6B7280;">View Details</text>
+      
+      <!-- Distance info -->
+      <text x="400" y="160" style="font-size: 8px; fill: #6B7280;">Distance</text>
+      <text x="400" y="175" style="font-size: 11px; fill: #374151; font-weight: 500;">45 miles</text>
+      
+      <!-- Contact -->
+      <text x="400" y="200" style="font-size: 8px; fill: #6B7280;">Contact</text>
+      <text x="400" y="215" style="font-size: 9px; fill: #0D9488;">(310) 555-0123</text>
+    </g>
+  </g>
+</svg>
+

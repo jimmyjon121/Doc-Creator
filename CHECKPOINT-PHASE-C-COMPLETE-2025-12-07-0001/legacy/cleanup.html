@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareConnect Beta Cleanup</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #0d9488, #0f766e);
+            padding: 24px;
+            text-align: center;
+            color: white;
+        }
+        .header h1 { font-size: 24px; margin-bottom: 8px; }
+        .header p { opacity: 0.9; font-size: 14px; }
+        .content { padding: 24px; }
+        .status {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .status.running { background: #fef3c7; color: #92400e; }
+        .status.success { background: #d1fae5; color: #065f46; }
+        .status.error { background: #fee2e2; color: #991b1b; }
+        .log {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log-entry { margin-bottom: 4px; }
+        .log-entry.header { color: #60a5fa; font-weight: bold; margin-top: 12px; }
+        .log-entry.success { color: #34d399; }
+        .log-entry.removed { color: #f87171; }
+        .log-entry.info { color: #94a3b8; }
+        .summary {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        .summary h3 { font-size: 14px; color: #64748b; margin-bottom: 12px; }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .summary-row:last-child { border-bottom: none; }
+        .summary-label { color: #475569; }
+        .summary-value { font-weight: 600; color: #1e293b; }
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Beta Cleanup Utility</h1>
+            <p>CareConnect Pro v13.0.0-beta</p>
+        </div>
+        <div class="content">
+            <div id="status" class="status running">Running cleanup...</div>
+            <div id="log" class="log"></div>
+            <div id="summary" class="summary" style="display:none;">
+                <h3>CLEANUP SUMMARY</h3>
+                <div class="summary-row">
+                    <span class="summary-label">Accounts Kept</span>
+                    <span id="kept" class="summary-value">0</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Accounts Removed</span>
+                    <span id="removed" class="summary-value">0</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">User Keys Cleaned</span>
+                    <span id="keys" class="summary-value">0</span>
+                </div>
+            </div>
+            <a href="CareConnect-Pro.html" class="btn">Return to App</a>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            var DEV_ACCOUNTS = ['masteradmin', 'doc232', 'admin'];
+            var ACCOUNT_KEY = 'careconnect_user_accounts';
+            
+            var logEl = document.getElementById('log');
+            var statusEl = document.getElementById('status');
+            var summaryEl = document.getElementById('summary');
+            
+            var report = {
+                accountsKept: [],
+                accountsRemoved: [],
+                keysRemoved: 0
+            };
+            
+            function log(msg, type) {
+                var div = document.createElement('div');
+                div.className = 'log-entry ' + (type || '');
+                div.textContent = msg;
+                logEl.appendChild(div);
+                logEl.scrollTop = logEl.scrollHeight;
+            }
+            
+            function runCleanup() {
+                try {
+                    log('=== CARECONNECT BETA CLEANUP ===', 'header');
+                    log('');
+                    
+                    // Step 1: Clean user accounts
+                    log('STEP 1: Cleaning user accounts...', 'header');
+                    var accountsJson = localStorage.getItem(ACCOUNT_KEY);
+                    
+                    if (accountsJson) {
+                        var accounts = JSON.parse(accountsJson);
+                        log('Found ' + accounts.length + ' total accounts', 'info');
+                        
+                        var filtered = accounts.filter(function(acc) {
+                            var username = (acc.username || '').toLowerCase();
+                            if (DEV_ACCOUNTS.indexOf(username) !== -1) {
+                                report.accountsKept.push(acc.username);
+                                log('  [KEEP] ' + acc.username + ' (dev account)', 'success');
+                                return true;
+                            }
+                            report.accountsRemoved.push(acc.username);
+                            log('  [REMOVE] ' + acc.username, 'removed');
+                            return false;
+                        });
+                        
+                        localStorage.setItem(ACCOUNT_KEY, JSON.stringify(filtered));
+                        log('Saved ' + filtered.length + ' accounts', 'success');
+                    } else {
+                        log('No accounts found in storage', 'info');
+                    }
+                    
+                    log('');
+                    
+                    // Step 2: Clean user-specific localStorage keys
+                    log('STEP 2: Cleaning user localStorage keys...', 'header');
+                    var prefixes = [
+                        'ccpro-profile-complete-',
+                        'ccpro-onboarding-complete-',
+                        'ccpro-agreement-accepted-',
+                        'ccpro-user-profile-',
+                        'ccpro_tour_v3-',
+                        'ccpro-tour-complete-'
+                    ];
+                    
+                    var allKeys = Object.keys(localStorage);
+                    allKeys.forEach(function(key) {
+                        prefixes.forEach(function(prefix) {
+                            if (key.indexOf(prefix) === 0) {
+                                var user = key.replace(prefix, '').toLowerCase();
+                                if (DEV_ACCOUNTS.indexOf(user) === -1) {
+                                    localStorage.removeItem(key);
+                                    report.keysRemoved++;
+                                    log('  [REMOVE] ' + key, 'removed');
+                                }
+                            }
+                        });
+                    });
+                    
+                    if (report.keysRemoved === 0) {
+                        log('  No user-specific keys to remove', 'info');
+                    }
+                    
+                    log('');
+                    
+                    // Step 3: Clear stale session data
+                    log('STEP 3: Clearing stale session data...', 'header');
+                    var sessionKeys = ['loginAttempts', 'loginLockUntil'];
+                    sessionKeys.forEach(function(k) {
+                        if (localStorage.getItem(k)) {
+                            localStorage.removeItem(k);
+                            log('  [REMOVE] ' + k, 'removed');
+                        }
+                    });
+                    
+                    log('');
+                    log('=== CLEANUP COMPLETE ===', 'header');
+                    log('');
+                    log('Dev accounts preserved: ' + DEV_ACCOUNTS.join(', '), 'success');
+                    log('Beta is ready for release!', 'success');
+                    
+                    // Update UI
+                    statusEl.className = 'status success';
+                    statusEl.textContent = 'Cleanup completed successfully!';
+                    
+                    summaryEl.style.display = 'block';
+                    document.getElementById('kept').textContent = report.accountsKept.length + ' (' + (report.accountsKept.join(', ') || 'none') + ')';
+                    document.getElementById('removed').textContent = report.accountsRemoved.length + ' (' + (report.accountsRemoved.join(', ') || 'none') + ')';
+                    document.getElementById('keys').textContent = report.keysRemoved;
+                    
+                } catch (err) {
+                    log('');
+                    log('ERROR: ' + err.message, 'removed');
+                    statusEl.className = 'status error';
+                    statusEl.textContent = 'Cleanup failed: ' + err.message;
+                }
+            }
+            
+            // Run cleanup after page loads
+            setTimeout(runCleanup, 500);
+        })();
+    </script>
+</body>
+</html>
+
+

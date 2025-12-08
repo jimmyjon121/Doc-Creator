@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" class="hand-drawn">
+  <defs>
+    <filter id="handWobble" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="2" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.8" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    
+    <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0D9488"/>
+      <stop offset="100%" style="stop-color:#14B8A6"/>
+    </linearGradient>
+    
+    <filter id="logoGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <style>
+    .stroke-draw { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    .logo-main { stroke: url(#tealGrad); stroke-width: 3; }
+    .logo-accent { stroke: #F97316; stroke-width: 2; }
+    .logo-text { stroke: #1F2937; stroke-width: 1.5; }
+  </style>
+  
+  <g filter="url(#handWobble)">
+    <!-- Heart/Care symbol -->
+    <g id="heart-symbol" filter="url(#logoGlow)">
+      <!-- Left curve of heart -->
+      <path class="stroke-draw logo-main" d="M30 45 Q30 25 50 25 Q70 25 70 45" data-draw-order="1"/>
+      <!-- Right curve of heart -->
+      <path class="stroke-draw logo-main" d="M70 45 Q70 25 90 25 Q110 25 110 45" data-draw-order="2"/>
+      <!-- Bottom point -->
+      <path class="stroke-draw logo-main" d="M30 45 Q30 65 70 85 Q110 65 110 45" data-draw-order="3"/>
+      
+      <!-- Connection symbol inside heart -->
+      <path class="stroke-draw logo-accent" d="M55 45 Q60 40 70 45 Q80 50 85 45" data-draw-order="4"/>
+      <circle class="stroke-draw logo-accent" cx="55" cy="45" r="4" data-draw-order="5"/>
+      <circle class="stroke-draw logo-accent" cx="85" cy="45" r="4" data-draw-order="6"/>
+    </g>
+    
+    <!-- "CareConnect" text as drawable paths -->
+    <g id="logo-text">
+      <!-- C -->
+      <path class="stroke-draw logo-text" d="M130 35 Q120 35 120 50 Q120 65 130 65" data-draw-order="7"/>
+      <!-- a -->
+      <path class="stroke-draw logo-text" d="M140 45 Q135 45 135 55 Q135 65 140 65 L140 45 L140 65" data-draw-order="8"/>
+      <!-- r -->
+      <path class="stroke-draw logo-text" d="M150 45 L150 65 M150 50 Q155 45 160 47" data-draw-order="9"/>
+      <!-- e -->
+      <path class="stroke-draw logo-text" d="M165 55 L175 55 Q175 45 170 45 Q165 45 165 55 Q165 65 175 65" data-draw-order="10"/>
+      
+      <!-- C (Connect) -->
+      <path class="stroke-draw logo-text" d="M190 35 Q180 35 180 50 Q180 65 190 65" data-draw-order="11"/>
+      <!-- o -->
+      <path class="stroke-draw logo-text" d="M200 55 Q200 45 207 45 Q215 45 215 55 Q215 65 207 65 Q200 65 200 55" data-draw-order="12"/>
+      <!-- n -->
+      <path class="stroke-draw logo-text" d="M220 45 L220 65 M220 50 Q225 45 230 50 L230 65" data-draw-order="13"/>
+      <!-- n -->
+      <path class="stroke-draw logo-text" d="M235 45 L235 65 M235 50 Q240 45 245 50 L245 65" data-draw-order="14"/>
+      <!-- e -->
+      <path class="stroke-draw logo-text" d="M250 55 L260 55 Q260 45 255 45 Q250 45 250 55 Q250 65 260 65" data-draw-order="15"/>
+      <!-- c -->
+      <path class="stroke-draw logo-text" d="M270 50 Q265 45 265 55 Q265 65 270 65" data-draw-order="16"/>
+      <!-- t -->
+      <path class="stroke-draw logo-text" d="M280 40 L280 65 M275 45 L285 45" data-draw-order="17"/>
+    </g>
+    
+    <!-- "Pro" badge -->
+    <g id="pro-badge">
+      <rect class="stroke-draw" x="265" y="25" width="30" height="15" rx="3" style="stroke: #A78BFA; stroke-width: 1.5;" data-draw-order="18"/>
+      <text x="280" y="36" text-anchor="middle" style="font-size: 9px; fill: #A78BFA; font-weight: 600;">PRO</text>
+    </g>
+  </g>
+  
+  <!-- Pencil tip follower (positioned via JS during animation) -->
+  <g id="pencil-tip" style="opacity: 0;">
+    <circle cx="0" cy="0" r="3" fill="#F97316"/>
+    <path d="M-2 -8 L0 0 L2 -8 Z" fill="#FBBF24"/>
+  </g>
+</svg>
+
